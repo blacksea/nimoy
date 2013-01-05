@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>{{ title }}</title>
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script>
+    	function cmd (cm) {
+    		var txt = document.getElementById('topbar');
+    		console.log(txt.value);
+    		txt.value = '';
+    		txt.blur();
+    	}
+    	function init() {
+				var num =	document.getElementById('number');
+				var grip = document.getElementById('grip');
+				var panel = document.getElementById('panel');
+				var offX =0;
+				grip.ondragstart = function(event) {
+					offX = event.clientX - panel.offsetLeft;
+					event.dataTransfer.dropEffect = 'none';
+					document.body.style.cursor = 'none';
+				}
+				grip.ondrag = function (event) {
+					if(event.clientY!=0 && event.clientX!=0){
+						panel.style.top = (event.clientY-5)+'px';
+						panel.style.left = (event.clientX-offX)+'px';
+					}
+					document.body.style.cursor = 'none';
+					console.log(event.clientX);
+					console.log(event.clientY);
+				}
+				grip.ondragend = function (event) {
+					event.preventDefault();
+				}
+				num.onmousewheel = function (event) {
+					var value = event.wheelDeltaY;
+					var oldVal = parseInt(num.innerHTML);
+					var newVal = null;
+					if(value<0){
+						newVal = oldVal+Math.abs(value);
+					}else{
+						newVal = oldVal-Math.abs(value);
+					}
+					console.log(event);
+					num.innerHTML = newVal;
+				}
+			}
+    </script>
+  </head>
+  <body onLoad='init();'>
+  	<form action='javascript:cmd();'>
+  	<input type='text' id='topbar'></input>
+  	<input type='submit' style='display:none;'></input>
+	  </form>
+  	<div id='panel'>
+  		<div id='grip'></div>
+			<div class='row'>
+				<label>start </label><div id='number'>0</div>
+			</div>
+		</div>
+  </body>
+</html>
