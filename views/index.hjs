@@ -3,9 +3,12 @@
   <head>
     <title>{{ title }}</title>
     <link rel='stylesheet' href='/stylesheets/style.css' />
+	  <script type='text/javascript' src="/socket.io/socket.io.js"></script>
     <script>
+  	  var socket = io.connect('http://127.0.0.1');
     	function cmd (cm) {
     		var txt = document.getElementById('topbar');
+    		socket.emit('cmd', txt.value);
     		console.log(txt.value);
     		txt.value = '';
     		txt.blur();
@@ -14,11 +17,10 @@
 				var num =	document.getElementById('number');
 				var grip = document.getElementById('grip');
 				var panel = document.getElementById('panel');
-				var offX =0;
+				var offX = 0;
 				grip.ondragstart = function(event) {
 					offX = event.clientX - panel.offsetLeft;
 					event.dataTransfer.dropEffect = 'none';
-					document.body.style.cursor = 'none';
 				}
 				grip.ondrag = function (event) {
 					if(event.clientY!=0 && event.clientX!=0){
@@ -26,23 +28,21 @@
 						panel.style.left = (event.clientX-offX)+'px';
 					}
 					document.body.style.cursor = 'none';
-					console.log(event.clientX);
-					console.log(event.clientY);
 				}
 				grip.ondragend = function (event) {
 					event.preventDefault();
 				}
 				num.onmousewheel = function (event) {
-					var value = event.wheelDeltaY;
-					var oldVal = parseInt(num.innerHTML);
+					var value = event.wheelDeltaY * 0.001;
+					var oldVal = parseFloat(num.innerHTML);
 					var newVal = null;
 					if(value<0){
-						newVal = oldVal+Math.abs(value);
+						newVal = (oldVal+Math.abs(value)).toFixed(3);
 					}else{
-						newVal = oldVal-Math.abs(value);
+						newVal = (oldVal-Math.abs(value)).toFixed(3);
+					} if (newVal > 0 && newVal <= 1.001) {
+						num.innerHTML = newVal;
 					}
-					console.log(event);
-					num.innerHTML = newVal;
 				}
 			}
     </script>

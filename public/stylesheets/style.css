@@ -15,7 +15,7 @@ a {
   font-family: 'monaco';
   font-size: 9px;
   cursor: none;
-  width: 30px;
+  width: 50px;
   height: 12px;
   border: 1px solid #ccc;
   color: #fff;
@@ -27,6 +27,8 @@ a {
   border-bottom: 1px solid #ccc;
   color: #ccc;
   font-size: 9px;
+  text-transform: uppercase;
+  font-weight: bold;
   font-family: 'monaco';
   text-align: center;
   width: 100%;
@@ -41,6 +43,11 @@ a {
   outline: none !important;
   background: #00f;
   color: #000;
+}
+input.text::selection,
+::selection {
+  background-color: #f00 !important;
+  color: #00f !important;
 }
 .row {
   border-bottom: 1px solid #ccc;
@@ -60,10 +67,11 @@ a {
   background-color: #00001e;
 }
 label {
-  font-size: 7px;
+  font-size: 9px;
   text-transform: uppercase;
   line-height: 15px;
   padding-right: 4px;
+  letter-spacing: 0px;
   float: left;
   color: #ccc;
 }

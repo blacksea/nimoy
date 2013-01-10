@@ -1,40 +1,56 @@
-var osc = require('node-osc');
-var midi = require('midi');
-var express = require('express');
-var path = require('path');
-var http = require('http');
-var io = require('socket.io');
-var redis = require("redis"),
-client = redis.createClient();
+// S L E E P  W A L K E R 
+// V.0 _ AG
 
-var app = express()
+// DEPENDANCIES
+var osc       = require('node-osc');
+var connect   = require('connect');
+var templayed = require('templayed');
+var midi      = require('midi');
+var path      = require('path');
+var http      = require('http');
+var io        = require('socket.io');
+var redis     = require('redis'),
+client        = redis.createClient();
+
+// LOCAL MODULES
+var iron = require('./_iron.js');
+var make = require('./_make.js');
+make.set({ 
+	public : './public',
+	source : './mods',
+	css    : './public/js',
+	js     : './public/css'	
+});
+var bus = require('./_bus.js');
+var mono = require('./mods/mono/monoServer.js'); // dynamically load server modules
+
+// CORE 
+// init iron
+// init bus
+
+// handle construction of server modules
+make.done = function () {
+	console.log('make complete!!!!');
+}
+
+make.rootDir = './mods';
+
+var app = connect()
+.use(connect.logger('dev'))
+.use(connect.static('public'))
 , server = require('http').createServer(app)
 , io = io.listen(server);
-
-app.configure(function(){
-  app.set('views', __dirname + '/views');
-  app.set('view engine', 'hjs');
-  app.use(express.favicon());
-  app.use(express.logger('dev'));
-  app.use(express.bodyParser());
-  app.use(require('stylus').middleware(__dirname + '/public'));
-  app.use(express.static(path.join(__dirname, '/public')));
-});
-
-app.get('/', function (req,res) {
-	res.render('index');
-});
 
 var portMonomeIn = 8000;
 var portMonomeOut = 8080;
 var portLiveIn = 7777;
 var portLiveOut = 9999;
 
-var midiOut = new midi.output();
-var monomeIn = new osc.Server(portMonomeIn, '127.0.0.1');
+var midiOut   = new midi.output();
+var monomeIn  = new osc.Server(portMonomeIn, '127.0.0.1');
 var monomeOut = new osc.Client('127.0.0.1', portMonomeOut);
-var liveIn = new osc.Server(portLiveIn, '127.0.0.1');
-var liveOut = new osc.Client('127.0.0.1', portLiveOut);
+var liveIn    = new osc.Server(portLiveIn, '127.0.0.1');
+var liveOut   = new osc.Client('127.0.0.1', portLiveOut);
 
 midiOut.openVirtualPort("monome");
 
@@ -47,52 +63,6 @@ function scale(val, oldMin, oldMax, newMin, newMax) {
 
 var rows = [];
 var presets = [];
-
-var Row = function (id) {
-	var r = this;
-	
-	r.json = {
-		min:0,
-		max:127,
-		vel:127
-	};
-
-	function scaleOnOff(val) {
-		if(val==1){
-			return r.json.vel;
-		} else {
-			return val;
-		}
-	}
-
-	r.getData = function () {
-		return r.json;
-	}
-
-	r.load = function (dataObj) {
-		r.json.min = dataObj.min;
-		r.json.max = dataObj.max;
-		r.json.vel = dataObj.vel;
-	}
-	
-	r.scale = function (min, max, velocity) {
-		midiOut.sendMessage([144,r.lastNote,0]);
-		r.json.min = min;
-		r.json.max = max;
-		r.json.vel = velocity;
-	}
-
-	r.hit = function (note, noteVal) {
-		var noteScaled = Math.round(scale(note, 0, 7, r.json.min, r.json.max));
-		r.lastNote = noteScaled;
-		midiOut.sendMessage([144,noteScaled,scaleOnOff(noteVal)]);
-	} 
-}; 
-
-for (var i=0;i<8;i++) { // make 8 rows & add to rows array
-	var row = new Row(i);
-	rows.push(row);
-}
 
 monomeIn.on("message", function (data) {
 	rows[data[2]].hit(data[1], data[3]);
@@ -161,6 +131,7 @@ liveIn.on('message', function (data) {
 			}
 		});
 	}
+
 	switch(param) {
 		case '/setRow' : updateRow(data);break; 
 		case '/setParamIN' : filterOSC(data);break;
@@ -171,4 +142,17 @@ liveIn.on('message', function (data) {
 	}
 
 });
-server.listen(3000);
+
+var cmd = function () {};
+
+cmd.do = function (action) {
+	console.log('the command ' + action);
+}
+
+io.sockets.on('connection', function (socket) {
+	socket.on('cmd', function (msg) {
+		cmd.do(msg);		
+	});
+});
+
+server.listen(80, '127.0.0.1');
