@@ -6,6 +6,7 @@
 	"commands" : {
 		"c" : "iron|compile",
 		"/" : "iron|newModule",
+		"rs" : "iron|sendTemplates",
 		"?" :	"iron|status"
 	} 		
 }
