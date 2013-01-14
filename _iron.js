@@ -119,7 +119,7 @@ var Iron = function () {
 
 	iron.buildFrame = function (cb) {
 		fs.readFile(iron.settings.path_template, function (err, data) {
-			var frame = templayed(data.toString())({modules:'<script src="/js/scripts.min.js"></script>'});
+			var frame = templayed(data.toString())({modules:''});
 			client.set('frame', frame);
 			console.log('master template ready!');
 			cb();
