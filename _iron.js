@@ -167,6 +167,7 @@ var Iron = function () {
 	}
 
 	iron.newModule = function (module, cb) {
+		console.log(module);
 		var notFound = true;
 		for(var i=0;i<iron.registry.length;i++) {
 			if(module==iron.registry[i]){
