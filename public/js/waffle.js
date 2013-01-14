@@ -28,7 +28,7 @@
 		console.log('unpacking...');
 		var module = paramArray[0]
 		, template = msgpack.unpack(paramArray[1]);
-		console.log('unpacked '+template);
+		console.log('unpacked '+paramArray[1]);
 		skeleton.log('loading module '+module);
 		window[module] = new window[module](template);
 		window[module].init();
