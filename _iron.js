@@ -178,7 +178,7 @@ var Iron = function () {
 						iron.loadModule(module);
 					}
 					if (pkg.files.client) {
-						client.hget(module, 'html', function (err, html) {
+						client.hget(module, 'client_html', function (err, html) {
 							console.log(html);
 							console.log(html.toString());
 							var pakdHTML = msgpack.encode(html);
