@@ -177,7 +177,10 @@ var Iron = function () {
 						iron.loadModule(module);
 					}
 					if (pkg.files.client) {
-						cb(['Waffle', 'loadModule', module]);
+						client.hget(module, 'html', function (err, html) {
+							var pakdHTML = msgpack.encode(html);
+							cb(['Waffle', 'loadModule', [module, pakdHTML]]);
+						});
 					} else if (!pkg.files.client) {
 						cb(['skeleton', 'log', 'loading server module '+module]);
 					}

@@ -8,7 +8,7 @@
 	Waffle.serve = function () {
 		window['bus'] = new Bus();
 		console.log('requesting templates');
-		bus.send(['iron', 'sendTemplates', 'bus', 'spread']);	
+		bus.send(['iron', 'newModule', 'bus', 'spread', 'skeleton']);	
 	}
 
 	Waffle.spread = function (obj) {
@@ -24,9 +24,13 @@
 		}
 	}
 
-	Waffle.loadModule = function (module) {
+	Waffle.loadModule = function (paramArray) {
+		console.log('unpacking...');
+		var module = paramArray[0]
+		, template = msgpack.unpack(paramArray[1]);
+		console.log('unpacked');
 		skeleton.log('loading module '+module);
-		window[module] = new window[module](Waffle.templates[module]);
+		window[module] = new window[module](template);
 		window[module].init();
 	}
 
