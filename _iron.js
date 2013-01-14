@@ -179,6 +179,8 @@ var Iron = function () {
 					}
 					if (pkg.files.client) {
 						client.hget(module, 'html', function (err, html) {
+							console.log(html);
+							console.log(html.toString());
 							var pakdHTML = msgpack.encode(html);
 							cb(['Waffle', 'loadModule', [module, pakdHTML]]);
 						});
