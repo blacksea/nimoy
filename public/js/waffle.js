@@ -24,12 +24,11 @@
 		}
 	}
 
-	Waffle.loadModule = function (json) {
-		var paramArray = JSON.parse(json);
+	Waffle.loadModule = function (paramArray) {
 		console.log('unpacking...');
 		var module = paramArray[0]
-		, template = msgpack.unpack(paramArray[1]);
-		console.log('unpacked '+paramArray[1]);
+		, template = msgpack.unpack(JSON.parse(paramArray[1]));
+		console.log('unpacked '+template);
 		skeleton.log('loading module '+module);
 		window[module] = new window[module](template);
 		window[module].init();
