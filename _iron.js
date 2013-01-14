@@ -180,7 +180,7 @@ var Iron = function () {
 					if (pkg.files.client) {
 						client.hget(module, 'client_html', function (err, html) {
 							// var pakdHTML = msgpack.encode(html.toString());
-							cb(['Waffle', 'loadModule', [module, html]);
+							cb(['Waffle', 'loadModule', [module, html]]);
 						});
 					} else if (!pkg.files.client) {
 						cb(['skeleton', 'log', 'loading server module '+module]);
