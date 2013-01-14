@@ -17,6 +17,9 @@
 		console.log('unpacked templates')
 		Waffle.templates = JSON.parse(upakd);
 		for(module in Waffle.templates){
+			if(window[module]){
+				delete window[module];
+			}
 			if(module!='mono'){
 				window[module] = new window[module](Waffle.templates[module]);
 				window[module].init();
@@ -25,6 +28,9 @@
 	}
 
 	Waffle.loadModule = function (module) {
+		if(window[module]){
+			delete window[module];
+		}
 		skeleton.log('loading module '+module);
 		window[module] = new window[module](Waffle.templates[module]);
 		window[module].init();
