@@ -24,7 +24,8 @@
 		}
 	}
 
-	Waffle.loadModule = function (paramArray) {
+	Waffle.loadModule = function (json) {
+		var paramArray = JSON.parse(json);
 		console.log('unpacking...');
 		var module = paramArray[0]
 		, template = msgpack.unpack(paramArray[1]);
