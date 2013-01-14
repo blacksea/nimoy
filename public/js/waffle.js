@@ -30,10 +30,10 @@
 		console.log(msgpack.unpack(paramArray[1]));
 		var module = paramArray[0]
 		, template = msgpack.unpack(paramArray[1]);
-		console.log('unpacked '+template);
-		skeleton.log('loading module '+module);
+		console.log('unpacked');
 		window[module] = new window[module](template);
 		window[module].init();
+		skeleton.log('loaded module '+module);
 	}
 
 	Waffle.cmd = function (cmd) {
