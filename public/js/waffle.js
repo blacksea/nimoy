@@ -8,7 +8,7 @@
 	Waffle.serve = function () {
 		window['bus'] = new Bus();
 		console.log('requesting templates');
-		bus.send(['iron', 'newModule', 'bus', 'spread', 'skeleton']);	
+		bus.send(['iron','interpret','Waffle','loadModule','skeleton']);
 	}
 
 	Waffle.spread = function (obj) {
