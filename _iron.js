@@ -127,8 +127,10 @@ var Iron = function () {
 	}
 
 	iron.sendTemplates = function (paramArray, cb) {
+		console.log('templates requested');
 		var json = JSON.stringify(iron.templates),
 		templates = msgpack.encode(json);
+		console.log('sending templates');
 		cb(['Waffle', 'spread', templates]);
 	}
 
