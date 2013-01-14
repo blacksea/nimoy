@@ -1,0 +1,12 @@
+{
+	"name": "skeleton",
+	"scope": "client",
+	"version": "0",
+	"files": {
+		"client": {
+			"html" : "skeleton.html",
+			"css" : "skeleton.styl",
+			"js" : "skeleton.js"
+		}
+	}
+}

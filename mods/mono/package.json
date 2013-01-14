@@ -1,0 +1,15 @@
+{
+	"name": "mono",
+	"scope": "server",
+	"version": "0",
+	"files" : {
+		"client" : {
+			"html":"mono.html",
+			"js":"monoClient.js",
+			"css":"mono.styl"
+		},
+		"server" : {
+			"js":"mono.js"
+		}
+	}
+}
