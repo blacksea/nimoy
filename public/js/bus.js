@@ -6,7 +6,7 @@
 
 		var bus = this;
 
-		var socket = io.connect("http://waf.com");
+		var socket = io.connect("http://204.27.60.58");
 		
 		socket.on('*', function (paramArray) {
 			var module     = paramArray[0]
