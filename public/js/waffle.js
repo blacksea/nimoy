@@ -7,11 +7,14 @@
 
 	Waffle.serve = function () {
 		window['bus'] = new Bus();
+		console.log('requesting templates');
 		bus.send(['iron', 'sendTemplates', 'bus', 'spread']);	
 	}
 
 	Waffle.spread = function (obj) {
+		console.log('got got templates');
 		var upakd = msgpack.unpack(obj);
+		console.log('unpacked templates')
 		Waffle.templates = JSON.parse(upakd);
 		for(module in Waffle.templates){
 			if(module!='mono'){
