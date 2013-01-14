@@ -11,23 +11,8 @@
 		bus.send(['iron','interpret','Waffle','loadModule','/ skeleton']);
 	}
 
-	Waffle.spread = function (obj) {
-		console.log('got got templates');
-		var upakd = msgpack.unpack(obj);
-		console.log('unpacked templates')
-		Waffle.templates = JSON.parse(upakd);
-		for(module in Waffle.templates){
-			if(module!='mono'){
-				window[module] = new window[module](Waffle.templates[module]);
-				window[module].init();
-			}
-		}
-	}
-
 	Waffle.loadModule = function (paramArray) {
 		console.log('unpacking...');
-		console.log(paramArray[0]);
-		console.log(msgpack.unpack(paramArray[1]));
 		var module = paramArray[0]
 		, template = msgpack.unpack(paramArray[1]);
 		console.log('unpacked');
