@@ -27,8 +27,7 @@
 	Waffle.loadModule = function (paramArray) {
 		console.log('unpacking...');
 		console.log(paramArray[0]);
-		console.log(paramArray[1]);
-		console.log(JSON.parse(paramArray[1]));
+		console.log(msgpack.unpack(paramArray[1]));
 		var module = paramArray[0]
 		, template = msgpack.unpack(paramArray[1]);
 		console.log('unpacked '+template);
