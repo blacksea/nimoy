@@ -15,6 +15,7 @@ var app = connect()
 , io = io.listen(server);
 
 iron.settingsJSON = './_settings.json';
+
 // patch socket.io into bus
 io.sockets.on('connection', bus.handleConnection); 
 

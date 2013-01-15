@@ -2,6 +2,7 @@
   "name": "sleepwalker",
   "description": "/\\/\\/\\/\\",
   "author": "ag <ag@theblacksea.cc>",
+  "version" : "0.0.1",
   "dependencies": {
     "socket.io" : "0.9.13",
     "connect" : "2.7.2",
@@ -10,7 +11,7 @@
     "msgpack-js" : "0.1.1",
     "rimraf" : "2.1.1",
     "async" : "0.1.22",
-    "node-osc" : "0.1.2",
+    "node-osc" : "x.x.x",
     "midi" : "0.6.0",
     "templayed" : "0.2.1"
   },

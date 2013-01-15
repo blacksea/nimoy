@@ -1,13 +1,21 @@
-// MONOME CLASS::SERVER 
 
+// M O N O M E
 
 var Mono = function (gridSize) {
 
-	var midi = require('midi');
-	var util = require('util');
-	var midiOut = new midi.output();
+	var monome = this;
+
+	var midi    = require('midi')
+	, maxRows   = Math.sqrt(gridSize)
+	, rows      = []
+	, oscPrefix = '/node/'
+	, osc       = require('node-osc')
+	, oscOut    = new osc.Client('127.0.0.1', 8080)
+	, oscIn     = new osc.Server(8000, '127.0.0.1')
+	, midiOut   = new midi.output();
+
+	var presets = [];
 	midiOut.openVirtualPort("monome");
-	midiOut.closePort();
 
 	function scale(val, oldMin, oldMax, newMin, newMax) {
 		var oldRange = oldMax - oldMin;
@@ -16,151 +24,48 @@ var Mono = function (gridSize) {
 		return newVal;
 	}
 
-	var p = this;
-
-	p.kill = function () {
-		console.log('killing');
-	}
-
-	p.init = function () {
-		console.log('starting monome!!!!');
-	}
-
-	var nRows = Math.sqrt(gridSize);
-	var rows = [];
-	var presets = [];
-
 	var Row = function (id) {
-		var r = this;
-		
-		r.json = {
-			min:0,
-			max:127,
-			vel:127
-		};
-
-		function scaleOnOff(val) {
-			if(val==1){
-				return r.json.vel;
-			} else {
-				return val;
-			}
+		var row = this;
+		row.settings = {
+			id  : id,
+			min : 0,
+			max : 127,
+			vel : 127
 		}
-
-		r.getData = function () {
-			return r.json;
+		row.press = function (x,z) {
+			var y = row.settings.id;
+			if(z==1) z=row.settings.vel;
+			oscOut.send(oscPrefix+'led',x,y,z);
+			var noteScaled = Math.round(scale(x, 0, 7, row.settings.min, row.settings.max));
+			midiOut.sendMessage([144,noteScaled,z]);
 		}
-
-		r.load = function (dataObj) {
-			r.json.min = dataObj.min;
-			r.json.max = dataObj.max;
-			r.json.vel = dataObj.vel;
-		}
-		
-		r.scale = function (min, max, velocity) {
-			midiOut.sendMessage([144,r.lastNote,0]);
-			r.json.min = min;
-			r.json.max = max;
-			r.json.vel = velocity;
-		}
-
-		r.hit = function (note, noteVal) {
-			var noteScaled = Math.round(scale(note, 0, 7, r.json.min, r.json.max));
-			r.lastNote = noteScaled;
-			// midiOut.sendMessage([144,noteScaled,scaleOnOff(noteVal)]);
-		} 
-	}; 
-
-	for (var i=0;i<8;i++) { // make 8 rows & add to rows array
-		var row = new Row(i);
-		rows.push(row);
 	}
 
-	// monomeIn.on("message", function (data) {
-	// 	rows[data[2]].hit(data[1], data[3]);
-	// 	monomeOut.send('/node/led', data[1], data[2], data[3]);
-	// });
+	oscOut.send(oscPrefix+'led',0,0,1);
 
-	var touchParam = 'butter';
-
-	// liveIn.on('message', function (data) {
-
-	// 	var param = data[0];
-
-	// 	function updateRow(data) {
-	// 		var rowId = data[1];
-	// 		var min = data[2];
-	// 		var max = data[3];
-	// 		var velocity = data[4];
-	// 		rows[rowId].scale(min,max,velocity);
-	// 		var txt = data[1]+' > '+ data[2]+' < '+ data[3]+' v '+data[4];
-	// 		liveOut.send('/console', txt);
-	// 	}
-	// 	function filterOSC(data) {
-	// 		if(touchParam!=data[1]){
-	// 			touchParam = data[1];
-	// 		}
-	// 		client.get(touchParam, function (err, result) {
-	// 			if(result != null){
-	// 				liveOut.send('/toCircle', result, data[2]);
-	// 			}
-	// 		});	
-	// 	}
-	// 	function newOSCfilter(data) {
-	// 		client.set(touchParam, data[1]);
-	// 	}
-	// 	function updateMenu() {
-	// 		liveOut.send('/setMenu', 'clear');
-	// 		client.llen('presets', function (err, len) {
-	// 			client.lrange('presets', 0, len, function (err, allPresets) {
-	// 				for(var i=0;i<allPresets.length;i++){
-	// 					liveOut.send('/setMenu', 'append '+allPresets[i]);
-	// 				}
-	// 			});
-	// 		});
-	// 	}
-	// 	function presetSave(presetName) {
-	// 		client.lpush('presets',presetName);
-	// 		var obj = {};
-	// 		for(var i=0;i<rows.length;i++){
-	// 			var id = 'row'+i;
-	// 			obj[id] = rows[i].getData();
-	// 		}
-	// 		var json = JSON.stringify(obj);
-	// 		client.set(presetName, json);
-	// 		updateMenu();
-	// 	}
-	// 	function presetLoad(presetName) {
-	// 		client.get(presetName, function (err, result){
-	// 			var obj = JSON.parse(result);
-	// 			var o = 0;
-	// 			for(var row in obj) {
-	// 				if(obj.hasOwnProperty(row)){
-	// 					rows[0].load(obj[row]);
-	// 					liveOut.send('/setRow', o, obj[row].min, obj[row].max, obj[row].vel);
-	// 				}
-	// 				o++;
-	// 			}
-	// 		});
-	// 	}
-
-	// 	switch(param) {
-	// 		case '/setRow' : updateRow(data);break; 
-	// 		case '/setParamIN' : filterOSC(data);break;
-	// 		case '/setParamOUT' : newOSCfilter(data);break;
-	// 		case '/save' : presetSave(data[1]);break;
-	// 		case '/update' : updateMenu();break;
-	// 		case '/load' : presetLoad(data[1]);break;
-	// 	}
-
-	// });
-
-	var cmd = function () {};
-
-	cmd.do = function (action) {
-		console.log('the command ' + action);
+	monome.init = function (size) {
+		for (var i=0;i<size;i++) { // make 8 rows & add to rows array
+			var row = new Row(i);
+			rows.push(row);
+		}
 	}
+	monome.set = function (paramArray, cb) {	
+		var settings = paramArray[2];
+		var r = settings[0];
+		var msg = 'set monome row: '+r;
+		rows[r].settings.min = settings[1]
+		rows[r].settings.max = settings[2]
+		rows[r].settings.vel = settings[3];
+		cb(['skeleton','log', msg]);
+	}
+	monome.handleOSC = function (msg, rinfo) {
+		var x = msg[1]
+		, y   = msg[2]
+		, z   = msg[3];
+		rows[y].press(x,z);
+	}
+	monome.init(maxRows);
+	oscIn.on("message", monome.handleOSC);
 }
-
 var mono = new Mono(64);
 exports = module.exports = mono;

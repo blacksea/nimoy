@@ -20,6 +20,11 @@
 			}
 			monome.ready();
 		}
+
+		monome.set = function (row, min, max, vel) {
+			bus.send(['mono','set','skeleton','log',[row,min,max,vel]]);
+		}
+
 		monome.ready = function () {
 			console.log('monome ready!');
 			var box = document.getElementById('monome')
@@ -59,8 +64,6 @@
 	var Skeleton = function (template) {
 
 		var skel = this;
-		
-
 		skel.template = template;
 
 		skel.init = function () {
@@ -87,15 +90,40 @@
 		skel.interpret = function (cmd) {
 			bus.send(['iron','interpret','Waffle','loadModule',cmd]);
 		}
-
 		skel.log = function (msg) {
 			var date = new Date() 
 			, time   = date.toLocaleTimeString().split(' ')[0]
 			, logger = document.getElementById('console')
 			, txt    = logger.innerHTML;
-			console.log(txt);
 			logger.innerHTML = '<small>'+time+'</small>'+msg+'<br>'+txt;
 		}
 	}
 	window.skeleton = Skeleton;
+}(window));
+// U I  K I T
+
+// -- shape shifter -- //
+
+(function (window) {
+
+	var Ui = function (template) {
+
+		var ui = this;
+		ui.template = template;
+
+		// provide structure and assemble
+		var templates = document.createElement('div');
+		templates.innerHTML = ui.template;
+		
+		ui.init = function () {
+			console.log(ui.getComponent('panel'));
+		}
+
+		ui.getComponent = function (component) {
+			var elements = templates.getElementsByTagName(component);
+			return elements[0].innerHTML; 
+		}		
+	}
+
+	window.uikit = Ui;
 }(window));
