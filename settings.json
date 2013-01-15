@@ -7,6 +7,9 @@
 		"c" : "iron|compile",
 		"/" : "iron|newModule",
 		"rs" : "iron|sendTemplates",
+		"g"	: "iron|generateModule",
+		"rm" : "iron|removeModule",
+		"!" : "iron|call",
 		"?" :	"iron|status"
 	} 		
 }

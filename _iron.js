@@ -5,6 +5,7 @@
 var templayed = require('templayed')
 , compressor	= require('node-minify')
 , msgpack     = require('msgpack-js')
+, rimraf      = require('rimraf')
 , async       = require('async')
 , path        = require('path')
 , http        = require('http')
@@ -199,6 +200,71 @@ var Iron = function () {
 			global[module] = require(moduleFile);
 			global[module].init();
 		});
+	}
+
+	iron.generateModule = function (module, callback) {
+		var moduleExists = false;
+		for(var i=0;i<iron.registry.length;i++){
+			if(module==iron.registry[i]){
+				callback(['skeleton','log', module+' already exists doooofus!!!']);
+				moduleExists = true;
+				break;
+			}
+		}
+		if (moduleExists==false) {
+			var modulePath = iron.settings.path_modules+module,
+			files = [module+'.html',module+'Client.js',module+'.js',module+'.styl'];
+			fs.mkdir(modulePath, function(){
+				var pkg = {
+					name : module,
+					version : '0',
+					files : {
+						client : {
+							html : module+'.html',
+							css : module+'.styl',
+							js : module+'Client.js'
+						},
+						server : {
+							js : module+'.js'
+						}
+					}
+				}
+				fs.writeFile(modulePath+'/package.json', JSON.stringify(pkg, null, '\t'), function () {
+					async.forEach(files, function (file, cb) {
+						fs.writeFile(modulePath+'/'+file, '', function () {
+							cb();
+						});
+					}, function () {
+						iron.buildRegistry(function () {
+							callback(['skeleton','log','generated new module '+module]);
+						});
+					});
+				});
+			});
+		}
+	}
+
+	iron.removeModule = function (module, cb) {
+		for(var i=0;i<iron.registry.length;i++){
+			if(module==iron.registry[i]){
+				rimraf(iron.settings.path_modules+module, function (err) {
+					console.log(err);
+					iron.buildRegistry(function () {
+						cb(['skeleton','log', module+' liquidated!']);
+					});
+				});
+				break;
+			}
+		}
+	}
+
+	iron.call = function (call, cb) {
+		console.log(call);
+		var params = call.split('|')
+		, module   = params[0]
+		, method   = params[1]
+		, args     = params[2]; 
+		cb([module, method, args]);
 	}
 
 	iron.compile = function (action, cb) {

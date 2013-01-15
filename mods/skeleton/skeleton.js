@@ -1,6 +1,4 @@
-
-// s k e l e t o n
-
+// S K E L E T O N
 (function (window) {
 	var Skeleton = function (template) {
 
@@ -10,7 +8,6 @@
 		skel.init = function () {
 			skel.render();
 		}
-
 		skel.render = function () {
 			var html = templayed(skel.template)({test:''});
 			var container = document.createElement('div');
@@ -18,7 +15,6 @@
 			document.body.appendChild(container);
 			skel.ready();
 		}
-		
 		skel.ready = function () {
 			var cmd = document.getElementById('cmd');
 			cmd.onsubmit = function (e) {
@@ -30,16 +26,16 @@
 				skel.interpret(prompt);
 			}		
 		}
-		
 		skel.interpret = function (cmd) {
 			bus.send(['iron','interpret','Waffle','loadModule',cmd]);
 		}
-		
 		skel.log = function (msg) {
-			var logger = document.getElementById('console');
-			logger.innerHTML = msg;
+			var date = new Date() 
+			, time   = date.toLocaleTimeString().split(' ')[0]
+			, logger = document.getElementById('console')
+			, txt    = logger.innerHTML;
+			logger.innerHTML = '<small>'+time+'</small>'+msg+'<br>'+txt;
 		}
-	
 	}
 	window.skeleton = Skeleton;
 }(window));

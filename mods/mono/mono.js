@@ -1,7 +1,13 @@
 // MONOME CLASS::SERVER 
+
+
 var Mono = function (gridSize) {
 
-	console.log('new monome created!!!!');
+	var midi = require('midi');
+	var util = require('util');
+	var midiOut = new midi.output();
+	midiOut.openVirtualPort("monome");
+	midiOut.closePort();
 
 	function scale(val, oldMin, oldMax, newMin, newMax) {
 		var oldRange = oldMax - oldMin;
@@ -11,6 +17,10 @@ var Mono = function (gridSize) {
 	}
 
 	var p = this;
+
+	p.kill = function () {
+		console.log('killing');
+	}
 
 	p.init = function () {
 		console.log('starting monome!!!!');
@@ -57,7 +67,7 @@ var Mono = function (gridSize) {
 		r.hit = function (note, noteVal) {
 			var noteScaled = Math.round(scale(note, 0, 7, r.json.min, r.json.max));
 			r.lastNote = noteScaled;
-			midiOut.sendMessage([144,noteScaled,scaleOnOff(noteVal)]);
+			// midiOut.sendMessage([144,noteScaled,scaleOnOff(noteVal)]);
 		} 
 	}; 
 

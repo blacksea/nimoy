@@ -1,13 +1,22 @@
 {
-  "name": "application-name",
-  "version": "0.0.1",
-  "private": true,
-  "scripts": {
-    "start": "node app"
-  },
+  "name": "sleepwalker",
+  "description": "/\\/\\/\\/\\",
+  "author": "ag <ag@theblacksea.cc>",
   "dependencies": {
-    "express": "3.0.3",
-    "hjs": "*",
-    "stylus": "*"
-  }
+    "socket.io" : "0.9.13",
+    "connect" : "2.7.2",
+    "redis" : "0.8.2",
+    "node-minify" : "0.7.2",
+    "msgpack-js" : "0.1.1",
+    "rimraf" : "2.1.1",
+    "async" : "0.1.22",
+    "node-osc" : "0.1.2",
+    "midi" : "0.6.0",
+    "templayed" : "0.2.1"
+  },
+  "devDependencies": {
+    "stylus" : "1.2.0"
+  },
+  "database" : "redis >= 2.6",
+  "engine": "node >= 0.8.17"
 }

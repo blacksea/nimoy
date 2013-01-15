@@ -1,34 +1,28 @@
-// S L E E P  W A L K E R 
+// S L E E P  W A L K E R  v.0 ag
 
-// V.0 _ AG _
 var iron  = require('./_iron.js')
 , bus  		= require('./_bus.js')
 , connect = require('connect')
 , http    = require('http')
 , io      = require('socket.io');
 
-global['iron'] = iron;
-
 var app = connect()
 .use(connect.logger('dev'))
 .use(connect.compress())
 .use(connect.static('public'))
-.use(iron.createFrame) // send requests to iron 
+.use(iron.createFrame) // handle all requests with waffle iron 
 , server = require('http').createServer(app)
 , io = io.listen(server);
 
-// handle socket connection with bus
+// patch socket.io into bus
 io.sockets.on('connection', bus.handleConnection); 
 
-iron.buildRegistry(function () {
-	console.log('registry built!');
+iron.buildRegistry(function () { // clean this
 	iron.buildFrame(function(){});
 	iron.buildHTML(function(){});
+	iron.buildCSS(function(){});
 	iron.buildJS(function(){});
-	console.log(iron.settings.commands);
-	// iron.buildCSS();
 });
 
-
-server.listen(80,'204.27.60.58');
-// server.listen(8888);
+// server.listen(80,'204.27.60.58');
+server.listen(8888);
