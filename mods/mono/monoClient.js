@@ -17,6 +17,7 @@
 		// make nested micro panels with mapped interface / ui elements
 		var panel = new Ui.panel({
 		});
+		// replace ui with uikit instances
 		monome.ready = function () {
 			var box = document.getElementById('monome')
 			, num   = box.querySelector('.number')
