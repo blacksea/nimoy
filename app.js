@@ -14,6 +14,7 @@ var app = connect()
 , server = require('http').createServer(app)
 , io = io.listen(server);
 
+iron.settingsJSON = './_settings.json';
 // patch socket.io into bus
 io.sockets.on('connection', bus.handleConnection); 
 

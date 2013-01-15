@@ -2,7 +2,7 @@
 	"path_modules" : "./mods/",
 	"path_js" : "./public/js/scripts.js",
 	"path_css" : "./public/css/modules.styl",
-	"path_template" : "./frame.html",
+	"path_template" : "./public/html/frame.html",
 	"commands" : {
 		"c" : "iron|compile",
 		"/" : "iron|newModule",

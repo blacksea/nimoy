@@ -21,7 +21,7 @@ var Iron = function () {
 	iron.buildRegistry = function (callback) {
 		iron.registry = [];
 		client.del('registry');
-		fs.readFile('./settings.json', function (err, json) {
+		fs.readFile(iron.settingsJSON, function (err, json) {
 			iron.settings = JSON.parse(json);
 			fs.readdir(iron.settings.path_modules, function (err, modules) {
 				async.forEach(modules, handleModule, function () {
