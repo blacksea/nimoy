@@ -26,5 +26,5 @@ iron.buildRegistry(function () { // clean this
 	iron.buildJS(function(){});
 });
 
-// server.listen(80,'204.27.60.58');
-server.listen(8888);
+// server.listen(80,'204.27.60.58'); //live config
+server.listen(8888); //dev config
