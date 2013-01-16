@@ -4,9 +4,7 @@
 	"version": "0",
 	"files" : {
 		"client" : {
-			"html":"mono.html",
-			"js":"monoClient.js",
-			"css":"mono.styl"
+			"js":"monoClient.js"
 		},
 		"server" : {
 			"js":"mono.js"

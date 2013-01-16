@@ -24,12 +24,18 @@ var Iron = function () {
 		fs.readFile(iron.settingsJSON, function (err, json) {
 			iron.settings = JSON.parse(json);
 			fs.readdir(iron.settings.path_modules, function (err, modules) {
+				for(var i=0;i<modules.length;i++){
+					if(modules[i]=='.DS_Store'){
+						modules.splice(0,1);
+						console.log(modules);
+					}
+				}
 				async.forEach(modules, handleModule, function () {
 					callback();
 				});
 			});
 		});
-		function handleModule (module, cb) {
+		function handleModule (module, callback) {
 			client.lpush('registry', module);
 			iron.registry.push(module);
 		  fs.readFile(iron.settings.path_modules+module+'/package.json', function (err, jsonBuf) {
@@ -57,7 +63,7 @@ var Iron = function () {
 			  			});
 			  		});
 			  	}, function () {
-			  		cb();
+			  		callback();
 			  	});
 		  	});
 		  });

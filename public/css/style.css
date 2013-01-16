@@ -1,74 +1,3 @@
-#monome {
-  -webkit-user-drag: element;
-  position: absolute;
-  width: 200px;
-  height: 200px;
-  border: 1px solid #666;
-  border-radius: 2px;
-  padding: 8px;
-  top: 20px;
-  left: 20px;
-}
-.panel:-webkit-drag {
-  opacity: 0 !important;
-}
-.number {
-  font-size: 9px;
-  width: 60px;
-  border: 1px solid #666;
-  color: #666;
-  border-radius: 2px;
-  text-align: center;
-}
-#skeleton {
-  opacity: 0.9;
-  margin: 0;
-  padding: 8px;
-  border-radius: 2px;
-  position: absolute;
-  border: 1px solid #666;
-  top: 18px;
-  right: 18px;
-  z-index: 1;
-}
-#skeleton li {
-  list-style: none;
-}
-#skeleton #console {
-  color: #666;
-  font-size: 9px;
-  padding: 6px;
-  line-height: 20px;
-}
-#prompt {
-  color: #ccc;
-  font-size: 9px;
-  font-family: 'monaco';
-  text-align: center;
-  background: transparent;
-  line-height: 13px;
-  width: 252px;
-  height: 13px;
-  top: 0;
-  left: 0;
-  position: relative;
-  border: 1px solid #666;
-}
-#prompt:focus {
-  outline: none !important;
-  border: 1px solid #fff;
-  color: #fff;
-}
-input.text::selection,
-::selection {
-  background-color: #f00 !important;
-  color: #00f !important;
-}
-#console small {
-  padding-right: 8px;
-  font-size: 9px;
-  color: #999;
-}
 body {
   width: 100%;
   height: 100%;
@@ -121,6 +50,20 @@ label {
   letter-spacing: 0px;
   float: left;
   color: #ccc;
+}
+.panel {
+  -webkit-user-drag: element;
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border: 1px solid #666;
+  border-radius: 2px;
+  padding: 8px;
+  top: 20px;
+  left: 20px;
+}
+.panel:-webkit-drag {
+  opacity: 0 !important;
 }
 #panel {
   border-radius: 2px;

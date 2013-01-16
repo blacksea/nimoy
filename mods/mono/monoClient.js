@@ -1,5 +1,6 @@
-
-// m o n o m e
+//-------------------------------------------------
+// 	m o n o m e
+//-------------------------------------------------
 (function (window) {
 	var Monome = function (template) {
 		var monome = this;
@@ -8,14 +9,16 @@
 		//---------------------------------------------
 		var panel = Object.create(UI_Panel, {
 			name : {value : 'monome'},
-			bind : {value : ['mono', 'set']},
-			layout : {value : {
-				// aef
-			}}
+			// bind : {value : ['mono', 'set']},
+			// layout : {value : {
+			// 	// aef
+			// }}
 		}); 
-		(function(){
+		console.log(panel);
+		panel.render();
+		// (function(){
 			// generate
-		});
+		// });
 		//---------------------------------------------
 		// E V E N T S
 		//---------------------------------------------

@@ -5,6 +5,7 @@
 //---------------------------------------------
 // T E M P L A T E  M A R K U P 
 //---------------------------------------------
+// patch in markup
 // var templates = document.createElement('div');
 // templates.innerHTML = ui.template;
 // ui.getComponent = function (component) {
@@ -15,60 +16,86 @@
 // P A N E L
 //---------------------------------------------
 var UI_Panel = {
-	// name gets set during construction
+
 	name : 'untitled',
-	// panel gets template from db
-	markup : '',
-	// render takes template assembles and adds to dom
-	render : function () {
-	},
-	// bind actions on dom elements to owner functions
-	ready : function () {
+	
+	template : '<div class="panel"></div>',
+	
+	render : function () { // render takes template assembles and adds to dom
+		var container = document.createElement('div'),
+		offset_x = 0,
+		offset_y = 0;
+		container.setAttribute('id', this.name);
+		container.innerHTML = this.template;
+		document.body.appendChild(container);
+		var panel = container.querySelector('.panel');
+		panel.ondragstart = function (e) {
+			offset_x = e.clientX - panel.offsetLeft;
+			offset_y = e.clientY - panel.offsetTop;
+		}
+		panel.ondrag = function (e) {
+			panel.style.left = (e.clientX-offset_x)+'px';
+			panel.style.top = (e.clientY-offset_y)+'px';
+		}
+		panel.ondragend = function (e) {
+			e.preventDefault();
+		}
 	}
+	// layout : function (uiArray) {
+	// 	for(var i=0;i<uiArray.length;i++) {
+	// 		var ele = Object.create(uiArray[i],{
+	// 			name:{value:uiArray[i]}
+	// 		});
+
+	// 	}
+	// } 
 }
 //---------------------------------------------
-// M I C R O  P A N E L
+// T E X T  I N P U T
 //---------------------------------------------
+var UI_textInput = {
+
+	template : '',
+
+	output : function (command) {
+		console.log(command);
+	},
+
+	render : function () {
+		var input = document.getElementById('cmd');
+		cmd.onsubmit = function (e) {
+			e.preventDefault();
+			var input = document.getElementById('prompt'),
+			prompt = e.target.prompt.value;
+			input.value = '';
+			input.blur();
+			this.output(prompt);
+		}		
+	}
+}
 //---------------------------------------------
 // N U M B E R  B O X
 //---------------------------------------------
 var UI_NumberBox = {
-	// name gets set during construction
-	name : 'untitled',
-	// panel gets template from db
-	markup : '',
-	// render takes template assembles and adds to dom
-	render : function () {
 
-	},
-	// bind actions on dom elements to owner functions
-	ready : function () {
+	name : 'untitled',
+
+	markup : '',
+
+	render : function () {
+		var num = box.querySelector('.number');
 		num.onmousewheel = function (event) {
-		var oldVal = parseInt(this.innerHTML)
-		, value = event.wheelDeltaY
-		, newVal = null;
-		if(value<0){
-			newVal = oldVal+Math.abs(value);
-		}else{
-			newVal = oldVal-Math.abs(value);
-		}
-		this.innerHTML = newVal;
-				monome.ready = function () {
-			var box = document.getElementById('monome')
-			, num   = box.querySelector('.number')
-			, offX  = 0
-			, offY  = 0;
-			box.ondragstart = function (event) {
-				offX = event.clientX - box.offsetLeft;
-				offY = event.clientY - box.offsetTop;
-			}
-			box.ondrag = function (event) {
-				box.style.left = (event.clientX-offX)+'px';
-				box.style.top = (event.clientY-offY)+'px';
-			}
-			box.ondragend = function (event) {
-				event.preventDefault();
+			var oldVal = parseInt(this.innerHTML)
+			, value = event.wheelDeltaY
+			, newVal = null;
+			if(value<0){
+				newVal = oldVal+Math.abs(value);
+			}else{
+				newVal = oldVal-Math.abs(value);
 			}
 		}
+	},
+
+	ready : function () {
 	}
 }

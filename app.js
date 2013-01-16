@@ -21,6 +21,7 @@ iron.settingsJSON = './_settings.json';
 io.sockets.on('connection', bus.handleConnection); 
 
 iron.buildRegistry(function () { // clean this
+	console.log('building additional..');
 	iron.buildFrame(function(){});
 	iron.buildHTML(function(){});
 	iron.buildCSS(function(){});
