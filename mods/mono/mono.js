@@ -1,6 +1,5 @@
 
 // M O N O M E
-
 var Mono = function (gridSize) {
 
 	var monome = this;

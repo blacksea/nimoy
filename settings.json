@@ -1,0 +1,17 @@
+// change this to user? create a blank format for reproduction in db?
+
+{
+	"path_modules" : "./mods/",
+	"path_js" : "./public/js/scripts.js",
+	"path_css" : "./public/css/modules.styl",
+	"path_template" : "./public/html/frame.html",
+	"commands" : {
+		"c" : "iron|compile",
+		"/" : "iron|newModule",
+		"rs" : "iron|sendTemplates",
+		"g"	: "iron|generateModule",
+		"rm" : "iron|removeModule",
+		"!" : "iron|call",
+		"?" :	"iron|status"
+	} 		
+}
