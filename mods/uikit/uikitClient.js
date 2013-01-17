@@ -33,12 +33,12 @@ var UI_Panel = {
 			offset_x = e.clientX - panel.offsetLeft;
 			offset_y = e.clientY - panel.offsetTop;
 		}
+		panel.ondragend = function (e) {
+			e.preventDefault();
+		}
 		panel.ondrag = function (e) {
 			panel.style.left = (e.clientX-offset_x)+'px';
 			panel.style.top = (e.clientY-offset_y)+'px';
-		}
-		panel.ondragend = function (e) {
-			e.preventDefault();
 		}
 	}
 	// layout : function (uiArray) {

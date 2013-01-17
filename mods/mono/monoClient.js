@@ -8,9 +8,10 @@
 		// L A Y O U T
 		//---------------------------------------------
 		var panel = Object.create(UI_Panel, {
-			name : {value : 'monome'},
+			name : {value : 'monome'}, 
 			// bind : {value : ['mono', 'set']},
-			// layout : {value : {
+			// should accept a simple layout description
+			// layout : {value : { 
 			// 	// aef
 			// }}
 		}); 
