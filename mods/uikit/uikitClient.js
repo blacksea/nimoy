@@ -1,17 +1,11 @@
-
 // U I  K I T
 
 // editor module bulk prints elements
+
 //---------------------------------------------
 // T E M P L A T E  M A R K U P 
 //---------------------------------------------
-// patch in markup
-// var templates = document.createElement('div');
-// templates.innerHTML = ui.template;
-// ui.getComponent = function (component) {
-// 	var elements = templates.getElementsByTagName(component);
-// 	return elements[0].innerHTML; 
-// }	
+
 //---------------------------------------------
 // P A N E L
 //---------------------------------------------
@@ -20,46 +14,58 @@ var UI_Panel = {
 	name : 'untitled',
 	
 	template : '<div class="panel"></div>',
+
+	insert : null,
 	
 	render : function () { // render takes template assembles and adds to dom
-		var container = document.createElement('div'),
-		offset_x = 0,
-		offset_y = 0;
+
+		this.name = this.set.name;
+
+		if(this.set.insert) {
+			var components = this.set.insert;
+			for(var i=0;i<components.length;i++) {
+				var obj = window[components[i]];
+				var newObj = Object.create(obj, {set: {
+					enumerable: true, value:
+					{
+						name: 'cmd',
+						io : ['skeleton', 'interpret']
+					}
+				}});
+				newObj.send('test');
+			}
+		}
+		
+		var container = document.createElement('div')
+		, offset_x    = 0
+		, offset_y    = 0;
 		container.setAttribute('id', this.name);
 		container.innerHTML = this.template;
 		document.body.appendChild(container);
 		var panel = container.querySelector('.panel');
+
 		panel.ondragstart = function (e) {
 			offset_x = e.clientX - panel.offsetLeft;
 			offset_y = e.clientY - panel.offsetTop;
 		}
+
 		panel.ondragend = function (e) {
 			e.preventDefault();
 		}
+
 		panel.ondrag = function (e) {
 			panel.style.left = (e.clientX-offset_x)+'px';
 			panel.style.top = (e.clientY-offset_y)+'px';
 		}
-	}
-	// layout : function (uiArray) {
-	// 	for(var i=0;i<uiArray.length;i++) {
-	// 		var ele = Object.create(uiArray[i],{
-	// 			name:{value:uiArray[i]}
-	// 		});
 
-	// 	}
-	// } 
+	}
 }
 //---------------------------------------------
 // T E X T  I N P U T
 //---------------------------------------------
-var UI_textInput = {
+var UI_TextInput = {
 
 	template : '',
-
-	output : function (command) {
-		console.log(command);
-	},
 
 	render : function () {
 		var input = document.getElementById('cmd');
@@ -71,6 +77,12 @@ var UI_textInput = {
 			input.blur();
 			this.output(prompt);
 		}		
+	},
+
+	send : function (params) {
+		var module = this.set.io[0]
+		, method   = this.set.io[1];
+		window[module][method](params);
 	}
 }
 //---------------------------------------------
@@ -95,7 +107,6 @@ var UI_NumberBox = {
 			}
 		}
 	},
-
 	ready : function () {
 	}
 }

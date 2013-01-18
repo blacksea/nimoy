@@ -8,14 +8,15 @@
 		// L A Y O U T
 		//---------------------------------------------
 		var panel = Object.create(UI_Panel, {
-			name : {value : 'monome'}, 
+			name : {value : 'monome'},
+			insert : {value : ['test','t2']}
 			// bind : {value : ['mono', 'set']},
 			// should accept a simple layout description
 			// layout : {value : { 
 			// 	// aef
 			// }}
 		}); 
-		console.log(panel);
+		console.log('ins = '+panel.insert);
 		panel.render();
 		// (function(){
 			// generate
