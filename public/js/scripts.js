@@ -69,6 +69,11 @@
 			return newObj;
 		},
 
+		setTemplates : function (json) {
+			var templates  = JSON.parse(json);
+			this.templates = templates;
+		},
+
 		// ----------------------------------------------------
 		//  C O M P O N E N T S
 		// ----------------------------------------------------
@@ -78,11 +83,9 @@
 
 		panel : {
 
-			template : '<div class="panel"></div>',
+			// template : ui.templates.panel,
 
 			render : function () {
-
-				console.log(ui);
 
 				var container = document.createElement('div')
 				, offset_x    = 0
@@ -109,8 +112,11 @@
 				}
 
 				if(this.insert){
-					console.log(this.insert);
-					console.log(this.template);
+					var components = this.insert;
+					for(var i=0;i<components.length;i++){
+						var component = components[i];
+						console.log(component);
+					}
 				}
 			}
 		},
@@ -119,6 +125,8 @@
 		//  T X T  I N P U T
 
 		txtInput : {
+
+			// allow for insertion / grouping
 
 			render : function () {
 			

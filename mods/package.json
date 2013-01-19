@@ -1,0 +1,24 @@
+{
+	"modules" : [
+	{
+		"name": "mono",
+		"desc": "monome interface",
+		"version": "0.0",
+		"files": [
+				{"scope":"server",
+				 "file": "mono.js"},
+				{"scope":"client",
+				 "file": "mono.js"}
+			]
+		},
+	{
+		"name": "skeleton",
+		"desc": "cli",
+		"version": "0.0",
+		"files": [
+				{"scope":"client",
+				 "file": "skeleton.js"}
+			]
+		}
+	]
+}

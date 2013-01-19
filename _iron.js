@@ -16,69 +16,25 @@ var templayed = require('templayed')
 var Iron = function () {
 	
 	var iron = this;
-	iron.templates = {};
 
-	iron.buildRegistry = function (callback) {
-		iron.registry = [];
-		client.del('registry');
+	iron.buildModules = function (callback) {
 		fs.readFile(iron.settingsJSON, function (err, json) {
-			iron.settings = JSON.parse(json);
-			fs.readdir(iron.settings.path_modules, function (err, modules) {
-				for(var i=0;i<modules.length;i++){
-					if(modules[i]=='.DS_Store'){
-						modules.splice(0,1);
-						console.log(modules);
-					}
-				}
-				async.forEach(modules, handleModule, function () {
+			iron.settings = JSON.parse(json.toString());
+			fs.readFile(iron.settings.path_modules+'/package.json', function (err, json) {
+				var obj = JSON.parse(json.toString());
+				iron.modules = obj.modules;
+				async.forEach(iron.modules, function (module, cb) {
+					async.forEach(module.files, function (file, cbb) {
+						
+						cbb();
+					}, function () {
+						cb();
+					});
+				},
+				function () {
 					callback();
 				});
 			});
-		});
-		function handleModule (module, callback) {
-			client.lpush('registry', module);
-			iron.registry.push(module);
-		  fs.readFile(iron.settings.path_modules+module+'/package.json', function (err, jsonBuf) {
-		  	var pkg = JSON.parse(jsonBuf.toString()),
-		  	allFiles = [];
-		  	client.del(pkg.name);
-		  	if (pkg.files.client) addFiles(pkg.files.client, 'client');
-		  	if (pkg.files.server) addFiles(pkg.files.server, 'server');
-		  	function addFiles (files, scope) {
-		  		for(file in files){
-		  			var item = [pkg.name, file, files[file], scope];
-		  			allFiles.push(item);
-		  		}
-		  	}
-		  	client.hset(pkg.name, 'pkg', jsonBuf.toString(), function () {
-		  		async.forEach(allFiles, function (pkgArray, cb) {
-	  				var module = pkgArray[0]
-	  				, file       = pkgArray[1]
-	  				, fileName   = pkgArray[2]
-	  				, scope      = pkgArray[3]
-			  		, filePath   = iron.settings.path_modules+module+'/'+fileName;
-			  		fs.readFile(filePath, function (err, dataBuf) {
-			  			client.hset(module, scope+'_'+file, dataBuf, function () {
-				  			cb();
-			  			});
-			  		});
-			  	}, function () {
-			  		callback();
-			  	});
-		  	});
-		  });
-		}
-	}
-
-	iron.buildHTML = function (callback) {
-		async.forEach(iron.registry, function (module, cb) {
-			client.hget(module, 'client_html', function (err, html) {
-				iron.templates[module] = html;
-				cb();
-			});
-		}, function () {
-			console.log('Templates ready!');
-			callback();
 		});
 	}
 
@@ -107,23 +63,6 @@ var Iron = function () {
 		});
 	}
 
-	iron.buildCSS = function (callback) {
-		var css = '';
-		fs.unlink(iron.settings.path_css, function () {
-			async.forEach(iron.registry, function (module, cb) {
-				client.hget(module, 'client_css', function (err, cssData) {
-					css += cssData;
-					cb();
-				});			
-			}, function () {
-				fs.writeFile(iron.settings.path_css, css, function () {
-					console.log("css ready!");
-					callback();
-				});
-			});
-		});
-	}
-
 	iron.buildFrame = function (cb) {
 		fs.readFile(iron.settings.path_template, function (err, data) {
 			var frame = templayed(data.toString())({modules:''});
@@ -131,14 +70,6 @@ var Iron = function () {
 			console.log('master template ready!');
 			cb();
 		});
-	}
-
-	iron.sendTemplates = function (paramArray, cb) {
-		console.log('templates requested');
-		var json = JSON.stringify(iron.templates),
-		templates = msgpack.encode(json);
-		console.log('sending templates');
-		cb(['Waffle', 'spread', templates]);
 	}
 
 	iron.createFrame = function (req, res) {	
@@ -197,15 +128,6 @@ var Iron = function () {
 			} 
 		}
 		if(notFound==true) cb(['skeleton', 'log', "module doesn't exist"]); 
-	}
-
-	iron.loadModule = function (module) {
-		client.hget(module, 'pkg', function (err, json) {
-			var pkg = JSON.parse(json);
-			var moduleFile = iron.settings.path_modules+module+'/'+pkg.files.server.js;
-			global[module] = require(moduleFile);
-			global[module].init();
-		});
 	}
 
 	iron.generateModule = function (module, callback) {

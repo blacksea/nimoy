@@ -20,13 +20,17 @@ iron.settingsJSON = './_settings.json';
 // patch socket.io into bus
 io.sockets.on('connection', bus.handleConnection); 
 
-iron.buildRegistry(function () { // clean this
-	console.log('building additional..');
-	iron.buildFrame(function(){});
-	iron.buildHTML(function(){});
-	iron.buildCSS(function(){});
-	iron.buildJS(function(){});
+iron.buildModules(function () {
+	console.log('modules ready');
 });
+
+// iron.buildRegistry(function () { // clean this
+// 	console.log('building additional..');
+// 	iron.buildFrame(function(){});
+// 	iron.buildHTML(function(){});
+// 	iron.buildCSS(function(){});
+// 	iron.buildJS(function(){});
+// });
 
 // server.listen(80,'204.27.60.58'); //live config
 server.listen(8888); //dev config

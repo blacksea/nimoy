@@ -1,6 +1,7 @@
 //-------------------------------------------------
 // 	m o n o m e
 //-------------------------------------------------
+
 (function (window) {
 	var Monome = function (template) {
 		var monome = this;

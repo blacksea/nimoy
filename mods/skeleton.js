@@ -10,7 +10,9 @@
 		skel.init = function () {
 			var panel = ui.create( 'panel', {
 				name : 'skeleton',
-				insert : ['test', 'test2']
+				insert : [['txtInput', {
+					out : ['skel','interpret']
+				}],['console']]
 				// io : []
 			});
 			panel.render();
@@ -21,6 +23,6 @@
 			// bus.send(['iron','interpret','Waffle','loadModule',cmd]);
 		}
 	}
-	
+
 	window.skeleton = Skeleton;
 }(window));

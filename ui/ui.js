@@ -27,7 +27,7 @@
 
 		panel : {
 
-			template : ui.templates.panel,
+			// template : ui.templates.panel,
 
 			render : function () {
 
@@ -107,9 +107,6 @@
 			}
 		}
 	}
-
-	// load templates
-	bus.send(['iron', 'getUiTemplates', 'ui', 'setTemplates']);
 
 	window.ui = UI;
 }(window));

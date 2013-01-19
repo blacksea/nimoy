@@ -1,5 +1,6 @@
 
 // M O N O M E
+
 var Mono = function (gridSize) {
 
 	var monome = this;
@@ -15,6 +16,8 @@ var Mono = function (gridSize) {
 
 	var presets = [];
 	midiOut.openVirtualPort("monome");
+
+	// list input / outputs somehow ? generated with row construction ?
 
 	function scale(val, oldMin, oldMax, newMin, newMax) {
 		var oldRange = oldMax - oldMin;
