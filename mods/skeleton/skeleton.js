@@ -1,3 +1,4 @@
+
 // S K E L E T O N
 
 (function (window) {
@@ -7,17 +8,11 @@
 		skel.template = template;
 
 		skel.init = function () {
-			// make a new panel
-			var panel = Object.create(UI_Panel, {set: {
-				enumerable: true, value: 
-				{ 
-					name : 'skeleton',
-					insert : ['UI_TextInput'],
-					io : ['skeleton', 'interpret']
-				}
-
-			}}); 
-			
+			var panel = ui.create( 'panel', {
+				name : 'skeleton',
+				insert : ['test', 'test2']
+				// io : []
+			});
 			panel.render();
 		}
 
@@ -26,5 +21,6 @@
 			// bus.send(['iron','interpret','Waffle','loadModule',cmd]);
 		}
 	}
+	
 	window.skeleton = Skeleton;
 }(window));
