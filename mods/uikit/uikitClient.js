@@ -1,11 +1,29 @@
 // U I  K I T
-
+(function (window) {
 // editor module bulk prints elements
 
 //---------------------------------------------
-// T E M P L A T E  M A R K U P 
+// M A S T E R
 //---------------------------------------------
+var UI = {
 
+	template : 
+
+	create : function (component, settings) {
+		var newObj = Object.create(this[component], {set: {value: settings}});
+		return newObj;
+	},
+
+
+
+
+}
+
+// components should have a base
+
+//---------------------------------------------
+// C O M P O N E N T S
+//---------------------------------------------
 //---------------------------------------------
 // P A N E L
 //---------------------------------------------
@@ -107,6 +125,10 @@ var UI_NumberBox = {
 			}
 		}
 	},
+
 	ready : function () {
 	}
 }
+
+	window.ui = Ui;
+}(window));
