@@ -13,16 +13,6 @@
 			return newObj;
 		},
 
-		getTemplates : function () {
-			console.log('requesting templates');
-			bus.send(['iron','getUI', 'ui', 'setTemplates','']);
-		},
-		
-		setTemplates : function (templates) {
-			console.log('got templates'+templates);
-			this.templates = templates;
-		},
-
 		// ----------------------------------------------------
 		//  C O M P O N E N T S
 		// ----------------------------------------------------

@@ -11,7 +11,6 @@ var templayed = require('templayed')
 , path        = require('path')
 , http        = require('http')
 , fs    		  = require('fs')
-, xml         = require('libxmljs')
 , redis       = require('redis')
 , client      = redis.createClient();
 
@@ -39,17 +38,13 @@ var Iron = function () {
 		});
 	}
 	iron.setup = function (callback) {
-		var loaded_html = false
+		var loaded_frame = false
 		, loaded_css    = false
-		, loaded_js     = false
-		, loaded_frame  = false;
+		, loaded_js     = false;
 
 		fs.readFile(iron.info.config_ui, function (err, buffer) { // ui
 			var json  = buffer.toString();
 			iron.ui = JSON.parse(json);
-			handleTemplates(function () {
-				status();
-			});
 			handleCSS(function () {
 				status();
 			});
@@ -60,7 +55,7 @@ var Iron = function () {
 				status();
 			});
 			function status () {
-			  if(loaded_html==true&&loaded_css==true&&loaded_js==true&&loaded_frame==true){
+			  if(loaded_css==true&&loaded_js==true&&loaded_frame==true){
 			  	callback();
 			  }
 			}
@@ -94,17 +89,20 @@ var Iron = function () {
 					}, function () {
 						fs.readFile(iron.ui.js, function (err, buffer) { // add ui script
 							clientJS += buffer.toString();
-							fs.unlink(iron.info.compiled_modules, function () {
-								fs.writeFile(iron.info.compiled_modules, clientJS, function () {
-									new compressor.minify({
-									    type: 'uglifyjs',
-									    fileIn: iron.info.compiled_modules,
-									    fileOut: iron.info.compiled_modules.replace('.js','.min.js'),
-									    callback: function(err){
-									        console.log(err);
-        									loaded_js = true;
-													callback();
-									    }
+							fs.readFile(iron.ui.templates, function (err, buffer) {
+								clientJS += '\n ui.templates = "'+buffer.toString()+'";';
+								fs.unlink(iron.info.compiled_modules, function () {
+									fs.writeFile(iron.info.compiled_modules, clientJS, function () {
+										new compressor.minify({
+										    type: 'uglifyjs',
+										    fileIn: iron.info.compiled_modules,
+										    fileOut: iron.info.compiled_modules.replace('.js','.min.js'),
+										    callback: function(err){
+										        console.log(err);
+	        									loaded_js = true;
+														callback();
+										    }
+										});
 									});
 								});
 							});
@@ -112,25 +110,11 @@ var Iron = function () {
 					});
 				});
 			}
-			function handleTemplates (callback) {
-				fs.readFile(iron.ui.templates, function (err, buffer) {
-					client.set('ui_templates', buffer, redis.print);
-					loaded_html = true;
-					callback();
-				});
-			}
 		});
 	}
 	iron.req = function (req, res) {
 		client.get('master_template', function (err, buffer) {
 			res.end(buffer.toString());
-		});
-	}
-	iron.getUI = function (args, cb) {
-		console.log('getting' + args);
-		client.get('ui_templates', function (err, buffer) {
-			var templates = buffer.toString();
-			cb(['ui', 'setTemplates', templates]);
 		});
 	}
 	iron.interpret = function (paramArray, cb) {
