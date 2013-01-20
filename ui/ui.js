@@ -13,8 +13,13 @@
 			return newObj;
 		},
 
-		setTemplates : function (json) {
-			var templates  = JSON.parse(json);
+		getTemplates : function () {
+			console.log('requesting templates');
+			bus.send(['iron','getUI', 'ui', 'setTemplates','']);
+		},
+		
+		setTemplates : function (templates) {
+			console.log('got templates'+templates);
 			this.templates = templates;
 		},
 
@@ -107,6 +112,5 @@
 			}
 		}
 	}
-
 	window.ui = UI;
 }(window));

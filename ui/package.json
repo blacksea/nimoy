@@ -1,0 +1,6 @@
+{ 
+	"local_css" : "./ui/ui.styl",
+	"public_css" : "./public/css/ui.styl",
+	"templates" : "./ui/ui.html",
+	"js": "./ui/ui.js"
+}

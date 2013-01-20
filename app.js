@@ -11,26 +11,18 @@ var app = connect()
 .use(connect.logger('dev'))
 .use(connect.compress())
 .use(connect.static('public'))
-.use(iron.createFrame) // handle all requests with waffle iron 
+.use(iron.req) // handle all requests with waffle iron 
 , server = require('http').createServer(app)
 , io = io.listen(server);
 
-iron.settingsJSON = './_settings.json';
+iron.readJson(function () {
+	iron.setup(function () {
+		console.log('server ready');
+	});
+});
 
 // patch socket.io into bus
 io.sockets.on('connection', bus.handleConnection); 
-
-iron.buildModules(function () {
-	console.log('modules ready');
-});
-
-// iron.buildRegistry(function () { // clean this
-// 	console.log('building additional..');
-// 	iron.buildFrame(function(){});
-// 	iron.buildHTML(function(){});
-// 	iron.buildCSS(function(){});
-// 	iron.buildJS(function(){});
-// });
 
 // server.listen(80,'204.27.60.58'); //live config
 server.listen(8888); //dev config

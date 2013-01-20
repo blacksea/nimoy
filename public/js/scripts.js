@@ -1,6 +1,8 @@
+
 //-------------------------------------------------
 // 	m o n o m e
 //-------------------------------------------------
+
 (function (window) {
 	var Monome = function (template) {
 		var monome = this;
@@ -30,6 +32,7 @@
 	}
 	window.mono = Monome;
 }(window));
+
 // S K E L E T O N
 
 (function (window) {
@@ -41,7 +44,9 @@
 		skel.init = function () {
 			var panel = ui.create( 'panel', {
 				name : 'skeleton',
-				insert : ['test', 'test2']
+				insert : [['txtInput', {
+					out : ['skel','interpret']
+				}],['console']]
 				// io : []
 			});
 			panel.render();
@@ -52,7 +57,7 @@
 			// bus.send(['iron','interpret','Waffle','loadModule',cmd]);
 		}
 	}
-	
+
 	window.skeleton = Skeleton;
 }(window));
 // U I  K I T
@@ -69,8 +74,13 @@
 			return newObj;
 		},
 
-		setTemplates : function (json) {
-			var templates  = JSON.parse(json);
+		getTemplates : function () {
+			console.log('requesting templates');
+			bus.send(['iron','getUI', 'ui', 'setTemplates','']);
+		},
+		
+		setTemplates : function (templates) {
+			console.log('got templates'+templates);
 			this.templates = templates;
 		},
 
@@ -163,6 +173,5 @@
 			}
 		}
 	}
-
 	window.ui = UI;
 }(window));

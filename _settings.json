@@ -1,8 +1,7 @@
 {
-	"path_modules" : "./mods/",
-	"path_js" : "./public/js/scripts.js",
-	"path_css" : "./public/css/modules.styl",
-	"path_template" : "./public/html/frame.html",
+	"config_ui" : "./ui/package.json",
+	"config_modules" : "./mods/package.json",
+	"compiled_modules" : "./public/js/scripts.js",
 	"commands" : {
 		"c" : "iron|compile",
 		"/" : "iron|newModule",

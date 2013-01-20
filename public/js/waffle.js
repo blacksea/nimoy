@@ -5,7 +5,9 @@
 
 	Waffle.serve = function () {
 		window['bus'] = new Bus();
-		bus.send(['iron','interpret','Waffle','loadModule','/ skeleton']);
+		console.log(ui);
+		ui.getTemplates();
+		// bus.send(['iron','interpret','Waffle','loadModule','/ skeleton']);
 	}
 	Waffle.loadModule = function (paramArray) {
 		var module = paramArray[0]

@@ -1,7 +1,8 @@
 
 // W A F F L E  I R O N
 
-// event map / save map?
+// do error handling
+
 var templayed = require('templayed')
 , compressor	= require('node-minify')
 , msgpack     = require('msgpack-js')
@@ -10,6 +11,7 @@ var templayed = require('templayed')
 , path        = require('path')
 , http        = require('http')
 , fs    		  = require('fs')
+, xml         = require('libxmljs')
 , redis       = require('redis')
 , client      = redis.createClient();
 
@@ -17,68 +19,120 @@ var Iron = function () {
 	
 	var iron = this;
 
-	iron.buildModules = function (callback) {
-		fs.readFile(iron.settingsJSON, function (err, json) {
-			iron.settings = JSON.parse(json.toString());
-			fs.readFile(iron.settings.path_modules+'/package.json', function (err, json) {
-				var obj = JSON.parse(json.toString());
-				iron.modules = obj.modules;
-				async.forEach(iron.modules, function (module, cb) {
-					async.forEach(module.files, function (file, cbb) {
-						
-						cbb();
-					}, function () {
+	iron.readJson = function (callback) {
+		fs.readdir('./', function (err, files) {
+			async.forEach(files, function (file, cb) {
+				var format = file.split('.')[1];
+				if (format=='json'&&file!='package.json'){
+					fs.readFile(file, function (err, buffer) {
+						var propertyName = file.replace('_','').replace('.json','')
+						, json = buffer.toString();
+						iron[propertyName] = JSON.parse(json);
 						cb();
 					});
-				},
-				function () {
-					callback();
-				});
+				} else {
+					cb();
+				}
+			}, function () {
+				callback();
 			});
 		});
 	}
+	iron.setup = function (callback) {
+		var loaded_html = false
+		, loaded_css    = false
+		, loaded_js     = false
+		, loaded_frame  = false;
 
-	iron.buildJS = function (callback) {
-		var js = '';
-		fs.unlink(iron.settings.path_js, function () {
-			async.forEach(iron.registry, function (module, cb) {
-				client.hget(module, 'client_js', function (err, jsData) {
-					js += jsData;
-					cb();
-				});
-			}, function () {
-				fs.writeFile(iron.settings.path_js, js, function () {
-					new compressor.minify({
-				    type: 'uglifyjs',
-				    fileIn: iron.settings.path_js,
-				    fileOut: iron.settings.path_js.replace('.js','.min.js'),
-				    callback: function(err){
-			        console.log(err);
-    					console.log('scripts.js ready!');
+		fs.readFile(iron.info.config_ui, function (err, buffer) { // ui
+			var json  = buffer.toString();
+			iron.ui = JSON.parse(json);
+			handleTemplates(function () {
+				status();
+			});
+			handleCSS(function () {
+				status();
+			});
+			handleJS(function () {
+				status();
+			});
+			getFrame(function () {
+				status();
+			});
+			function status () {
+			  if(loaded_html==true&&loaded_css==true&&loaded_js==true&&loaded_frame==true){
+			  	callback();
+			  }
+			}
+			function getFrame (callback) {
+			  fs.readFile(iron.info.config_frame, function (err, buffer) {
+			  	client.set('master_template', buffer, redis.print);
+			  	loaded_frame = true;
+			  	callback();
+			  });
+			}
+			function handleCSS (callback) {
+				fs.readFile(iron.ui.local_css, function (err, buffer) {
+					fs.unlink(iron.ui.public_css, function () {
+						fs.writeFile(iron.ui.public_css, buffer, function (err) {
+							loaded_css = true;
 							callback();
-				    }
+						});
 					});
-				});	
-			}); 
+				});
+			}
+			function handleJS (callback) {
+				fs.readFile(iron.info.config_modules, function (err, buffer) {
+					var json   = buffer.toString()
+					, clientJS = '';
+				  iron.modules  = JSON.parse(json);
+					async.forEach(iron.modules.client, function (module, cb) {
+						fs.readFile('./mods/'+module.file, function (err, buffer) {
+							clientJS += '\n'+buffer.toString();
+							cb();
+						});	
+					}, function () {
+						fs.readFile(iron.ui.js, function (err, buffer) { // add ui script
+							clientJS += buffer.toString();
+							fs.unlink(iron.info.compiled_modules, function () {
+								fs.writeFile(iron.info.compiled_modules, clientJS, function () {
+									new compressor.minify({
+									    type: 'uglifyjs',
+									    fileIn: iron.info.compiled_modules,
+									    fileOut: iron.info.compiled_modules.replace('.js','.min.js'),
+									    callback: function(err){
+									        console.log(err);
+        									loaded_js = true;
+													callback();
+									    }
+									});
+								});
+							});
+						});	
+					});
+				});
+			}
+			function handleTemplates (callback) {
+				fs.readFile(iron.ui.templates, function (err, buffer) {
+					client.set('ui_templates', buffer, redis.print);
+					loaded_html = true;
+					callback();
+				});
+			}
 		});
 	}
-
-	iron.buildFrame = function (cb) {
-		fs.readFile(iron.settings.path_template, function (err, data) {
-			var frame = templayed(data.toString())({modules:''});
-			client.set('frame', frame);
-			console.log('master template ready!');
-			cb();
+	iron.req = function (req, res) {
+		client.get('master_template', function (err, buffer) {
+			res.end(buffer.toString());
 		});
 	}
-
-	iron.createFrame = function (req, res) {	
-		client.get('frame', function (err, frame) {
-			console.log(frame);
-			res.end(frame);
+	iron.getUI = function (args, cb) {
+		console.log('getting' + args);
+		client.get('ui_templates', function (err, buffer) {
+			var templates = buffer.toString();
+			cb(['ui', 'setTemplates', templates]);
 		});
 	}
-
 	iron.interpret = function (paramArray, cb) {
 		var senderModule = paramArray[0]
 		, senderMethod   = paramArray[1]
@@ -101,125 +155,6 @@ var Iron = function () {
 		}
 		if(notFound==true){
 			cb(['skeleton', 'log', 'command not found']);
-		}
-	}
-
-	iron.newModule = function (module, cb) {
-		console.log('new module '+module);
-		var notFound = true;
-		for(var i=0;i<iron.registry.length;i++) {
-			if(module==iron.registry[i]){
-				notFound = false;
-				client.hget(module, 'pkg', function (err, json) {
-					var pkg = JSON.parse(json);
-					if (pkg.files.server) {
-						iron.loadModule(module);
-					}
-					if (pkg.files.client) {
-						client.hget(module, 'client_html', function (err, html) {
-							// var pakdHTML = msgpack.encode(html.toString());
-							cb(['Waffle', 'loadModule', [module, html]]);
-						});
-					} else if (!pkg.files.client) {
-						cb(['skeleton', 'log', 'loading server module '+module]);
-					}
-				});
-				break;
-			} 
-		}
-		if(notFound==true) cb(['skeleton', 'log', "module doesn't exist"]); 
-	}
-
-	iron.generateModule = function (module, callback) {
-		var moduleExists = false;
-		for(var i=0;i<iron.registry.length;i++){
-			if(module==iron.registry[i]){
-				callback(['skeleton','log', module+' already exists doooofus!!!']);
-				moduleExists = true;
-				break;
-			}
-		}
-		if (moduleExists==false) {
-			var modulePath = iron.settings.path_modules+module,
-			files = [module+'.html',module+'Client.js',module+'.js',module+'.styl'];
-			fs.mkdir(modulePath, function(){
-				var pkg = {
-					name : module,
-					version : '0',
-					files : {
-						client : {
-							html : module+'.html',
-							css : module+'.styl',
-							js : module+'Client.js'
-						},
-						server : {
-							js : module+'.js'
-						}
-					}
-				}
-				fs.writeFile(modulePath+'/package.json', JSON.stringify(pkg, null, '\t'), function () {
-					async.forEach(files, function (file, cb) {
-						fs.writeFile(modulePath+'/'+file, '', function () {
-							cb();
-						});
-					}, function () {
-						iron.buildRegistry(function () {
-							callback(['skeleton','log','generated new module '+module]);
-						});
-					});
-				});
-			});
-		}
-	}
-
-	iron.removeModule = function (module, cb) {
-		for(var i=0;i<iron.registry.length;i++){
-			if(module==iron.registry[i]){
-				rimraf(iron.settings.path_modules+module, function (err) {
-					console.log(err);
-					iron.buildRegistry(function () {
-						cb(['skeleton','log', module+' liquidated!']);
-					});
-				});
-				break;
-			}
-		}
-	}
-
-	iron.call = function (call, cb) {
-		console.log(call);
-		var params = call.split('|')
-		, module   = params[0]
-		, method   = params[1]
-		, args     = params[2]; 
-		cb([module, method, args]);
-	}
-
-	iron.compile = function (action, cb) {
-		switch(action) {
-			case 'html'  : iron.buildRegistry(function(){
-				iron.buildHTML(function(){
-					cb(['skeleton', 'log', 'html rebuilt']);
-				}); 
-			});	break;
-			case 'js'    : iron.buildRegistry(function(){
-				iron.buildJS(function(){
-					cb(['skeleton', 'log', 'js rebuilt']);
-				}); 
-			}); break;
-			case 'css'   : iron.buildRegistry(function(){
-				iron.buildCSS(function(){
-					cb(['skeleton', 'log', 'css rebuilt']);
-				}); 
-			}); break;
-			case 'frame' : iron.buildRegistry(function(){
-				iron.buildFrame(function(){
-					cb(['skeleton', 'log', 'frame rebuilt']);
-				});
-			}); break;
-		} 
-		if(action!='html'&&action!='js'&&action!='css'&&action!='frame'){
-			cb(['skeleton', 'log', 'that cannot be compiled']);
 		}
 	}
 
