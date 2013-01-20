@@ -90,7 +90,7 @@ var Iron = function () {
 						fs.readFile(iron.ui.js, function (err, buffer) { // add ui script
 							clientJS += buffer.toString();
 							fs.readFile(iron.ui.templates, function (err, buffer) {
-								clientJS += '\n ui.templates = "'+buffer.toString()+'";';
+								clientJS += '\n ui.markup = "'+buffer.toString()+'";\n ui.templates = document.createElement("div");\n ui.templates.innerHTML = ui.markup;';
 								fs.unlink(iron.info.compiled_modules, function () {
 									fs.writeFile(iron.info.compiled_modules, clientJS, function () {
 										new compressor.minify({

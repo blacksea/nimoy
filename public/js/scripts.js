@@ -83,16 +83,18 @@
 
 		panel : {
 
-			// template : ui.templates.panel,
+			template : function () {
+				var template = ui.templates.getElementsByTagName('panel')[0];
+				return template.innerHTML;
+			},
 
 			render : function () {
-
-				var container = document.createElement('div')
+				container = document.createElement('div')
 				, offset_x    = 0
 				, offset_y    = 0;
 				
 				container.setAttribute('id', this.name);
-				container.innerHTML = this.template;
+				container.innerHTML = this.template();
 				document.body.appendChild(container);
 				
 				var panel = container.querySelector('.panel');
@@ -165,8 +167,7 @@
 	}
 	window.ui = UI;
 }(window));
- ui.templates = "
-<panel>
+ ui.markup = "<panel>
 	<div class='panel'>
 		<div class='bar'>
 			text
@@ -179,3 +180,5 @@
 	</div>
 </number>
 ";
+ ui.templates = document.createElement("div");
+ ui.templates.innerHTML = ui.markup;
