@@ -1,8 +1,6 @@
 
 // W A F F L E  I R O N
 
-// do error handling
-
 var templayed = require('templayed')
 , compressor	= require('node-minify')
 , msgpack     = require('msgpack-js')
@@ -94,14 +92,14 @@ var Iron = function () {
 								fs.unlink(iron.info.compiled_modules, function () {
 									fs.writeFile(iron.info.compiled_modules, clientJS, function () {
 										new compressor.minify({
-										    type: 'uglifyjs',
-										    fileIn: iron.info.compiled_modules,
-										    fileOut: iron.info.compiled_modules.replace('.js','.min.js'),
-										    callback: function(err){
-										        console.log(err);
-	        									loaded_js = true;
-														callback();
-										    }
+									    type: 'uglifyjs',
+									    fileIn: iron.info.compiled_modules,
+									    fileOut: iron.info.compiled_modules.replace('.js','.min.js'),
+									    callback: function(err){
+									    	console.log(err);
+      									loaded_js = true;
+												callback();
+									    }
 										});
 									});
 								});

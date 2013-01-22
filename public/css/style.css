@@ -75,3 +75,17 @@ label {
   left: 200;
   top: 200;
 }
+#prompt {
+  font-size: 9px;
+  background: transparent;
+  border: 1px solid #666;
+  font-family: 'monaco';
+  width: 200px;
+  text-align: center;
+}
+#cmd input:focus {
+  color: #fff;
+  background: transparent;
+  border: 1px solid #fff !important;
+  outline: none;
+}

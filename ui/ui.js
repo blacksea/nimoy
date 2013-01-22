@@ -1,5 +1,5 @@
 
-// U I  K I T
+// U I 
 
 (function (window) {
 	var UI = {
@@ -13,27 +13,26 @@
 			return newObj;
 		},
 
+		template : function (name) {
+			var template = ui.templates.getElementsByTagName(name)[0];
+			return template.innerHTML;
+		},
+
 		// ----------------------------------------------------
 		//  C O M P O N E N T S
 		// ----------------------------------------------------
 
 		//-----------------------------------------------------	
 		//  P A N E L
-
 		panel : {
 
-			template : function () {
-				var template = ui.templates.getElementsByTagName('panel')[0];
-				return template.innerHTML;
-			},
-
 			render : function () {
-				container = document.createElement('div')
+				var container = document.createElement('div')
 				, offset_x    = 0
 				, offset_y    = 0;
 				
 				container.setAttribute('id', this.name);
-				container.innerHTML = this.template();
+				container.innerHTML = ui.template('panel');
 				document.body.appendChild(container);
 				
 				var panel = container.querySelector('.panel');
@@ -56,7 +55,8 @@
 					var components = this.insert;
 					for(var i=0;i<components.length;i++){
 						var component = components[i];
-						console.log(component);
+						var cmd = ui.create(component[0], component[1]);
+						cmd.render('.panel');
 					}
 				}
 			}
@@ -64,13 +64,20 @@
 
 		//-----------------------------------------------------
 		//  T X T  I N P U T
-
 		txtInput : {
+			// groupable ... 
+			// find parent?
+			output : function (text) {
+				console.log(this);
+				var module = this.out[0]
+				, method   = this.out[1];
+				window[module][method](text);
+			},
 
-			// allow for insertion / grouping
-
-			render : function () {
-			
+			render : function (element) {
+				var txt = this;
+				var container = document.querySelector(element);
+				container.innerHTML += ui.template('txtinput');
 				var input = document.getElementById('cmd');
 				cmd.onsubmit = function (e) {
 					e.preventDefault();
@@ -78,18 +85,24 @@
 					prompt = e.target.prompt.value;
 					input.value = '';
 					input.blur();
-					this.output(prompt);
+					txt.output(prompt);
 				}	
 			}
 		},
 
 		//-----------------------------------------------------
+		//  L O G
+		log : {
+			render : function (element) {
+				var container = document.querySelector(element);
+				container.innerHTML += ui.template('log');
+			}
+		},
+	
+		//-----------------------------------------------------
 		//  N U M  B O X
-
 		numBox : {
-
-			render : function () {
-			
+			render : function (element) {
 				var num = box.querySelector('.number');
 				num.onmousewheel = function (event) {
 					var oldVal = parseInt(this.innerHTML)
@@ -104,5 +117,6 @@
 			}
 		}
 	}
+
 	window.ui = UI;
 }(window));

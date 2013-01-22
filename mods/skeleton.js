@@ -2,6 +2,7 @@
 // S K E L E T O N
 
 (function (window) {
+
 	var Skeleton = function (template) {
 
 		var skel = this;
@@ -11,15 +12,14 @@
 			var panel = ui.create( 'panel', {
 				name : 'skeleton',
 				insert : [['txtInput', {
-					out : ['skel','interpret']
-				}],['console']]
-				// io : []
+					out : ['skeleton','interpret']
+				}],['log']]
 			});
 			panel.render();
 		}
 
 		skel.interpret = function (cmd) {
-			console.log('xxxx '+cmd);
+			console.log('+++ '+cmd);
 			// bus.send(['iron','interpret','Waffle','loadModule',cmd]);
 		}
 	}
