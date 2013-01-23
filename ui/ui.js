@@ -9,13 +9,21 @@
 			for(property in settings){
 				options[property] = {value: settings[property]}
 			}
-			var newObj = Object.create(this[component], options);
+			var newObj = Object.create(UI[component], options);
 			return newObj;
 		},
 
 		template : function (name) {
 			var template = ui.templates.getElementsByTagName(name)[0];
 			return template.innerHTML;
+		},
+
+		append : function (container, html, cb) {
+			var container = document.getElementById(container)
+			, tmp         = document.createElement('div');
+			tmp.innerHTML = html;
+	    while (tmp.firstChild) container.appendChild(tmp.firstChild);
+			cb();
 		},
 
 		// ----------------------------------------------------
@@ -31,12 +39,11 @@
 				, offset_x    = 0
 				, offset_y    = 0;
 				
-				container.setAttribute('id', this.name);
 				container.innerHTML = ui.template('panel');
 				document.body.appendChild(container);
 				
 				var panel = container.querySelector('.panel');
-
+				panel.setAttribute('id', this.name);
 				panel.ondragstart = function (e) {
 					offset_x = e.clientX - panel.offsetLeft;
 					offset_y = e.clientY - panel.offsetTop;
@@ -68,25 +75,26 @@
 			// groupable ... 
 			// find parent?
 			output : function (text) {
-				console.log(this);
 				var module = this.out[0]
 				, method   = this.out[1];
 				window[module][method](text);
 			},
 
 			render : function (element) {
-				var txt = this;
-				var container = document.querySelector(element);
-				container.innerHTML += ui.template('txtinput');
-				var input = document.getElementById('cmd');
-				cmd.onsubmit = function (e) {
-					e.preventDefault();
-					var input = document.getElementById('prompt'),
-					prompt = e.target.prompt.value;
-					input.value = '';
-					input.blur();
-					txt.output(prompt);
-				}	
+				var p = this;
+				console.log(this);
+				ui.append('skeleton', ui.template('txtInput'), function () {
+					var txt = this;
+					var cmd = document.getElementById('cmd');
+					cmd.onsubmit = function (e) {
+						e.preventDefault();
+						var input = document.getElementById('prompt'),
+						prompt = e.target.prompt.value;
+						input.value = '';
+						input.blur();
+						p.output(prompt);
+					}	
+				});
 			}
 		},
 
@@ -94,8 +102,14 @@
 		//  L O G
 		log : {
 			render : function (element) {
-				var container = document.querySelector(element);
-				container.innerHTML += ui.template('log');
+				var p = this;
+				ui.append('skeleton', ui.template('log'), function () {
+					var txt = this;
+					var cmd = document.getElementById('cmd');
+				});
+			}
+			input : function (msg) {
+				
 			}
 		},
 	
