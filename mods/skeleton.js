@@ -13,16 +13,19 @@
 				name: 'skeleton',
 				insert: {
 					txtInput: { 
-						out: ['skeleton', 'interpret']},
+						bind: [{out:['skeleton','interpret']}]
+					},
 					log: {
-						in: ['skeleton', 'log']}
+						bind: [{in:['skeleton','log']}]
+					}
 				}
 			});
-			panel.render();
+			panel.init();
 		}
 
 		skel.interpret = function (cmd) {
 			console.log('+++ '+cmd);
+			skeleton.log(cmd);
 			// bus.send(['iron','interpret','Waffle','loadModule',cmd]);
 		}
 	}

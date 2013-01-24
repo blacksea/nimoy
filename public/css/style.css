@@ -55,7 +55,6 @@ label {
   -webkit-user-drag: element;
   position: absolute;
   width: 200px;
-  height: 200px;
   border: 1px solid #666;
   border-radius: 2px;
   padding: 8px;
@@ -65,27 +64,26 @@ label {
 .panel:-webkit-drag {
   opacity: 0 !important;
 }
-#panel {
-  border-radius: 2px;
-  position: fixed;
-  cursor: default;
-  border: 1px solid #ccc;
-  width: 300px;
-  height: 200px;
-  left: 200;
-  top: 200;
-}
 #prompt {
-  font-size: 9px;
-  background: transparent;
   border: 1px solid #666;
-  font-family: 'monaco';
-  width: 200px;
-  text-align: center;
-}
-#cmd input:focus {
-  color: #fff;
   background: transparent;
-  border: 1px solid #fff !important;
+  font-family: 'monaco';
+  text-align: center;
+  font-size: 9px;
+  width: 200px;
+}
+#prompt:focus {
+  color: #fff;
+  border: 1px solid #fff;
   outline: none;
+}
+#console {
+  font-size: 9px;
+  line-height: 18px;
+  color: #666;
+}
+#console span {
+  font-size: 9px;
+  padding-right: 6px;
+  color: #999;
 }

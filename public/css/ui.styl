@@ -2,7 +2,6 @@
 	-webkit-user-drag: element
 	position absolute
 	width 200px
-	height 200px 
 	border 1px solid #666
 	border-radius 2px
 	padding 8px
@@ -12,18 +11,26 @@
 .panel:-webkit-drag
 	opacity 0!important
 
-#panel
-	border-radius 2px
-	position fixed
-	cursor default
-	border 1px solid #ccc
-	width 300px
-	height 200px
-	left 200
-	top 200
-
 #prompt
 	border 1px solid #666
 	background transparent
-  font-family 'monaco'
-  font-size 0px
+	font-family 'monaco'
+	text-align center
+	font-size 9px
+	width 200px
+
+#prompt:focus 
+	color white 
+	border 1px solid white
+	outline none
+
+#console
+	font-size 9px
+	line-height 18px
+	color #666
+
+#console span
+	font-size 9px
+	padding-right 6px
+	color #999
+

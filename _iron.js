@@ -43,9 +43,9 @@ var Iron = function () {
 		fs.readFile(iron.info.config_ui, function (err, buffer) { // ui
 			var json  = buffer.toString();
 			iron.ui = JSON.parse(json);
-			handleCSS(function () {
-				status();
-			});
+			// handleCSS(function () {
+			// 	status();
+			// });
 			handleJS(function () {
 				status();
 			});
@@ -53,7 +53,7 @@ var Iron = function () {
 				status();
 			});
 			function status () {
-			  if(loaded_css==true&&loaded_js==true&&loaded_frame==true){
+			  if(loaded_js==true&&loaded_frame==true){
 			  	callback();
 			  }
 			}

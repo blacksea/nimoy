@@ -44,31 +44,36 @@
 
 		skel.init = function () {
 			var panel = ui.create( 'panel', {
-				name   : 'skeleton',
-				insert : {
-					txtInput : {
-						out : ['skeleton', 'interpret']
+				name: 'skeleton',
+				insert: {
+					txtInput: { 
+						bind: [{out:['skeleton','interpret']}]
 					},
-					log : {
-
+					log: {
+						bind: [{in:['skeleton','log']}]
 					}
 				}
 			});
-			panel.render();
+			panel.init();
 		}
 
 		skel.interpret = function (cmd) {
 			console.log('+++ '+cmd);
+			skeleton.log(cmd);
 			// bus.send(['iron','interpret','Waffle','loadModule',cmd]);
 		}
 	}
 
 	window.skeleton = Skeleton;
 }(window));
-// U I 
+// U S E R   I N T E R F A C E
 
 (function (window) {
 	var UI = {
+
+		// ----------------------------------------------------
+		//  H E L P E R S
+		// ----------------------------------------------------
 
 		create : function (component, settings) {
 			var options = {}
@@ -84,12 +89,24 @@
 			return template.innerHTML;
 		},
 
-		append : function (container, html, cb) {
+		render : function (container, html, cb) {
 			var container = document.getElementById(container)
 			, tmp         = document.createElement('div');
 			tmp.innerHTML = html;
 	    while (tmp.firstChild) container.appendChild(tmp.firstChild);
 			cb();
+		},
+
+		bind : function (paramArray, obj) {
+			for(var i=0;i<paramArray.length;i++){
+				var binding = paramArray[i];
+				if(binding.out){
+					obj.output = window[binding.out[0]][binding.out[1]];
+				}
+				if(binding.in){
+					window[binding.in[0]][binding.in[1]]=obj.input;
+				}
+			}
 		},
 
 		// ----------------------------------------------------
@@ -98,66 +115,52 @@
 
 		//-----------------------------------------------------	
 		//  P A N E L
+
 		panel : {
-
-			render : function () {
-				var container = document.createElement('div')
-				, offset_x    = 0
-				, offset_y    = 0;
+			init : function () {		
+				var p = this;
+				ui.render('container', ui.template('panel'), function () {
 				
-				container.innerHTML = ui.template('panel');
-				document.body.appendChild(container);
-				
-				var panel = container.querySelector('.panel');
-				panel.setAttribute('id', this.name);
-				panel.ondragstart = function (e) {
-					offset_x = e.clientX - panel.offsetLeft;
-					offset_y = e.clientY - panel.offsetTop;
-				}
-			
-				panel.ondrag = function (e) {
-					panel.style.left = (e.clientX-offset_x)+'px';
-					panel.style.top = (e.clientY-offset_y)+'px';
-				}
-
-				panel.ondragend = function (e) {
-					e.preventDefault();
-				}
-
-				if(this.insert){
-					console.log(this.insert);
-
-					var components = this.insert;
+					var offset_x = 0
+					, offset_y   = 0;
 					
-					for(component in components) {
-						console.log(components[component]);
-						var cmp = ui.create(component, components[component]);
-						console.log(this.name);
-						cmp.render(this.name);
+					var panel = container.querySelector('.panel');
+					panel.setAttribute('id', p.name);
+					panel.ondragstart = function (e) {
+						offset_x = e.clientX - panel.offsetLeft;
+						offset_y = e.clientY - panel.offsetTop;
 					}
-					// for(var i=0;i<components.length;i++){
-					// 	var component = components[i];
-					// 	var cmd = ui.create(component[0], component[1]);
-					// 	cmd.render('.panel');
-					// }
+				
+					panel.ondrag = function (e) {
+						panel.style.left = (e.clientX-offset_x)+'px';
+						panel.style.top = (e.clientY-offset_y)+'px';
+					}
 
-				}
+					panel.ondragend = function (e) {
+						e.preventDefault();
+					}
+
+					if(p.insert) { // create panel ui
+						var components = p.insert;
+						for(component in components) {
+							var cmp = ui.create(component, components[component]);
+							cmp.init(p.name);
+						}
+					}
+				});
 			}
 		},
 
 		//-----------------------------------------------------
 		//  T X T  I N P U T
+		
 		txtInput : {
-			output : function (text) {
-				var module = this.out[0]
-				, method   = this.out[1];
-				window[module][method](text);
-			},
-
-			render : function (element) {
+			init : function (element) {
 				var p = this;
-				ui.append('skeleton', ui.template('txtInput'), function () {
-					var txt = this;
+				ui.render('skeleton', ui.template('txtInput'), function () {
+				
+					if (p.bind) ui.bind(p.bind, p);
+				
 					var cmd = document.getElementById('cmd');
 					cmd.onsubmit = function (e) {
 						e.preventDefault();
@@ -173,23 +176,28 @@
 
 		//-----------------------------------------------------
 		//  L O G
+	
 		log : {
-			render : function (element) {
+			init : function (element) {
 				var p = this;
-				ui.append('skeleton', ui.template('log'), function () {
-					var txt = this;
-					var cmd = document.getElementById('cmd');
+				ui.render('skeleton', ui.template('log'), function () {
+					if (p.bind) ui.bind(p.bind, p);
 				});
 			},
 			input : function (msg) {
-
+				var date = new Date(),
+				time = date.toLocaleTimeString().split(' ')[0],
+				log = document.getElementById('console');
+				console.log(time);
+				log.innerHTML += '<span>'+time+'</span>'+msg+'<br>';
 			}
 		},
 	
 		//-----------------------------------------------------
 		//  N U M  B O X
+
 		numBox : {
-			render : function (element) {
+			init : function (element) {
 				var num = box.querySelector('.number');
 				num.onmousewheel = function (event) {
 					var oldVal = parseInt(this.innerHTML)
@@ -201,10 +209,10 @@
 						newVal = oldVal-Math.abs(value);
 					}
 				}
+				if (this.bind) ui.bind(this.bind);
 			}
 		}
 	}
-
 	window.ui = UI;
 }(window));
  ui.markup = "<panel>

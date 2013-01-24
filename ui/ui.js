@@ -1,8 +1,12 @@
 
-// U I 
+// U S E R   I N T E R F A C E
 
 (function (window) {
 	var UI = {
+
+		// ----------------------------------------------------
+		//  H E L P E R S
+		// ----------------------------------------------------
 
 		create : function (component, settings) {
 			var options = {}
@@ -26,6 +30,18 @@
 			cb();
 		},
 
+		bind : function (paramArray, obj) {
+			for(var i=0;i<paramArray.length;i++){
+				var binding = paramArray[i];
+				if(binding.out){
+					obj.output = window[binding.out[0]][binding.out[1]];
+				}
+				if(binding.in){
+					window[binding.in[0]][binding.in[1]]=obj.input;
+				}
+			}
+		},
+
 		// ----------------------------------------------------
 		//  C O M P O N E N T S
 		// ----------------------------------------------------
@@ -34,39 +50,37 @@
 		//  P A N E L
 
 		panel : {
-			render : function () {
-				var container = document.createElement('div')
-				, offset_x    = 0
-				, offset_y    = 0;
+			init : function () {		
+				var p = this;
+				ui.render('container', ui.template('panel'), function () {
 				
-				container.innerHTML = ui.template('panel');
-				document.body.appendChild(container);
-				
-				var panel = container.querySelector('.panel');
-				panel.setAttribute('id', this.name);
-				panel.ondragstart = function (e) {
-					offset_x = e.clientX - panel.offsetLeft;
-					offset_y = e.clientY - panel.offsetTop;
-				}
-			
-				panel.ondrag = function (e) {
-					panel.style.left = (e.clientX-offset_x)+'px';
-					panel.style.top = (e.clientY-offset_y)+'px';
-				}
-
-				panel.ondragend = function (e) {
-					e.preventDefault();
-				}
-
-				if(this.insert) { // create panel ui
-					var components = this.insert;
-					for(component in components) {
-						console.log(components[component]);
-						var cmp = ui.create(component, components[component]);
-						console.log(this.name);
-						cmp.render(this.name);
+					var offset_x = 0
+					, offset_y   = 0;
+					
+					var panel = container.querySelector('.panel');
+					panel.setAttribute('id', p.name);
+					panel.ondragstart = function (e) {
+						offset_x = e.clientX - panel.offsetLeft;
+						offset_y = e.clientY - panel.offsetTop;
 					}
-				}
+				
+					panel.ondrag = function (e) {
+						panel.style.left = (e.clientX-offset_x)+'px';
+						panel.style.top = (e.clientY-offset_y)+'px';
+					}
+
+					panel.ondragend = function (e) {
+						e.preventDefault();
+					}
+
+					if(p.insert) { // create panel ui
+						var components = p.insert;
+						for(component in components) {
+							var cmp = ui.create(component, components[component]);
+							cmp.init(p.name);
+						}
+					}
+				});
 			}
 		},
 
@@ -74,16 +88,12 @@
 		//  T X T  I N P U T
 		
 		txtInput : {
-			output : function (text) {
-				var module = this.out[0]
-				, method   = this.out[1];
-				window[module][method](text);
-			},
-
 			init : function (element) {
 				var p = this;
 				ui.render('skeleton', ui.template('txtInput'), function () {
-					var txt = this;
+				
+					if (p.bind) ui.bind(p.bind, p);
+				
 					var cmd = document.getElementById('cmd');
 					cmd.onsubmit = function (e) {
 						e.preventDefault();
@@ -104,9 +114,14 @@
 			init : function (element) {
 				var p = this;
 				ui.render('skeleton', ui.template('log'), function () {
-					var txt = this;
-					var cmd = document.getElementById('cmd');
+					if (p.bind) ui.bind(p.bind, p);
 				});
+			},
+			input : function (msg) {
+				var date = new Date(),
+				time = date.toLocaleTimeString().split(' ')[0],
+				log = document.getElementById('console');
+				log.innerHTML += '<span>'+time+'</span>'+msg+'<br>';
 			}
 		},
 	
@@ -126,9 +141,9 @@
 						newVal = oldVal-Math.abs(value);
 					}
 				}
+				if (this.bind) ui.bind(this.bind);
 			}
 		}
-
 	}
 	window.ui = UI;
 }(window));
