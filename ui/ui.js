@@ -30,9 +30,9 @@
 			cb();
 		},
 
-		bind : function (paramArray, obj) {
-			for(var i=0;i<paramArray.length;i++){
-				var binding = paramArray[i];
+		bind : function (bindings, obj) {
+			for(var i=0;i<bindings.length;i++){
+				var binding = bindings[i];
 				if(binding.out){
 					obj.output = window[binding.out[0]][binding.out[1]];
 				}

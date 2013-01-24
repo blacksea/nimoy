@@ -1,36 +1,4 @@
 
-
-// S K E L E T O N
-
-(function (window) {
-
-	var Skeleton = function (template) {
-
-		var skel = this;
-		skel.template = template;
-
-		skel.init = function () {
-			var panel = ui.create( 'panel', {
-				name: 'skeleton',
-				insert: {
-					txtInput: { 
-						bind: [{out:['skeleton','interpret']}]
-					},
-					log: {
-						bind: [{in:['skeleton','log']}]
-					}
-				}
-			});
-			panel.init();
-		}
-
-		skel.interpret = function (cmd) {
-			skeleton.log(cmd);
-		}
-	}
-
-	window.skeleton = Skeleton;
-}(window));
 //-------------------------------------------------
 // 	m o n o m e
 //-------------------------------------------------
@@ -64,6 +32,40 @@
 	}
 	window.mono = Monome;
 }(window));
+
+// S K E L E T O N
+
+// improve quality / clean /transparent
+
+(function (window) {
+
+	var Skeleton = function (template) {
+
+		var skel = this;
+		skel.template = template;
+
+		skel.init = function () {
+			var panel = ui.create( 'panel', {
+				name: 'skeleton',
+				insert: {
+					txtInput: { 
+						bind: [{out:['skeleton','interpret']}]
+					},
+					log: {
+						bind: [{in:['skeleton','log']}]
+					}
+				}
+			});
+			panel.init();
+		}
+
+		skel.interpret = function (cmd) {
+			skeleton.log(cmd);
+		}
+	}
+
+	window.skeleton = Skeleton;
+}(window));
 // U S E R   I N T E R F A C E   C L A S S
 
 (function (window) {
@@ -95,9 +97,9 @@
 			cb();
 		},
 
-		bind : function (paramArray, obj) {
-			for(var i=0;i<paramArray.length;i++){
-				var binding = paramArray[i];
+		bind : function (bindings, obj) {
+			for(var i=0;i<bindings.length;i++){
+				var binding = bindings[i];
 				if(binding.out){
 					obj.output = window[binding.out[0]][binding.out[1]];
 				}
@@ -106,6 +108,9 @@
 				}
 			}
 		},
+
+		// add somekind of global tracking feature ? so panel pos is remembered 
+		// add tracking flag option ?
 
 		// ----------------------------------------------------
 		//  C O M P O N E N T S

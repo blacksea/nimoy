@@ -1,6 +1,8 @@
 
 // S K E L E T O N
 
+// improve quality / clean /transparent
+
 (function (window) {
 
 	var Skeleton = function (template) {

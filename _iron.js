@@ -18,6 +18,32 @@ var Iron = function () {
 
 	// store and access user data
 
+	// store record of commands / actions / events +++ in a logged format 
+
+	iron.userHandler = function (cb) {
+
+		console.log(iron.user.name);
+
+		client.hgetall(iron.user.name, function (err, obj) {
+			console.log(obj);
+		});
+
+
+		// client.hset('ag', 'available_modules', arr, function() {
+		// 	client.hgetall('ag', function (err, obj) {
+		// 		var mods = JSON.parse(obj.available_modules);
+		// 		console.log(mods[1]);
+		// 	});
+		// });
+		// // user
+				// default_modules
+				// available_modules
+				// command_log
+
+		// client.hget(user, )
+
+	}
+
 	iron.readJson = function (callback) {
 		fs.readdir('./', function (err, files) {
 			async.forEach(files, function (file, cb) {

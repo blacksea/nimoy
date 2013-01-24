@@ -6,8 +6,11 @@
 	var Waffle = function () {}
 
 	Waffle.serve = function () {
-		window['bus'] = new Bus();
+
 		window['skeleton'] = new skeleton();
+		
+		// get + load user	
+
 		skeleton.init();
 		// bus.send(['iron','interpret','Waffle','loadModule','/ skeleton']);
 	}

@@ -1,4 +1,5 @@
 {
+	"name" : "tmp",
 	"path_modules" : "./mods/",
 	"path_js" : "./public/js/scripts.js",
 	"path_css" : "./public/css/modules.styl",

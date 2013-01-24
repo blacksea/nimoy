@@ -18,6 +18,14 @@ var app = connect()
 
 iron.readJson(function () {
 	iron.setup(function () {
+		
+		iron.userHandler();
+
+		// how to serve preloaded data / user module ?
+
+		// attach to a script as a variable ?
+
+		console.log(iron.user);
 		console.log('server ready');
 	});
 });
