@@ -24,5 +24,5 @@ iron.readJson(function () {
 // patch socket.io into bus
 io.sockets.on('connection', bus.handleConnection); 
 
-// server.listen(80,'204.27.60.58'); //live config
-server.listen(8888); //dev config
+server.listen(80,'204.27.60.58'); //live config
+// server.listen(8888); //dev config

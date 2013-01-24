@@ -1,5 +1,5 @@
 
-// U S E R   I N T E R F A C E
+// U S E R   I N T E R F A C E   C L A S S
 
 (function (window) {
 	var UI = {

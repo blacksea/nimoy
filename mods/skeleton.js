@@ -24,9 +24,7 @@
 		}
 
 		skel.interpret = function (cmd) {
-			console.log('+++ '+cmd);
 			skeleton.log(cmd);
-			// bus.send(['iron','interpret','Waffle','loadModule',cmd]);
 		}
 	}
 
