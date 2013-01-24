@@ -16,6 +16,8 @@ var Iron = function () {
 	
 	var iron = this;
 
+	// store and access user data
+
 	iron.readJson = function (callback) {
 		fs.readdir('./', function (err, files) {
 			async.forEach(files, function (file, cb) {

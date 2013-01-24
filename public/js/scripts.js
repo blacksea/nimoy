@@ -1,4 +1,36 @@
 
+
+// S K E L E T O N
+
+(function (window) {
+
+	var Skeleton = function (template) {
+
+		var skel = this;
+		skel.template = template;
+
+		skel.init = function () {
+			var panel = ui.create( 'panel', {
+				name: 'skeleton',
+				insert: {
+					txtInput: { 
+						bind: [{out:['skeleton','interpret']}]
+					},
+					log: {
+						bind: [{in:['skeleton','log']}]
+					}
+				}
+			});
+			panel.init();
+		}
+
+		skel.interpret = function (cmd) {
+			skeleton.log(cmd);
+		}
+	}
+
+	window.skeleton = Skeleton;
+}(window));
 //-------------------------------------------------
 // 	m o n o m e
 //-------------------------------------------------
@@ -32,41 +64,7 @@
 	}
 	window.mono = Monome;
 }(window));
-
-// S K E L E T O N
-
-(function (window) {
-
-	var Skeleton = function (template) {
-
-		var skel = this;
-		skel.template = template;
-
-		skel.init = function () {
-			var panel = ui.create( 'panel', {
-				name: 'skeleton',
-				insert: {
-					txtInput: { 
-						bind: [{out:['skeleton','interpret']}]
-					},
-					log: {
-						bind: [{in:['skeleton','log']}]
-					}
-				}
-			});
-			panel.init();
-		}
-
-		skel.interpret = function (cmd) {
-			console.log('+++ '+cmd);
-			skeleton.log(cmd);
-			// bus.send(['iron','interpret','Waffle','loadModule',cmd]);
-		}
-	}
-
-	window.skeleton = Skeleton;
-}(window));
-// U S E R   I N T E R F A C E
+// U S E R   I N T E R F A C E   C L A S S
 
 (function (window) {
 	var UI = {
@@ -188,7 +186,6 @@
 				var date = new Date(),
 				time = date.toLocaleTimeString().split(' ')[0],
 				log = document.getElementById('console');
-				console.log(time);
 				log.innerHTML += '<span>'+time+'</span>'+msg+'<br>';
 			}
 		},
