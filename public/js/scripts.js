@@ -44,10 +44,15 @@
 
 		skel.init = function () {
 			var panel = ui.create( 'panel', {
-				name : 'skeleton',
-				insert : [['txtInput', {
-					out : ['skeleton','interpret']
-				}],['log']]
+				name   : 'skeleton',
+				insert : {
+					txtInput : {
+						out : ['skeleton', 'interpret']
+					},
+					log : {
+
+					}
+				}
 			});
 			panel.render();
 		}
@@ -120,12 +125,22 @@
 				}
 
 				if(this.insert){
+					console.log(this.insert);
+
 					var components = this.insert;
-					for(var i=0;i<components.length;i++){
-						var component = components[i];
-						var cmd = ui.create(component[0], component[1]);
-						cmd.render('.panel');
+					
+					for(component in components) {
+						console.log(components[component]);
+						var cmp = ui.create(component, components[component]);
+						console.log(this.name);
+						cmp.render(this.name);
 					}
+					// for(var i=0;i<components.length;i++){
+					// 	var component = components[i];
+					// 	var cmd = ui.create(component[0], component[1]);
+					// 	cmd.render('.panel');
+					// }
+
 				}
 			}
 		},
@@ -133,8 +148,6 @@
 		//-----------------------------------------------------
 		//  T X T  I N P U T
 		txtInput : {
-			// groupable ... 
-			// find parent?
 			output : function (text) {
 				var module = this.out[0]
 				, method   = this.out[1];
@@ -143,7 +156,6 @@
 
 			render : function (element) {
 				var p = this;
-				console.log(this);
 				ui.append('skeleton', ui.template('txtInput'), function () {
 					var txt = this;
 					var cmd = document.getElementById('cmd');
@@ -163,8 +175,14 @@
 		//  L O G
 		log : {
 			render : function (element) {
-				var container = document.querySelector(element);
-				// container.innerHTML += ui.template('log');
+				var p = this;
+				ui.append('skeleton', ui.template('log'), function () {
+					var txt = this;
+					var cmd = document.getElementById('cmd');
+				});
+			},
+			input : function (msg) {
+
 			}
 		},
 	

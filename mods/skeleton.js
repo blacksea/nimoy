@@ -10,10 +10,13 @@
 
 		skel.init = function () {
 			var panel = ui.create( 'panel', {
-				name : 'skeleton',
-				insert : [['txtInput', {
-					out : ['skeleton','interpret']
-				}],['log']]
+				name: 'skeleton',
+				insert: {
+					txtInput: { 
+						out: ['skeleton', 'interpret']},
+					log: {
+						in: ['skeleton', 'log']}
+				}
 			});
 			panel.render();
 		}

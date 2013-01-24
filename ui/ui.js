@@ -18,7 +18,7 @@
 			return template.innerHTML;
 		},
 
-		append : function (container, html, cb) {
+		render : function (container, html, cb) {
 			var container = document.getElementById(container)
 			, tmp         = document.createElement('div');
 			tmp.innerHTML = html;
@@ -32,8 +32,8 @@
 
 		//-----------------------------------------------------	
 		//  P A N E L
-		panel : {
 
+		panel : {
 			render : function () {
 				var container = document.createElement('div')
 				, offset_x    = 0
@@ -58,12 +58,13 @@
 					e.preventDefault();
 				}
 
-				if(this.insert){
+				if(this.insert) { // create panel ui
 					var components = this.insert;
-					for(var i=0;i<components.length;i++){
-						var component = components[i];
-						var cmd = ui.create(component[0], component[1]);
-						cmd.render('.panel');
+					for(component in components) {
+						console.log(components[component]);
+						var cmp = ui.create(component, components[component]);
+						console.log(this.name);
+						cmp.render(this.name);
 					}
 				}
 			}
@@ -71,19 +72,17 @@
 
 		//-----------------------------------------------------
 		//  T X T  I N P U T
+		
 		txtInput : {
-			// groupable ... 
-			// find parent?
 			output : function (text) {
 				var module = this.out[0]
 				, method   = this.out[1];
 				window[module][method](text);
 			},
 
-			render : function (element) {
+			init : function (element) {
 				var p = this;
-				console.log(this);
-				ui.append('skeleton', ui.template('txtInput'), function () {
+				ui.render('skeleton', ui.template('txtInput'), function () {
 					var txt = this;
 					var cmd = document.getElementById('cmd');
 					cmd.onsubmit = function (e) {
@@ -100,23 +99,22 @@
 
 		//-----------------------------------------------------
 		//  L O G
+	
 		log : {
-			render : function (element) {
+			init : function (element) {
 				var p = this;
-				ui.append('skeleton', ui.template('log'), function () {
+				ui.render('skeleton', ui.template('log'), function () {
 					var txt = this;
 					var cmd = document.getElementById('cmd');
 				});
-			}
-			input : function (msg) {
-				
 			}
 		},
 	
 		//-----------------------------------------------------
 		//  N U M  B O X
+
 		numBox : {
-			render : function (element) {
+			init : function (element) {
 				var num = box.querySelector('.number');
 				num.onmousewheel = function (event) {
 					var oldVal = parseInt(this.innerHTML)
@@ -130,7 +128,7 @@
 				}
 			}
 		}
-	}
 
+	}
 	window.ui = UI;
 }(window));
