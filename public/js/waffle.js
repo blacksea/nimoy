@@ -11,6 +11,7 @@
 		skeleton.init();
 		// bus.send(['iron','interpret','Waffle','loadModule','/ skeleton']);
 	}
+
 	Waffle.loadModule = function (paramArray) {
 		var module = paramArray[0]
 		, template = paramArray[1];
@@ -18,5 +19,6 @@
 		window[module].init();
 		skeleton.log('loaded module '+module);
 	}
+	
 	window.Waffle = Waffle;
 }(window));

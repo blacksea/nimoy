@@ -35,6 +35,7 @@ var Iron = function () {
 			});
 		});
 	}
+
 	iron.setup = function (callback) {
 		var loaded_frame = false
 		, loaded_css    = false
@@ -110,11 +111,13 @@ var Iron = function () {
 			}
 		});
 	}
+
 	iron.req = function (req, res) {
 		client.get('master_template', function (err, buffer) {
 			res.end(buffer.toString());
 		});
 	}
+	
 	iron.interpret = function (paramArray, cb) {
 		var senderModule = paramArray[0]
 		, senderMethod   = paramArray[1]
