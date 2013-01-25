@@ -4,15 +4,16 @@
 //-----------------------------------------------------	
 //  M O D U L E S
 
-var compressor = require('node-minify')
-, msgpack      = require('msgpack-js')
-, rimraf       = require('rimraf')
-, async        = require('async')
-, path         = require('path')
-, http         = require('http')
-, fs    		   = require('fs')
-, redis        = require('redis')
-, client       = redis.createClient();
+var templayed = require('templayed')
+, compressor  = require('node-minify')
+, msgpack     = require('msgpack-js')
+, rimraf      = require('rimraf')
+, async       = require('async')
+, path        = require('path')
+, http        = require('http')
+, fs    		  = require('fs')
+, redis       = require('redis')
+, client      = redis.createClient();
 
 var Iron = function () {
 	
@@ -68,8 +69,15 @@ var Iron = function () {
 			  }
 			}
 			function getFrame (callback) {
+				// include default module actions -- pass as arg to waffle.serve();
 			  fs.readFile(iron.info.config_frame, function (err, buffer) {
-			  	client.set('master_template', buffer, redis.print);
+			  	// pre process default modules and add using templayed
+			  	var defaultModules = JSON.stringify(iron.user.default_modules);
+			  	var file = buffer.toString()
+			  	, html   = templayed(file)({default_modules:defaultModules});
+			  	console.log(defaultModules);
+			  	console.log(html);
+			  	client.set('master_template', html, redis.print);
 			  	loaded_frame = true;
 			  	callback();
 			  });

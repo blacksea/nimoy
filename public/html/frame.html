@@ -1,16 +1,14 @@
-<html>
+<!DOCTYPE html>
+	<html>
 	<head>
-		<script src="/js/socket.io.min.js"></script>
-		<script src="/js/templayed.js"></script>
-		<script src="/js/msgpack.js"></script>
-		<script src="/js/bus.js"></script>
-		<script src="/js/waffle.js"></script>
-		<script src="/js/scripts.min.js"></script>
+		<script type='text/javascript' src="/js/socket.io.min.js"></script>
+		<script type='text/javascript' src="/js/bus.js"></script>
+		<script type='text/javascript' src="/js/waffle.js"></script>
+		<script type='text/javascript' src="/js/scripts.min.js"></script>
 		<link rel="stylesheet" href="/css/style.css" />
 	</head>
 	<body>
-		<div id='container'>
-		</div>
-		<script>Waffle.serve();</script>
+		<div id='container'></div>
+		<script type='text/javascript'>Waffle.serve({{{default_modules}}});</script>
 	</body>
 </html>
