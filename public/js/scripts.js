@@ -130,7 +130,7 @@
 					var offset_x = 0
 					, offset_y   = 0;
 
-					var panel = document.querySelector('.panel')
+					var panel = document.getElementById('ui_panel')
 					, group   = document.querySelector('.group');
 					panel.setAttribute('id', p.name);
 					group.setAttribute('id', p.name+'_group');
@@ -178,7 +178,7 @@
 				ui.render(element, ui.template('txtInput'), function () {
 				
 					if (p.bind) ui.bind(p.bind, p);
-				
+
 					var cmd = document.getElementById('cmd');
 					cmd.onsubmit = function (e) {
 						e.preventDefault();
@@ -234,7 +234,7 @@
 	window.ui = UI;
 }(window));
  ui.markup = "<panel>
-	<div class='panel'>
+	<div id='ui_panel' class='panel'>
 		<div class='group'>
 		</div>
 		<div class='grip'>
