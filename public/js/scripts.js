@@ -1,48 +1,50 @@
 
-//-------------------------------------------------
-// 	m o n o m e
-//-------------------------------------------------
+
+// M O N O M E
 
 (function (window) {
-	var Monome = function (template) {
+	
+	var Monome = function () {
 		var monome = this;
-		//---------------------------------------------
-		// L A Y O U T
-		//---------------------------------------------
-		var panel = Object.create(UI_Panel, {
-			name : {value : 'monome'},
-			insert : {value : ['test','t2']}
-			// bind : {value : ['mono', 'set']},
-			// should accept a simple layout description
-			// layout : {value : { 
-			// 	// aef
-			// }}
-		}); 
-		console.log('ins = '+panel.insert);
-		panel.render();
-		// (function(){
-			// generate
-		// });
-		//---------------------------------------------
-		// E V E N T S
-		//---------------------------------------------
-		monome.set = function (row, min, max, vel) {
+	
+		//-----------------------------------------------------	
+		//  L A Y O U T
+
+		monome.init = function () {
+			var panel = ui.create( 'panel', {
+				name: 'monome',
+				insert: {
+					txtInput: { 
+						bind: [{out:['monome','out']}]
+					},
+					log: {
+						bind: [{in:['monome','in']}]
+					}
+				}
+			});
+			panel.init();
+		}
+
+		//-----------------------------------------------------	
+		//  E V E N T S
+
+		monome.out = function (row, min, max, vel) {
 			bus.send(['mono','set','skeleton','log',[row,min,max,vel]]);
 		}		
 	}
+
 	window.mono = Monome;
 }(window));
 
 // S K E L E T O N
 
-// improve quality / clean /transparent
-
 (function (window) {
 
-	var Skeleton = function (template) {
-
+	var Skeleton = function () {
 		var skel = this;
-		skel.template = template;
+
+		//-----------------------------------------------------	
+		//  L A Y O U T
 
 		skel.init = function () {
 			var panel = ui.create( 'panel', {
@@ -59,6 +61,9 @@
 			panel.init();
 		}
 
+		//-----------------------------------------------------	
+		//  E V E N T S
+
 		skel.interpret = function (cmd) {
 			skeleton.log(cmd);
 		}
@@ -69,6 +74,7 @@
 // U S E R   I N T E R F A C E   C L A S S
 
 (function (window) {
+
 	var UI = {
 
 		// ----------------------------------------------------
@@ -108,9 +114,6 @@
 				}
 			}
 		},
-
-		// add somekind of global tracking feature ? so panel pos is remembered 
-		// add tracking flag option ?
 
 		// ----------------------------------------------------
 		//  C O M P O N E N T S
@@ -215,6 +218,7 @@
 			}
 		}
 	}
+	
 	window.ui = UI;
 }(window));
  ui.markup = "<panel>

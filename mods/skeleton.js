@@ -29,7 +29,7 @@
 
 		skel.interpret = function (cmd) {
 			skeleton.log(cmd);
-		}s
+		}
 	}
 
 	window.skeleton = Skeleton;

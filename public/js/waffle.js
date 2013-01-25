@@ -5,20 +5,21 @@
  
 	var Waffle = function () {}
 
+	//-----------------------------------------------------	
+	//  E V E N T S
+
 	Waffle.serve = function (default_modules) {
 		for(var i=0;i<default_modules.length;i++){
-			var module = default_modules[i];
-			window[module] = new window[module]();
-			window[module].init();
+			Waffle.loadModule(modules[i], function (module) {
+				console.log(module+' loaded!');
+			});
 		}
 	}
 
-	Waffle.loadModule = function (paramArray) {
-		var module = paramArray[0]
-		, template = paramArray[1];
-		window[module] = new window[module](template);
+	Waffle.loadModule = function (module, cb) {
+		window[module] = new window[module]();
 		window[module].init();
-		skeleton.log('loaded module '+module);
+		cb(module);
 	}
 	
 	window.Waffle = Waffle;
