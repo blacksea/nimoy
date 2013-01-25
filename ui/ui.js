@@ -57,23 +57,33 @@
 				
 					var offset_x = 0
 					, offset_y   = 0;
-					
-					var panel = container.querySelector('.panel');
+
+					var panel = document.querySelector('.panel');
 					panel.setAttribute('id', p.name);
-					panel.ondragstart = function (e) {
+					var panel = document.getElementById(p.name);
+					
+					panel.onmousedown = function (e) {
+						e.preventDefault();
 						offset_x = e.clientX - panel.offsetLeft;
 						offset_y = e.clientY - panel.offsetTop;
+						window.addEventListener("mousemove", startDrag, false);
+						document.body.style.cursor = 'move';
+						// return false;
 					}
-				
-					panel.ondrag = function (e) {
+
+					panel.onmouseup = function (e) {
+						document.body.style.cursor = 'default';
+						stopDrag();
+						return false;
+					}
+
+					function startDrag (e) {
 						panel.style.left = (e.clientX-offset_x)+'px';
 						panel.style.top = (e.clientY-offset_y)+'px';
 					}
-
-					panel.ondragend = function (e) {
-						e.preventDefault();
+					function stopDrag () {
+						window.removeEventListener("mousemove", startDrag, false);
 					}
-
 					if(p.insert) { // create panel ui
 						var components = p.insert;
 						for(component in components) {
@@ -146,6 +156,6 @@
 			}
 		}
 	}
-	
+
 	window.ui = UI;
 }(window));

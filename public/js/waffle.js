@@ -4,12 +4,11 @@
 (function (window) {
  
 	var Waffle = function () {}
-
 	//-----------------------------------------------------	
 	//  E V E N T S
 
-	Waffle.serve = function (default_modules) {
-		for(var i=0;i<default_modules.length;i++){
+	Waffle.serve = function (modules) {
+		for(var i=0;i<modules.length;i++){
 			Waffle.loadModule(modules[i], function (module) {
 				console.log(module+' loaded!');
 			});

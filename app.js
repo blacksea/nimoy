@@ -10,7 +10,6 @@ var iron  = require('./_iron.js')
 var app = connect()
 .use(connect.logger('dev'))
 .use(connect.compress())
-.use(connect.staticCache())
 .use(connect.static('public'))
 .use(iron.req) // handle all requests with waffle iron 
 , server = require('http').createServer(app)

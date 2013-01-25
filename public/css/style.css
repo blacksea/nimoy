@@ -25,44 +25,19 @@ a {
   float: left;
   text-align: center;
 }
-.row {
-  border-bottom: 1px solid #ccc;
-  height: 12px;
-  padding: 6px;
-}
-#grip {
-  -webkit-user-drag: element;
-  height: 8px;
-  background: #ccc;
-  cursor: crosshair;
-}
-#grip:-webkit-drag {
-  border: none;
-  width: 1px;
-  height: 1px;
-  background-color: #00001e;
-}
-label {
-  font-size: 9px;
-  text-transform: uppercase;
-  line-height: 15px;
-  padding-right: 4px;
-  letter-spacing: 0px;
-  float: left;
-  color: #ccc;
-}
 .panel {
-  -webkit-user-drag: element;
   position: absolute;
+  z-index: 2;
   width: 200px;
   border: 1px solid #666;
   border-radius: 2px;
   padding: 8px;
   top: 20px;
   left: 20px;
+  background: #00001e;
 }
-.panel:-webkit-drag {
-  opacity: 0 !important;
+.panel:hover {
+  cursor: move;
 }
 #prompt {
   border: 1px solid #666;
