@@ -19,10 +19,6 @@ var Iron = function () {
 	
 	var iron = this;
 
-	// store and access user data
-
-	// store record of commands / actions / events +++ in a logged format 
-
 	//-----------------------------------------------------	
 	//  S E T U P
 
@@ -163,7 +159,7 @@ var Iron = function () {
 	}
 
 	//-----------------------------------------------------	
-	//  R E D I S  I N T E R F A C E
+	//  D A T A  I N T E R F A C E
 
 	iron.getData = function (array, cb) {
 		client.hmget(iron.user.name, array, function (err, data) {

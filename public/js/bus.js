@@ -2,6 +2,7 @@
 // C L I E N T  B U S
 
 (function (window) {
+	
 	var Bus = function () {
 		
 		var socket = io.connect("http://127.0.0.1:8888");

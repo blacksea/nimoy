@@ -1,14 +1,13 @@
 
 // S K E L E T O N
 
-// improve quality / clean /transparent
-
 (function (window) {
 
-	var Skeleton = function (template) {
-
+	var Skeleton = function () {
 		var skel = this;
-		skel.template = template;
+
+		//-----------------------------------------------------	
+		//  L A Y O U T
 
 		skel.init = function () {
 			var panel = ui.create( 'panel', {
@@ -25,9 +24,12 @@
 			panel.init();
 		}
 
+		//-----------------------------------------------------	
+		//  E V E N T S
+
 		skel.interpret = function (cmd) {
 			skeleton.log(cmd);
-		}
+		}s
 	}
 
 	window.skeleton = Skeleton;

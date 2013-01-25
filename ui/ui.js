@@ -2,6 +2,7 @@
 // U S E R   I N T E R F A C E   C L A S S
 
 (function (window) {
+
 	var UI = {
 
 		// ----------------------------------------------------
@@ -41,9 +42,6 @@
 				}
 			}
 		},
-
-		// add somekind of global tracking feature ? so panel pos is remembered 
-		// add tracking flag option ?
 
 		// ----------------------------------------------------
 		//  C O M P O N E N T S
@@ -148,5 +146,6 @@
 			}
 		}
 	}
+	
 	window.ui = UI;
 }(window));
