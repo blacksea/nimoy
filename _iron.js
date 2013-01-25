@@ -1,16 +1,18 @@
 
-// W A F F L E  I R O N
+// W A F F L E  I R O N  C L A S S
 
-var templayed = require('templayed')
-, compressor	= require('node-minify')
-, msgpack     = require('msgpack-js')
-, rimraf      = require('rimraf')
-, async       = require('async')
-, path        = require('path')
-, http        = require('http')
-, fs    		  = require('fs')
-, redis       = require('redis')
-, client      = redis.createClient();
+//-----------------------------------------------------	
+//  M O D U L E S
+
+var compressor = require('node-minify')
+, msgpack      = require('msgpack-js')
+, rimraf       = require('rimraf')
+, async        = require('async')
+, path         = require('path')
+, http         = require('http')
+, fs    		   = require('fs')
+, redis        = require('redis')
+, client       = redis.createClient();
 
 var Iron = function () {
 	
@@ -20,29 +22,8 @@ var Iron = function () {
 
 	// store record of commands / actions / events +++ in a logged format 
 
-	iron.userHandler = function (cb) {
-
-		console.log(iron.user.name);
-
-		client.hgetall(iron.user.name, function (err, obj) {
-			console.log(obj);
-		});
-
-
-		// client.hset('ag', 'available_modules', arr, function() {
-		// 	client.hgetall('ag', function (err, obj) {
-		// 		var mods = JSON.parse(obj.available_modules);
-		// 		console.log(mods[1]);
-		// 	});
-		// });
-		// // user
-				// default_modules
-				// available_modules
-				// command_log
-
-		// client.hget(user, )
-
-	}
+	//-----------------------------------------------------	
+	//  S E T U P
 
 	iron.readJson = function (callback) {
 		fs.readdir('./', function (err, files) {
@@ -140,11 +121,17 @@ var Iron = function () {
 		});
 	}
 
+	//-----------------------------------------------------	
+	//  H T T P  R E Q U E S T S
+
 	iron.req = function (req, res) {
 		client.get('master_template', function (err, buffer) {
 			res.end(buffer.toString());
 		});
 	}
+
+	//-----------------------------------------------------	
+	//  I N T E R P R E T E R
 	
 	iron.interpret = function (paramArray, cb) {
 		var senderModule = paramArray[0]
@@ -169,6 +156,22 @@ var Iron = function () {
 		if(notFound==true){
 			cb(['skeleton', 'log', 'command not found']);
 		}
+	}
+
+	//-----------------------------------------------------	
+	//  R E D I S  I N T E R F A C E
+
+	iron.getData = function (array, cb) {
+		client.hmget(iron.user.name, array, function (err, data) {
+			console.log(err);
+			cb(data);
+		});
+	}
+
+	iron.setData = function (array, cb) {
+		client.hmset(iron.user.name, array, function () {
+			cb();
+		});
 	}
 
 }
