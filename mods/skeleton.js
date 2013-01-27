@@ -12,6 +12,7 @@
 		skel.init = function () {
 			var panel = ui.create( 'panel', {
 				name: 'skeleton',
+				bind: [{out:['skeleton','state']}],
 				insert: {
 					txtInput: { 
 						bind: [{out:['skeleton','interpret']}]
@@ -29,6 +30,10 @@
 
 		skel.interpret = function (cmd) {
 			skeleton.log(cmd);
+		}
+
+		skel.state = function (pos) {
+			console.log(pos);
 		}
 	}
 

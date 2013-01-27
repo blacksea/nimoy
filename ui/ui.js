@@ -55,13 +55,18 @@
 				var p = this;
 				ui.render('container', ui.template('panel'), function () {
 				
+					if (p.bind) ui.bind(p.bind, p);
+
 					var offset_x = 0
-					, offset_y   = 0;
+					, offset_y   = 0
+					, posX       = '0px'
+					, posY       = '0px';
 
 					var panel = document.getElementById('ui_panel')
 					, group   = document.querySelector('.group');
 					panel.setAttribute('id', p.name);
 					group.setAttribute('id', p.name+'_group');
+					
 					var container = document.getElementById(p.name)
 					, panel = container.querySelector('.grip');
 					
@@ -80,12 +85,17 @@
 					}
 
 					function startDrag (e) {
-						container.style.left = (e.clientX-offset_x)+'px';
-						container.style.top = (e.clientY-offset_y)+'px';
+						posX = (e.clientX-offset_x)+'px'
+						, posY   = (e.clientY-offset_y)+'px';
+						container.style.left = posX;
+						container.style.top = posY;
 					}
+					
 					function stopDrag () {
+						p.output([posX,posY]);
 						window.removeEventListener("mousemove", startDrag, false);
 					}
+
 					if(p.insert) { // create panel ui
 						var components = p.insert;
 						for(component in components) {
