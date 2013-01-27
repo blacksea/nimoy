@@ -4,6 +4,7 @@
 (function (window) {
  
 	var Waffle = function () {}
+	
 	//-----------------------------------------------------	
 	//  E V E N T S
 

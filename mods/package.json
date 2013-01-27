@@ -3,7 +3,11 @@
 		{"name":"mono",
 		 "file":"mono_client.js"},
 		{"name":"skeleton",
-		"file":"skeleton.js"}],
+		"file":"skeleton.js"},
+		{"name":"waffle",
+		"file":"waffle.js"},
+		{"name":"bus",
+		"file":"bus.js"}],
 	"server" : [
 		{"name":"mono",
 		 "file":"mono_server.js"}]

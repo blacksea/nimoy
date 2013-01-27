@@ -71,6 +71,56 @@
 
 	window.skeleton = Skeleton;
 }(window));
+
+// W A F F L E
+
+(function (window) {
+ 
+	var Waffle = function () {}
+	
+	//-----------------------------------------------------	
+	//  E V E N T S
+
+	Waffle.serve = function (modules) {
+		for(var i=0;i<modules.length;i++){
+			Waffle.loadModule(modules[i], function (module) {
+				console.log(module+' loaded!');
+			});
+		}
+	}
+
+	Waffle.loadModule = function (module, cb) {
+		window[module] = new window[module]();
+		window[module].init();
+		cb(module);
+	}
+	
+	window.Waffle = Waffle;
+}(window));
+
+
+// C L I E N T  B U S
+
+(function (window) {
+	
+	var Bus = function () {
+		
+		var socket = io.connect("http://127.0.0.1:8888");
+		
+		socket.on('*', function (paramArray) {
+			var module = paramArray[0]
+			, method   = paramArray[1]
+			, args     = paramArray[2];
+			window[module][method](args);
+		});
+
+		this.send = function (paramArray) {
+			socket.emit('*', paramArray);
+		}
+	}
+
+	window.bus = Bus;
+}(window));
 // U S E R   I N T E R F A C E   C L A S S
 
 (function (window) {
