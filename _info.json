@@ -6,6 +6,7 @@
 	"commands" : {
 		"c" : "iron|compile",
 		"/" : "iron|newModule",
+		"cu" : "iron|createUser",
 		"rs" : "iron|sendTemplates",
 		"g"	: "iron|generateModule",
 		"rm" : "iron|removeModule",

@@ -49,6 +49,7 @@
 		skel.init = function () {
 			var panel = ui.create( 'panel', {
 				name: 'skeleton',
+				bind: [{out:['skeleton','state']}],
 				insert: {
 					txtInput: { 
 						bind: [{out:['skeleton','interpret']}]
@@ -65,14 +66,20 @@
 		//  E V E N T S
 
 		skel.interpret = function (cmd) {
-			skeleton.log(cmd);
+			console.log(cmd);
+			console.log(bus.send);
+			bus.send(['iron','interpret','skeleton','interpret',cmd]);
+		}
+
+		skel.state = function (pos) {
+			console.log(pos);
 		}
 	}
 
 	window.skeleton = Skeleton;
 }(window));
 
-// W A F F L E
+//  W A F F L E
 
 (function (window) {
  
@@ -102,21 +109,21 @@
 // C L I E N T  B U S
 
 (function (window) {
-	
-	var Bus = function () {
-		
-		var socket = io.connect("http://127.0.0.1:8888");
-		
-		socket.on('*', function (paramArray) {
-			var module = paramArray[0]
-			, method   = paramArray[1]
-			, args     = paramArray[2];
-			window[module][method](args);
-		});
 
-		this.send = function (paramArray) {
-			socket.emit('*', paramArray);
-		}
+	var socket = io.connect("http://127.0.0.1:8888");
+
+	socket.on('*', function (paramArray) {
+		console.log(paramArray);
+		var module = paramArray[0]
+		, method   = paramArray[1]
+		, args     = paramArray[2];
+		window[module][method](args);
+	});
+
+	var Bus = function () {}
+
+	Bus.send = function (paramArray) {
+		socket.emit('*', paramArray);
 	}
 
 	window.bus = Bus;
@@ -177,13 +184,18 @@
 				var p = this;
 				ui.render('container', ui.template('panel'), function () {
 				
+					if (p.bind) ui.bind(p.bind, p);
+
 					var offset_x = 0
-					, offset_y   = 0;
+					, offset_y   = 0
+					, posX       = '0px'
+					, posY       = '0px';
 
 					var panel = document.getElementById('ui_panel')
 					, group   = document.querySelector('.group');
 					panel.setAttribute('id', p.name);
 					group.setAttribute('id', p.name+'_group');
+					
 					var container = document.getElementById(p.name)
 					, panel = container.querySelector('.grip');
 					
@@ -202,12 +214,17 @@
 					}
 
 					function startDrag (e) {
-						container.style.left = (e.clientX-offset_x)+'px';
-						container.style.top = (e.clientY-offset_y)+'px';
+						posX = (e.clientX-offset_x)+'px'
+						, posY   = (e.clientY-offset_y)+'px';
+						container.style.left = posX;
+						container.style.top = posY;
 					}
+					
 					function stopDrag () {
+						p.output([posX,posY]);
 						window.removeEventListener("mousemove", startDrag, false);
 					}
+
 					if(p.insert) { // create panel ui
 						var components = p.insert;
 						for(component in components) {

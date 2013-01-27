@@ -1,5 +1,5 @@
 
-// W A F F L E  I R O N  C L A S S
+//  W A F F L E  I R O N  C L A S S
 
 //-----------------------------------------------------	
 //  M O D U L E S
@@ -139,10 +139,10 @@ var Iron = function () {
 		, cmd            = paramArray[2].split(' ')
 		, arrayToSend    = []
 		, notFound			 = true;
-		for (command in iron.settings.commands) {	
+		for (command in iron.info.commands) {	
 			if (command==cmd[0]) { // matched command ex. / for new
 				notFound = false;
-				var action = iron.settings.commands[command].split('|')
+				var action = iron.info.commands[command].split('|')
 				, module   = action[0]
 				, method   = action[1]
 				, param    = cmd[1];
@@ -163,7 +163,6 @@ var Iron = function () {
 
 	iron.getData = function (array, cb) {
 		client.hmget(iron.user.name, array, function (err, data) {
-			console.log(err);
 			cb(data);
 		});
 	}
@@ -174,7 +173,27 @@ var Iron = function () {
 		});
 	}
 
-	iron.getCommandHistory = function () {
+	// how to access / save / edit /read user? 
+	iron.createUser = function (name, cb) {
+		client.hset(name, 'default_modules', iron.user.default_modules, function () {
+			cb(['skeleton', 'log', 'created user: '+name]);
+		});
+	}
+
+	iron.printUser = function () {
+
+	}
+
+	iron.recHistory = function () {
+		// timestamp + data
+		// ts -- module -- property -- data
+	}
+
+	iron.playHistory = function () {
+
+	}
+
+	iron.readHistory = function () {
 		
 	}
 
