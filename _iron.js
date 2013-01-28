@@ -50,9 +50,6 @@ var Iron = function () {
 		fs.readFile(iron.info.config_ui, function (err, buffer) { // ui
 			var json  = buffer.toString();
 			iron.ui = JSON.parse(json);
-			// handleCSS(function () {
-			// 	status();
-			// });
 			handleJS(function () {
 				status();
 			});
@@ -166,38 +163,27 @@ var Iron = function () {
 			cb(data);
 		});
 	}
-
 	iron.setData = function (array, cb) {
-		console.log(array);
 		client.hmset(iron.user.name, array[0], array[1], function () {
-			console.log('recorded');
 		});
 	}
-
-	// how to access / save / edit /read user? 
 	iron.createUser = function (name, cb) {
 		client.hset(name, 'default_modules', iron.user.default_modules, function () {
 			cb(['skeleton', 'log', 'created user: '+name]);
 		});
 	}
-
 	iron.printUser = function () {
-
 	}
-
 	iron.recHistory = function (data) {
 		var json = JSON.stringify(data);
 		iron.setData(['env', json]);
 	}
-
 	iron.playHistory = function (fk, cb) {
 		iron.getData(['env'], function (data) {
 			var uj = JSON.parse(data);
-			console.log(uj);
 			cb(uj);
 		});
 	}
-
 	iron.readHistory = function () {
 		
 	}
