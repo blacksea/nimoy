@@ -30,8 +30,6 @@
 		//  E V E N T S
 
 		skel.interpret = function (cmd) {
-			console.log(cmd);
-			console.log(bus.send);
 			bus.send(['iron','interpret','skeleton','interpret',cmd]);
 		}
 

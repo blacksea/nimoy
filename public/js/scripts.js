@@ -67,8 +67,6 @@
 		//  E V E N T S
 
 		skel.interpret = function (cmd) {
-			console.log(cmd);
-			console.log(bus.send);
 			bus.send(['iron','interpret','skeleton','interpret',cmd]);
 		}
 
@@ -253,7 +251,7 @@
 				var p = this;
 				ui.render(element, ui.template('txtInput'), function () {
 				
-					if (p.bind) ui.bind(p.bind, p);
+					if (p.bind) ui.bind(p.bind, p); // crutch!
 
 					var cmd = document.getElementById('cmd');
 					cmd.onsubmit = function (e) {

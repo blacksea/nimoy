@@ -156,8 +156,8 @@ var Iron = function () {
 	}
 
 	//-----------------------------------------------------	
-	//  D A T A  I N T E R F A C E
-
+	//  D A T A  H E L P E R S
+	
 	iron.getData = function (array, cb) {
 		client.hmget(iron.user.name, array, function (err, data) {
 			cb(data);
@@ -167,12 +167,19 @@ var Iron = function () {
 		client.hmset(iron.user.name, array[0], array[1], function () {
 		});
 	}
+
+	//-----------------------------------------------------	
+	//  D A T A  I N T E R F A C E
+
 	iron.createUser = function (name, cb) {
 		client.hset(name, 'default_modules', iron.user.default_modules, function () {
 			cb(['skeleton', 'log', 'created user: '+name]);
 		});
 	}
 	iron.printUser = function () {
+	}
+	iron.env_snapshot = function () {
+
 	}
 	iron.recHistory = function (data) {
 		var json = JSON.stringify(data);

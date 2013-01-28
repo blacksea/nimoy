@@ -3,13 +3,13 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
-  background: #00001e;
+  background: #f1f1f1;
   overflow: hidden;
   position: fixed;
   font-size: 8px;
   letter-spacing: 1px;
   font-family: 'monaco';
-  color: #fff;
+  color: #333;
 }
 a {
   color: #00b7ff;
@@ -34,10 +34,10 @@ a {
   padding-bottom: 6px;
   top: 20px;
   left: 20px;
-  background: #00001e;
+  background: #f1f1f1;
 }
 #prompt {
-  border: 1px solid #666;
+  border: 1px solid #999;
   background: transparent;
   font-family: 'monaco';
   text-align: center;
@@ -45,8 +45,8 @@ a {
   width: 186px;
 }
 #prompt:focus {
-  color: #fff;
-  border: 1px solid #fff;
+  color: #000;
+  border: 1px solid #000;
   outline: none;
 }
 #console {
@@ -68,14 +68,14 @@ a {
   bottom: 0px;
   right: 0px;
   border-radius: 2px;
-  border: 1px solid #444;
+  border: 1px solid #999;
   opacity: 0.9;
 }
 .group {
   position: relative;
   z-index: 2;
-  background: #00001e;
-  border: 1px solid #444;
+  background: #f1f1f1;
+  border: 1px solid #999;
   padding: 4px;
 }
 .grip:hover {

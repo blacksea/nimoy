@@ -122,7 +122,7 @@
 				var p = this;
 				ui.render(element, ui.template('txtInput'), function () {
 				
-					if (p.bind) ui.bind(p.bind, p);
+					if (p.bind) ui.bind(p.bind, p); // crutch!
 
 					var cmd = document.getElementById('cmd');
 					cmd.onsubmit = function (e) {
