@@ -51,6 +51,13 @@
 		//  P A N E L
 
 		panel : {
+			
+			input : function (pos) {
+				var panel = document.getElementById(pos[0]);
+				panel.style.left = pos[1];
+				panel.style.top = pos[2];
+			},
+
 			init : function () {		
 				var p = this;
 				ui.render('container', ui.template('panel'), function () {
@@ -92,7 +99,7 @@
 					}
 					
 					function stopDrag () {
-						p.output([posX,posY]);
+						p.output([p.name, posX,posY]);
 						window.removeEventListener("mousemove", startDrag, false);
 					}
 

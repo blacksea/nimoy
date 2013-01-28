@@ -11,7 +11,7 @@
 	Waffle.serve = function (modules) {
 		for(var i=0;i<modules.length;i++){
 			Waffle.loadModule(modules[i], function (module) {
-				console.log(module+' loaded!');
+				bus.send(['iron','playHistory','waffle','serve','fk']);
 			});
 		}
 	}

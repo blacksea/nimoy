@@ -49,7 +49,8 @@
 		skel.init = function () {
 			var panel = ui.create( 'panel', {
 				name: 'skeleton',
-				bind: [{out:['skeleton','state']}],
+				bind: [{in:['skeleton','move']},
+				{out:['skeleton','state']}],
 				insert: {
 					txtInput: { 
 						bind: [{out:['skeleton','interpret']}]
@@ -73,6 +74,7 @@
 
 		skel.state = function (pos) {
 			console.log(pos);
+			bus.send(['iron','recHistory','skeleton','move',pos]);
 		}
 	}
 
@@ -91,7 +93,7 @@
 	Waffle.serve = function (modules) {
 		for(var i=0;i<modules.length;i++){
 			Waffle.loadModule(modules[i], function (module) {
-				console.log(module+' loaded!');
+				bus.send(['iron','playHistory','waffle','serve','fk']);
 			});
 		}
 	}
@@ -180,6 +182,13 @@
 		//  P A N E L
 
 		panel : {
+			
+			input : function (pos) {
+				var panel = document.getElementById(pos[0]);
+				panel.style.left = pos[1];
+				panel.style.top = pos[2];
+			},
+
 			init : function () {		
 				var p = this;
 				ui.render('container', ui.template('panel'), function () {
@@ -221,7 +230,7 @@
 					}
 					
 					function stopDrag () {
-						p.output([posX,posY]);
+						p.output([p.name, posX,posY]);
 						window.removeEventListener("mousemove", startDrag, false);
 					}
 

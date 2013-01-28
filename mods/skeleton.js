@@ -12,7 +12,8 @@
 		skel.init = function () {
 			var panel = ui.create( 'panel', {
 				name: 'skeleton',
-				bind: [{out:['skeleton','state']}],
+				bind: [{in:['skeleton','move']},
+				{out:['skeleton','state']}],
 				insert: {
 					txtInput: { 
 						bind: [{out:['skeleton','interpret']}]
@@ -36,6 +37,7 @@
 
 		skel.state = function (pos) {
 			console.log(pos);
+			bus.send(['iron','recHistory','skeleton','move',pos]);
 		}
 	}
 

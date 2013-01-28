@@ -168,8 +168,9 @@ var Iron = function () {
 	}
 
 	iron.setData = function (array, cb) {
-		client.hmset(iron.user.name, array, function () {
-			cb();
+		console.log(array);
+		client.hmset(iron.user.name, array[0], array[1], function () {
+			console.log('recorded');
 		});
 	}
 
@@ -184,13 +185,17 @@ var Iron = function () {
 
 	}
 
-	iron.recHistory = function () {
-		// timestamp + data
-		// ts -- module -- property -- data
+	iron.recHistory = function (data) {
+		var json = JSON.stringify(data);
+		iron.setData(['env', json]);
 	}
 
-	iron.playHistory = function () {
-
+	iron.playHistory = function (fk, cb) {
+		iron.getData(['env'], function (data) {
+			var uj = JSON.parse(data);
+			console.log(uj);
+			cb(uj);
+		});
 	}
 
 	iron.readHistory = function () {
