@@ -1,4 +1,9 @@
+
 // S E R V E R  B U S
+
+var events = require('events');
+var eventEmitter = new events.EventEmitter;
+
 var Bus = function () {
 	var bus = this;	
 	// make this smarter so it can push updates to clients
@@ -14,7 +19,13 @@ var Bus = function () {
 				socket.emit('*', paramArray);
 			});
 		});
+		eventEmitter.on('&', function (paramArray) {
+			socket.emit('*', paramArray);
+		});
 	}	
+	bus.sendGlobal = function (paramArray) {
+		eventEmitter.emit('&', paramArray);
+	}
 }
 var bus = new Bus();
 exports = module.exports = bus;

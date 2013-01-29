@@ -1,3 +1,5 @@
+// c o r e
+
 var iron  = require('./_iron.js')
 , bus  		= require('./_bus.js')
 , connect = require('connect')
@@ -19,5 +21,4 @@ iron.readJson(function () {
 });
 
 io.sockets.on('connection', bus.handleConnection); 
-
 server.listen(8888);

@@ -12,6 +12,7 @@ var templayed = require('templayed')
 , path        = require('path')
 , http        = require('http')
 , fs    		  = require('fs')
+, bus         = require('./_bus.js')
 , redis       = require('redis')
 , client      = redis.createClient();
 
@@ -163,6 +164,7 @@ var Iron = function () {
 			cb(data);
 		});
 	}
+
 	iron.setData = function (array, cb) {
 		client.hmset(iron.user.name, array[0], array[1], function () {
 		});
@@ -171,26 +173,35 @@ var Iron = function () {
 	//-----------------------------------------------------	
 	//  D A T A  I N T E R F A C E
 
+	// create an api for data handling 
+
 	iron.createUser = function (name, cb) {
 		client.hset(name, 'default_modules', iron.user.default_modules, function () {
 			cb(['skeleton', 'log', 'created user: '+name]);
 		});
 	}
+	
 	iron.printUser = function () {
+			
 	}
+	
 	iron.env_snapshot = function () {
 
 	}
+	
 	iron.recHistory = function (data) {
 		var json = JSON.stringify(data);
+		bus.sendGlobal(data);
 		iron.setData(['env', json]);
 	}
+	
 	iron.playHistory = function (fk, cb) {
 		iron.getData(['env'], function (data) {
 			var uj = JSON.parse(data);
 			cb(uj);
 		});
 	}
+	
 	iron.readHistory = function () {
 		
 	}
