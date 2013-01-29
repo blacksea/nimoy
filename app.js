@@ -21,4 +21,5 @@ iron.readJson(function () {
 });
 
 io.sockets.on('connection', bus.handleConnection); 
+
 server.listen(8888);

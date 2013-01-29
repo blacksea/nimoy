@@ -85,9 +85,6 @@
  
 	var Waffle = function () {}
 	
-	//-----------------------------------------------------	
-	//  E V E N T S
-
 	Waffle.serve = function (modules) {
 		for(var i=0;i<modules.length;i++){
 			Waffle.loadModule(modules[i], function (module) {
@@ -95,13 +92,11 @@
 			});
 		}
 	}
-
 	Waffle.loadModule = function (module, cb) {
 		window[module] = new window[module]();
 		window[module].init();
 		cb(module);
 	}
-	
 	window.Waffle = Waffle;
 }(window));
 
@@ -117,13 +112,6 @@
 		, method   = paramArray[1]
 		, args     = paramArray[2];
 		window[module][method](args);
-	});
-
-	socket.on('&', function (paramArray) { // global channel
-		var module = parmaArray[0]
-		, method   = paramArray[1]
-		, args 		 = paramArray[2];
-		window[module][method](args);		
 	});
 
 	var Bus = function () {}
