@@ -35,17 +35,11 @@
 
 	window.mono = Monome;
 }(window));
-
 // S K E L E T O N
 
 (function (window) {
-
 	var Skeleton = function () {
 		var skel = this;
-
-		//-----------------------------------------------------	
-		//  L A Y O U T
-
 		skel.init = function () {
 			var panel = ui.create( 'panel', {
 				name: 'skeleton',
@@ -62,29 +56,20 @@
 			});
 			panel.init();
 		}
-
-		//-----------------------------------------------------	
-		//  E V E N T S
-
 		skel.interpret = function (cmd) {
 			bus.send(['iron','interpret','skeleton','interpret',cmd]);
 		}
-
 		skel.state = function (pos) {
 			console.log(pos);
 			bus.send(['iron','recHistory','skeleton','move',pos]);
 		}
 	}
-
 	window.skeleton = Skeleton;
 }(window));
-
 //  W A F F L E
 
 (function (window) {
- 
 	var Waffle = function () {}
-	
 	Waffle.serve = function (modules) {
 		for(var i=0;i<modules.length;i++){
 			Waffle.loadModule(modules[i], function (module) {
@@ -100,26 +85,20 @@
 	window.Waffle = Waffle;
 }(window));
 
-
 // C L I E N T  B U S
 
 (function (window) {
-
+	var Bus = function () {}
 	var socket = io.connect("http://127.0.0.1:8888");
-
 	socket.on('*', function (paramArray) { // local channel
 		var module = paramArray[0]
 		, method   = paramArray[1]
 		, args     = paramArray[2];
 		window[module][method](args);
 	});
-
-	var Bus = function () {}
-
 	Bus.send = function (paramArray) {
 		socket.emit('*', paramArray);
 	}
-
 	window.bus = Bus;
 }(window));
 // U S E R   I N T E R F A C E   C L A S S
@@ -131,7 +110,6 @@
 		// ----------------------------------------------------
 		//  H E L P E R S
 		// ----------------------------------------------------
-
 		create : function (component, settings) {
 			var options = {}
 			for(property in settings){
@@ -140,12 +118,10 @@
 			var newObj = Object.create(UI[component], options);
 			return newObj;
 		},
-
 		template : function (name) {
 			var template = ui.templates.getElementsByTagName(name)[0];
 			return template.innerHTML;
 		},
-
 		render : function (container, html, cb) {
 			var container = document.getElementById(container)
 			, tmp         = document.createElement('div');
@@ -153,7 +129,6 @@
 	    while (tmp.firstChild) container.appendChild(tmp.firstChild);
 			cb();
 		},
-
 		bind : function (bindings, obj) {
 			for(var i=0;i<bindings.length;i++){
 				var binding = bindings[i];
@@ -169,37 +144,26 @@
 		// ----------------------------------------------------
 		//  C O M P O N E N T S
 		// ----------------------------------------------------
-
-		//-----------------------------------------------------	
-		//  P A N E L
-
 		panel : {
-			
 			input : function (pos) {
 				var panel = document.getElementById(pos[0]);
 				panel.style.left = pos[1];
 				panel.style.top = pos[2];
 			},
-
 			init : function () {		
 				var p = this;
 				ui.render('container', ui.template('panel'), function () {
-				
 					if (p.bind) ui.bind(p.bind, p);
-
 					var offset_x = 0
 					, offset_y   = 0
 					, posX       = '0px'
 					, posY       = '0px';
-
 					var panel = document.getElementById('ui_panel')
 					, group   = document.querySelector('.group');
 					panel.setAttribute('id', p.name);
 					group.setAttribute('id', p.name+'_group');
-					
 					var container = document.getElementById(p.name)
 					, panel = container.querySelector('.grip');
-					
 					panel.onmousedown = function (e) {
 						e.preventDefault();
 						offset_x = e.clientX - container.offsetLeft;
@@ -207,25 +171,21 @@
 						window.addEventListener("mousemove", startDrag, false);
 						document.body.style.cursor = 'move';
 					}
-
 					panel.onmouseup = function (e) {
 						document.body.style.cursor = 'default';
 						stopDrag();
 						return false;
 					}
-
 					function startDrag (e) {
 						posX = (e.clientX-offset_x)+'px'
 						, posY   = (e.clientY-offset_y)+'px';
 						container.style.left = posX;
 						container.style.top = posY;
 					}
-					
 					function stopDrag () {
 						p.output([p.name, posX,posY]);
 						window.removeEventListener("mousemove", startDrag, false);
 					}
-
 					if(p.insert) { // create panel ui
 						var components = p.insert;
 						for(component in components) {
@@ -236,17 +196,12 @@
 				});
 			}
 		},
-
-		//-----------------------------------------------------
-		//  T X T  I N P U T
 		
 		txtInput : {
 			init : function (element) {
 				var p = this;
 				ui.render(element, ui.template('txtInput'), function () {
-				
 					if (p.bind) ui.bind(p.bind, p); // crutch!
-
 					var cmd = document.getElementById('cmd');
 					cmd.onsubmit = function (e) {
 						e.preventDefault();
@@ -260,9 +215,6 @@
 			}
 		},
 
-		//-----------------------------------------------------
-		//  L O G
-	
 		log : {
 			init : function (element) {
 				var p = this;
@@ -277,9 +229,6 @@
 				log.innerHTML += '<span>'+time+'</span>'+msg+'<br>';
 			}
 		},
-	
-		//-----------------------------------------------------
-		//  N U M  B O X
 
 		numBox : {
 			init : function (element) {
