@@ -39,6 +39,8 @@
 			}
 		},
 
+		// provide a way to adHoc load dependencies per module
+
 		// ----------------------------------------------------
 		//  C O M P O N E N T S
 		// ----------------------------------------------------
@@ -147,7 +149,10 @@
 
 		sketch : {
 			init : function (element) {
-
+				var p = this;
+				ui.render(element, ui.template('sketch'), function () {
+					if (p.bind) ui.bind(p.bind, p);
+				});
 			}
 		}
 
