@@ -143,8 +143,14 @@
 				}
 				if (this.bind) ui.bind(this.bind);
 			}
-		}
-	}
+		},
 
+		sketch : {
+			init : function (element) {
+
+			}
+		}
+
+	}
 	window.ui = UI;
 }(window));
