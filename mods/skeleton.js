@@ -23,7 +23,6 @@
 			bus.send(['iron','interpret','skeleton','interpret',cmd]);
 		}
 		skel.state = function (pos) {
-			console.log(pos);
 			bus.send(['iron','recHistory','skeleton','move',pos]);
 		}
 	}

@@ -1,18 +1,4 @@
 {
 	"name" : "tmp",
-	"path_modules" : "./mods/",
-	"path_js" : "./public/js/scripts.js",
-	"path_css" : "./public/css/modules.styl",
-	"path_template" : "./public/html/frame.html",
 	"default_modules" : ["skeleton"],
-	"commands" : {
-		"c" : "iron|compile",
-		"cu" : "iron|createUser",
-		"/" : "iron|newModule",
-		"rs" : "iron|sendTemplates",
-		"g"	: "iron|generateModule",
-		"rm" : "iron|removeModule",
-		"!" : "iron|call",
-		"?" :	"iron|status"
-	} 		
 }

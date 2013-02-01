@@ -175,7 +175,6 @@ var Iron = function () {
 			cb(['skeleton', 'log', 'created user: '+name]);
 		});
 	}
-	
 	iron.recHistory = function (data) {
 		var json = JSON.stringify(data);
 		bus.sendGlobal(data);
