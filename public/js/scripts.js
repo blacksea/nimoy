@@ -1,4 +1,68 @@
 
+// S K E L E T O N
+
+(function (window) {
+	var Skeleton = function () {
+		var skel = this;
+		skel.init = function () {
+			var panel = ui.create( 'panel', {
+				name: 'skeleton',
+				bind: [{in:['skeleton','move']},
+				{out:['skeleton','state']}],
+				insert: {
+					txtInput: { 
+						bind: [{out:['skeleton','interpret']}]
+					},
+					log: {
+						bind: [{in:['skeleton','log']}]
+					}
+				}
+			});
+			panel.init();
+		}
+		skel.interpret = function (cmd) {
+			bus.send(['iron','interpret','skeleton','interpret',cmd]);
+		}
+		skel.state = function (pos) {
+			bus.send(['iron','recHistory','skeleton','move',pos]);
+		}
+	}
+	window.skeleton = Skeleton;
+}(window));
+// C L I E N T  B U S
+
+(function (window) {
+	var Bus = function () {}
+	var socket = io.connect("http://127.0.0.1:8888");
+	socket.on('*', function (paramArray) { // local channel
+		var module = paramArray[0]
+		, method   = paramArray[1]
+		, args     = paramArray[2];
+		window[module][method](args);
+	});
+	Bus.send = function (paramArray) {
+		socket.emit('*', paramArray);
+	}
+	window.bus = Bus;
+}(window));
+// S K E T C H
+
+(function (window) {
+	var Sketch = function () {
+		var sketch = this;
+		sketch.init = function (params) {
+			console.log('init sketch');
+			var cvs = ui.create( 'sketch', {
+				name: 'sketch',
+				width: '100%',
+				height: '100%'});
+			cvs.init('container');
+			// handle ad hoc script loading ? just this module needs three.js
+		}
+	}
+	window.sketch = Sketch;
+}(window));
+
 
 // M O N O M E
 
@@ -35,37 +99,6 @@
 
 	window.mono = Monome;
 }(window));
-// S K E L E T O N
-
-(function (window) {
-	var Skeleton = function () {
-		var skel = this;
-		skel.init = function () {
-			var panel = ui.create( 'panel', {
-				name: 'skeleton',
-				bind: [{in:['skeleton','move']},
-				{out:['skeleton','state']}],
-				insert: {
-					txtInput: { 
-						bind: [{out:['skeleton','interpret']}]
-					},
-					log: {
-						bind: [{in:['skeleton','log']}]
-					}
-				}
-			});
-			panel.init();
-		}
-		skel.interpret = function (cmd) {
-			bus.send(['iron','interpret','skeleton','interpret',cmd]);
-		}
-		skel.state = function (pos) {
-			console.log(pos);
-			bus.send(['iron','recHistory','skeleton','move',pos]);
-		}
-	}
-	window.skeleton = Skeleton;
-}(window));
 //  W A F F L E
 
 (function (window) {
@@ -85,22 +118,6 @@
 	window.Waffle = Waffle;
 }(window));
 
-// C L I E N T  B U S
-
-(function (window) {
-	var Bus = function () {}
-	var socket = io.connect("http://127.0.0.1:8888");
-	socket.on('*', function (paramArray) { // local channel
-		var module = paramArray[0]
-		, method   = paramArray[1]
-		, args     = paramArray[2];
-		window[module][method](args);
-	});
-	Bus.send = function (paramArray) {
-		socket.emit('*', paramArray);
-	}
-	window.bus = Bus;
-}(window));
 // U S E R   I N T E R F A C E   C L A S S
 
 (function (window) {
@@ -140,6 +157,8 @@
 				}
 			}
 		},
+
+		// provide a way to adHoc load dependencies per module
 
 		// ----------------------------------------------------
 		//  C O M P O N E N T S
@@ -245,9 +264,22 @@
 				}
 				if (this.bind) ui.bind(this.bind);
 			}
-		}
-	}
+		},
 
+		sketch : {
+			init : function (element) {
+				console.log('sketch init called');
+				var p = this;
+				ui.render(element, ui.template('sketch'), function () {
+					if (p.bind) ui.bind(p.bind, p);
+					var cvs = document.getElementById(p.name);
+					if(p.width) cvs.style.width = p.width;
+					if(p.height) cvs.style.height = p.height;
+				});
+			}
+		}
+
+	}
 	window.ui = UI;
 }(window));
  ui.markup = "<panel>
@@ -273,6 +305,10 @@
 
 <log>
 	<div id='console'></div>
-</log>";
+</log>
+
+<sketch>
+	<canvas id='sketch'></canvas>
+</sketch>";
  ui.templates = document.createElement("div");
  ui.templates.innerHTML = ui.markup;

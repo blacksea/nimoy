@@ -149,9 +149,13 @@
 
 		sketch : {
 			init : function (element) {
+				console.log('sketch init called');
 				var p = this;
 				ui.render(element, ui.template('sketch'), function () {
 					if (p.bind) ui.bind(p.bind, p);
+					var cvs = document.getElementById(p.name);
+					if(p.width) cvs.style.width = p.width;
+					if(p.height) cvs.style.height = p.height;
 				});
 			}
 		}
