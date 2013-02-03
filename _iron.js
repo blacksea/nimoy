@@ -119,6 +119,7 @@ var Iron = function () {
 	//  H T T P  R E Q U E S T S
 
 	iron.req = function (req, res) {
+		var host = req.headers.host.split(':')[0]; // map host domain to user
 		client.get('master_template', function (err, buffer) {
 			res.end(buffer.toString());
 		});

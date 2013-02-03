@@ -1,68 +1,4 @@
 
-// S K E L E T O N
-
-(function (window) {
-	var Skeleton = function () {
-		var skel = this;
-		skel.init = function () {
-			var panel = ui.create( 'panel', {
-				name: 'skeleton',
-				bind: [{in:['skeleton','move']},
-				{out:['skeleton','state']}],
-				insert: {
-					txtInput: { 
-						bind: [{out:['skeleton','interpret']}]
-					},
-					log: {
-						bind: [{in:['skeleton','log']}]
-					}
-				}
-			});
-			panel.init();
-		}
-		skel.interpret = function (cmd) {
-			bus.send(['iron','interpret','skeleton','interpret',cmd]);
-		}
-		skel.state = function (pos) {
-			bus.send(['iron','recHistory','skeleton','move',pos]);
-		}
-	}
-	window.skeleton = Skeleton;
-}(window));
-// C L I E N T  B U S
-
-(function (window) {
-	var Bus = function () {}
-	var socket = io.connect("http://127.0.0.1:8888");
-	socket.on('*', function (paramArray) { // local channel
-		var module = paramArray[0]
-		, method   = paramArray[1]
-		, args     = paramArray[2];
-		window[module][method](args);
-	});
-	Bus.send = function (paramArray) {
-		socket.emit('*', paramArray);
-	}
-	window.bus = Bus;
-}(window));
-// S K E T C H
-
-(function (window) {
-	var Sketch = function () {
-		var sketch = this;
-		sketch.init = function (params) {
-			console.log('init sketch');
-			var cvs = ui.create( 'sketch', {
-				name: 'sketch',
-				width: '100%',
-				height: '100%'});
-			cvs.init('container');
-			// handle ad hoc script loading ? just this module needs three.js
-		}
-	}
-	window.sketch = Sketch;
-}(window));
-
 
 // M O N O M E
 
@@ -99,6 +35,36 @@
 
 	window.mono = Monome;
 }(window));
+// S K E L E T O N
+
+(function (window) {
+	var Skeleton = function () {
+		var skel = this;
+		skel.init = function () {
+			var panel = ui.create( 'panel', {
+				name: 'skeleton',
+				bind: [{in:['skeleton','move']},
+				{out:['skeleton','state']}],
+				insert: {
+					txtInput: { 
+						bind: [{out:['skeleton','interpret']}]
+					},
+					log: {
+						bind: [{in:['skeleton','log']}]
+					}
+				}
+			});
+			panel.init();
+		}
+		skel.interpret = function (cmd) {
+			bus.send(['iron','interpret','skeleton','interpret',cmd]);
+		}
+		skel.state = function (pos) {
+			bus.send(['iron','recHistory','skeleton','move',pos]);
+		}
+	}
+	window.skeleton = Skeleton;
+}(window));
 //  W A F F L E
 
 (function (window) {
@@ -116,6 +82,40 @@
 		cb(module);
 	}
 	window.Waffle = Waffle;
+}(window));
+
+// C L I E N T  B U S
+
+(function (window) {
+	var Bus = function () {}
+	var socket = io.connect("http://127.0.0.1:8888");
+	socket.on('*', function (paramArray) { // local channel
+		var module = paramArray[0]
+		, method   = paramArray[1]
+		, args     = paramArray[2];
+		window[module][method](args);
+	});
+	Bus.send = function (paramArray) {
+		socket.emit('*', paramArray);
+	}
+	window.bus = Bus;
+}(window));
+// S K E T C H
+
+(function (window) {
+	var Sketch = function () {
+		var sketch = this;
+		sketch.init = function (params) {
+			console.log('init sketch');
+			var cvs = ui.create( 'sketch', {
+				name: 'sketch',
+				width: '100%',
+				height: '100%'});
+			cvs.init('container');
+			// handle ad hoc script loading ? just this module needs three.js
+		}
+	}
+	window.sketch = Sketch;
 }(window));
 
 // U S E R   I N T E R F A C E   C L A S S
