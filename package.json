@@ -1,5 +1,5 @@
 {
-  "name": "sleepwalker",
+  "name": "vitruvian_method",
   "description": "/\\/\\/\\/\\",
   "author": "ag <ag@theblacksea.cc>",
   "version" : "0.0.1",
@@ -13,10 +13,6 @@
     "async" : "0.1.22",
     "node-osc" : "x.x.x",
     "midi" : "0.6.0",
-    "templayed" : "0.2.1"
-  },
-  "devDependencies": {
-    "stylus" : "1.2.0"
   },
   "database" : "redis >= 2.6",
   "engine": "node >= 0.8.17"
