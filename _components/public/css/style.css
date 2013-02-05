@@ -1,0 +1,88 @@
+body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  background: #f1f1f1;
+  overflow: hidden;
+  position: fixed;
+  font-size: 8px;
+  letter-spacing: 1px;
+  font-family: 'monaco';
+  color: #333;
+}
+a {
+  color: #00b7ff;
+}
+#number {
+  font-family: 'monaco';
+  font-size: 9px;
+  cursor: none;
+  width: 50px;
+  height: 12px;
+  border: 1px solid #ccc;
+  color: #fff;
+  float: left;
+  text-align: center;
+}
+.panel {
+  position: absolute;
+  z-index: 2;
+  min-width: 200px;
+  border-radius: 2px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  top: 20px;
+  left: 20px;
+  background: #f1f1f1;
+}
+#prompt {
+  border: 1px solid #999;
+  background: transparent;
+  font-family: 'monaco';
+  text-align: center;
+  font-size: 9px;
+  min-width: 186px;
+}
+#prompt:focus {
+  color: #000;
+  border: 1px solid #000;
+  outline: none;
+}
+#console {
+  position: relative;
+  padding-top: 4px;
+  font-size: 9px;
+  line-height: 18px;
+  color: #666;
+}
+#console span {
+  font-size: 9px;
+  padding-right: 6px;
+  color: #999;
+}
+.grip {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  bottom: 0px;
+  right: 0px;
+  border-radius: 2px;
+  border: 1px solid #999;
+  opacity: 0.9;
+}
+.group {
+  position: relative;
+  z-index: 2;
+  background: #f1f1f1;
+  border: 1px solid #999;
+  padding: 4px;
+}
+.grip:hover {
+  cursor: move;
+}
+#sketch {
+  background: transparent;
+  position: fixed;
+  z-index: 1;
+}
