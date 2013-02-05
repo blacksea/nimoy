@@ -1,10 +1,9 @@
 // c o r e
 
-var iron  = require('./_iron.js')
-, bus  		= require('./_bus.js')
+var iron = require('./_iron.js')
+, bus = require('./_bus.js')
 , connect = require('connect')
-, http    = require('http')
-, io      = require('socket.io');
+, http = require('http')
 
 var app = connect()
 .use(connect.logger('dev'))
