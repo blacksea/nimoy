@@ -1,5 +1,5 @@
-/* c o r e
-app setup
+/* C O R E 
+	app setup
 */
 
 var shell = require('./_shell')
@@ -10,7 +10,7 @@ var shell = require('./_shell')
 , http = require('http')
 
 var iron = new shell;
-var scan = new scanner('./_components');
+var bricolo = new brico('./_components');
 
 var app = connect()
 .use(connect.logger('dev'))

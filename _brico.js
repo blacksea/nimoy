@@ -7,20 +7,23 @@
 */
 
 var fs = require('fs')
-async = require('async');
+, async = require('async');
 
 module.exports = function (dir) {
 	var self = this;
-	fs.readdir(dir, function (err, files) {
-		for(var i=0;i<files.length;i++){ 
-			if(files[i][0]!='.') { // ignore hidden files
-				oggle(files[i], function (err, json){
-					if(err) console.log(err);
-					if (!err) console.log(json)	;
-				});
-			}
-		}
-	});	
+	self.test = function () {
+		console.log('tessssst!!!');
+	}
+	// fs.readdir(dir, function (err, files) {
+	// 	for(var i=0;i<files.length;i++){ 
+	// 		if(files[i][0]!='.') { // ignore hidden files
+	// 			oggle(files[i], function (err, json){
+	// 				if(err) console.log(err);
+	// 				if (!err) console.log(json)	;
+	// 			});
+	// 		}
+	// 	}
+	// });	
 	function oggle (file, cb) { // grab the file desc json
 		var fileStream = fs.createReadStream(dir+'/'+file);
 		fileStream.on('data', function (data) {
