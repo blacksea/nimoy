@@ -9,13 +9,9 @@ var muxDemux = require('mux-demux');
 module.exports = function () {
 	var self = this;
 	self.bus = function (stream) {
-		
 	}
-
 	self.create = function (component) {
-
 	}
 	self.destroy = function (component) {
-		
 	}
 }
