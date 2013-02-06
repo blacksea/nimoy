@@ -11,14 +11,14 @@ var shell = require('./_shell')
 , fs = require('fs')
 , uglifyJS = require('uglify-js');
 
-var bundle = browserify().bundle('./_core_client.js');
-var result = uglifyJS.minify(bundle, {fromString:true});
-fs.writeFile('./_components/public/bundle.min.js', result.code, function(err) {
+// bundle browser side code
+var bundle = browserify('./_core_client.js').bundle();
+var bundleMin = uglifyJS.minify(bundle, {fromString:true});
+fs.writeFile('./_components/public/bundle.min.js', bundleMin.code, function(err) {
 		if (err) console.log(err);
 });
 
 var iron = new shell;
-// var bricolo = new brico('./_components');
 
 var app = connect()
 .use(connect.logger('dev'))
@@ -26,8 +26,12 @@ var app = connect()
 .use(connect.static('_components/public'))
 , server = require('http').createServer(app);
 
-app.use(function(req, res) {
-	fs.readStream()
+app.use(function(req, res) { // handle http responses
+	res.setHeader("Content-Type", "text/html");
+	var stream = fs.createReadStream('_components/public/frame.html');
+  stream.on('open', function () {
+	  stream.pipe(res);
+	});
 });
 
 server.listen(8888);
@@ -36,11 +40,9 @@ var sock = shoe(function (stream) {
     var iv = setInterval(function () {
         stream.write(Math.floor(Math.random() * 2));
     }, 250);
-
     stream.on('end', function () {
         clearInterval(iv);
     });
-
     stream.pipe(process.stdout, { end : false });
 });
 
