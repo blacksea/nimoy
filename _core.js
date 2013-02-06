@@ -3,7 +3,7 @@ app setup
 */
 
 var shell = require('./_shell')
-, scanner = require('./_scanner')
+, brico = require('./_brico')
 , shoe = require('shoe')
 , muxDemux = require('mux-demux')
 , connect = require('connect')
@@ -17,6 +17,5 @@ var app = connect()
 .use(connect.compress())
 .use(connect.static('public'))
 , server = require('http').createServer(app);
-
 
 server.listen(8888);
