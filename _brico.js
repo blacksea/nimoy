@@ -1,9 +1,9 @@
 /* B R I C O L E U R 
-	post apocalyptic bricoleur
-	scans a dir for useful components
-	can crawl subdirs as well
-	grabs json or js files
-	if js file expects top of file to be a comment containing json
+post apocalyptic bricoleur
+scans a dir for useful components
+can crawl subdirs as well
+grabs json or js files
+if js file expects top of file to be a comment containing json
 */
 
 var fs = require('fs')

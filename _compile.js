@@ -10,5 +10,4 @@ module.exports = function (fileArray,dst,cb) {
   fs.writeFile(dst,bundleMin.code,function (err) {
     if(err) cb(err);
   });
-  // browserify + compile!!!
 }

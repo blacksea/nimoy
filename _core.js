@@ -1,4 +1,4 @@
-// C O R E
+// C O R E  server
 var shell = require('./_shell')
 // , brico = require('./_brico')
 , http = require('http')
@@ -21,3 +21,5 @@ server.listen(8888);
 var sock = shoe(iron.Stream);
 sock.on('connection', iron.Conn); // create streams now
 sock.install(server, '/bus');
+
+// port shell to client side & connect to core // wire up brico to add client modules
