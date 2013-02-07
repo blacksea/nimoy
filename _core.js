@@ -9,6 +9,8 @@ var shell = require('./_shell')
 , shoe = require('shoe')
 , fs = require('fs')
 , filed = require('filed')
+, Stream = require('stream')
+, MuxDemux = require('mux-demux')
 , uglifyJS = require('uglify-js');
 
 // bundle browser side code
@@ -32,13 +34,22 @@ app.use(function(req, res) { // handle http responses
 });
 
 server.listen(8888);
-console.log(shell);
 
-var sock = shoe(function (stream) {
-    //muxdemux here
+var mx = MuxDemux();
+mx.on('connection', function (stream) {
+    stream.on('data', function (data) {
+        console.log(stream.meta + ' ' +data);
+    });
 });
-sock.pipe(shell.bus).pipe(sock);
+var sock = shoe(function (stream) {
+    mx.pipe(stream).pipe(mx);    
+});
 sock.on('connection', function (conn) {
+    console.log(conn);
+    var ds = mx.createStream('ff');
+    setInterval(function() {
+        ds.write('goondoor');
+    }, 50); 
 });
 
 sock.install(server, '/bus');

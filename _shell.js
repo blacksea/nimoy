@@ -4,12 +4,10 @@
 	shell runs on server or client
 */
 
-var muxDemux = require('mux-demux');
+var MuxDemux = require('mux-demux');
 
 module.exports = function () {
 	var self = this;
-	self.bus = function (stream) {
-	}
 	self.create = function (component) {
 	}
 	self.destroy = function (component) {

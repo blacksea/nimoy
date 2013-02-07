@@ -1,9 +1,20 @@
-var shoe = require('shoe');
-var es = require('event-stream');
-var stream = shoe('/bus');
-var s = es.mapSync(function (msg) {
-		var result = document.getElementById('result');
-    result.appendChild(document.createTextNode(msg));
-    return String(Number(msg)^1);
+var shoe = require('shoe')
+, MuxDemux = require('mux-demux')
+, s = shoe('bus');
+
+var mx = MuxDemux();
+
+mx.pipe(s).pipe(mx);
+
+mx.on('connection', function (stream) {
+	stream.on('data', function (data) {
+		console.log(data);
+		console.log(stream.meta);
+	});
+	var p = mx.createStream('dx');
+	setInterval(function() {
+		p.write('nordove');
+	}, 50); 
 });
-s.pipe(stream).pipe(s);
+
+
