@@ -26,7 +26,7 @@ module.exports = function (dir) {
 		fileStream.on('data', function (data) {
 			var buf = data.toString();
 			var json = '';
-			var err = 'ERR missing desc in file: '+file;
+			var err = 'ERR no info available in: '+file;
 			for(var i=0;i<buf.length;i++){
 				json += buf[i];
 				if(buf[i]==='{'&&json=='/*{') err = null;
