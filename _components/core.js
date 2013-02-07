@@ -1,20 +1,19 @@
+// C O R E 
 var shoe = require('shoe')
 , MuxDemux = require('mux-demux')
-, s = shoe('bus');
+, bus = shoe('bus');
 
-var mx = MuxDemux();
+var muxdemux = MuxDemux();
 
-mx.pipe(s).pipe(mx);
+muxdemux.pipe(bus).pipe(muxdemux);
 
-mx.on('connection', function (stream) {
+muxdemux.on('connection', function (stream) {
 	stream.on('data', function (data) {
-		console.log(data);
-		console.log(stream.meta);
+		var channel =  stream.meta;
 	});
-	var p = mx.createStream('dx');
-	setInterval(function() {
-		p.write('nordove');
-	}, 50); 
+	// var output = mx.createStream('dx');
 });
 
-
+// var sock = shoe(iron.Stream);
+// sock.on('connection', iron.Conn); // create streams now
+// sock.install(server, '/bus');

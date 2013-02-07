@@ -19,7 +19,6 @@ module.exports = function () {
 		self.bus.pipe(stream).pipe(self.bus);		
 	}
 	self.Conn = function (conn) {
-
 	}
 	self.create = function (component) {
 	}

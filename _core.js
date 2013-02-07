@@ -1,6 +1,4 @@
-/* C O R E 
-    app setup
-*/
+// C O R E
 var shell = require('./_shell')
 , brico = require('./_brico')
 , http = require('http')
@@ -9,14 +7,17 @@ var shell = require('./_shell')
 , fs = require('fs')
 , filed = require('filed')
 , uglifyJS = require('uglify-js');
-// bundle browser side code -- stick this in a module!!!!
+var iron = new shell;
+
+//////////////////////////////////////////////////////////
 var bundle = browserify('./_components/core.js').bundle();
 var bundleMin = uglifyJS.minify(bundle, {fromString:true});
 fs.writeFile('./_components/public/bundle.min.js', bundleMin.code, function(err) {
     if (err) console.log(err);
 });
-var iron = new shell;
-var server = http.createServer(function (req, res) {
+////////////////////////////////////////////////////
+var server = http.createServer(function (req, res) { // pass in a module/function instead
+    console.log(req.url);
     if(req.url==='/bundle.min.js'){
         filed('_components/public/bundle.min.js').pipe(res);
     }
@@ -28,7 +29,8 @@ var server = http.createServer(function (req, res) {
     }
 });
 server.listen(8888);
-// setup socket connection
+/////////////////////////////////////////////////////////////
+
 var sock = shoe(iron.Stream);
 sock.on('connection', iron.Conn); // create streams now
 sock.install(server, '/bus');
