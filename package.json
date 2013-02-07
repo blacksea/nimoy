@@ -4,9 +4,7 @@
   "author": "ag <ag@theblacksea.cc>",
   "version" : "0.0.1",
   "dependencies": {
-    "connect" : "2.7.2",
     "redis" : "0.8.2",
-    "msgpack-js" : "0.1.1",
     "rimraf" : "2.1.1",
     "async" : "0.1.22",
     "node-osc" : "x.x.x",
