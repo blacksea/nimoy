@@ -9,13 +9,8 @@ var shell = require('./_shell')
 , compiler = require('./_compile')
 , router = require('./_route')
 , uglifyJS = require('uglify-js');
-
 var iron = new shell;
-// handle requests 
-// compile client side....
-compiler(['_components/core.js'],'_components/bundle.min.js',function (err) {
-  if(err) console.log(err);
-});
+compiler(['_components/core.js'],'_components/bundle.min.js'); // compile client side....
 var server = http.createServer(router); // map requests to router
 server.listen(8888);
 var sock = shoe(iron.Stream);

@@ -2,12 +2,12 @@
 var browserify = require('browserify')
 , fs = require('fs')
 , uglifyJS = require('uglify-js');
-module.exports = function (fileArray,dst,cb) {
+module.exports = function (fileArray,dst) {
   var bundle = browserify(fileArray).bundle();
   console.log(bundle);
   var bundleMin = uglifyJS.minify(bundle,{fromString: true});
   console.log(bundleMin);
   fs.writeFile(dst,bundleMin.code,function (err) {
-    if(err) cb(err);
+    if(err) console.log(err);
   });
 }
