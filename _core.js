@@ -1,18 +1,21 @@
 // C O R E  server
-var shell = require('./_shell')
-, brico = require('./_brico')
-, http = require('http')
-, browserify = require('browserify')
-, shoe = require('shoe')
-, fs = require('fs')
-, filed = require('filed')
-, compiler = require('./_compile')
+
+var compiler = require('./_compile')
 , router = require('./_route')
-, uglifyJS = require('uglify-js');
+, brico = require('./_brico')
+, shell = require('./_shell')
+, http = require('http')
+, shoe = require('shoe');
+
 compiler(['_components/core.js'],'_components/bundle.min.js'); // compile client side....
+
 var server = http.createServer(router); // map requests to router
 server.listen(8888);
+
+// brico
+
 var iron = new shell;
+
 var sock = shoe(iron.Stream);
 sock.on('connection', iron.Conn); // create streams now
 sock.install(server, '/bus');
