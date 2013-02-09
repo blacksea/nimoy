@@ -1,10 +1,9 @@
 // C O R E  client
 
-var shell = require('../_shell')
-, MuxDemux = require('mux-demux');
+var MuxDemux = require('mux-demux')
 , shoe = require('shoe')
-, bus = shoe('bus');
+, bus = shoe('bus')
+, bricoleur = require('../_brico');
 
-var waffle = new shell;
+var brico = new bricoleur('./_components');
 
-bus.pipe(waffle.Stream).pipe(bus);
