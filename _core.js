@@ -7,17 +7,17 @@ var compiler = require('./_compile')
 , http = require('http')
 , shoe = require('shoe');
 
-compiler(['_components/core.js'],'_components/bundle.min.js'); // compile client side....
+compiler(['_components/core.js'],'_components/public/bundle.min.js'); // compile client side....
 
 var server = http.createServer(router); // map requests to router
 server.listen(8888);
 
 // brico
-
+var brio = new brico('./_components');
 var iron = new shell;
 
 var sock = shoe(iron.Stream);
-sock.on('connection', iron.Conn); // create streams now
+sock.on('connection', iron.createChannel); // create streams now
 sock.install(server, '/bus');
 
 // port shell to client side & connect to core // wire up brico to add client modules

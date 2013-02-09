@@ -6,7 +6,8 @@ module.exports = function (fileArray,dst) {
   var bundle = browserify(fileArray).bundle();
   var bundleMin = uglifyJS.minify(bundle,{fromString: true});
   fs.writeFile(dst,bundleMin.code,function (err) {
-    if(err) console.log(err);
-  }
+    if(err) throw(err);
+    console.log('compile done');
+  });
 }
 

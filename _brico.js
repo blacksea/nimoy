@@ -13,7 +13,8 @@ module.exports = function (dir) {
   var self = this;
   fs.readdir(dir, function (err, files) {
     for(var i=0;i<files.length;i++){ 
-      if(files[i][0]!='.') { // ignore hidden files
+      var ext = files[i].split('.');
+      if( ext[0]!='' && ext[1] == 'js' || ext[1]=='json' ) { // add ability to read subdirs 
         oggle(files[i], function (err, json){
           if(err) console.log(err);
           if(!err) console.log(json);
