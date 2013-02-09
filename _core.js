@@ -7,17 +7,16 @@ var compiler = require('./_compile')
 , util = require('util')
 , shoe = require('shoe');
 
+var brico = new bricoleur('./_components');
+
 compiler(['_components/core.js'],'_components/public/bundle.min.js'); // compile client side....
 
 var server = http.createServer(router); // map requests to router
 server.listen(8888);
-
-var brico = new bricoleur('./_components');
-
 var sock = shoe(function(stream){
   stream.pipe(brico.stream).pipe(stream);
 });
 sock.install(server, '/bus');
 sock.on('connection', function(conn) { 
-  // install connections here
+  // create streams here with func in brico
 });
