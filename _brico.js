@@ -9,6 +9,8 @@ if js file expects top of file to be a comment containing json
 var fs = require('fs')
 , async = require('async');
 
+// somekind of command recognition thing !?!??
+
 module.exports = function (dir) {
   var self = this;
   fs.readdir(dir, function (err, files) {

@@ -5,7 +5,8 @@ var browserify = require('browserify')
 module.exports = function (fileArray,dst) {
   var bundle = browserify(fileArray).bundle();
   var bundleMin = uglifyJS.minify(bundle,{fromString: true});
-  fs.writeFile(dst,bundleMin.code,function (err) {
+  fs.writeFile(dst,bundle,function (err) {
+  //fs.writeFile(dst,bundleMin.code,function (err) {
     if(err) throw(err);
     console.log('compile done');
   });
