@@ -1,4 +1,6 @@
-// C O M P I L E R
+/* P R O V I S I O N E R
+*/
+
 var browserify = require('browserify')
 , fs = require('fs')
 , uglifyJS = require('uglify-js');

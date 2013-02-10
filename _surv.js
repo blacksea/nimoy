@@ -1,4 +1,4 @@
-/* S C A N N E R
+/* S U R V E Y O R 
 - scan
 - get data
 - add to map -- array? obj?

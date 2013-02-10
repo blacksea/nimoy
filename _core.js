@@ -4,7 +4,7 @@ var http = require('http')
 , router = require('./_route')
 , surv = require('./_surv')
 , bricoleur = require('./_brico')
-, compiler = require('./_compile')
+, provision = require('./_prov')
 , shoe = require('shoe');
 
 var server = http.createServer(router);  // router should be configurable
@@ -15,7 +15,7 @@ var survey = new surv({dir:'./_wilds'});
 survey.scan(function(json){
   // also compile / prep for client side
   brico.init(json);
-  compiler(['_wilds/core.js'],'_wilds/public/bundle.min.js'); // compile client side....
+  provision(['_wilds/core.js'],'_wilds/public/bundle.min.js'); // compile client side....
 });
 
 var sock = shoe(function(stream){
