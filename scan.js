@@ -8,22 +8,22 @@
 */
 
 var fs = require('fs');
-module.exports = function (opts, cb) {
+module.exports = function (opts) {
+  var self = this;
   if (!opts) { 
     var opts = {
       fileType : ['js'],
       dir : './_components'
     }
   }
-  scan(opts.dir);
-  function scan(dir) { 
-    fs.readdir(dir, function (err, files) {
+  self.scan = function (cb) { 
+    fs.readdir(opts.dir, function (err, files) {
       for(var i=0;i<files.length;i++){ 
         var ext = files[i].split('.');
         if(ext[0]!='.'&& ext[1]==='js') { // ignore hidden files
           oggle(files[i], function (err, json){
             if(err) console.log(err);
-            if(err===null) console.log(json);
+            if(err===null) cb(json);
           });
         }
       }

@@ -9,11 +9,13 @@ var MuxDemux = require('mux-demux')
 , scan = require('./scan')
 , async = require('async');
 
-var mapper = new scan;
+var mapper = new scan({dir:'./_components'});
 
 module.exports = function (dir) {
   var self = this;
-
+  mapper.scan(function(json){
+    console.log(json);
+  });
   self.stream = MuxDemux();
   self.stream.on('connection', function (stream) {
     stream.on('data', function (data) { // hook / pipe stream from here
