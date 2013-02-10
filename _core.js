@@ -2,20 +2,20 @@
 
 var http = require('http')
 , router = require('./_route')
-, scan = require('./_scan')
+, surv = require('./_surv')
 , bricoleur = require('./_brico')
 , compiler = require('./_compile')
 , shoe = require('shoe');
 
-compiler(['_components/core.js'],'_components/public/bundle.min.js'); // compile client side....
-
-var server = http.createServer(router); 
+var server = http.createServer(router);  // router should be configurable
 server.listen(8888);
 
 var brico = new bricoleur();
-var mapper = new scan({dir:'./_components'});
-mapper.scan(function(json){
+var survey = new surv({dir:'./_wilds'});
+survey.scan(function(json){
+  // also compile / prep for client side
   brico.init(json);
+  compiler(['_wilds/core.js'],'_wilds/public/bundle.min.js'); // compile client side....
 });
 
 var sock = shoe(function(stream){
