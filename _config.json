@@ -1,8 +1,8 @@
 {
-	"config_ui" : "./ui/package.json",
-	"config_frame" : "./public/html/frame.html",
-	"config_modules" : "./mods/package.json",
-	"compiled_modules" : "./public/js/scripts.js",
+	"routes" : {
+    "/" : "./_wilds/frame.html",
+    "/bundle.min.js" : "./_wilds/bundle.min.js"
+  },
 	"commands" : {
 		"c" : "iron|compile",
 		"/" : "iron|newModule",
