@@ -6,8 +6,10 @@ if js file expects top of file to be a comment containing json
 */
 
 var MuxDemux = require('mux-demux')
-, scan = require('./scan');
+, scan = require('./scan')
 , async = require('async');
+
+var mapper = new scan;
 
 module.exports = function (dir) {
   var self = this;

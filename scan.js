@@ -1,28 +1,36 @@
 /* S C A N N E R
-scan and pull meta data
-create a file map in json ?!? form ?
-accepts options object
+- scan
+- get data
+- add to map -- array? obj?
+-- first just return a simple object and provide basic options
+ -- module - scope -  
+ --
 */
 
 var fs = require('fs');
-module.exports = function (options, cb) {
-
+module.exports = function (opts, cb) {
+  if (!opts) { 
+    var opts = {
+      fileType : ['js'],
+      dir : './_components'
+    }
+  }
+  scan(opts.dir);
   function scan(dir) { 
     fs.readdir(dir, function (err, files) {
       for(var i=0;i<files.length;i++){ 
         var ext = files[i].split('.');
-        if(ext[0]!='.'&& ext[1]==='js'||ext[1]==='json') { // ignore hidden files
+        if(ext[0]!='.'&& ext[1]==='js') { // ignore hidden files
           oggle(files[i], function (err, json){
             if(err) console.log(err);
-            if(!err) console.log(json);
+            if(err===null) console.log(json);
           });
         }
       }
     });	
   }
-
-  function oggle (file, cb) { // grab the file desc json
-    var fileStream = fs.createReadStream(dir+'/'+file);
+  function oggle (file, cb) { // grab the file desc json -- check against options
+    var fileStream = fs.createReadStream(opts.dir+'/'+file);
     fileStream.on('data', function (data) { // fix this stream
       var buf = data.toString();
       var json = '';
@@ -32,12 +40,11 @@ module.exports = function (options, cb) {
         if(buf[i]==='{'&&json=='/*{') err = null;
         if(buf[i]==='}'&&err===null) {
           json = JSON.parse(json.replace('/*',''));
-          if (typeof json != 'object') // throw err;
-          cb(err, json);
+          if (typeof json === 'object') cb(null, json);
           break;
         }
       }
-      if(err!=null) cb(err);
+      if(err!=null&&err!='undefined') cb(err);
     });
   }
 } 
