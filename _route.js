@@ -2,12 +2,16 @@
  handle req's
 */
 var filed = require('filed');
-module.exports = function (req, res) {
-  if (req.url==='/bundle.min.js') {
-    filed('_wilds/bundle.min.js').pipe(res);
-  } else if (req.url==='/') { 
-    filed('_wilds/frame.html').pipe(res);
-  } else {
-    res.end('fuuuuuuk');
-   }
+module.exports = function (opts) {
+  this.handleRoutes = function (req,res) {
+    for(url in opts){
+      var match = false;
+      if(url === req.url) {
+        filed(opts[url]).pipe(res);
+        match = true;
+        break;
+      } else if(url != req.url) match = false;
+    }
+    if (match === false) res.end('fuuuuuk');
+  }
 }
