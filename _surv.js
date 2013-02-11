@@ -1,10 +1,10 @@
 /* S U R V E Y O R 
-- scan
-- get data
-- add to map -- array? obj?
--- first just return a simple object and provide basic options
--- module - scope -  
---
+--> scan
+--> get data
+--> add to map -- array? obj?
+--> first just return a simple object and provide basic options
+--> module - scope   
+--> grab config 
 */
 
 var fs = require('fs');
