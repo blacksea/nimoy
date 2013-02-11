@@ -12,19 +12,18 @@ var server = http.createServer(router);  // router should be configurable
 server.listen(8888);
 
 // replace all manual settings with settings from config - read by survey
-provision({
-  in : ['_wilds/cores.js'],
-  out : '_wilds/bundle.min.js',
-  compress : true
-}); // compile client side....
 
 var brico = new bricoleur();
-var survey = new surv({dir:'./'});
+var survey = new surv({dir:'./_wilds'});
 
 survey.scan(function(json){
   // also compile / prep for client side
   brico.init(json);
-  provision(['_wilds/core.js'],'_wilds/public/bundle.min.js'); // compile client side....
+  provision({
+    src : ['./_wilds/core.js'],
+    dst : './_wilds/bundle.min.js',
+    compress : true
+  }); // compile client side....
 });
 
 var sock = shoe(function(stream){

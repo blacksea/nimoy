@@ -6,11 +6,11 @@ var browserify = require('browserify')
 , uglifyJS = require('uglify-js');
 module.exports = function (opts) {
   // if (!opts) throw err;
-  var bundle = browserify(opts.in).bundle();
-  var data = bundle;
+  var bundle = browserify(opts.src).bundle();
+  var data = {code:bundle};
   if(opts.compress===true) data = uglifyJS.minify(bundle,{fromString: true});
-  fs.writeFile(opts.out,data,function (err) {
-  //fs.writeFile(dst,bundleMin.code,function (err) {
+  fs.writeFile(opts.dst,data.code,function (err) {
+    //fs.writeFile(dst,bundleMin.code,function (err) {
     if(err) throw(err);
     console.log('compile done');
   });
