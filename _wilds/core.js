@@ -1,4 +1,8 @@
-// C O R E  client
+/*{
+  "id":"core",
+	"scope":"client",
+	"desc":"information"
+}*/
 
 var shoe = require('shoe')
 , bus = shoe('bus')

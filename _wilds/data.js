@@ -1,4 +1,5 @@
 /*{
+  "id":"data",
 	"scope":"client",
 	"desc":"information"
 }*/
