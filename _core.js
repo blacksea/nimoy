@@ -14,11 +14,13 @@ server.listen(8888);
 var brico = new bricoleur();
 var survey = new surv({dir:'./_wilds'});
 
-survey.scan(function(map){
-  brico.init(map);
+survey.scan(function(map){ // callback should be err only & scan should generate server/client maps
+  console.log(survey.map_client);  
+  console.log(survey.map_server);  
+  brico.init();
 });
 
-var prov = new provision({
+var prov = new provision({ // browserify + compress client side js
   src : ['./_brico.js','./_wilds/core.js'],
   dst : './_wilds/bundle.min.js',
   compress : true
@@ -31,4 +33,5 @@ var sock = shoe(function(stream){
 });
 sock.install(server, '/bus');
 sock.on('connection', function(conn) { // trigger create streams func in brico
+  // send map ... 
 });

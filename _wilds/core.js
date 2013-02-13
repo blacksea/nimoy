@@ -1,6 +1,6 @@
 /*{
   "id":"core",
-	"scope":"client",
+	"scope":["client"],
 	"desc":"information"
 }*/
 

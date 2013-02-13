@@ -4,9 +4,7 @@ var MuxDemux = require('mux-demux')
 
 module.exports = function (dir) {
   var self = this;
-  this.init = function (map) { // a set of props
-    console.log('logging map...');
-    console.log(map);
+  this.init = function (map) { // an array of objs 
   }
   /////////////////////////
   this.stream = MuxDemux();
