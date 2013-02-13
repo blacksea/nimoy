@@ -1,5 +1,4 @@
 // C O R E  server
-
 var http = require('http')
 , Router = require('./_route')
 , surv = require('./_surv')
@@ -9,11 +8,10 @@ var http = require('http')
 
 var routes = [{url:"/",file:"./_wilds/frame.html"},{url:"/bundle.min.js",file:"./_wilds/bundle.min.js"}];
 var router = new Router(routes);
-var server = http.createServer(router.handleRoutes);  // router should be configurable
+var server = http.createServer(router.handleRoutes);
 server.listen(8888);
 
 // handle somekind of user model
-// replace all manual settings with settings from config - read by survey
 
 var brico = new bricoleur();
 var survey = new surv({dir:'./_wilds'});
@@ -21,10 +19,12 @@ var survey = new surv({dir:'./_wilds'});
 survey.scan(function(json){
   // also compile / prep for client side
   brico.init(json);
-  provision({
+  var prov = new provision({
     src : ['./_wilds/core.js'],
     dst : './_wilds/bundle.min.js',
     compress : true
+  }, function (msg) {
+    console.log(msg);
   }); // compile client side....
 });
 
