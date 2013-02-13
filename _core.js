@@ -11,27 +11,24 @@ var router = new Router(routes);
 var server = http.createServer(router.handleRoutes);
 server.listen(8888);
 
-// handle somekind of user model
-
 var brico = new bricoleur();
 var survey = new surv({dir:'./_wilds'});
 
 survey.scan(function(map){
-  // also compile / prep for client side
   brico.init(map);
-  var prov = new provision({
-    src : ['./_wilds/core.js'],
-    dst : './_wilds/bundle.min.js',
-    compress : true
-  }, function (msg) {
-    console.log(msg);
-  }); // compile client side....
 });
+
+var prov = new provision({
+  src : ['./_brico.js','./_wilds/core.js'],
+  dst : './_wilds/bundle.min.js',
+  compress : true
+}, function (msg) {
+  console.log(msg);
+}); 
 
 var sock = shoe(function(stream){
   stream.pipe(brico.stream).pipe(stream);
 });
 sock.install(server, '/bus');
-sock.on('connection', function(conn) { 
-  // trigger create streams func in brico
+sock.on('connection', function(conn) { // trigger create streams func in brico
 });
