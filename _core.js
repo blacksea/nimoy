@@ -7,10 +7,12 @@ var http = require('http')
 , provision = require('./_prov')
 , shoe = require('shoe');
 
-var router = Router({"/":"./_wilds/frame.html","/bundle.min.js":"./_wilds/bundle.min.js"});
-var server = http.createServer(router);  // router should be configurable
+var routes = [{url:"/",file:"./_wilds/frame.html"},{url:"/bundle.min.js",file:"./_wilds/bundle.min.js"}];
+var router = new Router(routes);
+var server = http.createServer(router.handleRoutes);  // router should be configurable
 server.listen(8888);
 
+// handle somekind of user model
 // replace all manual settings with settings from config - read by survey
 
 var brico = new bricoleur();

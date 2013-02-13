@@ -11,12 +11,12 @@ var fs = require('fs');
 module.exports = function (opts) {
   var self = this;
   if (!opts) { 
-    var opts = {
+    opts = {
       fileType : ['js'],
       dir : './_components'
     }
   }
-  self.scan = function (cb) { 
+  this.scan = function (cb) { 
     fs.readdir(opts.dir, function (err, files) {
       for(var i=0;i<files.length;i++){ 
         var ext = files[i].split('.');
@@ -44,7 +44,7 @@ module.exports = function (opts) {
           break;
         }
       }
-      if(err!=null&&err!='undefined') cb(err);
+      if(err!==null&&err!='undefined') cb(err);
     });
   }
 } 

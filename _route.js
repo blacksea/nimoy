@@ -1,17 +1,18 @@
-/* R O U T E R 
- handle req's
-*/
+// R O U T E R 
 var filed = require('filed');
-module.exports = function (opts) {
+module.exports = function (routes) {
   this.handleRoutes = function (req,res) {
-    for(url in opts){
-      var match = false;
-      if(url === req.url) {
-        filed(opts[url]).pipe(res);
+    var match = false;
+    for (var i=0;i<routes.length;i++) {
+      var route = routes[i];
+      if(route.url === req.url) {
+        filed(route.file).pipe(res);
         match = true;
         break;
-      } else if(url != req.url) match = false;
+      } else if(route.url != req.url) {
+        match = false;
+      }
     }
-    if (match === false) res.end('fuuuuuk');
+  if (match === false) res.end('fuuuuuk');
   }
 }
