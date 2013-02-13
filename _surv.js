@@ -1,9 +1,11 @@
 // S U R V E Y O R 
 var fs = require('fs')
+var util = require('util')
 , async = require('async');
+
 module.exports = function (opts) {
-  var self = this;
-  var map = [];
+  var self = this
+  , map = [];
   if (!opts) { 
     opts = {
       fileType : ['js'],
@@ -20,27 +22,22 @@ module.exports = function (opts) {
   }
   function oggle (file, cb) { // grab the file desc json -- check against options
     var ext = file.split('.');
-    if(ext[0]!='.'&& ext[1]==='js') { // ignore hidden files
+    if(ext[0]!='.' && ext[1]==='js') { 
       var fileStream = fs.createReadStream(opts.dir+'/'+file);
-      fileStream.on('data', function (data) { // fix this stream
-        var buf = data.toString();
-        var json = '';
-        var err = 'ERR no info available in: '+file;
-        for(var i=0;i<buf.length;i++){
-          json += buf[i];
-          if(buf[i]==='{'&&json=='/*{') err = null;
-          if(buf[i]==='}'&&err===null) {
-            json = JSON.parse(json.replace('/*',''));
-            if (typeof json === 'object') {
-              json.path = opts.dir+'/'+file;
-              map.push(json);
-            }
+      fileStream.on('readable', function () {
+        var data = fileStream.read().toString();
+        var buf = '';
+        for (var i=0; i<data.length; i++) {
+          buf += data[i];
+          if(data[i]==='}') {
+            var obj = JSON.parse(buf.replace('/*',''));
+            if (typeof obj === 'object') map.push(obj);
             cb();
             break;
           }
         }
-        if(err!==null&&err!='undefined') cb(err);
       });
+      var i = 0;
     } else {
       cb();
     }
