@@ -31,7 +31,10 @@ module.exports = function (opts) {
           if(buf[i]==='{'&&json=='/*{') err = null;
           if(buf[i]==='}'&&err===null) {
             json = JSON.parse(json.replace('/*',''));
-            if (typeof json === 'object') map.push(json);
+            if (typeof json === 'object') {
+              json.path = opts.dir+'/'+file;
+              map.push(json);
+            }
             cb();
             break;
           }

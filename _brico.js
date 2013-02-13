@@ -6,6 +6,7 @@ var MuxDemux = require('mux-demux')
 module.exports = function (dir) {
   var self = this;
   this.init = function (map) { // a set of props
+    console.log('logging map...');
     console.log(map);
   }
   /////////////////////////

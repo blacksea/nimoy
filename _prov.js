@@ -4,7 +4,6 @@ var browserify = require('browserify')
 , uglifyJS = require('uglify-js');
 module.exports = function (opts, cb) {
   var data = browserify(opts.src).bundle();
-  console.log(data);
   if(opts.compress===true) {
     var bundleMin = uglifyJS.minify(data,{fromString: true});
     data = bundleMin.code;
