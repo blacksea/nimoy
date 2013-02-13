@@ -1,6 +1,5 @@
 // S U R V E Y O R 
 var fs = require('fs')
-var util = require('util')
 , async = require('async');
 
 module.exports = function (opts) {
@@ -15,14 +14,14 @@ module.exports = function (opts) {
   this.scan = function (cb) { 
     fs.readdir(opts.dir, function (err, files) {
       async.forEach(files, oggle, function (err) {
-        if(err) console.log(err);
+        if(err) throw err;
         if(err===null) cb(map);
       });
     });	
   }
-  function oggle (file, cb) { // grab the file desc json -- check against options
+  function oggle (file, cb) { 
     var ext = file.split('.');
-    if(ext[0]!='.' && ext[1]==='js') { 
+    if(ext[0]!='.' && ext[1]==='js') { // exclude hidden files & non js files
       var fileStream = fs.createReadStream(opts.dir+'/'+file);
       fileStream.on('readable', function () {
         var data = fileStream.read().toString();
@@ -37,9 +36,6 @@ module.exports = function (opts) {
           }
         }
       });
-      var i = 0;
-    } else {
-      cb();
-    }
+    } else cb();
   }
 } 
