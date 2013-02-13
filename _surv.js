@@ -3,6 +3,7 @@ var fs = require('fs')
 , async = require('async');
 module.exports = function (opts) {
   var self = this;
+  var map = [];
   if (!opts) { 
     opts = {
       fileType : ['js'],
@@ -11,9 +12,9 @@ module.exports = function (opts) {
   }
   this.scan = function (cb) { 
     fs.readdir(opts.dir, function (err, files) {
-      async.forEach(files, oggle, function (err, json) {
+      async.forEach(files, oggle, function (err) {
         if(err) console.log(err);
-        if(err===null) cb(json);
+        if(err===null) cb(map);
       });
     });	
   }
@@ -30,7 +31,8 @@ module.exports = function (opts) {
           if(buf[i]==='{'&&json=='/*{') err = null;
           if(buf[i]==='}'&&err===null) {
             json = JSON.parse(json.replace('/*',''));
-            if (typeof json === 'object') cb(null, json);
+            if (typeof json === 'object') map.push(json);
+            cb();
             break;
           }
         }

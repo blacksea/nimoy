@@ -16,9 +16,9 @@ server.listen(8888);
 var brico = new bricoleur();
 var survey = new surv({dir:'./_wilds'});
 
-survey.scan(function(json){
+survey.scan(function(map){
   // also compile / prep for client side
-  brico.init(json);
+  brico.init(map);
   var prov = new provision({
     src : ['./_wilds/core.js'],
     dst : './_wilds/bundle.min.js',

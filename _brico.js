@@ -1,12 +1,12 @@
 /* B R I C O L E U R 
  intelligent collager
 */
-
 var MuxDemux = require('mux-demux')
 , async = require('async');
 module.exports = function (dir) {
   var self = this;
-  this.init = function (json) { // a set of props
+  this.init = function (map) { // a set of props
+    console.log(map);
   }
   /////////////////////////
   this.stream = MuxDemux();
