@@ -15,18 +15,15 @@ var brico = new bricoleur();
 var survey = new surv({dir:'./_wilds'});
 
 survey.scan(function(map){ // callback should be err only & scan should generate server/client maps
-  console.log(survey.map_client);  
-  console.log(survey.map_server);  
+  var prov = new provision({ // browserify + compress client side js
+    src : survey.prov_files,
+    dst : './_wilds/bundle.min.js',
+    compress : true
+  }, function (msg) {
+    console.log(msg);
+  }); 
   brico.init();
 });
-
-var prov = new provision({ // browserify + compress client side js
-  src : ['./_brico.js','./_wilds/core.js'],
-  dst : './_wilds/bundle.min.js',
-  compress : true
-}, function (msg) {
-  console.log(msg);
-}); 
 
 var sock = shoe(function(stream){
   stream.pipe(brico.stream).pipe(stream);
