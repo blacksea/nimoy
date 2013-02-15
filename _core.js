@@ -14,7 +14,7 @@ server.listen(8888);
 var brico = new bricoleur();
 var survey = new surv({dir:'./_wilds'});
 
-survey.scan(function(map){ // callback should be err only & scan should generate server/client maps
+survey.scan(function(map){ 
   var prov = new provision({ 
     src : survey.prov_files,
     dst : './_wilds/bundle.min.js',
