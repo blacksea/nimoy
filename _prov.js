@@ -2,6 +2,7 @@
 var browserify = require('browserify')
 , fs = require('fs')
 , uglifyJS = require('uglify-js');
+
 module.exports = function (opts, cb) {
   var data = browserify(opts.src).bundle();
   if(opts.compress===true) {
