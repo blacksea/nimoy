@@ -11,7 +11,7 @@ module.exports = function (opts, cb) {
   }
   fs.writeFile(opts.dst,data,function (err) {
     if(err) throw(err);
-    cb('compile done');
+    cb('bundle compiled');
   });
 }
 
