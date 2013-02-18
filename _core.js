@@ -30,4 +30,5 @@ var sock = shoe(function(stream){
 });
 sock.install(server, '/bus');
 sock.on('connection', function(conn) { // trigger create streams func in brico
+  // add streams to mux-demux
 });
