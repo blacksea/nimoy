@@ -13,5 +13,5 @@ module.exports = function () {
     client.get(key, cb);
   }
   // support for lists / hashes ????!!!
-
+    var key = params[0];
 }
