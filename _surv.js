@@ -2,19 +2,13 @@
 var fs = require('fs')
 , async = require('async');
 
-module.exports = function (opts) { // generate a server map and client map
+module.exports = function (dir) { // generate a server map and client map
   var self = this;
-  if (!opts) { 
-    opts = {
-      fileType : ['js'],
-      dir : './_components'
-    }
-  }
   this.map_client = [];
   this.map_server = [];
   this.client_files = [];
   this.scan = function (cb) { 
-    fs.readdir(opts.dir, function (err, files) {
+    fs.readdir(dir, function (err, files) {
       async.forEach(files, oggle, function (err) {
         if(err) throw err;
         if(err===null) {
@@ -26,7 +20,7 @@ module.exports = function (opts) { // generate a server map and client map
   function oggle (file, cb) { 
     var ext = file.split('.');
     if(ext[0]!='.' && ext[1]==='js') { // exclude hidden files & non js files
-      var fileStream = fs.createReadStream(opts.dir+'/'+file);
+      var fileStream = fs.createReadStream(dir+'/'+file);
       fileStream.on('readable', function () {
         var data = fileStream.read().toString();
         var buf = '';
@@ -35,7 +29,7 @@ module.exports = function (opts) { // generate a server map and client map
           if(data[i]==='}') {
             var obj = JSON.parse(buf.replace('/*',''));
             if (typeof obj === 'object') {
-              obj.filepath = opts.dir+'/'+file;
+              obj.filepath = dir+'/'+file;
               for(var n=0;n<obj.scope.length;n++) {
                 if (obj.scope[n]==='client') {
                   self.map_client.push(obj);
