@@ -1,15 +1,15 @@
 // C O R E  server
 var http = require('http')
+, User = require('./_user')
 , Router = require('./_route')
 , surv = require('./_surv')
 , bricoleur = require('./_brico')
 , provision = require('./_prov')
-, user = require('./_user')
 , shoe = require('shoe');
 
-var routes = [{url:"/",file:"./_wilds/frame.html"},{url:"/bundle.min.js",file:"./_wilds/bundle.min.js"}];
-var router = new Router(routes);
-var server = http.createServer(router.handleRoutes);
+var usr = new User(); // user hack :(
+var router = new Router(usr.def.routes);
+var server = http.createServer(router.handleRoutes); // pass all http reqs to router.handleRoutes
 server.listen(8888);
 
 var brico = new bricoleur();
@@ -17,7 +17,7 @@ var survey = new surv({dir:'./_wilds'});
 
 survey.scan(function(map){ 
   var prov = new provision({ 
-    src : survey.prov_files,
+    src : survey.client_files,
     dst : './_wilds/bundle.min.js',
     compress : true
   }, function (msg) {

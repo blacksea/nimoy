@@ -12,7 +12,7 @@ module.exports = function (opts) { // generate a server map and client map
   }
   this.map_client = [];
   this.map_server = [];
-  this.prov_files = [];
+  this.client_files = [];
   this.scan = function (cb) { 
     fs.readdir(opts.dir, function (err, files) {
       async.forEach(files, oggle, function (err) {
@@ -39,7 +39,7 @@ module.exports = function (opts) { // generate a server map and client map
               for(var n=0;n<obj.scope.length;n++) {
                 if (obj.scope[n]==='client') {
                   self.map_client.push(obj);
-                  self.prov_files.push(obj.filepath);
+                  self.client_files.push(obj.filepath);
                 }
                 if (obj.scope[n]==='server') self.map_server.push(obj);
               }
