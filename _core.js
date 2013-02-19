@@ -4,6 +4,7 @@ var http = require('http')
 , surv = require('./_surv')
 , bricoleur = require('./_brico')
 , provision = require('./_prov')
+, user = require('./_user')
 , shoe = require('shoe');
 
 var routes = [{url:"/",file:"./_wilds/frame.html"},{url:"/bundle.min.js",file:"./_wilds/bundle.min.js"}];
