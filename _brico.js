@@ -4,21 +4,28 @@ var MuxDemux = require('mux-demux')
 
 module.exports = function (dir) {
   var self = this;
-  this.init = function (map, cb) { // an array of objs 
+  var _ = function () {} // environment/global var for mods
+  this.init = function (map) { // an array of objs 
     async.forEach(map, self.addModule, function () {
-      cb();
+      console.log('modules added');
     });
   }
   this.addModule = function (module, cb) {
-    self[module.id.toUpperCase()] = require(module.filepath);
-    self[module.id] = new self[module.id.toUpperCase()]();
+    _[module.id.toUpperCase()] = require(module.filepath);
+    _[module.id] = new _[module.id.toUpperCase()]();
     cb();
   }
+  setTimeout(function(){
+    _.send.test();
+  }, 3000);
   ////////////////////////////////////////////////
   this.stream = MuxDemux();
   this.stream.on('connection', function (stream) {
     stream.on('data', function (data) { // hook / pipe stream from here
-       console.log(stream.meta+' '+data);
+      console.log(stream.meta+' '+data);
+      if(stream.meta==='brico') {
+        self[data[0]](data[1]);
+       }
     });
   /////////////////////////////////////////////////////////////////////
   });

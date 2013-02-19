@@ -19,13 +19,11 @@ surv.scan(function () {
   var prov = new Provisioner({ 
     src : surv.client_files,
     dst : './_wilds/bundle.min.js',
-    compress : true
+    compress : false
   }, function (msg) {
     console.log(msg);
   }); 
-  brico.init(surv.map_server, function () {
-    brico.data.test();
-  });
+  brico.init(surv.map_server);
 });
 
 var sock = shoe(function(stream){
@@ -33,5 +31,8 @@ var sock = shoe(function(stream){
 });
 sock.install(server, '/bus');
 sock.on('connection', function(conn) { // trigger create streams func in brico
+  var x = brico.stream.createStream('brico');
+  x.write(['init',surv.map_client]);
+  // send map to client brico
   // add streams to mux-demux
 });
