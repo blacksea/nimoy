@@ -19,7 +19,7 @@ surv.scan(function () {
   var prov = new Provisioner({ 
     src : surv.client_files,
     dst : './_wilds/bundle.min.js',
-    compress : false
+    compress : true
   }, function (msg) {
     console.log(msg);
   }); 
