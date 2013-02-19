@@ -33,6 +33,4 @@ sock.install(server, '/bus');
 sock.on('connection', function(conn) { // trigger create streams func in brico
   var x = brico.stream.createStream('brico');
   x.write(['init',surv.map_client]);
-  // send map to client brico
-  // add streams to mux-demux
 });
