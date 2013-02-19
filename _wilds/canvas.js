@@ -1,7 +1,8 @@
 /*{
   "id":"canvas",
-	"scope":["client,server"],
+	"scope":["server"],
 	"desc":"canvas support"
 }*/
 module.exports = function () {
+  var self = this;
 }
