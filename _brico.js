@@ -4,7 +4,15 @@ var MuxDemux = require('mux-demux')
 
 module.exports = function (dir) {
   var self = this;
-  this.init = function (map) { // an array of objs 
+  this.init = function (map, cb) { // an array of objs 
+    async.forEach(map, self.addModule, function () {
+      cb();
+    });
+  }
+  this.addModule = function (module, cb) {
+    self[module.id.toUpperCase()] = require(module.filepath);
+    self[module.id] = new self[module.id.toUpperCase()]();
+    cb();
   }
   ////////////////////////////////////////////////
   this.stream = MuxDemux();

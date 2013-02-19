@@ -10,4 +10,6 @@ var shoe = require('shoe')
 
 var brico = new bricoleur();
 bus.pipe(brico.stream).pipe(bus);
-
+module.exports = function () {
+  var self = this;
+}

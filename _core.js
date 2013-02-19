@@ -15,15 +15,17 @@ server.listen(8888);
 var brico = new Bricoleur();
 var surv = new Surveyor('./_wilds');
 
-survey.scan(function(map){ 
+surv.scan(function () { 
   var prov = new Provisioner({ 
-    src : survey.client_files,
+    src : surv.client_files,
     dst : './_wilds/bundle.min.js',
     compress : true
   }, function (msg) {
     console.log(msg);
   }); 
-  brico.init();
+  brico.init(surv.map_server, function () {
+    brico.data.test();
+  });
 });
 
 var sock = shoe(function(stream){

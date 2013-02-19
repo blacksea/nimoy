@@ -8,6 +8,9 @@ var redis = require('redis')
 // an easy api to store retreive data // map filter
 module.exports = function () {
   var self = this;
+  this.test = function () {
+    console.log('data!!!!!!!!!!!');
+  }
   this.set = function (params) {
     var key = params[0]
     , val = params[1];
