@@ -1,29 +1,29 @@
 // S E R V E R
 var http = require('http')
-, User = require('./_usr')
-, Router = require('./_rtr')
-, Surveyor = require('./_map')
-, Bricoleur = require('./_brico')
-, Provisioner = require('./_pre')
+, USR = require('./_usr')
+, RTR = require('./_rtr')
+, MAP = require('./_map')
+, BRICO = require('./_brico')
+, PRE = require('./_pre')
 , shoe = require('shoe');
 
-var usr = new User(); // user hack :(
-var router = new Router(usr.def.routes);
+var usr = new USR(); // user hack :(
+var router = new RTR(usr.def.routes);
 var server = http.createServer(router.handleRoutes); // pass all http reqs to router.handleRoutes
 server.listen(8888);
 
-var brico = new Bricoleur();
-var surv = new Surveyor('./_wilds');
+var brico = new BRICO();
+var map = new MAP('./_wilds');
 
-surv.scan(function () { 
-  var prov = new Provisioner({ 
-    src : surv.client_files,
+map.scan(function () { 
+  var pre = new PRE({ 
+    src : map.client_files,
     dst : './_wilds/bundle.min.js',
     compress : true
   }, function (msg) {
     console.log(msg);
   }); 
-  brico.init(surv.map_server);
+  brico.init(map.map_server);
 });
 
 var sock = shoe(function(stream){
@@ -32,5 +32,5 @@ var sock = shoe(function(stream){
 sock.install(server, '/bus');
 sock.on('connection', function(conn) { // trigger create streams func in brico
   var x = brico.stream.createStream('brico');
-  x.write(['init',surv.map_client]);
+  x.write(['init',map.map_client]);
 });
