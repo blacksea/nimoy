@@ -1,9 +1,4 @@
-/*{
-  "id":"core",
-	"scope":["client"],
-	"desc":"information"
-}*/
-// C O R E
+// C L I E N T
 var shoe = require('shoe')
 , bus = shoe('bus')
 , bricoleur = require('../_brico');

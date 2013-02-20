@@ -15,18 +15,12 @@ module.exports = function (dir) {
     _[module.id] = new _[module.id.toUpperCase()]();
     cb();
   }
-  setTimeout(function(){
-    _.send.test();
-  }, 3000);
-  ////////////////////////////////////////////////
   this.stream = MuxDemux();
   this.stream.on('connection', function (stream) {
     stream.on('data', function (data) { // hook / pipe stream from here
-      console.log(stream.meta+' '+data);
-      if(stream.meta==='brico') {
+      if(stream.meta==='brico') { // call fn in this scope
         self[data[0]](data[1]);
        }
     });
-  /////////////////////////////////////////////////////////////////////
   });
 }

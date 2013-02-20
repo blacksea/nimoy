@@ -1,10 +1,10 @@
-// C O R E  server
+// S E R V E R
 var http = require('http')
 , User = require('./_user')
 , Router = require('./_route')
 , Surveyor = require('./_surv')
 , Bricoleur = require('./_brico')
-, Provisioner = require('./_prov')
+, Provisioner = require('./_pre')
 , shoe = require('shoe');
 
 var usr = new User(); // user hack :(

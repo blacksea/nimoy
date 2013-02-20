@@ -12,5 +12,5 @@
   },
   "database" : "redis >= 2.6",
   "engine": "node >= 0.8.17",
-  "scripts": { "start": "node _core" }
+  "scripts": { "start": "node _srvr" }
 }
