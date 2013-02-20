@@ -1,8 +1,8 @@
 // S E R V E R
 var http = require('http')
-, User = require('./_user')
-, Router = require('./_route')
-, Surveyor = require('./_surv')
+, User = require('./_usr')
+, Router = require('./_rtr')
+, Surveyor = require('./_map')
 , Bricoleur = require('./_brico')
 , Provisioner = require('./_pre')
 , shoe = require('shoe');
