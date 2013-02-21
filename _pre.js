@@ -1,4 +1,5 @@
-// P R O V I S I O N E R
+// PRECOMPILER FOR CLIENT : manages dependancies
+
 var browserify = require('browserify')
 , fs = require('fs')
 , uglifyJS = require('uglify-js');

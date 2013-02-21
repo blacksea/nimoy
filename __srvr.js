@@ -1,10 +1,13 @@
-// S E R V E R
-var http = require('http')
+// SERVER
+
+Object._ = function(){} // create a global scope for modules
+
+var BRICO = require('./_brico')
+, PRE = require('./_pre')
+, MAP = require('./_map')
 , USR = require('./_usr')
 , RTR = require('./_rtr')
-, MAP = require('./_map')
-, BRICO = require('./_brico')
-, PRE = require('./_pre')
+, http = require('http')
 , shoe = require('shoe');
 
 var usr = new USR(); // user hack :(

@@ -1,4 +1,5 @@
-// U S E R 
+// USER 
+
 module.exports = function () {
   var self = this;
   this.def = {

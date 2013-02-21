@@ -1,4 +1,5 @@
-// S U R V E Y O R 
+// MAPPER
+
 var fs = require('fs')
 , async = require('async');
 
@@ -6,7 +7,7 @@ module.exports = function (dir) { // generate a server map and client map
   var self = this;
   this.map_client = [];
   this.map_server = [];
-  this.client_files = [];
+  this.client_files = ['./__clnt.js'];
   this.scan = function (cb) { 
     fs.readdir(dir, function (err, files) {
       async.forEach(files, oggle, function (err) {

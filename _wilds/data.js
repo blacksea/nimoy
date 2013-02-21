@@ -3,6 +3,9 @@
 	"scope":["server"],
 	"desc":"data(redis) api/interface"
 }*/
+
+var _ = Object._;
+
 var redis = require('redis')
 , client = redis.createClient();
 // an easy api to store retreive data // map filter

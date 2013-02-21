@@ -1,10 +1,11 @@
-// B R I C O L E U R 
-var MuxDemux = require('mux-demux')
+// BRICOLEUR 
+
+var _ = Object._
+, MuxDemux = require('mux-demux')
 , async = require('async');
 
 module.exports = function (dir) {
   var self = this;
-  var _ = function () {} // environment/global var for mods
   this.init = function (map) { // an array of objs 
     async.forEach(map, self.addModule, function () {
       console.log('modules added');
