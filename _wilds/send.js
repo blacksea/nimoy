@@ -3,7 +3,6 @@
 	"scope":["client","server"],
 	"desc":"information"
 }*/
-// meta for bricoleur to read in
 
 var _ = Object._;
 

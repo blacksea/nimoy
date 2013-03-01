@@ -2,24 +2,24 @@
 
 Object._ = function(){} // create a global scope for modules
 
-var BRICO = require('./_brico')
-, PRE = require('./_pre')
-, MAP = require('./_map')
-, USR = require('./_usr')
-, RTR = require('./_rtr')
+var Bricoleur = require('./_brico')
+, Precompiler = require('./_pre')
+, Mapper = require('./_map')
+, User = require('./_usr')
+, Router = require('./_rtr')
 , http = require('http')
 , shoe = require('shoe');
 
-var usr = new USR(); // user hack :(
-var router = new RTR(usr.def.routes);
+var usr = new User(); // user hack :(
+var router = new Router(usr.def.routes);
 var server = http.createServer(router.handleRoutes); // pass all http reqs to router.handleRoutes
 server.listen(8888);
 
-var brico = new BRICO();
-var map = new MAP('./_wilds');
+var brico = new Bricoleur();
+var map = new Mapper('./_wilds');
 
 map.scan(function () { 
-  var pre = new PRE({ 
+  var pre = new Precompiler({ 
     src : map.client_files,
     dst : './_wilds/bundle.min.js',
     compress : true

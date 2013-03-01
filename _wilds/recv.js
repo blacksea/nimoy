@@ -7,8 +7,8 @@
 var _ = Object._;
 
 module.exports = function () {
-  setTimeout(function() {
-    Object._.send.test();
-  }, 3000);
   var self = this;
+  setTimeout(function() {
+    _.send.test();
+  }, 3000);
 }
