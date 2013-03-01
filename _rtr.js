@@ -1,19 +1,20 @@
 // ROUTER 
 
-var filed = require('filed');
+var filed = require('filed')
+, async = require('async');
+
 module.exports = function (routes) {
+  // rewrite this ?
   this.handleRoutes = function (req,res) {
     var match = false;
-    for (var i=0;i<routes.length;i++) {
-      var route = routes[i];
+    async.forEach(routes, function (route, cb) {
       if(route.url === req.url) {
         filed(route.file).pipe(res);
         match = true;
-        break;
-      } else if(route.url != req.url) {
-        match = false;
       }
-    }
-  if (match === false) res.end('fuuuuuk');
+      cb();
+    }, function () {
+      if (match===false) res.end('fuuuuk');
+    });
   }
 }
