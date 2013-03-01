@@ -1,7 +1,9 @@
 
 ▲▽◘⩋○⧷⧽ 'brico-wilds' 
 
-<!-- 'brico-wilds' is a modular software engine that is designed around the user.
+<!--- 
+
+'brico-wilds' is a modular software engine that is designed around the user.
 Influenced by unix philosophy it provides a '_brico' ('bricoleur') model, a model that encourages hacking
 and is designed to allow the user to collage together many small modular elements.
 
@@ -20,7 +22,7 @@ Robustness and speed performance is acheived through transparency, designed with
 A way of describing software through storytelling / narrative 
 - art . design . function
 - ability . making . construction
-- how to create without rigid guidelines how to connect . encourage . facilitate good . innovative ideas
+- how to create without rigid guidelines, how to connect . encourage . facilitate good . innovative ideas
 - openness . community . outsideofaninstitution
 
 encourage / facilitate /
@@ -34,6 +36,7 @@ non-technical but correct ?!?
 
 --- creation - process - building ... 
 
-------------------------------------------------
-_______________________________________________
---!>
+-------------------------------------
+_____________________________________
+
+-->
