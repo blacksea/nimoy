@@ -24,4 +24,9 @@ module.exports = function (dir) {
        }
     });
   });
+  // function to connect / disconnect | pipe / unpipe modules
+  this.connect = function (input, output) {
+    _[output].output.pipe(_[input].input);
+  }
+  // how to disconnect a stream ?
 }
