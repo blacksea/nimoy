@@ -1,11 +1,11 @@
 
 ▲▽◘⩋○⧷⧽ 'brico-wilds' 
 
-'brico-wilds' is a modular software engine that is designed around the user.
-Influenced by unix philosophy it provides a '_brico' (bricoleur) model, a model that encourages hacking
+<!-- 'brico-wilds' is a modular software engine that is designed around the user.
+Influenced by unix philosophy it provides a '_brico' ('bricoleur') model, a model that encourages hacking
 and is designed to allow the user to collage together many small modular elements.
 
-Modules are encouraged to be very diverse, they should present / incorporate / encapsule a particular idea / functionality. 
+Modules are encouraged to be very diverse, they should present / incorporate / encapsulate a particular idea / functionality. 
 Writing modules and using them should be trivial, there should be the least amount of resistence possible in creating and using new modules. 
 Also users should have complete control over their bricoleur, they should be able to select any database they wish, 
 convert/stream their user data in any way they see fit.
@@ -25,3 +25,15 @@ A way of describing software through storytelling / narrative
 
 encourage / facilitate /
 overcome weakness / inability / constraints /
+
+How to describe as a narrative / story . 
+
+in a recognizable format !?
+
+non-technical but correct ?!?
+
+--- creation - process - building ... 
+
+------------------------------------------------
+_______________________________________________
+--!>
