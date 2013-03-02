@@ -14,7 +14,7 @@ module.exports = function (dir) {
     });
   }
 
-  this.streamMapData = function (data) {
+  this.handleData = function (data) {
     console.dir(data);
   }
 

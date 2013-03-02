@@ -6,8 +6,10 @@ var fs = require('fs')
 
 module.exports = function (dir) {
   var self = this;
-  this.scan = new Stream();
-  this.scan.readable = true;
+  this.client = new Stream();
+  this.server = new Stream();
+  this.client.readable = true;
+  this.server.readable = true;
 
   fs.readdir(dir, function (err, files) { // read dir!
     if(err) throw err;
@@ -28,7 +30,10 @@ module.exports = function (dir) {
           buf += data[i];
           if(data[i]==='}') {
             var obj = JSON.parse(buf.replace('/*','')); 
-            self.scan.emit('data', obj);
+            console.dir(obj.scope);
+            for (var x=0;x<obj.scope.length;x++) {
+              self[obj.scope[x]].emit('data', obj);
+            }
             cb();
             break;
           }

@@ -19,8 +19,8 @@ var server = http.createServer(router.handleRoutes); // pass all http reqs to ro
 server.listen(8888);
 
 var map = new Mapper('./_wilds'); // begin mapping wilds
-map.Client.on('data', pre.handleData); // stream client map to precompiler
-map.Server.on('data', brico.handleData); // stream server map to brico
+map.client.on('data', pre.handleData); // stream client map to precompiler
+map.server.on('data', brico.handleData); // stream server map to brico
 
 var sock = shoe(function(stream){
   stream.pipe(brico.stream).pipe(stream);
