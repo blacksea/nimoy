@@ -1,44 +1,34 @@
 // MAPPER
 
 var fs = require('fs')
+, Stream = require('stream')
 , async = require('async');
 
-module.exports = function (dir) { // generate a server map and client map
+module.exports = function (dir) {
   var self = this;
-  this.map_client = [];
-  this.map_server = [];
-  this.client_files = ['./__clnt.js'];
-  this.scan = function (cb) { 
-    fs.readdir(dir, function (err, files) {
-      async.forEach(files, oggle, function (err) {
-        if(err) throw err;
-        if(err===null) {
-          cb();
-        }
-      });
-    });	
-  }
-  function oggle (file, cb) { 
+  this.scan = new Stream();
+  this.scan.readable = true;
+
+  fs.readdir(dir, function (err, files) { // read dir!
+    if(err) throw err;
+    async.forEach(files, readFile, function (err) {
+      if(err===null) return self;
+      if(err) throw err;
+    });
+  }); 
+
+  function readFile (file, cb) { 
     var ext = file.split('.');
-    if(ext[0]!='.' && ext[1]==='js') { // exclude hidden files & non js files
+    if(ext[1]==='js'&&ext[0]!==''){ // ignore hidden and non js files
       var fileStream = fs.createReadStream(dir+'/'+file);
-      fileStream.on('readable', function () {
-        var data = fileStream.read().toString();
-        var buf = '';
-        for (var i=0; i<data.length; i++) {
+      fileStream.on('data', function (rawdata) {
+        var data = rawdata.toString()
+        , buf = '';
+        for (var i=0;i<data.length;i++) {
           buf += data[i];
           if(data[i]==='}') {
-            var obj = JSON.parse(buf.replace('/*',''));
-            if (typeof obj === 'object') {
-              obj.filepath = dir+'/'+file;
-              for(var n=0;n<obj.scope.length;n++) {
-                if (obj.scope[n]==='client') {
-                  self.map_client.push(obj);
-                  self.client_files.push(obj.filepath);
-                }
-                if (obj.scope[n]==='server') self.map_server.push(obj);
-              }
-            } // log somekind of err
+            var obj = JSON.parse(buf.replace('/*','')); 
+            self.scan.emit('data', obj);
             cb();
             break;
           }
@@ -46,4 +36,6 @@ module.exports = function (dir) { // generate a server map and client map
       });
     } else cb();
   }
-} 
+}
+
+// apply some filters!?

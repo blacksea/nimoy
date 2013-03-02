@@ -10,29 +10,24 @@ var Bricoleur = require('./_brico')
 , http = require('http')
 , shoe = require('shoe');
 
+var brico = new Bricoleur();
+var pre = new Precompiler();
 var usr = new User(); // user hack :(
 var router = new Router(usr.def.routes);
+
 var server = http.createServer(router.handleRoutes); // pass all http reqs to router.handleRoutes
 server.listen(8888);
 
-var brico = new Bricoleur();
-var map = new Mapper('./_wilds');
-
-map.scan(function () { 
-  var pre = new Precompiler({ 
-    src : map.client_files,
-    dst : './_wilds/bundle.min.js',
-    compress : true
-  }, function (msg) {
-    console.log(msg);
-  }); 
-  brico.init(map.map_server);
-});
+var map = new Mapper('./_wilds'); // begin mapping wilds
+map.Client.on('data', pre.handleData); // stream client map to precompiler
+map.Server.on('data', brico.handleData); // stream server map to brico
 
 var sock = shoe(function(stream){
   stream.pipe(brico.stream).pipe(stream);
 });
+
 sock.install(server, '/bus');
+
 sock.on('connection', function(conn) { // trigger create streams func in brico
   var x = brico.stream.createStream('brico');
   x.write(['init',map.map_client]);
