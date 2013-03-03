@@ -22,7 +22,8 @@ module.exports = function (dir) {
   function streamFileData (file, cb) { 
     var ext = file.split('.');
     if(ext[1]==='js'&&ext[0]!==''){ // ignore hidden and non js files
-      var fileStream = fs.createReadStream(dir+'/'+file);
+      var filepath = dir+'/'+file
+      , fileStream = fs.createReadStream(filepath);
       fileStream.on('data', function (rawdata) {
         var data = rawdata.toString()
         , buf = '';
@@ -30,6 +31,7 @@ module.exports = function (dir) {
           buf += data[i];
           if(data[i]==='}') {
             var obj = JSON.parse(buf.replace('/*','')); 
+            obj.filepath = filepath; // add the filepath
             for (var x=0;x<obj.scope.length;x++) {
               self[obj.scope[x]].emit('data', obj);
             }
