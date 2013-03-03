@@ -7,6 +7,7 @@ var _ = Object._
 
 module.exports = function (dir) {
   var self = this;
+  this.objMap = [];
   
   this.init = function (map) { // an array of objs 
     async.forEach(map, self.addModule, function () {
@@ -14,8 +15,8 @@ module.exports = function (dir) {
     });
   }
 
-  this.handleData = function (data) {
-    console.dir(data);
+  this.handleData = function (dataObj) {
+   self.objMap.push(dataObj);
   }
 
   this.addModule = function (module, cb) {
@@ -34,10 +35,14 @@ module.exports = function (dir) {
     });
   });
 
+  this.loaded = function () {
+    console.dir(self.objMap);
+  }
+  
   // function to connect / disconnect | pipe / unpipe modules
   
   this.connect = function (input, output) {
     _[output].output.pipe(_[input].input);
   }
-  // how to disconnect a stream ?
+  // how to disconnect a stream ? // just unpipe!
 }

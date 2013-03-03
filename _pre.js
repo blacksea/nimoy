@@ -5,12 +5,12 @@ var browserify = require('browserify')
 
 module.exports = function () {
   /* 
-    opts.src = (array) mod paths to browserify
-    opts.dst = (string) destination file 
-    opts.compress = (bool) minify or not
+   opts.src = (array) mod paths to browserify
+   opts.dst = (string) destination file 
+   opts.compress = (bool) minify or not
   */
-  this.handleData = function (data) {
-    console.dir(data);
+  this.handleData = function (obj) {
+    // data obj 
   }
   // var data = browserify(opts.src).bundle();
   // if(opts.compress===true) {

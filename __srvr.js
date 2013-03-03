@@ -5,13 +5,14 @@ Object._ = function(){} // create a global scope for modules
 var Bricoleur = require('./_brico')
 , Precompiler = require('./_pre')
 , Mapper = require('./_map')
-, User = require('./_usr')
 , Router = require('./_rtr')
+, User = require('./_usr')
 , http = require('http')
 , shoe = require('shoe');
 
 var brico = new Bricoleur();
 var pre = new Precompiler();
+
 var usr = new User(); // user hack :(
 var router = new Router(usr.def.routes);
 
@@ -20,7 +21,9 @@ server.listen(8888);
 
 var map = new Mapper('./_wilds'); // begin mapping wilds
 map.client.on('data', pre.handleData); // stream client map to precompiler
+map.client.on('end', pre.compile);
 map.server.on('data', brico.handleData); // stream server map to brico
+map.server.on('end', brico.loaded);
 
 var sock = shoe(function(stream){
   stream.pipe(brico.stream).pipe(stream);

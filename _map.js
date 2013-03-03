@@ -11,15 +11,15 @@ module.exports = function (dir) {
   this.client.readable = true;
   this.server.readable = true;
 
-  fs.readdir(dir, function (err, files) { // read dir!
+  fs.readdir(dir, function (err, files) { 
     if(err) throw err;
-    async.forEach(files, readFile, function (err) {
-      if(err===null) return self;
-      if(err) throw err;
+    async.forEach(files, streamFileData, function () {
+      self.server.emit('end');
+      self.client.emit('end');
     });
-  }); 
+  });
 
-  function readFile (file, cb) { 
+  function streamFileData (file, cb) { 
     var ext = file.split('.');
     if(ext[1]==='js'&&ext[0]!==''){ // ignore hidden and non js files
       var fileStream = fs.createReadStream(dir+'/'+file);
@@ -30,7 +30,6 @@ module.exports = function (dir) {
           buf += data[i];
           if(data[i]==='}') {
             var obj = JSON.parse(buf.replace('/*','')); 
-            console.dir(obj.scope);
             for (var x=0;x<obj.scope.length;x++) {
               self[obj.scope[x]].emit('data', obj);
             }
@@ -41,6 +40,7 @@ module.exports = function (dir) {
       });
     } else cb();
   }
+
 }
 
 // apply some filters!?
