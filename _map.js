@@ -2,6 +2,7 @@
 
 var fs = require('fs')
 , Stream = require('stream')
+, stylus = require('stylus')
 , async = require('async');
 
 module.exports = function (dir) {
@@ -44,9 +45,18 @@ module.exports = function (dir) {
   }
 
   function getHtml(file, cb) {
-    fs.readFile(file, function(data) {
+    fs.readFile(file, function(err, data) {
+      if(err) throw err;
       var html = data.toString();
+      cb(html);
     });
   }
 
+  function getCss(file, cb) {
+    stylus.render(str, { filename: 'nesting.css' }, function(err, css){
+      if(err)throw err;
+      console.log(css);
+    });
+  }
+  
 }
