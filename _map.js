@@ -33,6 +33,11 @@ module.exports = function (dir) {
           if(data[i]==='}') {
             var obj = JSON.parse(buf.replace('/*','')); 
             obj.filepath = filepath; // add the filepath + check for deps. like html
+            if (obj.deps) {
+              for(var x=0;x<obj.deps.length;x++){
+                handleDep(obj.deps[x]);
+              }
+            }
             for (var x=0;x<obj.scope.length;x++) {
               self[obj.scope[x]].emit('data', obj);
             }
