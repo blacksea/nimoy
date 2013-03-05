@@ -13,7 +13,7 @@ module.exports = function (routes) {
       }
       cb();
     }, function () {
-      if (match===false) res.end('fuuuuk');
+      if (match===false) res.end('404'); 
     });
   }
 }

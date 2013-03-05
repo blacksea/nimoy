@@ -11,6 +11,4 @@ module.exports = function () {
     ],
     modules:['data']
   }
-  // somekind of auth / login ????!!!! needed
-  // user storage basics -- in db
 }

@@ -1,4 +1,4 @@
-// BRICOLEUR 
+//BRICOLEUR 
 
 var _ = Object._
 , MuxDemux = require('mux-demux')
@@ -8,15 +8,14 @@ var _ = Object._
 module.exports = function (dir) {
   var self = this;
   this.objMap = [];
+  this.stream = MuxDemux();
   
-  this.init = function (map) { // an array of objs 
-    async.forEach(map, self.addModule, function () {
-      console.log('modules added');
-    });
-  }
-
   this.handleData = function (dataObj) {
    self.objMap.push(dataObj);
+  }
+
+  this.loaded = function () {
+    console.dir(self.objMap);
   }
 
   this.addModule = function (module, cb) {
@@ -25,24 +24,20 @@ module.exports = function (dir) {
     cb();
   }
 
-  this.stream = MuxDemux();
+  this.connect = function (input, output) { 
+    _[output].output.pipe(_[input].input);
+  } 
+
+  this.disconnect = function (input, output) {
+    _[output].output.unpipe(_[input].input);
+  }
 
   this.stream.on('connection', function (stream) {
     stream.on('data', function (data) { // hook / pipe stream from here
-      if(stream.meta === 'brico') { // call fn in this scope
+      if(stream.meta === 'brico') { // !?! call fn in this scope
         self[data[0]](data[1]);
        }
     });
   });
-
-  this.loaded = function () {
-    console.dir(self.objMap);
-  }
   
-  // function to connect / disconnect | pipe / unpipe modules
-  
-  this.connect = function (input, output) {
-    _[output].output.pipe(_[input].input);
-  }
-  // how to disconnect a stream ? // just unpipe!
 }

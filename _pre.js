@@ -5,15 +5,19 @@ var browserify = require('browserify')
 , uglifyJS = require('uglify-js');
 
 module.exports = function (opts) {
+
   /* 
    opts.src = (array) mod paths to browserify
    opts.dst = (string) destination file 
    opts.compress = (bool) minify or not
   */
-  this.handleData = function (obj) {
-    console.dir(obj.filepath);
+
+  // module filtering!/processing!
+
+  this.handleData = function (obj) { // filters here!?! allow a filter function pass through
     opts.src.push(obj.filepath);
   }
+
   this.compile = function () {
     var data = browserify(opts.src).bundle();
     if(opts.compress===true) {

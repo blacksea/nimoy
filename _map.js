@@ -31,7 +31,7 @@ module.exports = function (dir) {
           buf += data[i];
           if(data[i]==='}') {
             var obj = JSON.parse(buf.replace('/*','')); 
-            obj.filepath = filepath; // add the filepath
+            obj.filepath = filepath; // add the filepath + check for deps. like html
             for (var x=0;x<obj.scope.length;x++) {
               self[obj.scope[x]].emit('data', obj);
             }
@@ -43,6 +43,10 @@ module.exports = function (dir) {
     } else cb();
   }
 
-}
+  function getHtml(file, cb) {
+    fs.readFile(file, function(data) {
+      var html = data.toString();
+    });
+  }
 
-// apply some filters!?
+}
