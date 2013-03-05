@@ -44,19 +44,20 @@ module.exports = function (dir) {
     } else cb();
   }
 
-  function getHtml(file, cb) {
-    fs.readFile(file, function(err, data) {
-      if(err) throw err;
-      var html = data.toString();
-      cb(html);
+  function handleDep(file, cb) {
+    var ext = file.split('.')[1];
+    fs.readFile(file, function (err, data) {
+      if (err) throw err;
+      var str = data.toString();
+      if (ext==='html') {
+        cb(str);
+      } else if (ext==='css') {
+        stylus.render(str, function (err, css) {
+          if (err) throw err;
+          cb(css);
+        });
+      }
     });
   }
 
-  function getCss(file, cb) {
-    stylus.render(str, { filename: 'nesting.css' }, function(err, css){
-      if(err)throw err;
-      console.log(css);
-    });
-  }
-  
 }
