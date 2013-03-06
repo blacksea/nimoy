@@ -32,5 +32,5 @@ sock.install(server, '/bus');
 sock.on('connection', function(conn) { // trigger create streams func in brico
   var x = brico.Stream.createStream('brico');
   // pass client modules to brico
-  x.write(['AddMod',{id:'conosole',scope:['client'],filepath:'./_wilds/console.js'}]); // init user modules 
+  x.write(['addMod',{id:'conosole',scope:['client'],filepath:'./_wilds/console.js'}]); // init user modules 
 });

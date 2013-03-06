@@ -16,7 +16,7 @@ module.exports = function (opts) {
   this.Stream = MuxDemux();
   
   this.HandleData = function (dataObj) {
-   self.objMap.push(dataObj);
+   // self.objMap.push(dataObj);
   }
 
   this.Conn = function (state, input, output) { // handle module connections
@@ -24,7 +24,7 @@ module.exports = function (opts) {
     if (state==='connect') _[output].output.pipe(_[input].input);
   } 
 
-  this.AddMod = function (module, cb) {
+  this.addMod = function (module, cb) {
     if (opts.scope==='client') module.filepath = module.id; // client side require should be name not path
     _[module.id.toUpperCase()] = require(module.filepath);
     _[module.id] = new _[module.id.toUpperCase()]();
@@ -39,6 +39,7 @@ module.exports = function (opts) {
   this.Stream.on('connection', function (stream) { 
     stream.on('data', function (data) { 
       if(stream.meta === 'brico') { 
+        console.dir(data);
         self[data[0]](data[1]);
        }
     });

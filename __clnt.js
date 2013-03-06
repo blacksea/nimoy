@@ -7,4 +7,4 @@ var shoe = require('shoe')
 , bricoleur = require('../_brico');
 
 var brico = new bricoleur({scope:'client'});
-bus.pipe(brico.stream).pipe(bus);
+bus.pipe(brico.Stream).pipe(bus);
