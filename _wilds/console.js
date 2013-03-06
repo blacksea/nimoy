@@ -1,7 +1,8 @@
 /*{
   "id":"console",
 	"scope":["client"],
-	"desc":"cli"
+	"desc":"cli",
+  "deps":["console.html","console.styl"]
 }*/
 
 var _ = Object._;

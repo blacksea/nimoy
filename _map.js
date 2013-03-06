@@ -32,16 +32,14 @@ module.exports = function (dir) {
           buf += data[i];
           if(data[i]==='}') {
             var obj = JSON.parse(buf.replace('/*','')); 
-            obj.filepath = filepath; // add the filepath + check for deps. like html
-            if (obj.deps) {
-              for(var x=0;x<obj.deps.length;x++){
-                handleDep(obj.deps[x]);
+            obj.filepath = filepath; // add the filepath
+            handleData(obj, function (newObj) {
+              for ( var x=0;x<newObj.scope.length;x++) {
+                console.dir(newObj);
+                self[newObj.scope[x]].emit('data', newObj);
               }
-            }
-            for (var x=0;x<obj.scope.length;x++) {
-              self[obj.scope[x]].emit('data', obj);
-            }
-            cb();
+              cb();
+            });
             break;
           }
         }
@@ -49,20 +47,31 @@ module.exports = function (dir) {
     } else cb();
   }
 
-  function handleDep(file, cb) {
-    var ext = file.split('.')[1];
-    fs.readFile(file, function (err, data) {
-      if (err) throw err;
-      var str = data.toString();
-      if (ext==='html') {
-        cb(str);
-      } else if (ext==='css') {
-        stylus.render(str, function (err, css) {
-          if (err) throw err;
-          cb(css);
-        });
-      }
-    });
+  function handleData(obj, cb) {
+    if (obj.deps) { 
+      async.forEach(obj.deps, handleDep, function () {
+        cb(obj);
+      });
+    } else if (!obj.deps) {
+      cb(obj);
+    }
+    function handleDep (file, cb) {
+      var ext = file.split('.')[1];
+      fs.readFile('./_wilds/'+file, function (err, data) {
+        if (err) throw err;
+        var str = data.toString();
+        if (ext==='html') {
+          obj.html = str;
+          cb();
+        } else if (ext==='styl') {
+          stylus.render(str, function (err, css) {
+            if (err) throw err;
+            obj.css = css;
+            cb();
+          });
+        }
+      });
+    }
   }
 
 }
