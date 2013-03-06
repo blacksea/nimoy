@@ -51,6 +51,7 @@ module.exports = function (dir) {
   }
 
   function handleData (obj, cb) {
+
     if (obj.deps) { 
       async.forEach(obj.deps, handleDep, function () {
         cb(obj);
@@ -76,6 +77,7 @@ module.exports = function (dir) {
         }
       });
     }
+
   }
 
 }

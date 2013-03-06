@@ -5,11 +5,11 @@ module.exports = function () {
   this.def = {
     routes:[
       {url:"/",
-      file:"./_wilds/frame.html"},
-      {url:"/bundle.min.js",
-      file:"./_wilds/bundle.min.js"},
-      {url:"/styles.css",
-      file:"./_wilds/styles.css"}
+      file:"./_wilds/_index.html"},
+      {url:"/_scripts.min.js",
+      file:"./_wilds/_scripts.min.js"},
+      {url:"/_styles.css",
+      file:"./_wilds/_styles.css"}
     ],
     modules:['data']
   }
