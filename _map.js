@@ -11,12 +11,15 @@ module.exports = function (dir) {
   this.server = new Stream();
   this.client.readable = true;
   this.server.readable = true;
+  this.clientMap = [];
+  this.serverMap = [];
 
   fs.readdir(dir, function (err, files) { 
     if(err) throw err;
     async.forEach(files, streamFileData, function () {
       self.server.emit('end');
       self.client.emit('end');
+      console.dir(self.clientMap);
     });
   });
 
@@ -35,7 +38,7 @@ module.exports = function (dir) {
             obj.filepath = filepath; // add the filepath
             handleData(obj, function (newObj) {
               for ( var x=0;x<newObj.scope.length;x++) {
-                console.dir(newObj);
+                self[newObj.scope[x]+'Map'].push(newObj);
                 self[newObj.scope[x]].emit('data', newObj);
               }
               cb();
@@ -47,7 +50,7 @@ module.exports = function (dir) {
     } else cb();
   }
 
-  function handleData(obj, cb) {
+  function handleData (obj, cb) {
     if (obj.deps) { 
       async.forEach(obj.deps, handleDep, function () {
         cb(obj);
@@ -55,6 +58,7 @@ module.exports = function (dir) {
     } else if (!obj.deps) {
       cb(obj);
     }
+
     function handleDep (file, cb) {
       var ext = file.split('.')[1];
       fs.readFile('./_wilds/'+file, function (err, data) {

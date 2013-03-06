@@ -33,5 +33,5 @@ sock.install(server, '/bus');
 sock.on('connection', function(conn) { // trigger create streams func in brico
   var x = brico.stream.createStream('brico');
   // pass client modules to brico
-  // x.write(['init',map.map_client]); // init user modules 
+  x.write(['log',map.clientMap]); // init user modules 
 });
