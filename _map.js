@@ -24,7 +24,9 @@ module.exports = function (dir) {
   });
 
   function streamFileData (file, cb) { 
+
     var ext = file.split('.');
+
     if(ext[1]==='js'&&ext[0]!==''){ // ignore hidden and non js files
       var filepath = dir+'/'+file
       , fileStream = fs.createReadStream(filepath);

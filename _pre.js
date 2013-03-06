@@ -32,6 +32,7 @@ module.exports = function (opts) {
       data = bundleMin.code;
     }
 
+    // hook html into data string
     fs.writeFile(opts.dst,data,function (err) {
       if (err) throw(err);
       compileCSS();
@@ -44,5 +45,4 @@ module.exports = function (opts) {
     }
 
   }    
-  
 }

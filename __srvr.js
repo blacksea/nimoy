@@ -10,7 +10,7 @@ var Bricoleur = require('./_brico')
 , http = require('http')
 , shoe = require('shoe');
 
-var brico = new Bricoleur();
+var brico = new Bricoleur({scope:'server'});
 var pre = new Precompiler({compress:false,src:['./__clnt.js'],dst:'./_wilds/bundle.min.js',css:'./_wilds/styles.css'});
 
 var usr = new User(); 
