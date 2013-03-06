@@ -10,7 +10,7 @@ var Bricoleur = require('./_brico')
 , http = require('http')
 , shoe = require('shoe');
 
-var brico = new Bricoleur({scope:'server'});
+var brico = new Bricoleur({scope:'server',deps:['data']});
 var pre = new Precompiler({compress:false,src:['./__clnt.js'],dst:'./_wilds/bundle.min.js',css:'./_wilds/styles.css'});
 
 var usr = new User(); 
@@ -21,17 +21,16 @@ server.listen(8888);
 var map = new Mapper('./_wilds'); // begin mapping wilds
 map.client.on('data', pre.handleData); // stream client map to precompiler
 map.client.on('end', pre.compile);
-map.server.on('data', brico.handleData); // stream server map to brico
-map.server.on('end', brico.loaded); // load modules.../ 
+map.server.on('data', brico.HandleData); // stream server map to brico
 
 var sock = shoe(function(stream){
-  stream.pipe(brico.stream).pipe(stream);
+  stream.pipe(brico.Stream).pipe(stream);
 });
 
 sock.install(server, '/bus');
 
 sock.on('connection', function(conn) { // trigger create streams func in brico
-  var x = brico.stream.createStream('brico');
+  var x = brico.Stream.createStream('brico');
   // pass client modules to brico
-  x.write(['log',map.clientMap]); // init user modules 
+  x.write(['AddMod',{id:'conosole',scope:['client'],filepath:'./_wilds/console.js'}]); // init user modules 
 });
