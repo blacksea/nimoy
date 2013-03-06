@@ -39,8 +39,8 @@ module.exports = function (opts) {
   this.Stream.on('connection', function (stream) { 
     stream.on('data', function (data) { 
       if(stream.meta === 'brico') { 
-        console.dir(data);
-        self[data[0]](data[1]);
+        console.log(data);
+        // self[data[0]](data[1]);
        }
     });
   });
