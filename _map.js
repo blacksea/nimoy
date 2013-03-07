@@ -63,14 +63,12 @@ module.exports = function (dir) {
 
     function handleDep (file, cb) {
       var ext = file.split('.')[1];
-      fs.readFile('./_wilds/'+file, function (err, data) {
+      fs.readFile('./_wilds/'+file, function (err, content) {
         if (err) throw err;
-        var str = data.toString();
-        obj[ext] = str;
+        var str = content.toString();
+        obj[ext] = str; // add html/styl/css key with file content as value
         cb();
       });
     }
-
   }
-
 }
