@@ -5,30 +5,37 @@
   "deps":["console.html","console.styl"]
 }*/
 
+var Stream = require('stream');
+
 module.exports = function () {
 
   var self = this;
   this.template = null;
+  this.output = new Stream();
 
   this.init = function () {
-    var container = document.getElementById('container');
-    var log = document.createElement('div');
+
+    var container = document.getElementById('container')
+    , log = document.createElement('div');
+
     log.setAttribute('id','console');
     log.innerHTML = self.template;
+
     container.appendChild(log);
-    var form = document.getElementById('x');
+
+    var form = document.getElementById('x')
+    , prompt = form.querySelector('.console');
+    console.dir(prompt);
+
     form.onsubmit = function (e) {
       e.preventDefault();
-      console.dir(e.target[0].value);
-      return false;
+      var cmd = e.target[0].value; // entered text
+      self.output.emit('data',cmd);
+      prompt.blur();
     }
-    console.dir(form);
-  }
-
-  this.input = function (data) {
-  }
-
-  this.output = function (data) {
+    prompt.onblur = function () {
+      prompt.value = '';
+    }
   }
 
 }
