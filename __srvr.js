@@ -10,7 +10,7 @@ var Bricoleur = require('./_brico')
 , http = require('http')
 , shoe = require('shoe');
 
-var brico = new Bricoleur({scope:'server',deps:['data']});
+var brico = new Bricoleur({scope:'server'});
 var pre = new Precompiler({compress:false,src:['./__clnt.js'],dst:'./_wilds/_scripts.min.js',css:'./_wilds/_styles.css'});
 
 var usr = new User(); 
@@ -31,11 +31,12 @@ sock.install(server, '/bus');
 
 sock.on('connection', function(conn) { // trigger create streams func in brico
   var x = brico.Stream.createStream('brico');
-  // pass client modules to brico
   for(var i=0;i<map.clientMap.length;i++) {
     var mod = map.clientMap[i];
     if(mod.id==='console') {
-      x.write(['AddMod',mod]); // init user modules 
+      x.write(['AddMod',mod], function () {
+        console.dir('added '+mod.id);
+      }); // init user modules 
     }
   }
 });

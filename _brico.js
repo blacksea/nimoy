@@ -8,14 +8,11 @@ var _ = Object._ // module scope
 module.exports = function (opts) {
   
   /*
-   opts.deps = (array) base modules to load 
    opts.scope (string) 'client' or 'server'
   */
 
   var self = this;
 
-  this.Stream = MuxDemux();
-  
   this.HandleData = function (dataObj) {
    // self.objMap.push(dataObj);
   }
@@ -25,16 +22,20 @@ module.exports = function (opts) {
     if (state==='connect') _[output].output.pipe(_[input].input);
   } 
 
-  this.AddMod = function (module) {
+  this.AddMod = function (module, cb) {
     _[module.id.toUpperCase()] = require(module.filepath);
     _[module.id] = new _[module.id.toUpperCase()]();
     if (module.html) _[module.id].template = module.html;
+    cb();
   } 
 
-  this.DelMod = function (module) {
+  this.DelMod = function (module, cb) {
   }
 
   // CLIENT / SERVER BRICO COMMUNICATION
+  
+  this.Stream = MuxDemux();
+
   this.Stream.on('connection', function (stream) { 
     stream.on('data', function (data) { 
       if(stream.meta === 'brico') { 
