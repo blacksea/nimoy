@@ -12,8 +12,11 @@ module.exports = function () {
   var self = this;
   this.template = null;
 
-  this.test = function () {
-    console.log(self.template);
+  this.init = function () {
+    var container = document.getElementById('container');
+    var log = document.createElement('div');
+    log.innerHTML = self.template;
+    container.appendChild(log);
   }
 
   this.input = function (data) {

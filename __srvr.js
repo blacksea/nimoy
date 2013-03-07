@@ -34,9 +34,7 @@ sock.on('connection', function(conn) { // trigger create streams func in brico
   for(var i=0;i<map.clientMap.length;i++) {
     var mod = map.clientMap[i];
     if(mod.id==='console') {
-      x.write(['AddMod',mod], function () {
-        console.dir('added '+mod.id);
-      }); // init user modules 
+      x.write(['AddMod',mod]);
     }
   }
 });

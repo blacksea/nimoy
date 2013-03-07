@@ -26,6 +26,7 @@ module.exports = function (opts) {
     _[module.id.toUpperCase()] = require(module.filepath);
     _[module.id] = new _[module.id.toUpperCase()]();
     if (module.html) _[module.id].template = module.html;
+    if (_[module.id].init) _[module.id].init();
     cb();
   } 
 
@@ -40,7 +41,9 @@ module.exports = function (opts) {
     stream.on('data', function (data) { 
       if(stream.meta === 'brico') { 
         console.log(data);
-        self[data[0]](data[1]);
+        self[data[0]](data[1], function () {
+          console.dir('added '+data[1].id);
+        });
        }
     });
   });
