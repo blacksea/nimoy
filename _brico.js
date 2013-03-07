@@ -6,6 +6,7 @@ var _ = Object._ // module scope
 , async = require('async');
 
 module.exports = function (opts) {
+  
   /*
    opts.deps = (array) base modules to load 
    opts.scope (string) 'client' or 'server'
@@ -24,15 +25,13 @@ module.exports = function (opts) {
     if (state==='connect') _[output].output.pipe(_[input].input);
   } 
 
-  this.addMod = function (module, cb) {
-    if (opts.scope==='client') module.filepath = module.id; // client side require should be name not path
+  this.AddMod = function (module) {
     _[module.id.toUpperCase()] = require(module.filepath);
     _[module.id] = new _[module.id.toUpperCase()]();
     if (module.html) _[module.id].template = module.html;
-    cb();
   } 
 
-  this.DelMod = function (module, cb) {
+  this.DelMod = function (module) {
   }
 
   // CLIENT / SERVER BRICO COMMUNICATION
@@ -40,7 +39,7 @@ module.exports = function (opts) {
     stream.on('data', function (data) { 
       if(stream.meta === 'brico') { 
         console.log(data);
-        // self[data[0]](data[1]);
+        self[data[0]](data[1]);
        }
     });
   });

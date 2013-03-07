@@ -8,14 +8,18 @@
 var _ = Object._;
 
 module.exports = function () {
-  // default input function
+
   var self = this;
+  this.template = null;
+
   this.test = function () {
-    console.log('send called!!!!!!');
+    console.log(self.template);
   }
+
   this.input = function (data) {
   }
+
   this.output = function (data) {
   }
-  // default output function
+
 }
