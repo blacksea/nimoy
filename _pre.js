@@ -11,11 +11,10 @@ module.exports = function (opts) {
   /* 
    opts.src = (array) mod paths to browserify
    opts.dst = (string) destination file 
-   opts.css = (string) destination css
+   opts.srcCSS = (string) src css
+   opts.dstCSS = (string) destination css
    opts.compress = (bool) minify or not
   */
-
-  // module filtering!/processing!
 
   // handle css dependancies here! provide a single css loaded once ... also add gzip compression 
   // dynamic css manipulation should be done in plain js by loaded modules

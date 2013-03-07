@@ -2,7 +2,6 @@
 
 var fs = require('fs')
 , Stream = require('stream')
-, stylus = require('stylus')
 , async = require('async');
 
 module.exports = function (dir) {
