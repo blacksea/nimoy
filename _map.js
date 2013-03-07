@@ -67,16 +67,8 @@ module.exports = function (dir) {
       fs.readFile('./_wilds/'+file, function (err, data) {
         if (err) throw err;
         var str = data.toString();
-        if (ext==='html') {
-          obj.html = str;
-          cb();
-        } else if (ext==='styl') {
-          stylus.render(str, function (err, css) {
-            if (err) throw err;
-            obj.css = css;
-            cb();
-          });
-        }
+        obj[ext] = str;
+        cb();
       });
     }
 

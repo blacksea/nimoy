@@ -2,6 +2,7 @@
 
 var browserify = require('browserify')
 , fs = require('fs')
+, stylus = require('stylus')
 , uglifyJS = require('uglify-js');
 
 module.exports = function (opts) {
@@ -21,7 +22,7 @@ module.exports = function (opts) {
 
   this.handleData = function (obj) { // filters here!?! allow a filter function pass through
     opts.src.push(obj.filepath);
-    if(obj.css) self.css += obj.css; 
+    if(obj.styl) self.css += obj.styl; 
   }
 
   this.compile = function () {
@@ -39,9 +40,17 @@ module.exports = function (opts) {
     });
 
     function compileCSS () {
-       fs.writeFile(opts.css, self.css,function (err) {
-         if (err) throw(err);
-      });
+      fs.readFile(opts.srcCSS, function (err, data) {
+        if (err) throw err;
+        var styles = data.toString();
+        styles += self.css;
+        stylus.render(styles, {filename:opts.dstCSS}, function (err, css) {
+          if (err) throw err;
+          fs.writeFile(opts.dstCSS, css, function (err) {
+            if(err) throw err;
+          });
+        });
+     });
     }
 
   }    

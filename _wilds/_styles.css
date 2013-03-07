@@ -1,3 +1,8 @@
+body {
+  font-family: 'courier';
+  font-size: 9px;
+  background: #fcfcfc;
+}
 input {
   border: none;
   font-size: 9px;

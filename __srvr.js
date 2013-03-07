@@ -11,7 +11,13 @@ var Bricoleur = require('./_brico')
 , shoe = require('shoe');
 
 var brico = new Bricoleur({scope:'server'});
-var pre = new Precompiler({compress:false,src:['./__clnt.js'],dst:'./_wilds/_scripts.min.js',css:'./_wilds/_styles.css'});
+var pre = new Precompiler({
+  compress:false,
+  src:['./__clnt.js'],
+  dst:'./_wilds/_scripts.min.js',
+  srcCSS:'./_wilds/_default.styl',
+  dstCSS:'./_wilds/_styles.css'
+});
 
 var usr = new User(); 
 var router = new Router(usr.def.routes);
