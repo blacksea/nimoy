@@ -8,3 +8,8 @@ var shoe = require('shoe')
 
 var brico = new bricoleur({scope:'client'});
 bus.pipe(brico.Stream).pipe(bus);
+brico.Stream.on('connection', function (conn) {
+  console.dir(conn);
+  brico.Out.write('coondog');
+});
+

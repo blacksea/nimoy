@@ -36,16 +36,23 @@ module.exports = function (opts) {
   // CLIENT / SERVER BRICO COMMUNICATION
   
   this.Stream = MuxDemux();
+  this.Out = self.Stream.createStream('gen');
 
-  this.Stream.on('connection', function (stream) { 
-    stream.on('data', function (data) { 
-      if(stream.meta === 'brico') { 
-        console.log(data);
-        self[data[0]](data[1], function () {
-          console.dir('added '+data[1].id);
-        });
-       }
-    });
-  });
+  // this.Stream.on('connection', function (stream) { 
+  //   // create a session!
+  //   if(stream.id) {
+  //     console.dir('x'+stream.id);
+  //     self.Out.write({'id':stream.id});
+  //   }
+  //   stream.on('data', function (data) { 
+  //     console.dir(data);
+  //     if(stream.meta === 'brico') { 
+  //       console.log(data);
+  //       self[data[0]](data[1], function () {
+  //         console.dir('added '+data[1].id);
+  //       });
+  //      }
+  //   });
+  // });
 
 }

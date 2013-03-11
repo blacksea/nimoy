@@ -32,15 +32,24 @@ map.server.on('data', brico.HandleData); // stream server map to brico
 var sock = shoe(function(stream){
   stream.pipe(brico.Stream).pipe(stream);
 });
-
+brico.Stream.on('connection', function (conn) {
+  console.dir(conn);
+  conn.on('data', function(data) {
+    console.dir(data);
+  });
+});
 sock.install(server, '/bus');
 
-sock.on('connection', function(conn) { // trigger create streams func in brico
-  var x = brico.Stream.createStream('brico');
-  for(var i=0;i<map.clientMap.length;i++) {
-    var mod = map.clientMap[i];
-    if(mod.id==='console') {
-      x.write(['AddMod',mod]);
-    }
-  }
-});
+// remove this! -- handle session in brico!
+// sock.on('connection', function(conn) { // trigger create streams func in brico
+//   console.dir(conn);
+//   var x = brico.Stream.createStream('brico');
+  // session = conn.id;
+  // console.dir(session);
+  // for(var i=0;i<map.clientMap.length;i++) {
+  //   var mod = map.clientMap[i];
+  //   if(mod.id==='console') {
+  //     x.write(['AddMod',mod]);
+  //   }
+  // }
+// });
