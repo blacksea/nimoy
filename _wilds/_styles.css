@@ -1,7 +1,6 @@
 body {
   font-family: 'monaco';
   font-size: 9px;
-  text-transform: uppercase;
   background: #fcfcfc;
   margin: 0;
   padding: 0;
@@ -12,16 +11,15 @@ form {
   position: fixed;
   x-oveflow: hidden;
   width: 100%;
-  background: #00f;
   height: 16px;
 }
 input {
   height: 16px;
   line-height: 16px;
   width: inherit;
-  background: #00f;
-  color: #fff;
-  border: none;
+  background: transparent;
+  color: #000;
+  border: 1px dotted #000;
   font-size: 9px;
   font-family: 'monaco';
   letter-spacing: 1px;
@@ -29,6 +27,9 @@ input {
 input:focus {
   padding: 2px;
   padding-left: 10px;
-  background: #000;
+  color: #00f;
+  background: transparent;
   outline: none;
+  text-transform: uppercase;
+  border: 2px solid #00f;
 }

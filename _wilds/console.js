@@ -25,7 +25,6 @@ module.exports = function () {
 
     var form = document.getElementById('x')
     , prompt = form.querySelector('.console');
-    console.dir(prompt);
 
     form.onsubmit = function (e) {
       e.preventDefault();
@@ -33,9 +32,17 @@ module.exports = function () {
       self.output.emit('data',cmd);
       prompt.blur();
     }
-    prompt.onblur = function () {
+    
+    prompt.onfocus = function () {
       prompt.value = '';
+    }
+
+    prompt.onblur = function () {
+      prompt.value = '>';
     }
   }
 
+  this.output.on('data', function (data) {
+    console.dir(data);
+  });
 }

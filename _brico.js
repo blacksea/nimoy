@@ -6,7 +6,7 @@ var _ = Object._ // module scope
 , async = require('async');
 
 module.exports = function (opts) {
-  
+
   /*
    opts.scope (string) 'client' or 'server'
   */
