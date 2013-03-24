@@ -1,6 +1,6 @@
 // SERVER
 
-Object._ = function(){} // create a global scope for modules
+Object._ = function(){} // module scope : this is proably a bad idea
 
 var Bricoleur = require('./_brico')
 , Precompiler = require('./_pre')
@@ -14,7 +14,7 @@ var Bricoleur = require('./_brico')
 
 var brico = new Bricoleur({scope:'server'});
 
-// make a brico for each user & map host to users brico
+// make a brico for each user & map host to that brico
 
 var pre = new Precompiler({
   compress:false,
