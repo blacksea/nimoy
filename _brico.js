@@ -11,8 +11,6 @@ module.exports = function (opts) {
    opts.scope (string) 'client' or 'server'
   */
 
- // make 1 brico per user
-
   var self = this;
 
   this.HandleData = function (dataObj) {
