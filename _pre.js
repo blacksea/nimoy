@@ -8,6 +8,7 @@ var browserify = require('browserify')
 module.exports = function (opts) {
   var self = this;
   this.css = '';
+
   /* 
    opts.src = (array) mod paths to browserify
    opts.dst = (string) destination file 
@@ -25,32 +26,28 @@ module.exports = function (opts) {
   }
 
   this.compile = function () {
-    var data = browserify(opts.src).bundle();
-
-    if(opts.compress===true) {
-      var bundleMin = uglifyJS.minify(data,{fromString: true});
-      data = bundleMin.code;
-    }
-
-    // hook html into data string
-    fs.writeFile(opts.dst,data,function (err) {
-      if (err) throw(err);
-      compileCSS();
-    });
-
-    function compileCSS () {
-      fs.readFile(opts.srcCSS, function (err, data) {
-        if (err) throw err;
-        var styles = data.toString();
-        styles += self.css;
-        stylus.render(styles, {filename:opts.dstCSS}, function (err, css) {
+    browserify(opts.src).bundle({}, function (err, data) {
+      if(opts.compress===true) {
+        var bundleMin = uglifyJS.minify(data,{fromString: true});
+        data = bundleMin.code;
+      }
+      fs.writeFile(opts.dst,data,function (err) {
+        if (err) throw(err);
+        compileCSS();
+      });
+      function compileCSS () {
+        fs.readFile(opts.srcCSS, function (err, data) {
           if (err) throw err;
-          fs.writeFile(opts.dstCSS, css, function (err) {
-            if(err) throw err;
+          var styles = data.toString();
+          styles += self.css;
+          stylus.render(styles, {filename:opts.dstCSS}, function (err, css) {
+            if (err) throw err;
+            fs.writeFile(opts.dstCSS, css, function (err) {
+              if(err) throw err;
+            });
           });
-        });
-     });
-    }
-
+       });
+      }
+    });
   }    
 }

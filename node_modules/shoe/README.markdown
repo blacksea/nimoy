@@ -27,19 +27,16 @@ them:
 
 ``` js
 var shoe = require('shoe');
-var domready = require('domready');
 var es = require('event-stream');
 
-domready(function () {
-    var result = document.getElementById('result');
-    
-    var stream = shoe('/invert');
-    var s = es.mapSync(function (msg) {
-        result.appendChild(document.createTextNode(msg));
-        return String(Number(msg)^1);
-    });
-    s.pipe(stream).pipe(s);
+var result = document.getElementById('result');
+
+var stream = shoe('/invert');
+var s = es.mapSync(function (msg) {
+    result.appendChild(document.createTextNode(msg));
+    return String(Number(msg)^1);
 });
+s.pipe(stream).pipe(s);
 ```
 
 Server code that hosts some static files and emits 0s and 1s:
@@ -89,22 +86,19 @@ Since dnode has a simple streaming api it's very simple to plug into shoe.
 Just hack up some browser code:
 
 ``` js
-var domready = require('domready');
 var shoe = require('shoe');
 var dnode = require('dnode');
 
-domready(function () {
-    var result = document.getElementById('result');
-    var stream = shoe('/dnode');
-    
-    var d = dnode();
-    d.on('remote', function (remote) {
-        remote.transform('beep', function (s) {
-            result.textContent = 'beep => ' + s;
-        });
+var result = document.getElementById('result');
+var stream = shoe('/dnode');
+
+var d = dnode();
+d.on('remote', function (remote) {
+    remote.transform('beep', function (s) {
+        result.textContent = 'beep => ' + s;
     });
-    d.pipe(stream).pipe(d);
 });
+d.pipe(stream).pipe(d);
 ```
 and hack up a server piping shoe streams into dnode:
 

@@ -11,10 +11,11 @@ module.exports = function (opts) {
    opts.scope (string) 'client' or 'server'
   */
 
+ // make 1 brico per user
+
   var self = this;
 
   this.HandleData = function (dataObj) {
-   // self.objMap.push(dataObj);
   }
 
   this.Conn = function (state, input, output) { // handle module connections
@@ -32,27 +33,8 @@ module.exports = function (opts) {
 
   this.DelMod = function (module, cb) {
   }
-
-  // CLIENT / SERVER BRICO COMMUNICATION
   
   this.Stream = MuxDemux();
   this.Out = self.Stream.createStream('gen');
-
-  // this.Stream.on('connection', function (stream) { 
-  //   // create a session!
-  //   if(stream.id) {
-  //     console.dir('x'+stream.id);
-  //     self.Out.write({'id':stream.id});
-  //   }
-  //   stream.on('data', function (data) { 
-  //     console.dir(data);
-  //     if(stream.meta === 'brico') { 
-  //       console.log(data);
-  //       self[data[0]](data[1], function () {
-  //         console.dir('added '+data[1].id);
-  //       });
-  //      }
-  //   });
-  // });
 
 }

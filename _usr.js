@@ -6,8 +6,8 @@ module.exports = function () {
     routes:[
       {url:"/",
       file:"./_wilds/_index.html"},
-      {url:"/_scripts.min.js",
-      file:"./_wilds/_scripts.min.js"},
+      {url:"/_bundle.min.js",
+      file:"./_wilds/_bundle.min.js"},
       {url:"/_styles.css",
       file:"./_wilds/_styles.css"}
     ],
