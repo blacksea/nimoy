@@ -36,7 +36,6 @@ map.client.on('end', pre.compile);
 map.server.on('data', brico.HandleData); // stream server map to brico
 
 var sock = shoe({log:'error'}, function (conn) { // or specify function
-  console.dir(conn.id);
   conn.write(conn.id);
   // use this with callback & install instead
 });
