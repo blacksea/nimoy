@@ -13,7 +13,7 @@ module.exports = function (opts) {
   */
 
   var self = this;
-
+  this.HandleData = function (stream) {}
   // handle modules space
   
   this.AddMod = function (module, cb) {

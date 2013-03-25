@@ -35,9 +35,18 @@ map.client.on('data', pre.handleData); // stream client map to precompiler
 map.client.on('end', pre.compile);
 map.server.on('data', brico.HandleData); // stream server map to brico
 
-var sock = shoe({log:'error'}, function (conn) { // or specify function
-  conn.write(conn.id);
-  // use this with callback & install instead
+var sock = shoe({log:'error'}, function (stream) { // or specify function
+  stream.on('data', function (data) {
+    var obj = JSON.parse(data);
+    for (key in obj) {
+      if (key==='tmpID') {
+        var setID = {}
+        setID[obj[key]] = stream.id;
+        console.dir('bind to '+stream.id);
+        stream.write(JSON.stringify(setID));
+      }
+    }
+  });
 });
 
 sock.install(server, '/bus');
