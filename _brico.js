@@ -1,7 +1,6 @@
 //BRICOLEUR 
 
 var _ = Object._ // module scope : this is proably a bad idea
-
 , MuxDemux = require('mux-demux')
 , Stream = require('stream')
 , async = require('async');
@@ -13,8 +12,8 @@ module.exports = function (opts) {
   */
 
   var self = this;
+
   this.HandleData = function (stream) {}
-  // handle modules space
   
   this.AddMod = function (module, cb) {
     _[module.id.toUpperCase()] = require(module.filepath);
@@ -33,5 +32,5 @@ module.exports = function (opts) {
   } 
 
   // this.input & this.output = demux stream
-
+  
 }

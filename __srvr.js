@@ -25,15 +25,15 @@ var pre = new Precompiler({
 });
 
 var usr = new User(); 
-var router = new Router(usr.def.routes);
+var router = new Router(usr.routes);
 
 var server = http.createServer(router.handleRoutes); // pass all http reqs to router.handleRoutes
 server.listen(8888);
 
 var map = new Mapper('./_wilds'); // begin mapping wilds
 map.client.on('data', pre.handleData); // stream client map to precompiler
-map.client.on('end', pre.compile);
 map.server.on('data', brico.HandleData); // stream server map to brico
+map.client.on('end', pre.compile);
 
 var sock = shoe({log:'error'}, function (stream) { // or specify function
   stream.on('data', function (data) {
@@ -42,8 +42,8 @@ var sock = shoe({log:'error'}, function (stream) { // or specify function
       if (key==='tmpID') {
         var setID = {}
         setID[obj[key]] = stream.id;
-        console.dir('bind to '+stream.id);
         stream.write(JSON.stringify(setID));
+        console.dir('bind to '+stream.id); 
       }
     }
   });
