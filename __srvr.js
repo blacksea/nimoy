@@ -38,6 +38,7 @@ map.client.on('end', pre.compile);
 map.server.on('data', brico.HandleData); // stream server map to brico
 
 var sock = shoe({log:'error'}, function (stream) { // or specify function
+
   var domain = stream.address.address; // resolve to user / brico with domain
   console.log(domain);
 

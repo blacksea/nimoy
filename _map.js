@@ -60,7 +60,9 @@ module.exports = function (dir) {
         
         }
       });
+
     } else cb();
+
   }
 
   function handleData (obj, cb) {
