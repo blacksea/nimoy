@@ -5,11 +5,11 @@ Object._ = function(){} // module scope : this is proably a bad idea
 var Bricoleur = require('./_brico')
 , Precompiler = require('./_pre')
 , MuxDemux = require('mux-demux')
+, stream = require('stream')
 , Mapper = require('./_map')
 , Router = require('./_rtr')
 , User = require('./_usr')
 , http = require('http')
-, stream = require('stream')
 , shoe = require('shoe');
 
 var brico = new Bricoleur({scope:'server'});
@@ -25,17 +25,22 @@ var pre = new Precompiler({
 });
 
 var usr = new User(); 
-var router = new Router(usr.routes);
 
+// users stored / handled as urls
+
+var router = new Router(usr.routes);
 var server = http.createServer(router.handleRoutes); // pass all http reqs to router.handleRoutes
 server.listen(8888);
 
 var map = new Mapper('./_wilds'); // begin mapping wilds
 map.client.on('data', pre.handleData); // stream client map to precompiler
-map.server.on('data', brico.HandleData); // stream server map to brico
 map.client.on('end', pre.compile);
+map.server.on('data', brico.HandleData); // stream server map to brico
 
 var sock = shoe({log:'error'}, function (stream) { // or specify function
+  var domain = stream.address.address; // resolve to user / brico with domain
+  console.log(domain);
+
   stream.on('data', function (data) {
     var obj = JSON.parse(data);
     for (key in obj) {
@@ -43,11 +48,12 @@ var sock = shoe({log:'error'}, function (stream) { // or specify function
         var setID = {}
         setID[obj[key]] = stream.id;
         stream.write(JSON.stringify(setID));
-        console.dir('bind to '+stream.id); 
       }
     }
   });
+
 });
 
-sock.install(server, '/bus');
+// match routes / match domains
 
+sock.install(server, '/bus');

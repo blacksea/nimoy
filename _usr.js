@@ -5,8 +5,8 @@ module.exports = function (opts) {
 
   if (!opts) {
     opts = { 
-      domain:'http://127.0.0.1',
       name: 'default',
+      domain:'http://127.0.0.1',
       routes:[
         {url:"/",
         file:"./_wilds/_index.html"},
@@ -18,8 +18,9 @@ module.exports = function (opts) {
       modules:['data']
     }
   }
+
   for (opt in opts) {
     self[opt] = opts[opt];
   }
-}
 
+}
