@@ -1,11 +1,9 @@
 // SERVER
 
-Object._ = function(){} // module scope : this is proably a bad idea
+Object._ = function(){} 
 
 var Bricoleur = require('./_brico')
 , Precompiler = require('./_pre')
-, MuxDemux = require('mux-demux')
-, stream = require('stream')
 , Mapper = require('./_map')
 , Router = require('./_rtr')
 , User = require('./_usr')
@@ -14,7 +12,6 @@ var Bricoleur = require('./_brico')
 
 var brico = new Bricoleur({scope:'server'});
 
-// make a brico for each user & map host to that brico
 
 var pre = new Precompiler({
   compress:false,
@@ -26,22 +23,17 @@ var pre = new Precompiler({
 
 var usr = new User(); 
 
-// users stored / handled as urls
-
 var router = new Router(usr.routes);
-var server = http.createServer(router.handleRoutes); // pass all http reqs to router.handleRoutes
+var server = http.createServer(router.handleRoutes); 
 server.listen(8888);
 
-var map = new Mapper('./_wilds'); // begin mapping wilds
-map.client.on('data', pre.handleData); // stream client map to precompiler
+var map = new Mapper('./_wilds');
+map.client.on('data', pre.handleData); 
 map.client.on('end', pre.compile);
-map.server.on('data', brico.HandleData); // stream server map to brico
+map.server.on('data', brico.HandleData);
 
-var sock = shoe({log:'error'}, function (stream) { // or specify function
-
-  var domain = stream.address.address; // resolve to user / brico with domain
-  console.log(domain);
-
+var sock = shoe({log:'error'}, function (stream) { 
+  var domain = stream.address.address;
   stream.on('data', function (data) {
     var obj = JSON.parse(data);
     for (key in obj) {
@@ -49,12 +41,10 @@ var sock = shoe({log:'error'}, function (stream) { // or specify function
         var setID = {}
         setID[obj[key]] = stream.id;
         stream.write(JSON.stringify(setID));
+        console.dir('binding to '+stream.id);
       }
     }
   });
-
 });
-
-// match routes / match domains
 
 sock.install(server, '/bus');

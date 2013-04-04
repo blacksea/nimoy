@@ -1,5 +1,8 @@
 // USER 
 
+var redis = require('redis'),
+client = redis.createClient();
+
 module.exports = function (opts) {
   var self = this;
 
@@ -22,5 +25,4 @@ module.exports = function (opts) {
   for (opt in opts) {
     self[opt] = opts[opt];
   }
-
 }

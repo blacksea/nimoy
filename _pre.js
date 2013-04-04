@@ -9,18 +9,7 @@ module.exports = function (opts) {
   var self = this;
   this.css = '';
 
-  /* 
-   opts.src = (array) mod paths to browserify
-   opts.dst = (string) destination file 
-   opts.srcCSS = (string) src css
-   opts.dstCSS = (string) destination css
-   opts.compress = (bool) minify or not
-  */
-
-  // handle css dependancies here! provide a single css loaded once ... also add gzip compression 
-  // dynamic css manipulation should be done in plain js by loaded modules
-
-  this.handleData = function (obj) { // filters here!?! allow a filter function pass through
+  this.handleData = function (obj) { 
     opts.src.push(obj.filepath);
     if(obj.styl) self.css += obj.styl; 
   }

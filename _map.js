@@ -5,6 +5,7 @@ var fs = require('fs')
 , async = require('async');
 
 module.exports = function (dir) {
+
   var self = this;
   this.client = new Stream();
   this.server = new Stream();
@@ -45,7 +46,7 @@ module.exports = function (dir) {
           if(data[i]==='}') {
 
             var obj = JSON.parse(buf.replace('/*','')); 
-            obj.filepath = filepath; // add the filepath
+            obj.filepath = filepath;
 
             handleData(obj, function (newObj) {
               for (var x=0;x<newObj.scope.length;x++) {
@@ -82,7 +83,7 @@ module.exports = function (dir) {
       fs.readFile('./_wilds/'+file, function (err, content) {
         if (err) throw err;
         var str = content.toString();
-        obj[ext] = str; // add html/styl/css key with file content as value
+        obj[ext] = str;
         cb();
       });
 

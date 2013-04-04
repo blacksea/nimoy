@@ -1,6 +1,5 @@
 // CLIENT
-
-Object._ = function(){} // create a global scope for modules
+Object._ = function(){} 
 
 var shoe = require('shoe')
 , MuxDemux = require('mux-demux')
@@ -20,11 +19,9 @@ bus.on('data', function (data) {
   var obj = JSON.parse(data);
   if (typeof obj === 'object') {
     console.dir(data);
-    // handle data
   }
   if (obj[connID]) {
     connID = obj[connID];
     console.dir('bind to '+connID);
   }
 });
-
