@@ -5,14 +5,14 @@ var browserify = require('browserify')
 , stylus = require('stylus')
 , uglifyJS = require('uglify-js');
 
-module.exports = function (opts) {
+var Pre = function (opts) {
   var self = this;
   this.css = '';
   opts.dst = './_wilds/_bundle.min.js';
   opts.dstCSS = './_wilds/_styles.css'; 
 
   this.handleData = function (obj) { 
-    opts.src.push(obj.filepath);
+    opts.js.push(obj.filepath);
     if(obj.styl) self.css += obj.styl; 
   }
 
@@ -49,3 +49,5 @@ module.exports = function (opts) {
     });
   }    
 }
+
+module.exports = new Pre();

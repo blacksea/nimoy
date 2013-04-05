@@ -1,13 +1,12 @@
-// USER 
+// USERS
 
 var redis = require('redis'),
-client = redis.createClient();
+client = redis.createClient()
 
-module.exports = function (opts) {
+var Users = function (opts, cb) {
 
-  var self = this;
-
-  var usr = { // default user
+  var self = this
+  this.basic = { // default user
     name:'default',
     domain:'localhost',
     routes:[
@@ -21,7 +20,22 @@ module.exports = function (opts) {
     modules:['data']
   }
 
-  for (opt in opts) {
-    self[opt] = opts[opt];
+  this.addUser = function (json) { // add a user
+    var user = JSON.parse(json)
+    client.hset('users', user.name, user)
   }
+
+  this.getUsers = function (cb) {
+    client.hgetall('users', function (err, users) {
+      console.dir(users)
+      cb(users)
+    })
+  }
+
+  for (opt in opts) {
+    self[opt] = opts[opt]
+  }
+
 }
+
+module.exports = new Users()

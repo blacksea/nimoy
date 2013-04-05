@@ -3,30 +3,17 @@
 Object._ = function(){} 
 
 var Bricoleur = require('./_brico')
-, Precompiler = require('./_pre')
-, Mapper = require('./_map')
-, Router = require('./_rtr')
-, User = require('./_usr')
+, pre = require('./_pre')
+, map = require('./_map')
+, rtr = require('./_rtr')
+, usr = require('./_usr')
 , http = require('http')
-, shoe = require('shoe');
+, shoe = require('shoe')
 
-var brico = new Bricoleur({scope:'server'});
+// make a new brico for each user var brico = new Bricoleur({scope:'server'});
 
-var pre = new Precompiler({compress:false,js:['./__clnt.js'],css:'./_wilds/_default.styl'});
-
-var usr = new User(); 
-
-var router = new Router(usr.routes);
 var server = http.createServer(router.handleRoutes); 
 server.listen(80);
-
-var map = new Mapper('./_wilds');
-
-///
-map.client.on('data', pre.handleData); 
-map.client.on('end', pre.compile);
-map.server.on('data', brico.HandleData);
-///
 
 var sock = shoe({log:'error'}, function (stream) { 
   var domain = stream.address.address;
