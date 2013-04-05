@@ -12,7 +12,7 @@ var Bricoleur = require('./_brico')
 
 // make a new brico for each user var brico = new Bricoleur({scope:'server'});
 
-var server = http.createServer(router.handleRoutes) 
+var server = http.createServer(rtr.handleRoutes) 
 server.listen(80)
 
 var sock = shoe({log:'error'}, function (stream) { 

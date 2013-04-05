@@ -8,15 +8,16 @@ var browserify = require('browserify')
 var Pre = function (opts) {
   var self = this
   this.css = ''
-  opts.dst = './_wilds/_bundle.min.js'
-  opts.dstCSS = './_wilds/_styles.css' 
+  this.liveJS = './_wilds/_bundle.min.js'
+  this.liveCSS = './_wilds/_styles.css' 
 
   this.handleData = function (obj) { 
-    opts.js.push(obj.filepath)
+    self.liveJS.push(obj.filepath)
     if(obj.styl) self.css += obj.styl 
   }
 
-  this.compile = function () {
+  this.compile = function (opts) {
+
 
     browserify(opts.js).bundle({}, function (err, data) {
 
@@ -25,7 +26,7 @@ var Pre = function (opts) {
         data = bundleMin.code
       }
 
-      fs.writeFile(opts.dst,data,function (err) {
+      fs.writeFile(self.liveJS,data,function (err) {
         if (err) throw(err)
         compileCSS()
       })
@@ -37,13 +38,12 @@ var Pre = function (opts) {
           var styles = data.toString()
           styles += self.css
 
-          stylus.render(styles, {filename:opts.dstCSS}, function (err, css) {
+          stylus.render(styles, {filename:self.liveCSS}, function (err, css) {
             if (err) throw err
-            fs.writeFile(opts.dstCSS, css, function (err) {
+            fs.writeFile(self.liveCSS, css, function (err) {
               if(err) throw err
             })
           })
-
        })
       }
     })
