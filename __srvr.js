@@ -25,7 +25,7 @@ var usr = new User();
 
 var router = new Router(usr.routes);
 var server = http.createServer(router.handleRoutes); 
-server.listen(8888);
+server.listen(80);
 
 var map = new Mapper('./_wilds');
 map.client.on('data', pre.handleData); 

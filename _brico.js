@@ -26,4 +26,5 @@ module.exports = function (opts) {
     if (state === 'disconnect') _[output].output.unpipe(_[input].input);
     if (state === 'connect') _[output].output.pipe(_[input].input);
   } 
+
 }
