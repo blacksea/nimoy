@@ -12,22 +12,22 @@ var Bricoleur = require('./_brico')
 
 // make a new brico for each user var brico = new Bricoleur({scope:'server'});
 
-var server = http.createServer(router.handleRoutes); 
-server.listen(80);
+var server = http.createServer(router.handleRoutes) 
+server.listen(80)
 
 var sock = shoe({log:'error'}, function (stream) { 
-  var domain = stream.address.address;
+  var domain = stream.address.address
   stream.on('data', function (data) {
-    var obj = JSON.parse(data);
+    var obj = JSON.parse(data)
     for (key in obj) {
       if (key==='tmpID') {
         var setID = {}
-        setID[obj[key]] = stream.id;
-        stream.write(JSON.stringify(setID));
-        console.dir('binding to '+stream.id);
+        setID[obj[key]] = stream.id
+        stream.write(JSON.stringify(setID))
+        console.dir('binding to '+stream.id)
       }
     }
-  });
-});
+  })
+})
 
-sock.install(server, '/bus');
+sock.install(server, '/bus')
