@@ -7,6 +7,8 @@ module.exports = function (routes) {
 
   this.handleRoutes = function (req,res) {
 
+    // host is req.headers.host and url is req.url
+    
     var match = false;
 
     async.forEach(routes, function (route, cb) {

@@ -8,6 +8,8 @@ var browserify = require('browserify')
 module.exports = function (opts) {
   var self = this;
   this.css = '';
+  opts.dst = './_wilds/_bundle.min.js';
+  opts.dstCSS = './_wilds/_styles.css'; 
 
   this.handleData = function (obj) { 
     opts.src.push(obj.filepath);
@@ -16,7 +18,7 @@ module.exports = function (opts) {
 
   this.compile = function () {
 
-    browserify(opts.src).bundle({}, function (err, data) {
+    browserify(opts.js).bundle({}, function (err, data) {
 
       if(opts.compress===true) {
         var bundleMin = uglifyJS.minify(data,{fromString: true});
@@ -29,7 +31,7 @@ module.exports = function (opts) {
       });
 
       function compileCSS () {
-        fs.readFile(opts.srcCSS, function (err, data) {
+        fs.readFile(opts.css, function (err, data) {
           if (err) throw err;
 
           var styles = data.toString();

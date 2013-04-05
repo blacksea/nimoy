@@ -12,7 +12,13 @@ var Bricoleur = require('./_brico')
 
 var brico = new Bricoleur({scope:'server'});
 
-var pre = new Precompiler({compress:false,js:['./__clnt.js'],css:'./_wilds/_default.styl'});
+var pre = new Precompiler({ // basic layer :: generate an html
+  compress:false,
+  src:['./__clnt.js'], // js to use 
+  dst:'./_wilds/_bundle.min.js', // remove
+  srcCSS:'./_wilds/_default.styl', // stylesheet to use
+  dstCSS:'./_wilds/_styles.css' // remove
+});
 
 var usr = new User(); 
 
