@@ -4,8 +4,8 @@ var redis = require('redis'),
 client = redis.createClient()
 
 var Users = function (opts, cb) {
-
   var self = this
+
   this.basic = { // default user
     name:'default',
     domain:'localhost',
@@ -20,10 +20,14 @@ var Users = function (opts, cb) {
     modules:['data']
   }
 
-  this.addUser = function (json) { // add a user
+  this.createUser = function (json) { // add a user
     var user = JSON.parse(json)
     client.hset('users', user.name, user)
   }
+
+  this.removeUser = function (json) {
+
+  }    
 
   this.getUsers = function (cb) {
     client.hgetall('users', function (err, users) {

@@ -18,7 +18,7 @@ bus.on('connect', function () {
 
 bus.on('data', function (data) {
   var obj = JSON.parse(data)
-  if (typeof obj === 'object') {
+  if (typeof obj==='object') {
     console.dir(data)
   }
   if (obj[connID]) {

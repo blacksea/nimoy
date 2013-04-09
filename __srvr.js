@@ -10,7 +10,11 @@ var Bricoleur = require('./_brico')
 , http = require('http')
 , shoe = require('shoe')
 
-// make a new brico for each user var brico = new Bricoleur({scope:'server'});
+// make a new brico for each user var brico = new Bricoleur({scope:'server'})
+
+pre.bundle({compress:false,js:['./__clnt.js'],css:'./_wilds/_default.styl'},function () {
+  console.dir('doneeee')
+})
 
 var server = http.createServer(rtr.handleRoutes) 
 server.listen(80)

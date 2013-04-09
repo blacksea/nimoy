@@ -5,48 +5,55 @@ var browserify = require('browserify')
 , stylus = require('stylus')
 , uglifyJS = require('uglify-js')
 
-var Pre = function (opts) {
-  var self = this
-  this.css = ''
-  this.liveJS = './_wilds/_bundle.min.js'
-  this.liveCSS = './_wilds/_styles.css' 
+exports = function (stream) {
 
-  this.handleData = function (obj) { 
-    self.liveJS.push(obj.filepath)
-    if(obj.styl) self.css += obj.styl 
+  stream.on('data', function (data) {
+
   }
 
-  this.compile = function (opts) {
+  stream.on('end', function () {
+
+  }
 
 
-    browserify(opts.js).bundle({}, function (err, data) {
+
+}
+var Pre = function () {
+  var _ = this,
+
+  this.bundle = function (opts,cb) {
+    for (opt in opts) {
+      _[opt] = opts[opt]
+    }
+
+    browserify(_.JS).bundle({}, compile)
+
+    function compile (bundle) {
+      var JS = opts.js
 
       if(opts.compress===true) {
-        var bundleMin = uglifyJS.minify(data,{fromString: true})
-        data = bundleMin.code
+        var bundleMin = uglifyJS.minify(bundle,{fromString: true})
+        bundle = bundleMin.code
       }
 
-      fs.writeFile(self.liveJS,data,function (err) {
-        if (err) throw(err)
-        compileCSS()
+      fs.writeFile(destJS,bundle,function (err) {
+        if (err) throw err
+        fs.readFile(opts.css, writeCSS)
       })
+    }
 
-      function compileCSS () {
-        fs.readFile(opts.css, function (err, data) {
+    function writeCSS (err, css) {
+      if (err) throw err
+      var styles = data.toString(),
+      styles += self.css
+      stylus.render(styles, {filename:destCSS}, function (err, css) {
+        if (err) throw err
+        fs.writeFile(destCSS, css, function (err) {
           if (err) throw err
-
-          var styles = data.toString()
-          styles += self.css
-
-          stylus.render(styles, {filename:self.liveCSS}, function (err, css) {
-            if (err) throw err
-            fs.writeFile(self.liveCSS, css, function (err) {
-              if(err) throw err
-            })
-          })
-       })
-      }
-    })
+          cb();
+        })
+      })
+    }
   }    
 }
 

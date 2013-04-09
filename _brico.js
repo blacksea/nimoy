@@ -6,11 +6,10 @@ var _ = Object._
 , async = require('async')
 
 module.exports = function (opts) {
-  
   var self = this
 
   this.HandleData = function (stream) {}
-  
+
   this.AddMod = function (module, cb) {
     _[module.id.toUpperCase()] = require(module.filepath)
     _[module.id] = new _[module.id.toUpperCase()]()
@@ -26,5 +25,4 @@ module.exports = function (opts) {
     if (state === 'disconnect') _[output].output.unpipe(_[input].input)
     if (state === 'connect') _[output].output.pipe(_[input].input)
   } 
-
 }
