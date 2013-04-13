@@ -1,9 +1,9 @@
 // PRECOMPILER FOR CLIENT : manages dependancies
 
-var browserify = require('browserify')
-, fs = require('fs')
-, stylus = require('stylus')
-, uglifyJS = require('uglify-js')
+var browserify = require('browserify'),
+fs = require('fs'),
+stylus = require('stylus'),
+uglifyJS = require('uglify-js')
 
 exports = function (stream) {
   var _ = this,
@@ -29,7 +29,7 @@ exports = function (stream) {
         if (err) throw err
       })
     }
-
+// test
     function makeCSS (err, css) {
       if (err) throw err
       var styles = data.toString(),
@@ -43,4 +43,4 @@ exports = function (stream) {
       })
     }
   })
-}
+
