@@ -29,7 +29,6 @@ exports = function (stream) {
         if (err) throw err
       })
     }
-// test
     function makeCSS (err, css) {
       if (err) throw err
       var styles = data.toString(),

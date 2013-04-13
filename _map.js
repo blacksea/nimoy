@@ -60,4 +60,5 @@ var Map = function (dir) {
     }
   }
 }
+
 module.exports = new Map('./_wilds')
