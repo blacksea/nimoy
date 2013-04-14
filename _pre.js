@@ -3,6 +3,7 @@
 var browserify = require('browserify'),
 fs = require('fs'),
 stylus = require('stylus'),
+tele = require('tele'),
 uglifyJS = require('uglify-js')
 
 exports = function (stream) {

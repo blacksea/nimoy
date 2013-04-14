@@ -2,6 +2,7 @@
 
 var fs = require('fs'),
 Stream = require('stream'),
+tele = require('tele'),
 async = require('async')
 
 var Map = function (dir) {
