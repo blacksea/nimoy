@@ -22,7 +22,6 @@ var sock = shoe({log:'error'}, function (stream) {
         var setID = {}
         setID[obj[key]] = stream.id
         stream.write(JSON.stringify(setID))
-        console.dir('binding to '+stream.id)
       }
     }
   })
