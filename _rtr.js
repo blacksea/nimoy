@@ -5,7 +5,11 @@ var filed = require('filed')
 
 module.exports = function (routes) {
   this.handleRoutes = function (req,res) {
-    var match = false
+    var match = false,
+    headers = req.headers,
+    origin = headers.referer,
+    host = headers.host
+
     async.forEach(routes, function (route, cb) {
       if (route.url === req.url) {
         filed(route.file).pipe(res)
@@ -13,7 +17,7 @@ module.exports = function (routes) {
       }
       cb()
     }, function () {
-      if (match===false) res.end('404')
+      if (match === false) res.end('404')
     })
   }
 }
