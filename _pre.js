@@ -5,43 +5,52 @@ telepath = require('tele'),
 fs = require('fs')
 
 // PRECOMPILER
-module.exports = function (stream) {
+// stream output to rtr???
+module.exports = function (opts) {
   telepath(this)
-  var self = this
+  
+  var self = this,
+  JS = '',
+  destJS = './_wilds/_bundle.js',
+  srcJS = ['./__clnt.js'],
+  CSS = '',
+  srcCSS = './_wilds/_default.styl',
+  destCSS = './_wilds/_styles.css'
 
-  var destJS = './_wilds/bundle.js',
-  var destCSS = './_wilds/styles.css'
+  this.recv = function (moduleData) {
+    console.dir(JSON.parse(moduleData))
+    var mod = JSON.parse(moduleData.toString())
+    handleMod(mod)
+  }
 
-  stream.on('data', function (data) {
-    
-  })
+  function handleMod (mod) {
+    if (mod.scope === 'client') 
+    if (mod.scope === 'server')
+    JS.push(mod.filePath)
+  }
 
-  stream.on('end', function () {
-    browserify(JS).bundle({}, makeJS)
-
-    fs.readFile(CSS, makeCSS)
-
-    function makeJS (err, JS) {
-      if (err) throw err
-      if (_.compress===true) {
-        var bundleMin = uglifyJS.minify(JS,{fromString: true})
-        bundle = bundleMin.code
-      }
-      fs.writeFile(destJS, JS, function (err) {
-        if (err) throw err
-      })
+  // browserify(JS).bundle({}, makeJS)
+  function makeJS (JS) {
+    if (opts.compress === true) {
+      var bundleMin = uglifyJS.minify(JS,{fromString: true})
+      bundle = bundleMin.code
     }
-
-    function makeCSS (err, css) {
+    fs.writeFile(opts.destJS, JS, function (err) {
       if (err) throw err
-      var styles = data.toString(),
-      styles += self.css
-      stylus.render(styles, {filename:destCSS}, function (err, css) {
+    })
+  }
+
+  function makeCSS (err, css) {
+    if (err) throw err
+    var styles = data.toString()
+    styles += self.css
+
+    stylus.render(styles, {filename:destCSS}, function (err, css) {
+      if (err) throw err
+      fs.writeFile(destCSS, css, function (err) {
         if (err) throw err
-        fs.writeFile(destCSS, css, function (err) {
-          if (err) throw err
-          cb();
-        })
+        cb();
       })
-    }
-  })
+    })
+  }
+}

@@ -1,5 +1,4 @@
-var Stream = require('stream'),
-telepath = require('tele'),
+var telepath = require('tele'),
 async = require('async'),
 fs = require('fs')
 
@@ -8,48 +7,53 @@ module.exports = function (dir) {
   telepath(this)
   var self = this
 
-  fs.readdir(dir, handleDir)
+  fs.readdir(dir, HandleFiles)
 
-  function handleDir (err, files) {
-    if (err) throw err
-    if (!err) async.forEach(files, function (file, cb) {
-      if (file.split('.')[1] === 'js') readFile(file, function (moduleData) {
-        if (moduleData) self.send(JSON.stringify(moduleData))
-      })
-    })
+  function HandleFiles (err, files) {
+    if (!err) async.each(files, HandleFile, MappingDone)
+    if (err) throw err 
   }
-
-  function readFile (file, cb) {
-    var filePath = dir+'/'+file,
-    moduleData = {}
-
-    fs.readFile(filePath, function (err, buffer) {
+  
+  function HandleFile (file, callback) {
+    if (file.split('.')[1] === 'js') fs.readFile(dir+'/'+file, getModuleData) // ignore hidden and non js files
+    else callback()
+    
+    function getModuleData (err, buffer) {
+      if (err) throw err
       var data = buffer.toString(),
+      moduleData = {},
       buf = ''
 
-      for (var i=0;i<data.length;i++) {
+      for (var i=0;i<data.length;i++) { // PARSE OUT MODULE DATA OBJ
         buf += data[i]
         if (data[i] === '}') {
-          var obj = JSON.parse(buf.replace('/*',''))
-          if (typeof obj === 'object') handleFile(obj)
-          if (typeof obj !== 'object') cb()
-          break 
+          moduleData = JSON.parse(buf.toString().replace('/*',''))
+          if (typeof moduleData !== 'object') throw new Error('no module data!')
+          break
         }
       }
-    })
+      
+      if (moduleData.deps) { // IF THERE ARE CLIENT SIDE DEPENDANCIES HANDLE THEM
+        async.each(moduleData.deps, HandleDeps, function () {
+          self.send(JSON.stringify(moduleData))
+          callback()
+        })
+      } else {
+        self.send(JSON.stringify(moduleData))
+        callback()
+      }
 
-    function handleFile (obj) {
-      moduleData = obj
-      moduleData.filePath = filePath
-      if (moduleData.deps) async.forEach(moduleData.deps, handleDep, cb)
-      if (!moduleData.deps) cb(moduleData)
+      function HandleDeps (dep, cb) {
+        fs.readFile(dir+'/'+dep, function (err,depBuffer) {
+          if (err) throw err
+          moduleData[dep.split('.')[1]] = depBuffer.toString()
+          cb()
+        })
+      }
     }
+  }
 
-    function handleDep (dep, callback) {
-      fs.readFile(dir+'/'+dep, function (err, buffer) {
-        moduleData[dep.split('.')[1]] = buffer.toString()  
-        callback(moduleData)
-      })
-    }
+  function MappingDone () {
+    self.send(JSON.stringify({event:'done'}))
   }
 }
