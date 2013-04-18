@@ -8,58 +8,49 @@ module.exports = function (dir) {
   telepath(this)
   var self = this
 
-  fs.readdir(dir, function (err, files) { 
-    if(err) throw err
-    async.forEach(files, streamFileData, function () {
+  fs.readdir(dir, handleDir)
+
+  function handleDir (err, files) {
+    if (err) throw err
+    if (!err) async.forEach(files, function (file, cb) {
+      if (file.split('.')[1] === 'js') readFile(file, function (moduleData) {
+        console.dir(moduleData)
+        if (moduleData) self.send(moduleData)
+      })
     })
-  })
-
-  function streamFileData (file, cb) { 
-    var ext = file.split('.')
-    if(ext[1]==='js'&&ext[0]!==''){ // ignore hidden and non js files
-      var filepath = dir+'/'+file,
-      fileStream = fs.createReadStream(filepath)
-      fileStream.on('data', function (rawdata) {
-     })
-    } else cb()
   }
 
-  function streamFile (rawData) {
-    var data = rawdata.toString(),
-    buf = ''
-    for (var i=0;i<data.length;i++) {
-      buf += data[i]
-      if(data[i]==='}') {
-        var obj = JSON.parse(buf.replace('/*',''))
-        obj.filepath = filepath
-        handleData(obj, function (newObj) {
-          for (var x=0;x<newObj.scope.length;x++) {
-            self[newObj.scope[x]+'Map'].push(newObj)
-            self[newObj.scope[x]].emit('data', newObj)
-          }
-          cb()
-        })
-        break
+  function readFile (file, cb) {
+    var fS = fs.createReadStream(filepath),
+    filePath = dir+'/'+file,
+    moduleData = {}
+
+    fS.on('data', function (chunk) {
+      var buffer = chunk.toString(),
+      data = ''
+      for (var i=0;i<buffer.length;i++) {
+        if (buffer[i] === '}') {
+          var obj = JSON.parse(buf.replace('/*',''))
+          if (typeof obj === 'object') handleFile(obj)
+          if (typeof obj !== 'object') cb()
+          break 
+        }
       }
-    }
-  }
+    })
 
-  function handleData (obj, cb) {
-    if (obj.deps) { 
-      async.forEach(obj.deps, handleDep, function () {
-        cb(obj)
-      })
-    } else if (!obj.deps) {
-      cb(obj)
+    function handleFile (obj) {
+      moduleData = obj
+      moduleData.filePath = filePath
+      if (moduleData.deps) async.forEach(moduleData.deps, handleDep, cb)
+      if (!moduleData.deps) cb()
     }
-    function handleDep (file, cb) {
-      var ext = file.split('.')[1]
-      fs.readFile('./_wilds/'+file, function (err, content) {
-        if (err) throw err
-        var str = content.toString()
-        obj[ext] = str
-        cb()
+
+    function handleDep (dep, callback) {
+      fs.readFile(dep, function (buffer) {
+        moduleData[dep.split('.')[1]] = buffer.toString()  
+        callback(moduleData)
       })
     }
+
   }
 }
