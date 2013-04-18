@@ -9,8 +9,8 @@ module.exports = function (opts) {
   var self = this
 
   this.add = function () {
-
   }
+
   this.remove = function () {
   }
 }

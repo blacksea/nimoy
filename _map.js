@@ -1,11 +1,13 @@
+var Stream = require('stream'),
+telepath = require('tele'),
+async = require('async'),
+fs = require('fs')
+
 // MAPPER
+module.exports = function (dir) {
+  telepath(this)
+  var self = this
 
-var fs = require('fs'),
-Stream = require('stream'),
-tele = require('tele'),
-async = require('async')
-
-var Map = function (dir) {
   fs.readdir(dir, function (err, files) { 
     if(err) throw err
     async.forEach(files, streamFileData, function () {
@@ -61,5 +63,3 @@ var Map = function (dir) {
     }
   }
 }
-
-module.exports = new Map('./_wilds')

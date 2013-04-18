@@ -1,15 +1,16 @@
-// PRECOMPILER FOR CLIENT : manages dependancies
-
 var browserify = require('browserify'),
-fs = require('fs'),
+uglifyJS = require('uglify-js'),
 stylus = require('stylus'),
-tele = require('tele'),
-uglifyJS = require('uglify-js')
+telepath = require('tele'),
+fs = require('fs')
 
-exports = function (stream) {
-  var _ = this,
-  destJS = './_wilds/bundle.js',
-  destCSS = './_wilds/styles.css'
+// PRECOMPILER
+module.exports = function (stream) {
+  telepath(this)
+  var self = this
+
+  var destJS = './_wilds/bundle.js',
+  var destCSS = './_wilds/styles.css'
 
   stream.on('data', function (data) {
     
