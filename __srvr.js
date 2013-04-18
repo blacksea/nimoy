@@ -3,7 +3,7 @@
 Object._ = function(){} 
 
 var Bricoleur = require('./_brico')
-, pre = require('./_pre')
+// , pre = require('./_pre')
 , map = require('./_map')
 , rtr = require('./_rtr')
 , usr = require('./_usr')
@@ -12,6 +12,9 @@ var Bricoleur = require('./_brico')
 
 var server = http.createServer(rtr.handleRoutes) 
 server.listen(80)
+
+var _map = new map('./_wilds')
+_map.out.pipe(process.stdout)
 
 var sock = shoe({log:'error'}, function (stream) { 
   var domain = stream.address.address
