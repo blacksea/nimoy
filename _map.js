@@ -24,7 +24,7 @@ module.exports = function (dir) {
       moduleData = {},
       buf = ''
 
-      for (var i=0;i<data.length;i++) { // PARSE OUT MODULE DATA OBJ
+      for (var i=0;i<data.length;i++) { // parse out data object
         buf += data[i]
         if (data[i] === '}') {
           moduleData = JSON.parse(buf.toString().replace('/*',''))
@@ -33,7 +33,7 @@ module.exports = function (dir) {
         }
       }
       
-      if (moduleData.deps) { // IF THERE ARE CLIENT SIDE DEPENDANCIES HANDLE THEM
+      if (moduleData.deps) { // if there are deps handle them
         async.each(moduleData.deps, HandleDeps, function () {
           self.send(JSON.stringify(moduleData))
           callback()

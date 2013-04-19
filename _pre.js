@@ -5,32 +5,32 @@ telepath = require('tele'),
 fs = require('fs')
 
 // PRECOMPILER
-// stream output to rtr???
-module.exports = function (opts) {
+module.exports = function (opts) { // stream output to rtr???
   telepath(this)
   
   var self = this,
-  JS = '',
   destJS = './_wilds/_bundle.js',
   srcJS = ['./__clnt.js'],
+  MAP = [],
   CSS = '',
   srcCSS = './_wilds/_default.styl',
   destCSS = './_wilds/_styles.css'
 
   this.recv = function (moduleData) {
-    console.dir(JSON.parse(moduleData))
     var mod = JSON.parse(moduleData.toString())
-    handleMod(mod)
+    
+    if (typeof mod === 'object') {
+      for (var i=0;i<mod.scope.length;i++) {
+        if (mod.scope[i]==='client') srcJS.push(mod.filePath) // add to browserify
+        if (mod.styl) CSS += mod.styl
+      }
+      MAP.push(mod)
+    }
+    else if (mod === 'done') compile()
   }
 
-  function handleMod (mod) {
-    if (mod.scope === 'client') 
-    if (mod.scope === 'server')
-    JS.push(mod.filePath)
-  }
-
-  // browserify(JS).bundle({}, makeJS)
-  function makeJS (JS) {
+  function compile () {
+    browserify(JS).bundle({}, makeJS)
     if (opts.compress === true) {
       var bundleMin = uglifyJS.minify(JS,{fromString: true})
       bundle = bundleMin.code
@@ -38,18 +38,15 @@ module.exports = function (opts) {
     fs.writeFile(opts.destJS, JS, function (err) {
       if (err) throw err
     })
-  }
-
-  function makeCSS (err, css) {
-    if (err) throw err
-    var styles = data.toString()
-    styles += self.css
-
-    stylus.render(styles, {filename:destCSS}, function (err, css) {
-      if (err) throw err
-      fs.writeFile(destCSS, css, function (err) {
+    fs.readFile(srcCSS, function (err, buffer) {
+      var styles = buffer.toString()
+      styles += CSS
+      stylus.render(styles, {filename:destCSS}, function (err, css) {
         if (err) throw err
-        cb();
+        fs.writeFile(destCSS, css, function (err) {
+          if (err) throw err
+          cb();
+        })
       })
     })
   }
