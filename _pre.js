@@ -19,7 +19,6 @@ module.exports = function (opts) {
   , destCSS = './_wilds/_styles.css'
 
   this.recv = function (moduleData) {
-    console.dir(moduleData.toString())
     var mod = JSON.parse(moduleData.toString())
     if (typeof mod === 'object' && !mod.event) {
       for (var i=0;i<mod.scope.length;i++) {
@@ -40,27 +39,23 @@ module.exports = function (opts) {
       } 
       fs.writeFile(destJS, bundle, function (err) {
         console.dir('js written')
-        makeCSS()
          if (err) throw err
       })
     })
 
-    function makeCSS () {
-      console.dir('makeCSS called')
-      fs.readFile(srcCSS, function (err, buffer) {
+    fs.readFile(srcCSS, function (err, buffer) {
+      if (err) throw err
+      var styles = buffer.toString()
+      styles += CSS
+      stylus.render(styles, {filename:destCSS}, function (err, css) {
         if (err) throw err
-        var styles = buffer.toString()
-        styles += CSS
-        console.dir(styles)
-        stylus.render(styles, {filename:destCSS}, function (err, css) {
+        console.dir(css)
+        fs.writeFile(destCSS, css, function (err) {
           if (err) throw err
-          console.dir(css)
-          fs.writeFile(destCSS, css, function (err) {
-            if (err) throw err
-            // cb();
-          })
+          console.log('css compiled')
+          // cb();
         })
       })
-    }
+    })
   }
 }
