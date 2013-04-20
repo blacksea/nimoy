@@ -4,8 +4,7 @@ var browserify = require('browserify')
 , telepath = require('tele')
 , fs = require('fs')
 
-// PRECOMPILER
-module.exports = function (opts) { 
+module.exports = function (opts) { // PRECOMPILER
   telepath(this)
 
   if (!opts) opts = {compress:false}
@@ -28,7 +27,6 @@ module.exports = function (opts) {
       MAP.push(mod)
     }
     else if (mod.event === 'done') compile()
-
   }
 
   function compile () {

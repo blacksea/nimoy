@@ -11,7 +11,9 @@ var Bricoleur = require('./_brico')
 , shoe = require('shoe')
 
 /* dynamic route loading somewhow?
-   specify client side frame to load
+define application routes
+load user (simplest/hackable user model)
+fastest way to lookup usr model/tree ? async call
 */
 
 var _rtr = new rtr(usr.basic.routes)
@@ -22,9 +24,10 @@ var _map = new map('./_wilds')
 var _pre = new pre()
 _map.out.pipe(_pre.in)
 
-// handle socket connections : bind to user ?
+// handle socket connections:bind to user? pass stream into user instance !?
 var sock = shoe({log:'error'}, function (stream) { 
   var domain = stream.address.address
+  console.log(domain)
   stream.on('data', function (data) {
     var obj = JSON.parse(data)
     for (key in obj) {
