@@ -1,10 +1,10 @@
-var telepath = require('tele'),
-async = require('async'),
-fs = require('fs')
+var telepath = require('tele')
+, async = require('async')
+, fs = require('fs')
 
-// MAPPER
-module.exports = function (dir) {
-  telepath(this)
+// MAPPER 
+module.exports = function (dir) { 
+  telepath(this) 
   var self = this
 
   fs.readdir(dir, HandleFiles)
@@ -20,25 +20,25 @@ module.exports = function (dir) {
     
     function getModuleData (err, buffer) {
       if (err) throw err
-      var data = buffer.toString(),
-      moduleData = {},
-      buf = ''
+      var data = buffer.toString()
+      , moduleData = null
+      , buf = ''
 
       for (var i=0;i<data.length;i++) { // parse out data object
         buf += data[i]
-        if (data[i] === '}') {
-          moduleData = JSON.parse(buf.toString().replace('/*',''))
+        if (data[i] === '}' && data[1]==='*' && data[2]==='{') { // super clumsy replace**
           if (typeof moduleData !== 'object') throw new Error('no module data!')
+          moduleData = JSON.parse(buf.toString().replace('/*',''))
           break
         }
       }
       
-      if (moduleData.deps) { // if there are deps handle them
+      if (moduleData !== null && moduleData.deps) { // if there are deps handle them
         async.each(moduleData.deps, HandleDeps, function () {
           self.send(JSON.stringify(moduleData))
           callback()
         })
-      } else {
+      } else if (moduleData !== null) {
         self.send(JSON.stringify(moduleData))
         callback()
       }

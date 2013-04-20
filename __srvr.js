@@ -10,7 +10,8 @@ var Bricoleur = require('./_brico')
 , http = require('http')
 , shoe = require('shoe')
 
-var server = http.createServer(rtr.handleRoutes) 
+var _rtr = new rtr(usr.basic.routes)
+var server = http.createServer(_rtr.handleRoutes) 
 server.listen(80)
 
 var _map = new map('./_wilds')
