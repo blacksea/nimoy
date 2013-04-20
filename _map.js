@@ -41,7 +41,7 @@ module.exports = function (dir) {
       } else if (moduleData !== null) {
         self.send(JSON.stringify(moduleData))
         callback()
-      }
+      } else callback()
 
       function HandleDeps (dep, cb) {
         fs.readFile(dir+'/'+dep, function (err,depBuffer) {
