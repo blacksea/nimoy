@@ -20,26 +20,6 @@ var Users = function (opts, cb) {
     modules:['data']
   }
 
-  this.createUser = function (json) { // add a user
-    var user = JSON.parse(json)
-    client.hset('users', user.name, user)
-  }
-
-  this.removeUser = function (json) {
-
-  }    
-
-  this.getUsers = function (cb) {
-    client.hgetall('users', function (err, users) {
-      console.dir(users)
-      cb(users)
-    })
-  }
-
-  for (opt in opts) {
-    self[opt] = opts[opt]
-  }
-
 }
 
 module.exports = new Users()
