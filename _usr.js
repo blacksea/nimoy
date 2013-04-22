@@ -6,10 +6,10 @@ client = redis.createClient()
 var Users = function (opts, cb) {
   var self = this
 
-  this.basic = { // default user
+  this.dflt = { // default user
     name:'default',
     domain:'localhost',
-    routes:[
+    rts:[
       {url:"/",
       file:"./_wilds/_index.html"},
       {url:"/_bundle.min.js",

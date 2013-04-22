@@ -11,12 +11,13 @@ var Bricoleur = require('./_brico')
 , shoe = require('shoe')
 
 /* dynamic route loading somewhow?
+set environment!?!
 define application routes
 load user (simplest/hackable user model)
 fastest way to lookup usr model/tree ? async call
 */
 
-var _rtr = new rtr(usr.basic.routes)
+var _rtr = new rtr(usr.dflt.rts)
 var server = http.createServer(_rtr.handleRoutes) 
 server.listen(80)
 
