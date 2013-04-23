@@ -20,7 +20,7 @@ var server = http.createServer(_rtr.handleRoutes)
 server.listen(80)
 
 var _map = new map('./_wilds')
-var _pre = new pre({js_src:['./__clnt.js'],css_src:'./_wilds/_css',compress:true})
+var _pre = new pre({js:['./__clnt.js'],css:'./_wilds/_css',compress:true})
 _map.out.pipe(_pre.in)
 
 // handle socket connections bind to user? 

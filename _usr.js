@@ -7,4 +7,6 @@ var defaultUser = { // default user object
   modules:['data']
 }
 
-module.exports = defaultUser 
+module.exports = function () {
+  
+}

@@ -20,7 +20,7 @@ module.exports = function (opts) { // PRECOMPILER
     var mod = JSON.parse(moduleData.toString())
     if (typeof mod === 'object' && !mod.event) {
       for (var i=0;i<mod.scope.length;i++) {
-        if (mod.scope[i]==='client') opts.js_src.push(mod.filePath) // add to browserify
+        if (mod.scope[i]==='client') opts.js.push(mod.filePath) // add to browserify
         if (mod.styl) CSS += mod.styl
       }
       MAP.push(mod)
@@ -29,7 +29,7 @@ module.exports = function (opts) { // PRECOMPILER
   }
 
   function compile () {
-    browserify(opts.js_src).bundle({}, function (err, bundle) {
+    browserify(opts.js).bundle({}, function (err, bundle) {
       if (opts.compress === true) {
         var bundleMin = uglifyJS.minify(bundle,{fromString: true})
         bundle = bundleMin.code
@@ -40,7 +40,7 @@ module.exports = function (opts) { // PRECOMPILER
       })
     })
 
-    fs.readFile(opts.css_src, function (err, buffer) {
+    fs.readFile(opts.css, function (err, buffer) {
       if (err) throw err
       var styles = buffer.toString()
       styles += CSS
