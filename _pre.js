@@ -8,20 +8,19 @@ module.exports = function (opts) { // PRECOMPILER
   telepath(this)
 
   if (!opts) opts = {compress:false}
+  if (!opts.compress) opts.compress = false
 
   var self = this
+  , destCSS = './_wilds/_styles.css'
   , destJS = './_wilds/_bundle.js'
-  , srcJS = ['./__clnt.js']
   , MAP = []
   , CSS = ''
-  , srcCSS = './_wilds/_default.styl'
-  , destCSS = './_wilds/_styles.css'
 
   this.recv = function (moduleData) {
     var mod = JSON.parse(moduleData.toString())
     if (typeof mod === 'object' && !mod.event) {
       for (var i=0;i<mod.scope.length;i++) {
-        if (mod.scope[i]==='client') srcJS.push(mod.filePath) // add to browserify
+        if (mod.scope[i]==='client') opts.js_src.push(mod.filePath) // add to browserify
         if (mod.styl) CSS += mod.styl
       }
       MAP.push(mod)
@@ -30,18 +29,18 @@ module.exports = function (opts) { // PRECOMPILER
   }
 
   function compile () {
-    browserify(srcJS).bundle({}, function (err, bundle) {
+    browserify(opts.js_src).bundle({}, function (err, bundle) {
       if (opts.compress === true) {
         var bundleMin = uglifyJS.minify(bundle,{fromString: true})
         bundle = bundleMin.code
-      } 
+      }
       fs.writeFile(destJS, bundle, function (err) {
         console.dir('js written')
          if (err) throw err
       })
     })
 
-    fs.readFile(srcCSS, function (err, buffer) {
+    fs.readFile(opts.css_src, function (err, buffer) {
       if (err) throw err
       var styles = buffer.toString()
       styles += CSS

@@ -20,7 +20,7 @@ var server = http.createServer(_rtr.handleRoutes)
 server.listen(80)
 
 var _map = new map('./_wilds')
-var _pre = new pre({js_src:['./__clnt.js'],css_src:'./_wilds/_css',index:'./_wilds/_html'})
+var _pre = new pre({js_src:['./__clnt.js'],css_src:'./_wilds/_css',compress:true})
 _map.out.pipe(_pre.in)
 
 // handle socket connections bind to user? 
@@ -28,7 +28,6 @@ _map.out.pipe(_pre.in)
 
 var sock = shoe({log:'error'}, function (stream) { 
   var domain = stream.address.address
-  console.log(domain)
   stream.on('data', function (data) {
     var obj = JSON.parse(data)
     for (key in obj) {
