@@ -1925,7 +1925,7 @@ function MuxDemux (opts, onConnection) {
 module.exports = MuxDemux
 
 
-},{"through":10,"duplex":11,"xtend":12,"stream-serializer":13}],3:[function(require,module,exports){
+},{"through":10,"duplex":11,"stream-serializer":12,"xtend":13}],3:[function(require,module,exports){
 var Stream = require('stream');
 var sockjs = require('sockjs-client');
 
@@ -2250,22 +2250,6 @@ module.exports = function (write, end) {
 
 })(require("__browserify_process"))
 },{"stream":5,"__browserify_process":8}],12:[function(require,module,exports){
-module.exports = extend
-
-function extend(target) {
-    for (var i = 1; i < arguments.length; i++) {
-        var source = arguments[i],
-            keys = Object.keys(source)
-
-        for (var j = 0; j < keys.length; j++) {
-            var name = keys[j]
-            target[name] = source[name]
-        }
-    }
-
-    return target
-}
-},{}],13:[function(require,module,exports){
 
 var EventEmitter = require('events').EventEmitter
 
@@ -2334,7 +2318,23 @@ exports.raw = function (stream) {
 }
 
 
-},{"events":6}],14:[function(require,module,exports){
+},{"events":6}],13:[function(require,module,exports){
+module.exports = extend
+
+function extend(target) {
+    for (var i = 1; i < arguments.length; i++) {
+        var source = arguments[i],
+            keys = Object.keys(source)
+
+        for (var j = 0; j < keys.length; j++) {
+            var name = keys[j]
+            target[name] = source[name]
+        }
+    }
+
+    return target
+}
+},{}],14:[function(require,module,exports){
 (function(){/* SockJS client, version 0.3.1.7.ga67f.dirty, http://sockjs.org, MIT License
 
 Copyright (c) 2011-2012 VMware, Inc.

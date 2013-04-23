@@ -4,7 +4,7 @@ client = redis.createClient()
 var defaultUser = { // default user object
   name:'default',
   domain:'localhost',
-  rts:[
+  routes:[
     {url:"/",
     file:"./_wilds/_index.html"},
     {url:"/_bundle.min.js",
