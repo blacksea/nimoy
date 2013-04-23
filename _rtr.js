@@ -15,7 +15,7 @@ module.exports = function (opts) {
     file:"./_wilds/_styles.css"}
   ];
 
-  this.handleRoutes = function (req,res) {
+  this.handleReqs = function (req,res) {
     var match = false
     , headers = req.headers
     , origin = headers.referer

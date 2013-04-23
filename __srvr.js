@@ -16,7 +16,7 @@ var Bricoleur = require('./_brico')
 // fastest way to lookup usr model/tree ? async call
 
 var _rtr = new rtr()
-var server = http.createServer(_rtr.handleRoutes) 
+var server = http.createServer(_rtr.handleReqs) 
 server.listen(80)
 
 var _map = new map('./_wilds')
