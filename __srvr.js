@@ -25,14 +25,15 @@ var _map = new map('./_wilds')
 var _pre = new pre()
 _map.out.pipe(_pre.in)
 
-// handle socket connections:bind to user? pass stream into user instance !?
+// handle socket connections:bind to user? 
+// pass stream into user instance !?
 var sock = shoe({log:'error'}, function (stream) { 
   var domain = stream.address.address
   console.log(domain)
   stream.on('data', function (data) {
     var obj = JSON.parse(data)
     for (key in obj) {
-      if (key==='tmpID') {
+      if (key === 'tmpID') {
         var setID = {}
         setID[obj[key]] = stream.id
         stream.write(JSON.stringify(setID))
