@@ -1,0 +1,19 @@
+{
+  "name": "blacksea",
+  "version": "0.0.0",
+  "main": "__srvr.js",
+  "repository": {
+    "type": "git",
+    "url": "http://github.com/blacksea/vitruvian_method.git"
+  },
+  "author": {
+  "name": "Anthony Gasca",
+  "email": "ag@theblacksea.cc",
+  "url": "http://theblacksea.cc"
+  },
+  "scripts": {
+    "start": "node __srvr.js",
+    "test": "tap test/*.js"
+  },
+  "license": "MIT"
+}
