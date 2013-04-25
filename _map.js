@@ -2,8 +2,7 @@ var telepath = require('tele')
 , async = require('async')
 , fs = require('fs')
 
-// MAPPER 
-module.exports = function (dir) { 
+module.exports = function (dir) { // MAPPER
   telepath(this) 
   var self = this
 

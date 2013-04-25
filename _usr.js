@@ -7,6 +7,12 @@ var defaultUser = { // default user object
   modules:['data']
 }
 
-module.exports = function () {
-  
+module.exports = function () { // user superclass / a wrapper for brico
+  var self = this
+  this.add = function (usrObj) {
+    
+  }
+  this.remove = function (usrObj) {
+
+  }
 }

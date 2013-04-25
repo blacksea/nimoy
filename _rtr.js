@@ -1,9 +1,7 @@
-// ROUTER 
-
 var filed = require('filed')
 , async = require('async')
 
-module.exports = function (opts) {
+module.exports = function (opts) { // ROUTER
   if (!opts) var opts = null
 
   opts = [
@@ -13,7 +11,7 @@ module.exports = function (opts) {
     file:"./_wilds/_bundle.js"},
     {url:"/_styles.css",
     file:"./_wilds/_styles.css"}
-  ];
+  ]
 
   this.handleReqs = function (req,res) {
     var match = false

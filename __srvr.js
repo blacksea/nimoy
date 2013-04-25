@@ -1,4 +1,4 @@
-// SERVER
+// server
 Object._ = function(){} 
 
 var Bricoleur = require('./_brico')
@@ -9,12 +9,6 @@ var Bricoleur = require('./_brico')
 , http = require('http')
 , shoe = require('shoe')
 
-// dynamic route loading somehow?
-// set environment!?!
-// define application routes
-// load user (simplest/hackable user model)
-// fastest way to lookup usr model/tree ? async call
-
 var _rtr = new rtr()
 var server = http.createServer(_rtr.handleReqs) 
 server.listen(80)
@@ -22,9 +16,6 @@ server.listen(80)
 var _map = new map('./_wilds')
 var _pre = new pre({js:['./__clnt.js'],css:'./_wilds/_css',compress:true})
 _map.out.pipe(_pre.in)
-
-// handle socket connections bind to user? 
-// pass stream into user instance !?
 
 var sock = shoe({log:'error'}, function (stream) { 
   var domain = stream.address.address
