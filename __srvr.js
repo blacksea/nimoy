@@ -18,9 +18,9 @@ var _pre = new pre({js:['./__clnt.js'],css:'./_wilds/_css',compress:true})
 _map.out.pipe(_pre.in)
 
 var sock = shoe({log:'error'}, function (stream) { 
-  var domain = stream.address.address
+  var domain = stream.address.address // extend sockjs/shoe?
   stream.on('data', function (data) {
-    var obj = JSON.parse(data)
+    var obj = JSON.parse(data) 
     for (key in obj) {
       if (key === 'tmpID') {
         var setID = {}
