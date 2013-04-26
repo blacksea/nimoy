@@ -19,6 +19,8 @@ _map.out.pipe(_pre.in)
 
 var sock = shoe({log:'error'}, function (stream) { 
   var domain = stream.address.address // extend sockjs/shoe?
+  // how to handle connections -- create a relationship between > usr > brico
+  // bind brico to conn id/domain and pass in stream
   stream.on('data', function (data) {
     var obj = JSON.parse(data) 
     for (key in obj) {
