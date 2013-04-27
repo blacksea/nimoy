@@ -13,14 +13,12 @@ _usr.buildUsers(function (user) {
   console.dir(Object)
 })
 
-var _rtr = new rtr()
-var server = http.createServer(_rtr.handleReqs) 
-server.listen(80)
-
 var _map = new map('./_wilds')
 var _pre = new pre({js:['./__clnt.js'],css:'./_wilds/_css',compress:true})
 _map.out.pipe(_pre.in)
 
-var sock = shoe({log:'error'}, _rtr.handleData)
-
+var _rtr = new rtr()
+var sock = shoe({log:'error'}, _rtr.handleData) // handle socket connections 
+var server = http.createServer(_rtr.handleReqs) // handle http requests
+server.listen(80)
 sock.install(server, '/bus')
