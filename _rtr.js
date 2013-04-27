@@ -12,6 +12,17 @@ module.exports = function (opts) { // ROUTER / include additional info - like us
     file:"./_wilds/_styles.css"}
   ]
 
+  this.handleData = function (data) {
+    var obj = JSON.parse(data) 
+    for (key in obj) {
+      if (key === 'tmpID') {
+        var setID = {}
+        setID[obj[key]] = stream.id
+        stream.write(JSON.stringify(setID))
+      }
+    }
+  }
+
   this.handleReqs = function (req,res) {
     var match = false
     , headers = req.headers
