@@ -21,11 +21,6 @@ var _map = new map('./_wilds')
 var _pre = new pre({js:['./__clnt.js'],css:'./_wilds/_css',compress:true})
 _map.out.pipe(_pre.in)
 
-var sock = shoe({log:'error'}, function (stream) { 
-  var domain = stream.address.address // extend sockjs/shoe?
-  // how to handle connections -- create a relationship between > usr > brico
-  // | bind brico | conn id/domain and pass in stream
-  stream.on('data', _rtr.handleData) // pipe into router
-})
+var sock = shoe({log:'error'}, _rtr.handleData)
 
 sock.install(server, '/bus')

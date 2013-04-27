@@ -12,16 +12,6 @@ module.exports = function (opts) { // ROUTER / include additional info - like us
     file:"./_wilds/_styles.css"}
   ]
 
-  this.handleData = function (data) {
-    var obj = JSON.parse(data) 
-    for (key in obj) {
-      if (key === 'tmpID') {
-        var setID = {}
-        setID[obj[key]] = stream.id
-        stream.write(JSON.stringify(setID))
-      }
-    }
-  }
 
   this.handleReqs = function (req,res) {
     var match = false
@@ -39,6 +29,20 @@ module.exports = function (opts) { // ROUTER / include additional info - like us
       cb()
     }, function () {
       if (match === false) res.end('404')
+    })
+  }
+
+  this.handleData = function (stream) {
+    var domain = stream.address.address // extend sockjs/shoe?
+    stream.on('data', function (data) {
+      var obj = JSON.parse(data) 
+      for (key in obj) {
+        if (key === 'tmpID') {
+          var setID = {}
+          setID[obj[key]] = stream.id
+          stream.write(JSON.stringify(setID))
+        }
+      }
     })
   }
 }
