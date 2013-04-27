@@ -7,12 +7,10 @@ var Bricoleur = require('./_brico')
 , http = require('http')
 , shoe = require('shoe')
 
-// default user sim
-var defaultUser = { // default user object
-  name:'default',
-  domain:'localhost',
-  modules:['data']
-}
+var _usr = new usr()
+_usr.buildUsers(function (user) {
+  Object['_'+user.name] = new Bricoleur(user)
+})
 
 var _rtr = new rtr()
 var server = http.createServer(_rtr.handleReqs) 

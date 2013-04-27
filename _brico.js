@@ -5,8 +5,9 @@ var _ = Object._
 , Stream = require('stream')
 , async = require('async')
 
-module.exports = function (opts) {
+module.exports = function (usr) {
   var self = this
-
+  
+  console.dir(usr)
 
 }
