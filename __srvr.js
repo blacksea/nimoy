@@ -1,6 +1,4 @@
-// server
-Object._ = function(){} 
-
+// s e r v e r
 var Bricoleur = require('./_brico')
 , pre = require('./_pre')
 , map = require('./_map')
@@ -8,6 +6,13 @@ var Bricoleur = require('./_brico')
 , usr = require('./_usr')
 , http = require('http')
 , shoe = require('shoe')
+
+// default user sim
+var defaultUser = { // default user object
+  name:'default',
+  domain:'localhost',
+  modules:['data']
+}
 
 var _rtr = new rtr()
 var server = http.createServer(_rtr.handleReqs) 
@@ -20,7 +25,7 @@ _map.out.pipe(_pre.in)
 var sock = shoe({log:'error'}, function (stream) { 
   var domain = stream.address.address // extend sockjs/shoe?
   // how to handle connections -- create a relationship between > usr > brico
-  // bind brico to conn id/domain and pass in stream
+  // | bind brico | conn id/domain and pass in stream
   stream.on('data', function (data) {
     var obj = JSON.parse(data) 
     for (key in obj) {
