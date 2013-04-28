@@ -4,7 +4,7 @@ var redis = require('redis')
 
 var user = { // default user object
   name:'default',
-  domain:'127.0.0.1',
+  host:'127.0.0.1',
   modules:['data']
 }
 

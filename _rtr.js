@@ -32,14 +32,14 @@ module.exports = function (opts) { // ROUTER / include additional info - like us
   }
 
   // match brico based on domain -- handle seperate instances with id
+  // split to smaller micro class that only handles conn's
 
   this.handleData = function (stream) { 
     var domain = stream.address.address
     stream.on('data', function (json) {
       var data = JSON.parse(json) 
 
-      if (data.tmp_id) { // first conn, send an id
-        console.dir(stream.address.address)
+      if (data.tmp_id) { // first conn, make an id and send it
         var id = {} 
         id[data.tmp_id] = stream.id
         stream.write(JSON.stringify(id))
