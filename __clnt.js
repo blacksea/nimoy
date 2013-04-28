@@ -31,5 +31,6 @@ bus.on('data', function (json) {
 
 setTimeout(function () {
   console.log('sending to ... '+id)
+  console.log(document.URL)
   bus.write(JSON.stringify({id:id, params:['test',2,'r']}))
 }, 300)

@@ -42,6 +42,7 @@ module.exports = function (opts) { // ROUTER / include additional info - like us
     console.dir(domain)
     stream.on('data', function (json) {
       var data = JSON.parse(json) 
+      console.dir(data)
 
       if (data.tmp_id) { // first conn, make an id and send it
         var id = {} 
