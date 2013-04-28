@@ -22,15 +22,17 @@ bus.on('data', function (json) {
 
   if (typeof data === 'object') console.dir(data)
  
-  if (data[tmp_id]) id = data[tmp_id]
+  if (data[tmp_id]) {
+    console.dir(data[tmp_id])
+    id = data[tmp_id]
+    host = document.URL
+  }
 
   if (data.id === id) { // handle data -- pass to brico
-    console.log('sending data to brico from '+document.URL)
   }
 })
 
 setTimeout(function () {
   console.log('sending to ... '+id)
-  console.log(document.URL)
   bus.write(JSON.stringify({id:id, params:['test',2,'r']}))
 }, 300)
