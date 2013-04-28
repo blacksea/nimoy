@@ -25,7 +25,7 @@ bus.on('data', function (json) {
   if (data[tmp_id]) id = data[tmp_id]
 
   if (data.id === id) { // handle data -- pass to brico
-    console.log('sending data to brico from '+id)
+    console.log('sending data to brico from '+document.URL)
   }
 })
 
