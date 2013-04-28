@@ -19,6 +19,8 @@ module.exports = function (opts) { // ROUTER / include additional info - like us
     , agent = headers['user-agent']
     , host = headers.host
 
+    console.log(host)
+
     async.forEach(opts, function (route, cb) {
       if (route.url === req.url) {
         console.dir('serving '+route.file)
