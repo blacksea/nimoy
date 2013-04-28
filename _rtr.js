@@ -12,7 +12,6 @@ module.exports = function (opts) { // ROUTER / include additional info - like us
     file:"./_wilds/_styles.css"}
   ]
 
-
   this.handleReqs = function (req,res) {
     var match = false
     , headers = req.headers
@@ -32,16 +31,22 @@ module.exports = function (opts) { // ROUTER / include additional info - like us
     })
   }
 
-  this.handleData = function (stream) {
-    var domain = stream.address.address // extend sockjs/shoe?
-    stream.on('data', function (data) {
-      var obj = JSON.parse(data) 
-      for (key in obj) {
-        if (key === 'tmpID') {
-          var setID = {}
-          setID[obj[key]] = stream.id
-          stream.write(JSON.stringify(setID))
-        }
+  // match brico based on domain -- handle seperate instances with id
+
+  this.handleData = function (stream) { 
+    var domain = stream.address.address
+    stream.on('data', function (json) {
+      var data = JSON.parse(json) 
+
+      if (data.tmp_id) { // first conn, send an id
+        console.dir(stream.address.address)
+        var id = {} 
+        id[data.tmp_id] = stream.id
+        stream.write(JSON.stringify(id))
+      }
+
+      if (data.id) { // pass to correct brico based on id
+        console.log('send data to '+data.id)
       }
     })
   }

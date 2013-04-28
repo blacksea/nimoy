@@ -5,24 +5,31 @@ Object._ = function(){}
 var shoe = require('shoe')
 , MuxDemux = require('mux-demux')
 , bricoleur = require('./_brico')
-, connID = null
+, tmp_id = null
+, id = null
 
 var brico = new bricoleur({scope:'client'})
 
 var bus = shoe('/bus')
 
 bus.on('connect', function () {
-  connID = new Date().getTime() 
-  bus.write(JSON.stringify({tmpID:connID}))
+  tmp_id = new Date().getTime() 
+  bus.write(JSON.stringify({tmp_id:tmp_id}))
 })
 
-bus.on('data', function (data) {
-  var obj = JSON.parse(data)
-  if (typeof obj==='object') {
-    console.dir(data)
-  }
-  if (obj[connID]) {
-    connID = obj[connID]
-    console.dir('bind to '+connID)
+bus.on('data', function (json) {
+  var data = JSON.parse(json)
+
+  if (typeof data === 'object') console.dir(data)
+ 
+  if (data[tmp_id]) id = data[tmp_id]
+
+  if (data.id === id) { // handle data -- pass to brico
+    console.log('sending data to brico from '+id)
   }
 })
+
+setTimeout(function () {
+  console.log('sending to ... '+id)
+  bus.write(JSON.stringify({id:id, params:['test',2,'r']}))
+}, 300)

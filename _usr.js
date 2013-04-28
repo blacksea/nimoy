@@ -4,7 +4,7 @@ var redis = require('redis')
 
 var user = { // default user object
   name:'default',
-  domain:'localhost',
+  domain:'127.0.0.1',
   modules:['data']
 }
 
@@ -14,7 +14,6 @@ client.hset('users', user.name, JSON.stringify(user), function (err) {
 
 module.exports = function () { // user superclass/a wrapper for brico
   var self = this
-
   this.buildUsers = function (cb) {
     client.hgetall('users', function (err, users) { 
       for (user in users) {
