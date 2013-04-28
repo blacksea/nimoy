@@ -14,7 +14,7 @@ var bus = shoe('/bus')
 
 bus.on('connect', function () {
   tmp_id = new Date().getTime() 
-  bus.write(JSON.stringify({tmp_id:tmp_id}))
+  bus.write(JSON.stringify({tmp_id:tmp_id, host:document.URL}))
 })
 
 bus.on('data', function (json) {
@@ -25,7 +25,6 @@ bus.on('data', function (json) {
   if (data[tmp_id]) {
     console.dir(data[tmp_id])
     id = data[tmp_id]
-    host = document.URL
   }
 
   if (data.id === id) { // handle data -- pass to brico
@@ -35,4 +34,4 @@ bus.on('data', function (json) {
 setTimeout(function () {
   console.log('sending to ... '+id)
   bus.write(JSON.stringify({id:id, params:['test',2,'r']}))
-}, 300)
+}, 900)
