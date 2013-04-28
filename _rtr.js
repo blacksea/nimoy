@@ -36,6 +36,8 @@ module.exports = function (opts) { // ROUTER / include additional info - like us
 
   this.handleData = function (stream) { 
     var domain = stream.address.address
+    console.dir(stream)
+    console.dir(domain)
     stream.on('data', function (json) {
       var data = JSON.parse(json) 
 
@@ -46,6 +48,7 @@ module.exports = function (opts) { // ROUTER / include additional info - like us
       }
 
       if (data.id) { // pass to correct brico based on id
+        console.dir(Object)
         console.log('send data to '+data.id)
       }
     })
