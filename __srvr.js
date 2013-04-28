@@ -14,7 +14,7 @@ _usr.buildUsers(function (user) {
 })
 
 var _map = new map('./_wilds') // map _wilds modules
-var _pre = new pre({js:['./__clnt.js'],css:'./_wilds/_css',compress:true})
+var _pre = new pre({js:['./__clnt.js'],css:'./_wilds/_css',compress:false})
 _map.out.pipe(_pre.in)
 
 var _rtr = new rtr() // do routing 
