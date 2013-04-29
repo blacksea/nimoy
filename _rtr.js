@@ -20,7 +20,7 @@ module.exports = function (opts) { // ROUTER / include additional info - like us
     , host = headers.host
 
     async.forEach(opts, function (route, cb) {
-      if (route.url === path) {
+      if (route.url === req.url) {
         filed(route.file).pipe(res)
         match = true
       }
