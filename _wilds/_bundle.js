@@ -756,6 +756,8 @@ var MuxDemux = require('mux-demux')
 
 module.exports = function (usr) {
   var self = this
+  if (usr) self.usr = usr
+
   this.test = function (data) {
     console.dir(data)
   }
@@ -2001,7 +2003,113 @@ function MuxDemux (opts, onConnection) {
 module.exports = MuxDemux
 
 
-},{"through":11,"xtend":12,"duplex":13,"stream-serializer":14}],10:[function(require,module,exports){
+},{"through":11,"xtend":12,"duplex":13,"stream-serializer":14}],11:[function(require,module,exports){
+(function(process){var Stream = require('stream')
+
+// through
+//
+// a stream that does nothing but re-emit the input.
+// useful for aggregating a series of changing but not ending streams into one stream)
+
+
+
+exports = module.exports = through
+through.through = through
+
+//create a readable writable stream.
+
+function through (write, end) {
+  write = write || function (data) { this.queue(data) }
+  end = end || function () { this.queue(null) }
+
+  var ended = false, destroyed = false, buffer = []
+  var stream = new Stream()
+  stream.readable = stream.writable = true
+  stream.paused = false
+
+  stream.write = function (data) {
+    write.call(this, data)
+    return !stream.paused
+  }
+
+  function drain() {
+    while(buffer.length && !stream.paused) {
+      var data = buffer.shift()
+      if(null === data)
+        return stream.emit('end')
+      else
+        stream.emit('data', data)
+    }
+  }
+
+  stream.queue = function (data) {
+    buffer.push(data)
+    drain()
+    return stream
+  }
+
+  //this will be registered as the first 'end' listener
+  //must call destroy next tick, to make sure we're after any
+  //stream piped from here.
+  //this is only a problem if end is not emitted synchronously.
+  //a nicer way to do this is to make sure this is the last listener for 'end'
+
+  stream.on('end', function () {
+    stream.readable = false
+    if(!stream.writable)
+      process.nextTick(function () {
+        stream.destroy()
+      })
+  })
+
+  function _end () {
+    stream.writable = false
+    end.call(stream)
+    if(!stream.readable)
+      stream.destroy()
+  }
+
+  stream.end = function (data) {
+    if(ended) return
+    ended = true
+    if(arguments.length) stream.write(data)
+    _end() // will emit or queue
+    return stream
+  }
+
+  stream.destroy = function () {
+    if(destroyed) return
+    destroyed = true
+    ended = true
+    buffer.length = 0
+    stream.writable = stream.readable = false
+    stream.emit('close')
+    return stream
+  }
+
+  stream.pause = function () {
+    if(stream.paused) return
+    stream.paused = true
+    stream.emit('pause')
+    return stream
+  }
+  stream.resume = function () {
+    if(stream.paused) {
+      stream.paused = false
+    }
+    drain()
+    //may have become paused again,
+    //as drain emits 'data'.
+    if(!stream.paused)
+      stream.emit('drain')
+    return stream
+  }
+  return stream
+}
+
+
+})(require("__browserify_process"))
+},{"stream":5,"__browserify_process":8}],10:[function(require,module,exports){
 (function(){/* SockJS client, version 0.3.1.7.ga67f.dirty, http://sockjs.org, MIT License
 
 Copyright (c) 2011-2012 VMware, Inc.
@@ -4327,113 +4435,7 @@ if (typeof module === 'object' && module && module.exports) {
 
 
 })()
-},{}],11:[function(require,module,exports){
-(function(process){var Stream = require('stream')
-
-// through
-//
-// a stream that does nothing but re-emit the input.
-// useful for aggregating a series of changing but not ending streams into one stream)
-
-
-
-exports = module.exports = through
-through.through = through
-
-//create a readable writable stream.
-
-function through (write, end) {
-  write = write || function (data) { this.queue(data) }
-  end = end || function () { this.queue(null) }
-
-  var ended = false, destroyed = false, buffer = []
-  var stream = new Stream()
-  stream.readable = stream.writable = true
-  stream.paused = false
-
-  stream.write = function (data) {
-    write.call(this, data)
-    return !stream.paused
-  }
-
-  function drain() {
-    while(buffer.length && !stream.paused) {
-      var data = buffer.shift()
-      if(null === data)
-        return stream.emit('end')
-      else
-        stream.emit('data', data)
-    }
-  }
-
-  stream.queue = function (data) {
-    buffer.push(data)
-    drain()
-    return stream
-  }
-
-  //this will be registered as the first 'end' listener
-  //must call destroy next tick, to make sure we're after any
-  //stream piped from here.
-  //this is only a problem if end is not emitted synchronously.
-  //a nicer way to do this is to make sure this is the last listener for 'end'
-
-  stream.on('end', function () {
-    stream.readable = false
-    if(!stream.writable)
-      process.nextTick(function () {
-        stream.destroy()
-      })
-  })
-
-  function _end () {
-    stream.writable = false
-    end.call(stream)
-    if(!stream.readable)
-      stream.destroy()
-  }
-
-  stream.end = function (data) {
-    if(ended) return
-    ended = true
-    if(arguments.length) stream.write(data)
-    _end() // will emit or queue
-    return stream
-  }
-
-  stream.destroy = function () {
-    if(destroyed) return
-    destroyed = true
-    ended = true
-    buffer.length = 0
-    stream.writable = stream.readable = false
-    stream.emit('close')
-    return stream
-  }
-
-  stream.pause = function () {
-    if(stream.paused) return
-    stream.paused = true
-    stream.emit('pause')
-    return stream
-  }
-  stream.resume = function () {
-    if(stream.paused) {
-      stream.paused = false
-    }
-    drain()
-    //may have become paused again,
-    //as drain emits 'data'.
-    if(!stream.paused)
-      stream.emit('drain')
-    return stream
-  }
-  return stream
-}
-
-
-})(require("__browserify_process"))
-},{"stream":5,"__browserify_process":8}],12:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 module.exports = extend
 
 function extend(target) {
@@ -4449,76 +4451,7 @@ function extend(target) {
 
     return target
 }
-},{}],14:[function(require,module,exports){
-
-var EventEmitter = require('events').EventEmitter
-
-exports = module.exports = function (wrapper) {
-
-  if('function' == typeof wrapper)
-    return wrapper
-  
-  return exports[wrapper] || exports.json
-}
-
-exports.json = function (stream) {
-
-  var write = stream.write
-  var soFar = ''
-
-  function parse (line) {
-    var js
-    try {
-      js = JSON.parse(line)
-      //ignore lines of whitespace...
-    } catch (err) { 
-      return console.error('invalid JSON', line)
-    }
-    if(js !== undefined)
-      write.call(stream, js)
-  }
-
-  function onData (data) {
-    var lines = (soFar + data).split('\n')
-    soFar = lines.pop()
-    while(lines.length) {
-      parse(lines.shift())
-    }
-  }
-
-  stream.write = onData
-  
-  var end = stream.end
-
-  stream.end = function (data) {
-    if(data)
-      stream.write(data)
-    //if there is any left over...
-    if(soFar) {
-      parse(soFar)
-    }
-    return end.call(stream)
-  }
-
-  stream.emit = function (event, data) {
-
-    if(event == 'data') {
-      data = JSON.stringify(data) + '\n'
-    }
-    //since all stream events only use one argument, this is okay...
-    EventEmitter.prototype.emit.call(stream, event, data)
-  }
-
-  return stream
-//  return es.pipeline(es.split(), es.parse(), stream, es.stringify())
-}
-
-exports.raw = function (stream) {
-  return stream
-}
-
-
-},{"events":6}],13:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 (function(process){var Stream = require('stream')
 
 module.exports = function (write, end) {
@@ -4665,5 +4598,74 @@ module.exports = function (write, end) {
 
 
 })(require("__browserify_process"))
-},{"stream":5,"__browserify_process":8}]},{},[1])
+},{"stream":5,"__browserify_process":8}],14:[function(require,module,exports){
+
+var EventEmitter = require('events').EventEmitter
+
+exports = module.exports = function (wrapper) {
+
+  if('function' == typeof wrapper)
+    return wrapper
+  
+  return exports[wrapper] || exports.json
+}
+
+exports.json = function (stream) {
+
+  var write = stream.write
+  var soFar = ''
+
+  function parse (line) {
+    var js
+    try {
+      js = JSON.parse(line)
+      //ignore lines of whitespace...
+    } catch (err) { 
+      return console.error('invalid JSON', line)
+    }
+    if(js !== undefined)
+      write.call(stream, js)
+  }
+
+  function onData (data) {
+    var lines = (soFar + data).split('\n')
+    soFar = lines.pop()
+    while(lines.length) {
+      parse(lines.shift())
+    }
+  }
+
+  stream.write = onData
+  
+  var end = stream.end
+
+  stream.end = function (data) {
+    if(data)
+      stream.write(data)
+    //if there is any left over...
+    if(soFar) {
+      parse(soFar)
+    }
+    return end.call(stream)
+  }
+
+  stream.emit = function (event, data) {
+
+    if(event == 'data') {
+      data = JSON.stringify(data) + '\n'
+    }
+    //since all stream events only use one argument, this is okay...
+    EventEmitter.prototype.emit.call(stream, event, data)
+  }
+
+  return stream
+//  return es.pipeline(es.split(), es.parse(), stream, es.stringify())
+}
+
+exports.raw = function (stream) {
+  return stream
+}
+
+
+},{"events":6}]},{},[1])
 ;
