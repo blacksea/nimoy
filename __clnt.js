@@ -1,13 +1,20 @@
-Object._ = function(){} 
-
 var shoe = require('shoe')
-, MuxDemux = require('mux-demux')
+, stream = require('stream')
 , bricoleur = require('./_brico')
 , tmp_id = null
 , id = null
 , host = window.location.host.replace('www.','')
 
-var brico = new bricoleur({scope:'client'})
+var brico = new bricoleur()
+
+var t = new stream()
+t.readable = true
+
+setInterval(function () {
+  t.emit('data', 'testing!!!')
+}, 300)
+
+t.pipe(brico.in)
 
 var bus = shoe('/bus')
 

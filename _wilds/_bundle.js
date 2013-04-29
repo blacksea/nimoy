@@ -1,40 +1,4 @@
 ;(function(e,t,n,r){function i(r){if(!n[r]){if(!t[r]){if(e)return e(r);throw new Error("Cannot find module '"+r+"'")}var s=n[r]={exports:{}};t[r][0](function(e){var n=t[r][1][e];return i(n?n:e)},s,s.exports)}return n[r].exports}for(var s=0;s<r.length;s++)i(r[s]);return i})(typeof require!=="undefined"&&require,{1:[function(require,module,exports){
-Object._ = function(){} 
-
-var shoe = require('shoe')
-, MuxDemux = require('mux-demux')
-, bricoleur = require('./_brico')
-, tmp_id = null
-, id = null
-, host = window.location.host.replace('www.','')
-
-var brico = new bricoleur({scope:'client'})
-
-var bus = shoe('/bus')
-
-bus.on('connect', function () {
-  tmp_id = new Date().getTime()
-  bus.write(JSON.stringify({tmp_id:tmp_id, host:host}))
-})
-
-bus.on('data', function (json) {
-  var data = JSON.parse(json)
-
-  if (typeof data === 'object') console.dir(data)
- 
-  if (data[tmp_id]) {
-    id = data[tmp_id]
-  }
-
-  if (data.id === id) { // handle data -- pass to brico
-  }
-})
-
-setTimeout(function () {
-  bus.write(JSON.stringify({id:id, params:['test',2,'r']}))
-}, 900)
-
-},{"./_brico":2,"shoe":3,"mux-demux":4}],5:[function(require,module,exports){
 var events = require('events');
 var util = require('util');
 
@@ -155,7 +119,7 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":6,"util":7}],8:[function(require,module,exports){
+},{"events":2,"util":3}],4:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -209,7 +173,7 @@ process.chdir = function (dir) {
     throw new Error('process.chdir is not supported');
 };
 
-},{}],6:[function(require,module,exports){
+},{}],2:[function(require,module,exports){
 (function(process){if (!process.EventEmitter) process.EventEmitter = function () {};
 
 var EventEmitter = exports.EventEmitter = process.EventEmitter;
@@ -395,7 +359,7 @@ EventEmitter.prototype.listeners = function(type) {
 };
 
 })(require("__browserify_process"))
-},{"__browserify_process":8}],7:[function(require,module,exports){
+},{"__browserify_process":4}],3:[function(require,module,exports){
 var events = require('events');
 
 exports.isArray = isArray;
@@ -748,22 +712,118 @@ exports.format = function(f) {
   return str;
 };
 
-},{"events":6}],2:[function(require,module,exports){
-// BRICOLEUR 
-var MuxDemux = require('mux-demux')
-, Stream = require('stream')
+},{"events":2}],5:[function(require,module,exports){
+var shoe = require('shoe')
+, stream = require('stream')
+, bricoleur = require('./_brico')
+, tmp_id = null
+, id = null
+, host = window.location.host.replace('www.','')
+
+var brico = new bricoleur()
+
+var t = new stream()
+t.readable = true
+
+setInterval(function () {
+  t.emit('data', 'testing!!!')
+}, 300)
+
+t.pipe(brico.in)
+
+var bus = shoe('/bus')
+
+bus.on('connect', function () {
+  tmp_id = new Date().getTime()
+  bus.write(JSON.stringify({tmp_id:tmp_id, host:host}))
+})
+
+bus.on('data', function (json) {
+  var data = JSON.parse(json)
+
+  if (typeof data === 'object') console.dir(data)
+ 
+  if (data[tmp_id]) {
+    id = data[tmp_id]
+  }
+
+  if (data.id === id) { // handle data -- pass to brico
+  }
+})
+
+setTimeout(function () {
+  bus.write(JSON.stringify({id:id, params:['test',2,'r']}))
+}, 900)
+
+},{"stream":1,"./_brico":6,"shoe":7}],6:[function(require,module,exports){
+var telepath = require('tele')
+, stream = require('stream')
 , async = require('async')
 
-module.exports = function (usr) {
+module.exports = function (usr) { // BRICOLEUR 
   var self = this
+  telepath(this)
+
   if (usr) self.usr = usr
 
   this.test = function (data) {
     console.dir(data)
   }
+
+  this.recv = function (data) {
+    console.dir(data.toString())
+  }
 }
 
-},{"stream":5,"mux-demux":4,"async":9}],9:[function(require,module,exports){
+},{"stream":1,"tele":8,"async":9}],8:[function(require,module,exports){
+var stream = require('stream')
+, browser = false
+if (!stream.Writable) browser = true // browser ugliness
+
+function Tele () {
+  var self = this
+
+  this.out = new stream()
+  this.out.readable = true
+  
+  this.send = function (data) {
+    self.out.emit('data',data)
+  }
+
+  if (browser===true) { // very strange browserify hack
+    self.in = new stream()
+    self.in.writable = true
+  }
+
+  if (browser===false) {
+    self.in = new stream.Writable()
+  }
+} 
+
+// output stream (instance of stream) **uses readable = true to trigger streams 1 style
+module.exports = function (mod) { // pass in module & make it telepathic!
+  var tele = new Tele()
+  Object.keys(tele).forEach(function(method) {
+    mod[method] = tele[method]
+    if (method === 'in') { // handle _write chunks with recv method 
+      if (browser===true) {
+        mod.in.write = function (chunk) {
+          if (!mod.recv) throw new Error('module needs a recv method') 
+          mod.recv(chunk)
+        }
+      }
+      if (browser===false) { 
+        mod.in._write = function (chunk,encoding,cb) {
+          if (!mod.recv) throw new Error('module needs a recv method') 
+          mod.recv(chunk)
+          cb()
+        }
+      }
+    }
+  })
+}
+
+},{"stream":1}],9:[function(require,module,exports){
 (function(process){/*global setImmediate: false, setTimeout: false, console: false */
 (function () {
 
@@ -1748,7 +1808,7 @@ module.exports = function (usr) {
 }());
 
 })(require("__browserify_process"))
-},{"__browserify_process":8}],3:[function(require,module,exports){
+},{"__browserify_process":4}],7:[function(require,module,exports){
 var Stream = require('stream');
 var sockjs = require('sockjs-client');
 
@@ -1819,297 +1879,7 @@ module.exports = function (uri, cb) {
     return stream;
 };
 
-},{"stream":5,"sockjs-client":10}],4:[function(require,module,exports){
-'use strict';
-
-var through = require('through')
-  , extend = require('xtend')
-  , duplex = require('duplex')
-  , serializer = require('stream-serializer')
-
-function MuxDemux (opts, onConnection) {
-  if('function' === typeof opts)
-    onConnection = opts, opts = null
-  opts = opts || {}
-
-  function createID() {
-    return (
-      Math.random().toString(16).slice(2) +
-      Math.random().toString(16).slice(2)
-    )
-  }
-
-  var streams = {}, streamCount = 0
-  var md = duplex()//.resume()
-
-  md.on('_data', function (data) {
-    if(!(Array.isArray(data)
-      && 'string' === typeof data[0]
-      && '__proto__' !== data[0]
-      && 'string' === typeof data[1]
-      && '__proto__' !== data[1]
-    )) return
-    var id = data.shift()
-    var event = data[0]
-    var s = streams[id]
-    if(!s) {
-      if(event == 'close')
-        return
-      if(event != 'new')
-        return outer.emit('unknown', id)
-      md.emit('connection', createStream(id, data[1].meta, data[1].opts))
-    }
-    else if (event === 'pause')
-      s.paused = true
-    else if (event === 'resume') {
-      var p = s.paused
-      s.paused = false
-      if(p) s.emit('drain')
-    }
-    else if (event === 'error') {
-      var error = data[1]
-      if (typeof error === 'string') {
-        s.emit('error', new Error(error))
-      } else if (typeof error.message === 'string') {
-        var e = new Error(error.message)
-        extend(e, error)
-        s.emit('error', e)
-      } else {
-        s.emit('error', error)
-      }
-    }
-    else {
-      s.emit.apply(s, data)
-    }
-  })
-  .on('_end', function () {
-    destroyAll()
-    md._end()
-  })
-
-  function destroyAll (_err) {
-    md.removeListener('end', destroyAll)
-    md.removeListener('error', destroyAll)
-    md.removeListener('close', destroyAll)
-    var err = _err || new Error ('unexpected disconnection')
-    for (var i in streams) {
-      var s = streams[i]
-      s.destroyed = true
-      if (opts.error !== true) {
-        s.end()
-      } else {
-        s.emit('error', err)
-        s.destroy()
-      }
-    }
-  }
-
-  //end the stream once sub-streams have ended.
-  //(waits for them to close, like on a tcp server)
-
-  function createStream(id, meta, opts) {
-    streamCount ++
-    var s = through(function (data) {
-      if(!this.writable) {
-        var err = Error('stream is not writable: ' + id)
-        err.stream = this
-        return outer.emit("error", err)
-      }
-      md._data([s.id, 'data', data])
-    }, function () {
-      md._data([s.id, 'end'])
-      if (this.readable && !opts.allowHalfOpen && !this.ended) {
-        this.emit("end")
-      }
-    })
-    s.pause = function () {
-      md._data([s.id, 'pause'])
-    }
-    s.resume = function () {
-      md._data([s.id, 'resume'])
-    }
-    s.error = function (message) {
-      md._data([s.id, 'error', message])
-    }
-    s.once('close', function () {
-      delete streams[id]
-      streamCount --
-      md._data([s.id, 'close'])
-      if(streamCount === 0)
-        md.emit('zero')
-    })
-    s.writable = opts.writable
-    s.readable = opts.readable
-    streams[s.id = id] = s
-    s.meta = meta
-    return s
-  }
-
-  var outer = serializer(opts.wrapper)(md)
-
-  if(md !== outer)
-    md.on('connection', function (stream) {
-      outer.emit('connection', stream)
-    })
-
-  outer.close = function (cb) {
-    md.once('zero', function () {
-      md._end()
-      if(cb) cb()
-    })
-    return this
-  }
-
-  if(onConnection)
-    outer.on('connection', onConnection)
-
-  outer.on('connection', function (stream) {
-    //if mux-demux recieves a stream but there is nothing to handle it,
-    //then return an error to the other side.
-    //still trying to think of the best error message.
-    if(outer.listeners('connection').length === 1)
-      stream.error('remote end lacks connection listener ' 
-        + outer.listeners('connection').length)
-  })
-
-  var pipe = outer.pipe
-  outer.pipe = function (dest, opts) {
-    pipe.call(outer, dest, opts)
-    md.on('end', destroyAll)
-    md.on('close', destroyAll)
-    md.on('error', destroyAll)
-    return dest
-  }
-
-  outer.createStream = function (meta, opts) {
-    opts = opts || {}
-    if (!opts.writable && !opts.readable)
-      opts.readable = opts.writable = true
-    var s = createStream(createID(), meta, opts)
-    var _opts = {writable: opts.readable, readable: opts.writable}
-    md._data([s.id, 'new', {meta: meta, opts: _opts}])
-    return s
-  }
-  outer.createWriteStream = function (meta) {
-    return outer.createStream(meta, {writable: true, readable: false})
-  }
-  outer.createReadStream = function (meta) {
-    return outer.createStream(meta, {writable: false, readable: true})
-  }
-
-  return outer
-}
-
-module.exports = MuxDemux
-
-
-},{"through":11,"xtend":12,"duplex":13,"stream-serializer":14}],11:[function(require,module,exports){
-(function(process){var Stream = require('stream')
-
-// through
-//
-// a stream that does nothing but re-emit the input.
-// useful for aggregating a series of changing but not ending streams into one stream)
-
-
-
-exports = module.exports = through
-through.through = through
-
-//create a readable writable stream.
-
-function through (write, end) {
-  write = write || function (data) { this.queue(data) }
-  end = end || function () { this.queue(null) }
-
-  var ended = false, destroyed = false, buffer = []
-  var stream = new Stream()
-  stream.readable = stream.writable = true
-  stream.paused = false
-
-  stream.write = function (data) {
-    write.call(this, data)
-    return !stream.paused
-  }
-
-  function drain() {
-    while(buffer.length && !stream.paused) {
-      var data = buffer.shift()
-      if(null === data)
-        return stream.emit('end')
-      else
-        stream.emit('data', data)
-    }
-  }
-
-  stream.queue = function (data) {
-    buffer.push(data)
-    drain()
-    return stream
-  }
-
-  //this will be registered as the first 'end' listener
-  //must call destroy next tick, to make sure we're after any
-  //stream piped from here.
-  //this is only a problem if end is not emitted synchronously.
-  //a nicer way to do this is to make sure this is the last listener for 'end'
-
-  stream.on('end', function () {
-    stream.readable = false
-    if(!stream.writable)
-      process.nextTick(function () {
-        stream.destroy()
-      })
-  })
-
-  function _end () {
-    stream.writable = false
-    end.call(stream)
-    if(!stream.readable)
-      stream.destroy()
-  }
-
-  stream.end = function (data) {
-    if(ended) return
-    ended = true
-    if(arguments.length) stream.write(data)
-    _end() // will emit or queue
-    return stream
-  }
-
-  stream.destroy = function () {
-    if(destroyed) return
-    destroyed = true
-    ended = true
-    buffer.length = 0
-    stream.writable = stream.readable = false
-    stream.emit('close')
-    return stream
-  }
-
-  stream.pause = function () {
-    if(stream.paused) return
-    stream.paused = true
-    stream.emit('pause')
-    return stream
-  }
-  stream.resume = function () {
-    if(stream.paused) {
-      stream.paused = false
-    }
-    drain()
-    //may have become paused again,
-    //as drain emits 'data'.
-    if(!stream.paused)
-      stream.emit('drain')
-    return stream
-  }
-  return stream
-}
-
-
-})(require("__browserify_process"))
-},{"stream":5,"__browserify_process":8}],10:[function(require,module,exports){
+},{"stream":1,"sockjs-client":10}],10:[function(require,module,exports){
 (function(){/* SockJS client, version 0.3.1.7.ga67f.dirty, http://sockjs.org, MIT License
 
 Copyright (c) 2011-2012 VMware, Inc.
@@ -4435,237 +4205,5 @@ if (typeof module === 'object' && module && module.exports) {
 
 
 })()
-},{}],12:[function(require,module,exports){
-module.exports = extend
-
-function extend(target) {
-    for (var i = 1; i < arguments.length; i++) {
-        var source = arguments[i],
-            keys = Object.keys(source)
-
-        for (var j = 0; j < keys.length; j++) {
-            var name = keys[j]
-            target[name] = source[name]
-        }
-    }
-
-    return target
-}
-},{}],13:[function(require,module,exports){
-(function(process){var Stream = require('stream')
-
-module.exports = function (write, end) {
-  var stream = new Stream() 
-  var buffer = [], ended = false, destroyed = false, emitEnd
-  stream.writable = stream.readable = true
-  stream.paused = false
-  stream._paused = false
-  stream.buffer = buffer
-  
-  stream
-    .on('pause', function () {
-      stream._paused = true
-    })
-    .on('drain', function () {
-      stream._paused = false
-    })
-   
-  function destroySoon () {
-    process.nextTick(stream.destroy.bind(stream))
-  }
-
-  if(write)
-    stream.on('_data', write)
-  if(end)
-    stream.on('_end', end)
-
-  //destroy the stream once both ends are over
-  //but do it in nextTick, so that other listeners
-  //on end have time to respond
-  stream.once('end', function () { 
-    stream.readable = false
-    if(!stream.writable) {
-      process.nextTick(function () {
-        stream.destroy()
-      })
-    }
-  })
-
-  stream.once('_end', function () { 
-    stream.writable = false
-    if(!stream.readable)
-      stream.destroy()
-  })
-
-  // this is the default write method,
-  // if you overide it, you are resposible
-  // for pause state.
-
-  
-  stream._data = function (data) {
-    if(!stream.paused && !buffer.length)
-      stream.emit('data', data)
-    else 
-      buffer.push(data)
-    return !(stream.paused || buffer.length)
-  }
-
-  stream._end = function (data) { 
-    if(data) stream._data(data)
-    if(emitEnd) return
-    emitEnd = true
-    //destroy is handled above.
-    stream.drain()
-  }
-
-  stream.write = function (data) {
-    stream.emit('_data', data)
-    return !stream._paused
-  }
-
-  stream.end = function () {
-    stream.writable = false
-    if(stream.ended) return
-    stream.ended = true
-    stream.emit('_end')
-  }
-
-  stream.drain = function () {
-    if(!buffer.length && !emitEnd) return
-    //if the stream is paused after just before emitEnd()
-    //end should be buffered.
-    while(!stream.paused) {
-      if(buffer.length) {
-        stream.emit('data', buffer.shift())
-        if(buffer.length == 0) {
-          stream.emit('_drain')
-        }
-      }
-      else if(emitEnd && stream.readable) {
-        stream.readable = false
-        stream.emit('end')
-        return
-      } else {
-        //if the buffer has emptied. emit drain.
-        return true
-      }
-    }
-  }
-  var started = false
-  stream.resume = function () {
-    //this is where I need pauseRead, and pauseWrite.
-    //here the reading side is unpaused,
-    //but the writing side may still be paused.
-    //the whole buffer might not empity at once.
-    //it might pause again.
-    //the stream should never emit data inbetween pause()...resume()
-    //and write should return !buffer.length
-    started = true
-    stream.paused = false
-    stream.drain() //will emit drain if buffer empties.
-    return stream
-  }
-
-  stream.destroy = function () {
-    if(destroyed) return
-    destroyed = ended = true     
-    buffer.length = 0
-    stream.emit('close')
-  }
-  var pauseCalled = false
-  stream.pause = function () {
-    started = true
-    stream.paused = true
-    stream.emit('_pause')
-    return stream
-  }
-  stream._pause = function () {
-    if(!stream._paused) {
-      stream._paused = true
-      stream.emit('pause')
-    }
-    return this
-  }
-  stream.paused = true
-  process.nextTick(function () {
-    //unless the user manually paused
-    if(started) return
-    stream.resume()
-  })
- 
-  return stream
-}
-
-
-})(require("__browserify_process"))
-},{"stream":5,"__browserify_process":8}],14:[function(require,module,exports){
-
-var EventEmitter = require('events').EventEmitter
-
-exports = module.exports = function (wrapper) {
-
-  if('function' == typeof wrapper)
-    return wrapper
-  
-  return exports[wrapper] || exports.json
-}
-
-exports.json = function (stream) {
-
-  var write = stream.write
-  var soFar = ''
-
-  function parse (line) {
-    var js
-    try {
-      js = JSON.parse(line)
-      //ignore lines of whitespace...
-    } catch (err) { 
-      return console.error('invalid JSON', line)
-    }
-    if(js !== undefined)
-      write.call(stream, js)
-  }
-
-  function onData (data) {
-    var lines = (soFar + data).split('\n')
-    soFar = lines.pop()
-    while(lines.length) {
-      parse(lines.shift())
-    }
-  }
-
-  stream.write = onData
-  
-  var end = stream.end
-
-  stream.end = function (data) {
-    if(data)
-      stream.write(data)
-    //if there is any left over...
-    if(soFar) {
-      parse(soFar)
-    }
-    return end.call(stream)
-  }
-
-  stream.emit = function (event, data) {
-
-    if(event == 'data') {
-      data = JSON.stringify(data) + '\n'
-    }
-    //since all stream events only use one argument, this is okay...
-    EventEmitter.prototype.emit.call(stream, event, data)
-  }
-
-  return stream
-//  return es.pipeline(es.split(), es.parse(), stream, es.stringify())
-}
-
-exports.raw = function (stream) {
-  return stream
-}
-
-
-},{"events":6}]},{},[1])
+},{}]},{},[5])
 ;
