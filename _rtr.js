@@ -19,22 +19,19 @@ module.exports = function (opts) { // ROUTER / include additional info - like us
     , agent = headers['user-agent']
     , host = headers.host
 
-    console.log(host)
-
     async.forEach(opts, function (route, cb) {
-      if (route.url === req.url) {
-        console.dir('serving '+route.file)
+      if (route.url === path) {
         filed(route.file).pipe(res)
         match = true
       }
       cb()
     }, function () {
-      if (match === false) res.end('404')
+      if (match === false) { // url is not default frame do something with it....
+        filed('./_wilds/_index.html').pipe(res)
+        console.log(req.url) // the url path
+      }
     })
   }
-
-  // match brico based on domain -- handle seperate instances with id
-  // split to smaller micro class that only handles conn's
 
   this.handleData = function (stream) { 
     var domain = stream.address.address
@@ -46,11 +43,10 @@ module.exports = function (opts) { // ROUTER / include additional info - like us
         var id = {} 
         id[data.tmp_id] = stream.id
         stream.write(JSON.stringify(id))
+        console.dir('host is '+data.host) // create binding!
       }
 
       if (data.id) { // pass to correct brico based on id
-        console.dir(Object)
-        console.log('send data to '+data.id)
       }
     })
   }
