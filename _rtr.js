@@ -42,6 +42,7 @@ module.exports = function (opts) { // ROUTER
         id[data.tmp_id] = stream.id
         stream.write(JSON.stringify(id))
         console.dir('host is '+data.host) // create binding here!
+        console.dir(Object[data.host])
       }
 
       if (data.id) { // pass to correct brico based on id

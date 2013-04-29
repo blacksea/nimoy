@@ -10,7 +10,7 @@ var port = 80 // set port
 
 var _usr = new usr() // setup user
 _usr.buildUsers(function (user) {
-  Object['_'+user.host] = new Bricoleur(user) // not too sure about this prob a temp hack
+  Object[user.host] = new Bricoleur(user) // not too sure about this prob a temp hack
 })
 
 var _map = new map('./_wilds') // map _wilds modules
