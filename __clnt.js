@@ -5,7 +5,7 @@ Object._ = function(){}
 var shoe = require('shoe')
 , MuxDemux = require('mux-demux')
 , bricoleur = require('./_brico')
-, host = docuement.URL.split('//')[1].split('/')[0]
+, host = window.location.host
 , tmp_id = null
 , id = null
 
