@@ -823,7 +823,78 @@ module.exports = function (mod) { // pass in module & make it telepathic!
   })
 }
 
-},{"stream":1}],9:[function(require,module,exports){
+},{"stream":1}],6:[function(require,module,exports){
+var Stream = require('stream');
+var sockjs = require('sockjs-client');
+
+module.exports = function (uri, cb) {
+    if (/^\/\/[^\/]+\//.test(uri)) {
+        uri = window.location.protocol + uri;
+    }
+    else if (!/^https?:\/\//.test(uri)) {
+        uri = window.location.protocol + '//'
+            + window.location.host
+            + (/^\//.test(uri) ? uri : '/' + uri)
+        ;
+    }
+    
+    var stream = new Stream;
+    stream.readable = true;
+    stream.writable = true;
+    
+    var ready = false;
+    var buffer = [];
+    
+    var sock = sockjs(uri);
+    stream.sock = sock;
+    
+    stream.write = function (msg) {
+        if (!ready || buffer.length) buffer.push(msg)
+        else sock.send(msg)
+    };
+    
+    stream.end = function (msg) {
+        if (msg !== undefined) stream.write(msg);
+        if (!ready) {
+            stream._ended = true;
+            return;
+        }
+        stream.writable = false;
+        sock.close();
+    };
+    
+    stream.destroy = function () {
+        stream._ended = true;
+        stream.writable = stream.readable = false;
+        buffer.length = 0
+        sock.close();
+    };
+    
+    sock.onopen = function () {
+        if (typeof cb === 'function') cb();
+        ready = true;
+        for (var i = 0; i < buffer.length; i++) {
+            sock.send(buffer[i]);
+        }
+        buffer = [];
+        stream.emit('connect');
+        if (stream._ended) stream.end();
+    };
+    
+    sock.onmessage = function (e) {
+        stream.emit('data', e.data);
+    };
+    
+    sock.onclose = function () {
+        stream.emit('end');
+        stream.writable = false;
+        stream.readable = false;
+    };
+    
+    return stream;
+};
+
+},{"stream":1,"sockjs-client":10}],9:[function(require,module,exports){
 (function(process){/*global setImmediate: false, setTimeout: false, console: false */
 (function () {
 
@@ -1808,78 +1879,7 @@ module.exports = function (mod) { // pass in module & make it telepathic!
 }());
 
 })(require("__browserify_process"))
-},{"__browserify_process":7}],6:[function(require,module,exports){
-var Stream = require('stream');
-var sockjs = require('sockjs-client');
-
-module.exports = function (uri, cb) {
-    if (/^\/\/[^\/]+\//.test(uri)) {
-        uri = window.location.protocol + uri;
-    }
-    else if (!/^https?:\/\//.test(uri)) {
-        uri = window.location.protocol + '//'
-            + window.location.host
-            + (/^\//.test(uri) ? uri : '/' + uri)
-        ;
-    }
-    
-    var stream = new Stream;
-    stream.readable = true;
-    stream.writable = true;
-    
-    var ready = false;
-    var buffer = [];
-    
-    var sock = sockjs(uri);
-    stream.sock = sock;
-    
-    stream.write = function (msg) {
-        if (!ready || buffer.length) buffer.push(msg)
-        else sock.send(msg)
-    };
-    
-    stream.end = function (msg) {
-        if (msg !== undefined) stream.write(msg);
-        if (!ready) {
-            stream._ended = true;
-            return;
-        }
-        stream.writable = false;
-        sock.close();
-    };
-    
-    stream.destroy = function () {
-        stream._ended = true;
-        stream.writable = stream.readable = false;
-        buffer.length = 0
-        sock.close();
-    };
-    
-    sock.onopen = function () {
-        if (typeof cb === 'function') cb();
-        ready = true;
-        for (var i = 0; i < buffer.length; i++) {
-            sock.send(buffer[i]);
-        }
-        buffer = [];
-        stream.emit('connect');
-        if (stream._ended) stream.end();
-    };
-    
-    sock.onmessage = function (e) {
-        stream.emit('data', e.data);
-    };
-    
-    sock.onclose = function () {
-        stream.emit('end');
-        stream.writable = false;
-        stream.readable = false;
-    };
-    
-    return stream;
-};
-
-},{"stream":1,"sockjs-client":10}],10:[function(require,module,exports){
+},{"__browserify_process":7}],10:[function(require,module,exports){
 (function(){/* SockJS client, version 0.3.1.7.ga67f.dirty, http://sockjs.org, MIT License
 
 Copyright (c) 2011-2012 VMware, Inc.

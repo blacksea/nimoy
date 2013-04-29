@@ -48,5 +48,8 @@ module.exports = function (opts) { // ROUTER
       if (data.id) { // pass to correct brico based on id
       }
     })
+    stream.on('close', function () { // unpipe brico by id!
+      console.log('conn '+stream.id+' closed')
+    })
   }
 }
