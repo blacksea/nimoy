@@ -4435,23 +4435,7 @@ function through (write, end) {
 
 
 })(require("__browserify_process"))
-},{"stream":5,"__browserify_process":8}],12:[function(require,module,exports){
-module.exports = extend
-
-function extend(target) {
-    for (var i = 1; i < arguments.length; i++) {
-        var source = arguments[i],
-            keys = Object.keys(source)
-
-        for (var j = 0; j < keys.length; j++) {
-            var name = keys[j]
-            target[name] = source[name]
-        }
-    }
-
-    return target
-}
-},{}],13:[function(require,module,exports){
+},{"stream":5,"__browserify_process":8}],13:[function(require,module,exports){
 (function(process){var Stream = require('stream')
 
 module.exports = function (write, end) {
@@ -4598,7 +4582,23 @@ module.exports = function (write, end) {
 
 
 })(require("__browserify_process"))
-},{"stream":5,"__browserify_process":8}],14:[function(require,module,exports){
+},{"stream":5,"__browserify_process":8}],12:[function(require,module,exports){
+module.exports = extend
+
+function extend(target) {
+    for (var i = 1; i < arguments.length; i++) {
+        var source = arguments[i],
+            keys = Object.keys(source)
+
+        for (var j = 0; j < keys.length; j++) {
+            var name = keys[j]
+            target[name] = source[name]
+        }
+    }
+
+    return target
+}
+},{}],14:[function(require,module,exports){
 
 var EventEmitter = require('events').EventEmitter
 
