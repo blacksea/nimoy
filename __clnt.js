@@ -1,5 +1,3 @@
-// CLIENT
-
 Object._ = function(){} 
 
 var shoe = require('shoe')
