@@ -14,8 +14,7 @@ var bus = shoe('/bus')
 
 bus.on('connect', function () {
   tmp_id = new Date().getTime()
-  console.dir(window.location.host)
-  bus.write(JSON.stringify({tmp_id:tmp_id, host:window.location.host}))
+  bus.write(JSON.stringify({tmp_id:tmp_id, host:window.location.host.replace('www.','')}))
 })
 
 bus.on('data', function (json) {
