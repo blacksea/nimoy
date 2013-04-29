@@ -5,6 +5,7 @@ Object._ = function(){}
 var shoe = require('shoe')
 , MuxDemux = require('mux-demux')
 , bricoleur = require('./_brico')
+, host = docuement.URL.split('//')[1].split('/')[0]
 , tmp_id = null
 , id = null
 
@@ -13,8 +14,9 @@ var brico = new bricoleur({scope:'client'})
 var bus = shoe('/bus')
 
 bus.on('connect', function () {
-  tmp_id = new Date().getTime() 
-  bus.write(JSON.stringify({tmp_id:tmp_id, host:document.URL}))
+  tmp_id = new Date().getTime(
+  bus.write(JSON.stringify({tmp_id:tmp_id, host:host})
+
 })
 
 bus.on('data', function (json) {
