@@ -5,7 +5,6 @@ Object._ = function(){}
 var shoe = require('shoe')
 , MuxDemux = require('mux-demux')
 , bricoleur = require('./_brico')
-, host = window.location.host
 , tmp_id = null
 , id = null
 
@@ -15,6 +14,7 @@ var bus = shoe('/bus')
 
 bus.on('connect', function () {
   tmp_id = new Date().getTime(
+  console.dir(window.location.host)
   bus.write(JSON.stringify({tmp_id:tmp_id, host:host})
 
 })
