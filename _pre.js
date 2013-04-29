@@ -47,7 +47,6 @@ module.exports = function (opts) { // PRECOMPILER
       styles += CSS
       stylus.render(styles, {filename:destCSS}, function (err, css) {
         if (err) throw err
-        console.dir(css)
         fs.writeFile(destCSS, css, function (err) {
           if (err) throw err
           console.log('css compiled')
