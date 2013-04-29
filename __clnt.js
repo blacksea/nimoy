@@ -7,6 +7,7 @@ var shoe = require('shoe')
 , bricoleur = require('./_brico')
 , tmp_id = null
 , id = null
+, host = window.location.host.replace('www.','')
 
 var brico = new bricoleur({scope:'client'})
 
@@ -14,7 +15,7 @@ var bus = shoe('/bus')
 
 bus.on('connect', function () {
   tmp_id = new Date().getTime()
-  bus.write(JSON.stringify({tmp_id:tmp_id, host:window.location.host.replace('www.','')}))
+  bus.write(JSON.stringify({tmp_id:tmp_id, host:host}))
 })
 
 bus.on('data', function (json) {
@@ -23,7 +24,6 @@ bus.on('data', function (json) {
   if (typeof data === 'object') console.dir(data)
  
   if (data[tmp_id]) {
-    console.dir(data[tmp_id])
     id = data[tmp_id]
   }
 
@@ -32,6 +32,5 @@ bus.on('data', function (json) {
 })
 
 setTimeout(function () {
-  console.log('sending to ... '+id)
   bus.write(JSON.stringify({id:id, params:['test',2,'r']}))
 }, 900)
