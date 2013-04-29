@@ -30,6 +30,7 @@ module.exports = function (opts) { // PRECOMPILER
 
   function compile () {
     browserify(opts.js).bundle({}, function (err, bundle) {
+      if (err) throw err
       if (opts.compress === true) {
         var bundleMin = uglifyJS.minify(bundle,{fromString: true})
         bundle = bundleMin.code

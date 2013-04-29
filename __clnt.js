@@ -13,10 +13,9 @@ var brico = new bricoleur({scope:'client'})
 var bus = shoe('/bus')
 
 bus.on('connect', function () {
-  tmp_id = new Date().getTime(
+  tmp_id = new Date().getTime()
   console.dir(window.location.host)
-  bus.write(JSON.stringify({tmp_id:tmp_id, host:host})
-
+  bus.write(JSON.stringify({tmp_id:tmp_id, host:window.location.host}))
 })
 
 bus.on('data', function (json) {
