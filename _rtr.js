@@ -10,7 +10,7 @@ module.exports = function (opts) { // ROUTER
     file:"./_wilds/_bundle.js"},
     {url:"/_styles.css",
     file:"./_wilds/_styles.css"}
-  ];
+  ]
 
   this.handleReqs = function (req,res) {
     var match = false

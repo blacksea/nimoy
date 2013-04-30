@@ -23,7 +23,7 @@ async.forEach(users, function (user, cb) {
   console.log('users added')
 })
 
-module.exports = function () { // user superclass/a wrapper for brico
+module.exports = function () {
   var self = this
   this.buildUsers = function (cb) {
     client.hgetall('users', function (err, users) { 
