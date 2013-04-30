@@ -12,12 +12,13 @@ ws.on('data', function (json) {
   if (data.new_id) {
     id = data.new_id
     ws.write(JSON.stringify({newConn:host,id:id}))
-    setInterval(function () {
-      ws.write(JSON.stringify({id:id,msg:'tst'}))
-    }, 200)
   }
   if (typeof data === 'object') console.log(data)
 })
+
+setInterval(function () {
+  ws.write(JSON.stringify({id:id,msg:'tst'}))
+}, 200)
 
 
 
@@ -436,7 +437,24 @@ EventEmitter.prototype.listeners = function(type) {
 };
 
 })(require("__browserify_process"))
-},{"__browserify_process":7}],6:[function(require,module,exports){
+},{"__browserify_process":7}],2:[function(require,module,exports){
+var telepath = require('tele')
+, stream = require('stream')
+, async = require('async')
+
+module.exports = function (usr) { // BRICOLEUR 
+  var self = this
+  telepath(this)
+
+  if (usr) self.usr = usr
+
+  this.recv = function (data) {
+    console.dir(usr.host)
+    console.dir(data.toString())
+  }
+}
+
+},{"stream":4,"tele":8,"async":9}],6:[function(require,module,exports){
 var events = require('events');
 
 exports.isArray = isArray;
@@ -789,24 +807,7 @@ exports.format = function(f) {
   return str;
 };
 
-},{"events":5}],2:[function(require,module,exports){
-var telepath = require('tele')
-, stream = require('stream')
-, async = require('async')
-
-module.exports = function (usr) { // BRICOLEUR 
-  var self = this
-  telepath(this)
-
-  if (usr) self.usr = usr
-
-  this.recv = function (data) {
-    console.dir(usr.host)
-    console.dir(data.toString())
-  }
-}
-
-},{"stream":4,"tele":8,"async":9}],8:[function(require,module,exports){
+},{"events":5}],8:[function(require,module,exports){
 var stream = require('stream')
 , browser = false
 if (!stream.Writable) browser = true // browser ugliness

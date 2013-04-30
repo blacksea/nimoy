@@ -9,7 +9,6 @@ module.exports = function (usr) { // BRICOLEUR
   if (usr) self.usr = usr
 
   this.recv = function (data) {
-    console.dir(usr.host)
     console.dir(data.toString())
   }
 }
