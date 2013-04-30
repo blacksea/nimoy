@@ -2,14 +2,25 @@ var redis = require('redis')
 , async = require('async')
 , client = redis.createClient()
 
-var user = { // default user object
-  name:'default',
+var users = [
+  { name:'default',
   host:'localhost',
-  modules:['data']
-}
+  modules:['data']}, 
+  { name:'blacksea',
+  host:'blacksea.cc',
+  modules:['data']},
+  { name:'waffles',
+  host:'waffles.cc',
+  modules:['data']}
+]
 
-client.hset('users', user.name, JSON.stringify(user), function (err) {
-  if (err) throw err
+async.forEach(users, function (user, cb) {
+  client.hset('users', user.name, JSON.stringify(user), function (err) {
+    if (err) throw err
+    cb()
+  })
+}, function () {
+  console.log('users added')
 })
 
 module.exports = function () { // user superclass/a wrapper for brico
