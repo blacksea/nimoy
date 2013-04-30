@@ -7,7 +7,7 @@ var users = [
   host:'localhost',
   modules:['data']}, 
   { name:'blacksea',
-  host:'blacksea.cc',
+  host:'theblacksea.cc',
   modules:['data']},
   { name:'waffles',
   host:'waffles.cc',
