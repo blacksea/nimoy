@@ -22,4 +22,3 @@ var server = http.createServer(_rtr.handleReqs) // handle http requests
 server.listen(port)
 var wss = new ws({server:server})
 wss.on('connection', _rtr.handleData)
-sock.install(server, '/bus')

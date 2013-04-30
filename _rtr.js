@@ -35,28 +35,20 @@ module.exports = function (opts) { // ROUTER
 
   this.handleData = function (ws) { 
     var stream = ws_stream(ws)
-    console.dir(stream)
-    var domain = stream.address.address
+    , new_id = new Date().getTime()
+
+    console.log('setting conn id to '+new_id)
+    stream.write(JSON.stringify({new_id:new_id}))
+    
     stream.on('data', function (json) {
       var data = JSON.parse(json) 
-
-      if (data.tmp_id) { // first conn: make an id and send it
-        var id = {} 
-        id[data.tmp_id] = stream.id
-        stream.host = data.host // add host property to stream
-        stream.write(JSON.stringify(id))
-        stream.pipe(Object[stream.host].in)
-        Object[stream.host].out.pipe(stream)
-      }
-
-      if (data.id) { // pass to correct brico based on id
-      }
     })
+
     stream.on('close', function () { 
       // remove id + unpipe brico
       // stream.unpipe()
       // Object[stream.host].out.unpipe(stream)
-      console.dir(stream)
+      console.dir('conn closed')
     })
   }
 }
