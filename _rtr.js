@@ -40,16 +40,20 @@ module.exports = function (opts) { // ROUTER
       if (data.tmp_id) { // first conn: make an id and send it
         var id = {} 
         id[data.tmp_id] = stream.id
+        stream.host = data.host // add host property to stream
         stream.write(JSON.stringify(id))
-        stream.pipe(Object[data.host].in)
-        Object[data.host].out.pipe(stream)
+        stream.pipe(Object[stream.host].in)
+        Object[stream.host].out.pipe(stream)
       }
 
       if (data.id) { // pass to correct brico based on id
       }
     })
-    stream.on('close', function () { // unpipe brico by id!
-      console.log('conn '+stream.id+' closed')
+    stream.on('close', function () { 
+      // remove id + unpipe brico
+      // stream.unpipe()
+      // Object[stream.host].out.unpipe(stream)
+      console.dir(stream)
     })
   }
 }
