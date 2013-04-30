@@ -1,4 +1,5 @@
 var filed = require('filed')
+, ws_stream = require('websocket-stream')
 , async = require('async')
 
 module.exports = function (opts) { // ROUTER 
@@ -32,7 +33,9 @@ module.exports = function (opts) { // ROUTER
     })
   }
 
-  this.handleData = function (stream) { 
+  this.handleData = function (ws) { 
+    var stream = ws_stream(ws)
+    console.dir(stream)
     var domain = stream.address.address
     stream.on('data', function (json) {
       var data = JSON.parse(json) 

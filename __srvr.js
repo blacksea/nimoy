@@ -4,7 +4,7 @@ var Bricoleur = require('./_brico')
 , rtr = require('./_rtr')
 , usr = require('./_usr')
 , http = require('http')
-, shoe = require('shoe')
+, ws = require('ws').Server
 
 var port = 80 // set port
 
@@ -20,5 +20,6 @@ _map.out.pipe(_pre.in)
 var _rtr = new rtr() // do routing 
 var server = http.createServer(_rtr.handleReqs) // handle http requests
 server.listen(port)
-var sock = shoe({log:'error'}, _rtr.handleData) // handle socket connections 
+var wss = new ws({server:server})
+wss.on('connection', _rtr.handleData)
 sock.install(server, '/bus')
