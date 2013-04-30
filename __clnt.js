@@ -11,12 +11,10 @@ ws.on('data', function (json) {
   if (data.new_id) {
     id = data.new_id
     ws.write(JSON.stringify({newConn:host,id:id}))
+    ws.pipe(brico.in)
+    brico.out.pipe(ws)
   }
-  if (typeof data === 'object') console.log(data)
+  if (data.id===id) { // handle data
+    console.log(data)
+  }
 })
-
-setInterval(function () {
-  ws.write(JSON.stringify({id:id,msg:'tst'}))
-}, 200)
-
-

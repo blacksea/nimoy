@@ -37,14 +37,18 @@ module.exports = function (opts) { // ROUTER
     var stream = ws_stream(ws)
     , new_id = new Date().getTime()
 
-    stream.write(JSON.stringify({new_id:new_id}))
-    
+    stream.write(JSON.stringify({new_id:new_id})) // send an id 
+
     stream.on('data', function (json) {
       var data = JSON.parse(json) 
       if (data.newConn) {
-        stream.pipe(Object[data.newConn].in)
+        stream.pipe(Object[data.newConn].in) // * connecting every user to the same stream is likely very bad
         Object[data.newConn].out.pipe(stream)
       }
+      // closed connections?
     })
   }
+
+  // manage connections? somekind of graph / grid?
+
 }

@@ -1,4 +1,5 @@
 var telepath = require('tele')
+// a small module to handle/manage connections?
 
 module.exports = function (usr) { // BRICOLEUR 
   var self = this
@@ -8,6 +9,9 @@ module.exports = function (usr) { // BRICOLEUR
 
   this.recv = function (buffer) {
     var data = JSON.parse(buffer.toString())
+    if (data.id) {
+      console.log(data.id)
+    }
     console.dir(usr.host+' '+data.id)
   }
 }
