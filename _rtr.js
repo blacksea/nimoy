@@ -27,15 +27,20 @@ module.exports = function (opts) { // ROUTER
       cb()
     }, function () {
       if (match === false) { // do something with url!
-        filed('./_wilds/_index.html').pipe(res)
         var path = req.url
+        filed('./_wilds/_index.html').pipe(res)
       }
     })
   }
 
   this.handleData = function (ws) { 
     var stream = ws_stream(ws)
+    , headers = ws.upgradeReq.headers
+    , key = headers['sec-websocket-key']
+    , host = headers.host
     , new_id = new Date().getTime()
+
+    console.log('new connection: '+key)
 
     stream.write(JSON.stringify({new_id:new_id})) // send an id 
 
@@ -47,8 +52,8 @@ module.exports = function (opts) { // ROUTER
       }
       // closed connections?
     })
+    ws.on('close', function () {
+      console.log('closing connection: '+key)
+    })
   }
-
-  // manage connections? somekind of graph / grid?
-
 }

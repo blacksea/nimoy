@@ -12,15 +12,14 @@ ws.on('data', function (json) {
   if (data.new_id) {
     id = data.new_id
     ws.write(JSON.stringify({newConn:host,id:id}))
+
+    ws.pipe(brico.in)
+    brico.out.pipe(ws)
   }
-  if (typeof data === 'object') console.log(data)
+  if (data.id === id) { // handle data
+    console.log(data)
+  }
 })
-
-setInterval(function () {
-  ws.write(JSON.stringify({id:id,msg:'tst'}))
-}, 200)
-
-
 
 },{"./_brico":2,"websocket-stream":3}],3:[function(require,module,exports){
 var stream = require('stream')
@@ -87,6 +86,9 @@ module.exports = function (usr) { // BRICOLEUR
 
   this.recv = function (buffer) {
     var data = JSON.parse(buffer.toString())
+    if (data.id) {
+      console.log(data.id)
+    }
     console.dir(usr.host+' '+data.id)
   }
 }
@@ -575,7 +577,7 @@ function Tele () {
 
   this.out = new stream()
   this.out.readable = true
-
+  
   this.send = function (data) {
     self.out.emit('data',data)
   }
@@ -588,18 +590,14 @@ function Tele () {
   if (browser===false) {
     self.in = new stream.Writable()
   }
-  this.in.on('end', function () {
-    console.log(self.in.id+' closed')
-  }) 
-  // wimp error handling : fix this shit
-  this.in.on('error', function (err) {
-    if(err) console.log(err)
-  })
+
+  // halfbaked temp err handling
   this.out.on('error', function (err) {
-    if(err) console.log(err) 
+    console.log(err)
   })
-  this.in.on('finish', function () {
-    console.dir('fini')
+
+  this.in.on('error', function (err) {
+    console.log(err)
   })
 } 
 
