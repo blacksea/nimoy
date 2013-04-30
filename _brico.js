@@ -8,11 +8,8 @@ module.exports = function (usr) { // BRICOLEUR
 
   if (usr) self.usr = usr
 
-  this.test = function (data) {
-    console.dir(data)
-  }
-
   this.recv = function (data) {
+    console.dir(usr.host)
     console.dir(data.toString())
   }
 }

@@ -37,18 +37,14 @@ module.exports = function (opts) { // ROUTER
     var stream = ws_stream(ws)
     , new_id = new Date().getTime()
 
-    console.log('setting conn id to '+new_id)
     stream.write(JSON.stringify({new_id:new_id}))
     
     stream.on('data', function (json) {
       var data = JSON.parse(json) 
-    })
-
-    stream.on('close', function () { 
-      // remove id + unpipe brico
-      // stream.unpipe()
-      // Object[stream.host].out.unpipe(stream)
-      console.dir('conn closed')
+      if (data.newConn) {
+        stream.pipe(Object[data.newConn].in)
+        Object[data.newConn].out.pipe(stream)
+      }
     })
   }
 }
