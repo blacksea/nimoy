@@ -8,7 +8,8 @@ module.exports = function (usr) { // BRICOLEUR
 
   if (usr) self.usr = usr
 
-  this.recv = function (data) {
-    console.dir(data.toString())
+  this.recv = function (buffer) {
+    var data = JSON.parse(buffer.toString())
+    console.dir(usr.host+' '+data.id)
   }
 }
