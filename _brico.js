@@ -9,11 +9,11 @@ module.exports = function (usr) { // BRICOLEUR
 
   this.recv = function (buffer) {
     var data = JSON.parse(buffer.toString())
-    console.dir(data)
+    console.log(data)
   }
 
   // prob. temp hack for adding / removing stream interface
-  // --------------------------------------------------------
+  // ------------------------------------------------------
   this.addConnection = function (key) {
     self[key] = {}
     var s = self[key]
@@ -31,9 +31,13 @@ module.exports = function (usr) { // BRICOLEUR
     s.send = function (data) {
       s.out.emit('data',data)
     }
+    setInterval(function () {
+      s.send(JSON.stringify({id:key,s:Math.random()}))
+    }, 400)
   }
+
   this.rmConnection = function (key) {
+    self[key].out.emit('close')
     delete self[key]
-  }
-  // ---------------------------------------------------------
+  }// -------------------------------------------------------
 }
