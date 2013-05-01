@@ -9,17 +9,10 @@ var brico = new bricoleur()
 ws.on('data', function (json) {
   var data = JSON.parse(json)
 
-  if (data.new_id) {
+  if (data.new_id) { // make new connection
     id = data.new_id
-    console.log(id)
-
     ws.write(JSON.stringify({newConn:host,id:id}))
     ws.pipe(brico.in)
     brico.out.pipe(ws)
-  }
-
-  if (data.id === id) { // handle data
-    console.log('received data')
-    console.log(data)
   }
 })
