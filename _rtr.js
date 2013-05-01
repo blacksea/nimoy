@@ -43,15 +43,21 @@ module.exports = function (opts) { // ROUTER
     // send client id : wait ... is this secure ? 
     stream.write(JSON.stringify({new_id:key})) 
 
-    // create a new streaming connection
-    brico.add_conn(key)
+    stream.on('data', function (json) {
+      var data = JSON.parse(json)
 
-    // pipe into socket stream
-    brico.pipe(stream).pipe(brico)
+      if (data.newConn) { 
+        brico.addConnection(key)
+        stream.pipe(brico[key].in)
+        brico[key].out.pipe(stream)
+      }
+    })
 
     // when socket closes remove connection
     ws.on('close', function () {
-      brico.rm_conn(key)
+      // unpipe first ?
+      // stream.unpipe(brico.in)
+      brico.rmConnection(key)
     })
   }
 }
