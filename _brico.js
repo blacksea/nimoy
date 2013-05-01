@@ -8,9 +8,14 @@ module.exports = function (usr) { // BRICOLEUR
 
   this.recv = function (buffer) {
     var data = JSON.parse(buffer.toString())
-    if (data.id) {
-      console.log(data.id)
-    }
-    console.dir(usr.host+' '+data.id)
+    console.dir(data)
+  }
+
+  this.add_conn = function () { // add incoming stream conn > calls recv & is called by send
+
+  }
+
+  this.rm_conn = function () { // remove the connection
+
   }
 }

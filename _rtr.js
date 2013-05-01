@@ -12,7 +12,7 @@ module.exports = function (opts) { // ROUTER
     file:"./_wilds/_styles.css"}
   ]
 
-  this.handleReqs = function (req,res) {
+  this.handleReqs = function (req, res) {
     var match = false
     , headers = req.headers
     , origin = headers.referer
@@ -33,27 +33,25 @@ module.exports = function (opts) { // ROUTER
     })
   }
 
-  this.handleData = function (ws) { 
+  this.NewWebsocketConnection = function (ws) { // new connection
     var stream = ws_stream(ws)
     , headers = ws.upgradeReq.headers
     , key = headers['sec-websocket-key']
     , host = headers.host
-    , new_id = new Date().getTime()
+    , brico = Object[host]
+    
+    // send client id : wait ... is this secure ? 
+    stream.write(JSON.stringify({new_id:key})) 
 
-    console.log('new connection: '+key)
+    // create a new streaming connection
+    brico.add_conn(key)
 
-    stream.write(JSON.stringify({new_id:new_id})) // send an id 
+    // pipe into socket stream
+    brico.pipe(stream).pipe(brico)
 
-    stream.on('data', function (json) {
-      var data = JSON.parse(json) 
-      if (data.newConn) {
-        stream.pipe(Object[data.newConn].in) // * connecting every user to the same stream is likely very bad
-        Object[data.newConn].out.pipe(stream)
-      }
-      // closed connections?
-    })
+    // when socket closes remove connection
     ws.on('close', function () {
-      console.log('closing connection: '+key)
+      brico.rm_conn(key)
     })
   }
 }

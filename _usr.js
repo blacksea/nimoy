@@ -25,6 +25,7 @@ async.forEach(users, function (user, cb) {
 
 module.exports = function () {
   var self = this
+
   this.buildUsers = function (cb) {
     client.hgetall('users', function (err, users) { 
       for (user in users) {
@@ -33,6 +34,7 @@ module.exports = function () {
       }
     })
   }
+
   this.add = function (usrObj) {
   }
   this.remove = function (usrObj) {
