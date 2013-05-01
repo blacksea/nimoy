@@ -16,11 +16,6 @@ ws.on('data', function (json) {
     ws.write(JSON.stringify({newConn:host,id:id}))
     ws.pipe(brico.in)
     brico.out.pipe(ws)
-
-    setInterval(function () {
-      ws.write(JSON.stringify({id:id,test:Math.random()}))
-    }, 200)
-
   }
 
   if (data.id === id) { // handle data

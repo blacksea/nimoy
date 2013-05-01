@@ -3,7 +3,7 @@ var telepath = require('tele')
 
 module.exports = function (usr) { // BRICOLEUR 
   var self = this
-  telepath(this)
+  telepath(this) // use telepath server side -- otherwise allow multiple streams/keys to be added
 
   if (usr) self.usr = usr
 
@@ -12,7 +12,7 @@ module.exports = function (usr) { // BRICOLEUR
     console.log(data)
   }
 
-  // prob. temp hack for adding / removing stream interface
+  // prob. temp hack for adding server side stream conn's
   // ------------------------------------------------------
   this.addConnection = function (key) {
     self[key] = {}
@@ -24,16 +24,12 @@ module.exports = function (usr) { // BRICOLEUR
       self.recv(chunk)
       cb()
     }
-
     // add read stream
     s.out = new stream()
     s.out.readable = true
     s.send = function (data) {
       s.out.emit('data',data)
     }
-    setInterval(function () {
-      s.send(JSON.stringify({id:key,s:Math.random()}))
-    }, 400)
   }
 
   this.rmConnection = function (key) {
