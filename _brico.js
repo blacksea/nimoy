@@ -12,6 +12,8 @@ module.exports = function (usr) { // BRICOLEUR
     console.dir(data)
   }
 
+  // prob. temp hack for adding / removing stream interface
+  // --------------------------------------------------------
   this.addConnection = function (key) {
     self[key] = {}
     var s = self[key]
@@ -30,8 +32,8 @@ module.exports = function (usr) { // BRICOLEUR
       s.out.emit('data',data)
     }
   }
-
   this.rmConnection = function (key) {
     delete self[key]
   }
+  // ---------------------------------------------------------
 }

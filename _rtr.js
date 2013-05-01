@@ -55,8 +55,6 @@ module.exports = function (opts) { // ROUTER
 
     // when socket closes remove connection
     ws.on('close', function () {
-      // unpipe first ?
-      // stream.unpipe(brico.in)
       brico.rmConnection(key)
     })
   }
