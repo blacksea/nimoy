@@ -10,23 +10,11 @@ var brico = new bricoleur()
 ws.on('data', function (json) {
   var data = JSON.parse(json)
 
-  if (data.new_id) {
+  if (data.new_id) { // make new connection
     id = data.new_id
-    console.log(id)
-
     ws.write(JSON.stringify({newConn:host,id:id}))
     ws.pipe(brico.in)
     brico.out.pipe(ws)
-
-    setInterval(function () {
-      ws.write(JSON.stringify({id:id,test:Math.random()}))
-    }, 200)
-
-  }
-
-  if (data.id === id) { // handle data
-    console.log('received data')
-    console.log(data)
   }
 })
 
@@ -205,52 +193,7 @@ WebsocketStream.prototype.end = function() {
   this.ws.close()
 }
 
-},{"stream":4,"util":6}],2:[function(require,module,exports){
-var telepath = require('tele')
-, stream = require('stream')
-
-module.exports = function (usr) { // BRICOLEUR 
-  var self = this
-  telepath(this)
-
-  if (usr) self.usr = usr
-
-  this.recv = function (buffer) {
-    var data = JSON.parse(buffer.toString())
-    console.log(data)
-  }
-
-  // prob. temp hack for adding / removing stream interface
-  // ------------------------------------------------------
-  this.addConnection = function (key) {
-    self[key] = {}
-    var s = self[key]
-
-    // add write stream
-    s.in = new stream.Writable()
-    s.in._write = function (chunk, encoding, cb) {
-      self.recv(chunk)
-      cb()
-    }
-
-    // add read stream
-    s.out = new stream()
-    s.out.readable = true
-    s.send = function (data) {
-      s.out.emit('data',data)
-    }
-    setInterval(function () {
-      s.send(JSON.stringify({id:key,s:Math.random()}))
-    }, 400)
-  }
-
-  this.rmConnection = function (key) {
-    self[key].out.emit('close')
-    delete self[key]
-  }// -------------------------------------------------------
-}
-
-},{"stream":4,"tele":7}],8:[function(require,module,exports){
+},{"stream":4,"util":6}],7:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -490,7 +433,7 @@ EventEmitter.prototype.listeners = function(type) {
 };
 
 })(require("__browserify_process"))
-},{"__browserify_process":8}],6:[function(require,module,exports){
+},{"__browserify_process":7}],6:[function(require,module,exports){
 var events = require('events');
 
 exports.isArray = isArray;
@@ -843,7 +786,52 @@ exports.format = function(f) {
   return str;
 };
 
-},{"events":5}],7:[function(require,module,exports){
+},{"events":5}],2:[function(require,module,exports){
+var telepath = require('tele')
+, stream = require('stream')
+
+module.exports = function (usr, map) { // BRICOLEUR 
+  var self = this
+  telepath(this) // use telepath server side -- otherwise allow multiple streams/keys to be added
+
+  if (usr) self.usr = usr
+  if (map) {
+    self.map = map
+    console.log(map)
+  }
+    
+  this.recv = function (buffer) {
+    var data = JSON.parse(buffer.toString())
+    console.log(data)
+  }
+
+  // prob. temp hack for adding server side stream conn's
+  // ------------------------------------------------------
+  this.addConnection = function (key) {
+    self[key] = {}
+    var s = self[key]
+
+    // add write stream
+    s.in = new stream.Writable()
+    s.in._write = function (chunk, encoding, cb) {
+      self.recv(chunk)
+      cb()
+    }
+    // add read stream
+    s.out = new stream()
+    s.out.readable = true
+    s.send = function (data) {
+      s.out.emit('data',data)
+    }
+  }
+
+  this.rmConnection = function (key) {
+    self[key].out.emit('close')
+    delete self[key]
+  }// -------------------------------------------------------
+}
+
+},{"stream":4,"tele":8}],8:[function(require,module,exports){
 var stream = require('stream')
 , browser = false
 if (!stream.Writable) browser = true // browser ugliness

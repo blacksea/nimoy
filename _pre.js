@@ -13,8 +13,9 @@ module.exports = function (opts) { // PRECOMPILER
   var self = this
   , destCSS = './_wilds/_styles.css'
   , destJS = './_wilds/_bundle.js'
-  , MAP = []
   , CSS = ''
+
+  this.map = []
 
   this.recv = function (moduleData) {
     var mod = JSON.parse(moduleData.toString())
@@ -23,9 +24,11 @@ module.exports = function (opts) { // PRECOMPILER
         if (mod.scope[i]==='client') opts.js.push(mod.filePath) // add to browserify
         if (mod.styl) CSS += mod.styl
       }
-      MAP.push(mod)
+      self.map.push(mod)
     }
-    else if (mod.event === 'done') compile()
+    else if (mod.event === 'done') {
+      compile()
+    }
   }
 
   function compile () {
@@ -36,8 +39,8 @@ module.exports = function (opts) { // PRECOMPILER
         bundle = bundleMin.code
       }
       fs.writeFile(destJS, bundle, function (err) {
-        console.dir('js written')
          if (err) throw err
+         self.ready()
       })
     })
 

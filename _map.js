@@ -6,6 +6,8 @@ module.exports = function (dir) { // MAPPER
   telepath(this) 
   var self = this
 
+  // how to supply brico with map?
+  
   fs.readdir(dir, HandleFiles)
 
   function HandleFiles (err, files) {

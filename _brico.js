@@ -1,12 +1,16 @@
 var telepath = require('tele')
 , stream = require('stream')
 
-module.exports = function (usr) { // BRICOLEUR 
+module.exports = function (usr, map) { // BRICOLEUR 
   var self = this
   telepath(this) // use telepath server side -- otherwise allow multiple streams/keys to be added
 
   if (usr) self.usr = usr
-
+  if (map) {
+    self.map = map
+    console.log(map)
+  }
+    
   this.recv = function (buffer) {
     var data = JSON.parse(buffer.toString())
     console.log(data)
