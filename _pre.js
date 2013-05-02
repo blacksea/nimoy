@@ -25,12 +25,15 @@ module.exports = function (opts) { // PRECOMPILER
         if (mod.styl) CSS += mod.styl
       }
   // pipe into brico
-      self.map.push(mod)
+      // self.map.push(mod)
     }
   }
   // on map stream end compile
     
-  self.in.on('end', compile)
+  self.in.on('finish', function () {
+    console.log('done writing')
+    compile()
+  })
 
   function compile () {
     browserify(opts.js).bundle({}, function (err, bundle) {
