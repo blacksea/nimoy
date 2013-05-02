@@ -5,8 +5,6 @@ var telepath = require('tele')
 module.exports = function (dir) { // MAPPER
   telepath(this) 
   var self = this
-
-  // how to supply brico with map?
   
   fs.readdir(dir, HandleFiles)
 
@@ -28,7 +26,7 @@ module.exports = function (dir) { // MAPPER
       for (var i=0;i<data.length;i++) { // parse out data object
         buf += data[i]
         if (data[i] === '}' && data[1]==='*' && data[2]==='{') { // super clumsy replace**
-          if (typeof moduleData !== 'object') throw new Error('no module data!')
+          if (typeof moduleData !== 'object') throw new Error('no module data!') // kind of weird
           moduleData = JSON.parse(buf.toString().replace('/*',''))
           break
         }

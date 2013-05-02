@@ -3,15 +3,25 @@ var telepath = require('tele')
 
 module.exports = function (usr) { // BRICOLEUR 
   var self = this
-  telepath(this) // use telepath server side -- otherwise allow multiple streams/keys to be added
+  telepath(this)
+
+  var map = []
 
   if (usr) self.usr = usr
     
   this.recv = function (buffer) {
     var data = JSON.parse(buffer.toString())
-    // expect streaming map data
-    console.log(data)
+
+    if (data.scope && data.id && data.desc) { // it's module data!
+      map.push(data)
+    } else { // who knows wtf it is : do something
+
+    }      
   }
+
+  this.in.on('finish', function () { // should be more generic somehow ... 
+    // do something with map
+  })
 
   // prob. temp hack for adding server side stream conn's
   // ----------------------------------------------------
@@ -25,6 +35,7 @@ module.exports = function (usr) { // BRICOLEUR
       self.recv(chunk)
       cb()
     }
+
     // add read stream
     s.out = new stream()
     s.out.readable = true

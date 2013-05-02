@@ -43,6 +43,7 @@ module.exports = function (opts) { // PRECOMPILER
       }
       fs.writeFile(destJS, bundle, function (err) {
         if (err) throw err
+        console.log('fin')
         self.out.emit('end') 
       })
     })
