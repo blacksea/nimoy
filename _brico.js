@@ -1,11 +1,14 @@
 var telepath = require('tele')
 , stream = require('stream')
 
-module.exports = function (usr) { // BRICOLEUR 
+module.exports = function (usr) { // BRICOLEUR : split this into srvr/clnt func? 
   var self = this
   telepath(this)
 
-  var map = []
+  var map = {
+    client: []
+    , server: []
+  }
 
   if (usr) self.usr = usr
     
@@ -13,7 +16,9 @@ module.exports = function (usr) { // BRICOLEUR
     var data = JSON.parse(buffer.toString())
 
     if (data.scope && data.id && data.desc) { // it's module data!
-      map.push(data)
+      for (var i=0;i<data.scope.length;i++) {
+        map[data.scope[i]].push(data)
+      }
     } else { // who knows wtf it is : do something
 
     }      
@@ -21,6 +26,7 @@ module.exports = function (usr) { // BRICOLEUR
 
   this.in.on('finish', function () { // should be more generic somehow ... 
     // do something with map
+    console.log(map)
   })
 
   // prob. temp hack for adding server side stream conn's
