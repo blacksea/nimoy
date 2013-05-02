@@ -29,6 +29,7 @@ module.exports = function (opts) { // PRECOMPILER
     }
   }
   // on map stream end compile
+    
   self.in.on('end', compile)
 
   function compile () {
