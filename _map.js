@@ -55,6 +55,6 @@ module.exports = function (dir) { // MAPPER
   }
 
   function MappingDone () {
-    self.send(JSON.stringify({event:'done'}))
+    self.out.emit('end')
   }
 }

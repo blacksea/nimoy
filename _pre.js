@@ -24,12 +24,12 @@ module.exports = function (opts) { // PRECOMPILER
         if (mod.scope[i]==='client') opts.js.push(mod.filePath) // add to browserify
         if (mod.styl) CSS += mod.styl
       }
+  // pipe into brico
       self.map.push(mod)
     }
-    else if (mod.event === 'done') {
-      compile()
-    }
   }
+  // on map stream end compile
+  self.in.on('end', compile)
 
   function compile () {
     browserify(opts.js).bundle({}, function (err, bundle) {
@@ -39,8 +39,8 @@ module.exports = function (opts) { // PRECOMPILER
         bundle = bundleMin.code
       }
       fs.writeFile(destJS, bundle, function (err) {
-         if (err) throw err
-         self.ready()
+        if (err) throw err
+        self.out.emit('end') 
       })
     })
 

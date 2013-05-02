@@ -33,29 +33,19 @@ module.exports = function (opts) { // ROUTER
     })
   }
 
-  this.NewWebsocketConnection = function (ws) { // new connection
+  this.handleSoc = function (ws) { // new connection
     var stream = ws_stream(ws)
     , headers = ws.upgradeReq.headers
     , key = headers['sec-websocket-key']
     , host = headers.host
     , brico = Object[host]
-    
-    // send client id : wait ... is this secure ? 
-    stream.write(JSON.stringify({new_id:key})) 
 
-    stream.on('data', function (json) {
-      var data = JSON.parse(json)
-
-      if (data.newConn) { 
-        brico.addConnection(key)
-        stream.pipe(brico[key].in)
-        brico[key].out.pipe(stream)
-      }
-    })
+    // add connection
+    brico.addConnection(key)
+    stream.pipe(brico[key].in)
+    brico[key].out.pipe(stream)
 
     // when socket closes remove connection
-    ws.on('close', function () {
-      brico.rmConnection(key)
-    })
+    ws.on('close', brico.rmConnection)
   }
 }
