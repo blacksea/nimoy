@@ -36,11 +36,11 @@ module.exports = function (dir) { // MAPPER
       
       if (moduleData !== null && moduleData.deps) { // if there are deps handle them
         async.each(moduleData.deps, HandleDeps, function () {
-          self.send(JSON.stringify(moduleData))
+          self.send(moduleData)
           callback()
         })
       } else if (moduleData !== null) {
-        self.send(JSON.stringify(moduleData))
+        self.send(moduleData)
         callback()
       } else callback()
 

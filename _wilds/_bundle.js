@@ -225,7 +225,7 @@ module.exports = function (usr) { // BRICOLEUR
     s.out = new stream()
     s.out.readable = true
     s.send = function (data) {
-      s.out.emit('data',data)
+      s.out.emit('data',JSON.stringify(data))
     }
   }
 
@@ -840,7 +840,7 @@ function Tele () {
   this.out.readable = true
   
   this.send = function (data) {
-    self.out.emit('data',data)
+    self.out.emit('data', JSON.stringify(data))
   }
 
   if (browser===true) { // very strange browserify hack

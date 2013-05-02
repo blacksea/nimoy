@@ -29,7 +29,7 @@ module.exports = function (usr) { // BRICOLEUR
     s.out = new stream()
     s.out.readable = true
     s.send = function (data) {
-      s.out.emit('data',data)
+      s.out.emit('data',JSON.stringify(data))
     }
   }
 
