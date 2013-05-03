@@ -20,13 +20,12 @@ module.exports = function (usr) { // BRICOLEUR : split this into srvr/clnt func?
         map[data.scope[i]].push(data)
       }
     } else { // who knows wtf it is : do something
-
+      
     }      
   }
 
   this.in.on('finish', function () { // should be more generic somehow ... 
-    // do something with map
-    console.log(map)
+     console.log(map) // do something with map : how to organize use modules!?
   })
 
   // prob. temp hack for adding server side stream conn's
@@ -50,7 +49,7 @@ module.exports = function (usr) { // BRICOLEUR : split this into srvr/clnt func?
     }
   }
 
-  this.rmConnection = function (key) {
+  this.removeConnection = function (key) {
     self[key].out.emit('close')
     delete self[key]
   }// ---------------------------------------------------
