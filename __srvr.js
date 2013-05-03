@@ -11,6 +11,7 @@ var port = 80 // set port
 var _usr = new usr() // setup user
 var _map = new map('./_wilds') // map _wilds modules
 var _pre = new pre({js:['./__clnt.js'],css:'./_wilds/_css',compress:false})
+
 _map.out.pipe(_pre.in)
 _usr.buildUsers(function (user) { // fix this
   Object[user.host] = new Bricoleur(user) // not too sure about this prob a temp hack

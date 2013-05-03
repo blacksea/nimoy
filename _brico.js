@@ -6,8 +6,8 @@ module.exports = function (usr) { // BRICOLEUR : split this into srvr/clnt func?
   telepath(this)
 
   var map = {
-    client: []
-    , server: []
+    client: [],
+    server: []
   }
 
   if (usr) self.usr = usr
@@ -24,8 +24,8 @@ module.exports = function (usr) { // BRICOLEUR : split this into srvr/clnt func?
     }      
   }
 
-  this.in.on('finish', function () { // should be more generic somehow ... 
-     console.log(map) // do something with map : how to organize use modules!?
+  this.in.on('finish', function () { // should be more generic somehow ......
+     console.log(map) // do something with map : how to organize use modules!
   })
 
   // prob. temp hack for adding server side stream conn's

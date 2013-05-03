@@ -2,7 +2,7 @@ var redis = require('redis')
 , async = require('async')
 , client = redis.createClient()
 
-var users = [
+var users = [ // prototype user model
   { name:'default',
   host:'localhost',
   modules:['data']}, 
