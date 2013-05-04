@@ -14,7 +14,8 @@ module.exports = function (dir) { // MAPPER
   }
   
   function HandleFile (file, callback) {
-    if (file.split('.')[1] === 'js') fs.readFile(dir+'/'+file, getModuleData) // ignore hidden and non js files
+    var filepath = dir+'/'+file
+    if (file.split('.')[1] === 'js') fs.readFile(filepath, getModuleData) // ignore hidden and non js files
     else callback()
     
     function getModuleData (err, buffer) {
@@ -28,6 +29,7 @@ module.exports = function (dir) { // MAPPER
         if (data[i] === '}' && data[1]==='*' && data[2]==='{') { // super clumsy replace**
           if (typeof moduleData !== 'object') throw new Error('no module data!') // kind of weird
           moduleData = JSON.parse(buf.toString().replace('/*',''))
+          moduleData.filePath = filepath
           break
         }
       }
