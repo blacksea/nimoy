@@ -1,5 +1,6 @@
 var telepath = require('tele')
 , stream = require('stream')
+, async = require ('async')
 
 module.exports = function (usr) { // BRICOLEUR
   var self = this
@@ -23,8 +24,25 @@ module.exports = function (usr) { // BRICOLEUR
 
   this.build = function () { // load modules
     if (!map) throw new Error('no map')
-    for (key in map) {
+
+    async.forEach(map, match, function () {
+      console.log('modules loaded')
+    })
+
+    function match (mod, cb) {
+      var modules = self.usr.modules
+      for (var i=0;i<modules.length;i++) {
+        if (modules[i]===mod.id) {
+          self.loadModule(mod)
+          cb()
+          break
+        } else cb()
+      }
     }
+  }
+
+  this.loadModule = function (mod) {
+    console.log('loading: '+mod.id)
   }
 
   // ----------------------------------------------------
