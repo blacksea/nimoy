@@ -16,6 +16,7 @@ module.exports = function (opts) { // PRECOMPILER
   , CSS = ''
 
   var map = {
+    meta: 'module_map',
     client: [],
     server: []
   }
