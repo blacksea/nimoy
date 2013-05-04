@@ -6,7 +6,7 @@ module.exports = function (usr) { // BRICOLEUR
   , map = null
   telepath(this)
 
-  // detect if scope is client or browser
+  // detect if running in node or browser
   if (global.process && global.process.title==='node') self.scope = 'server'
   if (!global.process) self.scope = 'client'
 
