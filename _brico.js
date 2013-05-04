@@ -5,6 +5,7 @@ var telepath = require('tele')
 module.exports = function (usr) { // BRICOLEUR
   var self = this
   , map = null
+  , _ = {} // module scope
   telepath(this)
 
   // detect if running in node or browser
@@ -26,7 +27,7 @@ module.exports = function (usr) { // BRICOLEUR
     if (!map) throw new Error('no map')
 
     async.forEach(map, match, function () {
-      console.log('modules loaded')
+      console.log(usr.host+' modules loaded')
     })
 
     function match (mod, cb) {
@@ -42,7 +43,10 @@ module.exports = function (usr) { // BRICOLEUR
   }
 
   this.loadModule = function (mod) {
-    console.log('loading: '+mod.id)
+    _[mod.id.toUpperCase()] = require(mod.filePath)
+    _[mod.id] = new _[mod.id.toUpperCase()]()
+    if (mod.html) _[mod.id].template = mod.html
+    console.log(_[mod.id])
   }
 
   // ----------------------------------------------------
