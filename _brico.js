@@ -5,28 +5,12 @@ module.exports = function (usr) { // BRICOLEUR : split this into srvr/clnt func?
   var self = this
   telepath(this)
 
-  var map = {
-    client: [],
-    server: []
-  }
-
   if (usr) self.usr = usr
     
   this.recv = function (buffer) {
     var data = JSON.parse(buffer.toString())
-
-    if (data.scope && data.id && data.desc) { // it's module data!
-      for (var i=0;i<data.scope.length;i++) {
-        map[data.scope[i]].push(data)
-      }
-    } else { // who knows wtf it is : do something
-      
-    }      
+     
   }
-
-  this.in.on('finish', function () { // should be more generic somehow ......
-     console.log(map) // do something with map : how to organize use modules!
-  })
 
   // prob. temp hack for adding server side stream conn's
   // ----------------------------------------------------

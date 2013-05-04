@@ -15,23 +15,26 @@ module.exports = function (opts) { // PRECOMPILER
   , destJS = './_wilds/_bundle.js'
   , CSS = ''
 
-  this.map = []
+  var map = {
+    client: [],
+    server: []
+  }
 
   this.recv = function (moduleData) {
     var mod = JSON.parse(moduleData.toString())
     if (typeof mod === 'object' && !mod.event) {
       for (var i=0;i<mod.scope.length;i++) {
-        if (mod.scope[i]==='client') opts.js.push(mod.filePath) // add to browserify
+        var scope = mod.scope[i]
+        if (scope==='client') opts.js.push(mod.filePath) // add to browserify
         if (mod.styl) CSS += mod.styl
+        map[scope].push(mod)
       }
-      // pipe into brico
-      self.send(mod)
     }
   }
-  // on map stream end compile
     
   self.in.on('finish', function () {
     compile()
+    console.log(map)
   })
 
   function compile () {
