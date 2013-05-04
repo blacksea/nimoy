@@ -1,7 +1,7 @@
 var telepath = require('tele')
 , stream = require('stream')
 
-module.exports = function (usr) { // BRICOLEUR : split this into srvr/clnt func? 
+module.exports = function (usr) { // BRICOLEUR
   var self = this
   , map = null
   telepath(this)
@@ -11,12 +11,15 @@ module.exports = function (usr) { // BRICOLEUR : split this into srvr/clnt func?
   this.recv = function (buffer) {
     var data = JSON.parse(buffer.toString())
     if (data.meta==='module_map') {
-      // do something with the map
       map = data
+      self.build()
     }
   }
 
-  // prob. temp hack for adding server side stream conn's
+  this.build = function () { // load modules
+    if (!map) throw new Error('no map')
+  }
+
   // ----------------------------------------------------
   this.addConnection = function (key) {
     self[key] = {}
