@@ -35,7 +35,7 @@ module.exports = function (opts) { // PRECOMPILER
     
   self.in.on('finish', function () {
     compile()
-    console.log(map)
+    self.send(map)
   })
 
   function compile () {
