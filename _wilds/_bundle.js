@@ -433,7 +433,65 @@ EventEmitter.prototype.listeners = function(type) {
 };
 
 })(require("__browserify_process"))
-},{"__browserify_process":7}],6:[function(require,module,exports){
+},{"__browserify_process":7}],2:[function(require,module,exports){
+(function(global){var telepath = require('tele')
+, stream = require('stream')
+
+module.exports = function (usr) { // BRICOLEUR
+  var self = this
+  , map = null
+  telepath(this)
+
+  // detect if running in browser...
+  if (global.process && global.process.title==='node') self.scope = 'server'
+  if (!global.process) self.scope = 'client'
+  console.log(self.scope) 
+
+  if (usr) self.usr = usr
+    
+  this.recv = function (buffer) {
+    var data = JSON.parse(buffer.toString())
+    if (data.meta==='module_map') {
+      map = data[self.scope]
+      console.log(map)
+      self.build()
+    }
+  }
+
+  this.build = function () { // load modules
+    if (!map) throw new Error('no map')
+    for (key in map) {
+    }
+  }
+
+  // ----------------------------------------------------
+  this.addConnection = function (key) {
+    self[key] = {}
+    var s = self[key]
+
+    // add write stream
+    s.in = new stream.Writable()
+    s.in._write = function (chunk, encoding, cb) {
+      self.recv(chunk)
+      cb()
+    }
+
+    // add read stream
+    s.out = new stream()
+    s.out.readable = true
+    s.send = function (data) {
+      s.out.emit('data',JSON.stringify(data))
+    }
+  }
+
+  this.removeConnection = function (key) {
+    self[key].out.emit('close')
+    delete self[key]
+  }// ---------------------------------------------------
+}
+
+})(window)
+},{"stream":4,"tele":8}],6:[function(require,module,exports){
 var events = require('events');
 
 exports.isArray = isArray;
@@ -786,63 +844,7 @@ exports.format = function(f) {
   return str;
 };
 
-},{"events":5}],2:[function(require,module,exports){
-var telepath = require('tele')
-, stream = require('stream')
-
-module.exports = function (usr) { // BRICOLEUR : split this into srvr/clnt func? 
-  var self = this
-  , map = null
-  telepath(this)
-
-  if (usr) self.usr = usr
-    
-  this.recv = function (buffer) {
-    var data = JSON.parse(buffer.toString())
-    if (data.meta==='module_map') {
-      // do something with the map
-      map = data
-      self.build()
-    }
-  }
-
-  this.build = function () {
-    if (!map) throw new Error('no map')
-    for (var i=0;i<usr.modules.length;i++) {
-      console.log(usr.modules[i])
-      console.log(map.server)
-      // dynamically load modules    
-    }
-  }
-
-  // prob. temp hack for adding server side stream conn's
-  // ----------------------------------------------------
-  this.addConnection = function (key) {
-    self[key] = {}
-    var s = self[key]
-
-    // add write stream
-    s.in = new stream.Writable()
-    s.in._write = function (chunk, encoding, cb) {
-      self.recv(chunk)
-      cb()
-    }
-
-    // add read stream
-    s.out = new stream()
-    s.out.readable = true
-    s.send = function (data) {
-      s.out.emit('data',JSON.stringify(data))
-    }
-  }
-
-  this.removeConnection = function (key) {
-    self[key].out.emit('close')
-    delete self[key]
-  }// ---------------------------------------------------
-}
-
-},{"stream":4,"tele":8}],8:[function(require,module,exports){
+},{"events":5}],8:[function(require,module,exports){
 var stream = require('stream')
 , browser = false
 if (!stream.Writable) browser = true // browser ugliness

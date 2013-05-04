@@ -6,18 +6,25 @@ module.exports = function (usr) { // BRICOLEUR
   , map = null
   telepath(this)
 
+  // detect if scope is client or browser
+  if (global.process && global.process.title==='node') self.scope = 'server'
+  if (!global.process) self.scope = 'client'
+
   if (usr) self.usr = usr
     
   this.recv = function (buffer) {
     var data = JSON.parse(buffer.toString())
-    if (data.meta==='module_map') {
-      map = data
+
+    if (data.meta==='module_map') { // add map 
+      map = data[self.scope]
       self.build()
     }
   }
 
   this.build = function () { // load modules
     if (!map) throw new Error('no map')
+    for (key in map) {
+    }
   }
 
   // ----------------------------------------------------
