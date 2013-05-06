@@ -1,7 +1,7 @@
 /*{
   "id":"test",
 	"scope":["server"],
-	"desc":"test module",
+	"desc":"test module"
 }*/
 
 var telepath = require('tele')
@@ -11,6 +11,9 @@ module.exports = function () {
   telepath(this)
 
   this.recv = function (data) {
+    console.dir('test: '+data)
+
+
   }
 
 }
