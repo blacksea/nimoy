@@ -34,7 +34,7 @@ module.exports = function (opts) { // ROUTER
   }
 
   this.handleSoc = function (ws) { // new connection
-    var stream = ws_stream(ws)
+    var wss = ws_stream(ws)
     , headers = ws.upgradeReq.headers
     , key = headers['sec-websocket-key']
     , host = headers.host
@@ -42,7 +42,7 @@ module.exports = function (opts) { // ROUTER
 
     // add connection
     brico.addConnection(key)
-    stream.pipe(brico[key].in)
+    wss.pipe(brico[key].in)
     brico[key].out.pipe(stream)
 
     // when socket closes remove connection
