@@ -27,8 +27,8 @@ module.exports = function (dir) { // MAPPER
       for (var i=0;i<data.length;i++) { // parse out data object
         buf += data[i]
         if (data[i] === '}' && data[1]==='*' && data[2]==='{') { // super clumsy replace**
-          if (typeof moduleData !== 'object') throw new Error('no module data!') // kind of weird
           moduleData = JSON.parse(buf.toString().replace('/*',''))
+          if (typeof moduleData !== 'object') throw new Error('no module data!') // kind of weird
           moduleData.filePath = filepath
           break
         }
