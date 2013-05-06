@@ -42,11 +42,19 @@ module.exports = function (usr) { // BRICOLEUR
     }
   }
 
-  this.connModule = function (connect) { // ['modA>modB','modB>modC']
+  this.connModule = function (conn) { // ['modA>modB','modB>modC']
+    var modA = null
+    , modB = null
 
+    for (key in conn) {
+      modA = _[conn[key].split('>')[0]]
+      modB = _[conn[key].split('>')[1]]
+     if (!modA.out || !modB.in) throw new Error(modA+','+modB+' :no .out or .in connections')
+     if (modA.out && modB.in) modA.out.pipe(modB.in)
+    }
   }
 
-  this.disconnModule = function (disconnect) {
+  this.disconnModule = function (disconn) {
 
   }
 
