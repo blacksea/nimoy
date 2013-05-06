@@ -5,16 +5,14 @@ var redis = require('redis')
 var users = [ // prototype user model
   { name:'default',
   host:'localhost',
-  modules:['data'], 
-  conns:[{1367804332183:'data>console'}]},
+  modules:['data']},
   { name:'blacksea',
   host:'theblacksea.cc',
-  modules:['data'],
-  conns:[{1367804270001:'data>console'}]},
+  modules:['data']},
   { name:'waffles',
   host:'waffles.cc',
-  modules:['data'],
-  conns:[{1367804262251:'data>console'}]}
+  modules:['data','test'],
+  conns:[{1367804262251:'test>data'},{1367804270001:'data>test'}]}
 ]
 // or make conns like : [{timestampID:modA>modB}, ..etc]
 
