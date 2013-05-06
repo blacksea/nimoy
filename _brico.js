@@ -41,12 +41,17 @@ module.exports = function (usr) { // BRICOLEUR
     }
 
     function connModules () {
-      console.log('modules loaded :: connecting modules...')
-      
+      if (usr.conns) {
+        console.log('modules loaded :: connecting modules...')
+        async.forEach(usr.conns, self.connModule, function () {
+          console.log('connected modules for : '+usr.host)
+        })
+      }
+      if (!usr.conns) console.log('no conns for : '+usr.host)
     }
   }
 
-  this.connModule = function (conn) { // ['modA>modB','modB>modC']
+  this.connModule = function (conn, cb) { // ['modA>modB','modB>modC']
     var modA = null
     , modB = null
 
@@ -55,6 +60,7 @@ module.exports = function (usr) { // BRICOLEUR
       modB = _[conn[key].split('>')[1]]
      if (!modA.out || !modB.in) throw new Error(modA+','+modB+' :no .out or .in connections')
      if (modA.out && modB.in) modA.out.pipe(modB.in)
+     cb()
     }
   }
 
