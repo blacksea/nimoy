@@ -16,6 +16,7 @@ var users = [ // prototype user model
   modules:['data'],
   conns:['data>console']}
 ]
+// or make conns like : [{timestampID:modA>modB}, ..etc]
 
 async.forEach(users, function (user, cb) {
   client.hset('users', user.name, JSON.stringify(user), function (err) {
