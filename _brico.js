@@ -9,7 +9,7 @@ module.exports = function (usr) { // BRICOLEUR
   telepath(this)
 
   // detect if running in node or browser
-  if (global.process && global.process.title==='node') self.scope = 'server'
+  if (global.process && global.process.title === 'node') self.scope = 'server'
   if (!global.process) self.scope = 'client'
 
   if (usr) self.usr = usr
@@ -17,7 +17,7 @@ module.exports = function (usr) { // BRICOLEUR
   this.recv = function (buffer) {
     var data = JSON.parse(buffer.toString())
 
-    if (data.meta==='module_map') { // add map 
+    if (data.meta === 'module_map') { // add map 
       map = data[self.scope]
       self.build()
     }
@@ -42,11 +42,22 @@ module.exports = function (usr) { // BRICOLEUR
     }
   }
 
-  this.loadModule = function (mod) {
+  this.connModule = function (connect) { // ['modA>modB','modB>modC']
+
+  }
+
+  this.disconnModule = function (disconnect) {
+
+  }
+
+  this.loadModule = function (mod) { // load module!
     _[mod.id.toUpperCase()] = require(mod.filePath)
     _[mod.id] = new _[mod.id.toUpperCase()]()
     if (mod.html) _[mod.id].template = mod.html
-    console.log(_[mod.id])
+  }
+
+  this.unloadModule = function (mod) {
+
   }
 
   // ----------------------------------------------------
