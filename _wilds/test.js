@@ -8,7 +8,7 @@ var telepath = require('tele')
 
 module.exports = function () {
   var self = this
-  , var id = new Date().getTime()
+  , id = new Date().getTime()
   telepath(this)
 
   this.recv = function (data) {
