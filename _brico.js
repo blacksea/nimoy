@@ -25,7 +25,6 @@ module.exports = function (usr) { // BRICOLEUR
 
   this.build = function () { // load modules && handle connections
     if (!map) throw new Error('no map')
-    console.log(map)
 
     async.forEach(map, lookupModule, connModules)
 
