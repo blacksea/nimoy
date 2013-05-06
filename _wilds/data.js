@@ -12,13 +12,14 @@ module.exports = function () {
   var self = this
   telepath(this)
 
-  this.recv = function (data) {
+  this.recv = function (json) {
+    var data = JSON.parse(json)
     for (key in data) {
       switch (key) {
-        case 'set': self.set(data[key]);break
-        case 'get': self.get(data[key]);break
-        case 'hset': self.hset(data[key]);break
-        case 'hget': self.hget(data[key]);break
+        case 'set': self.set(data[key]);break;
+        case 'get': self.get(data[key]);break;
+        case 'hset': self.hset(data[key]);break;
+        case 'hget': self.hget(data[key]);break;
       }
     }
   }
@@ -32,7 +33,6 @@ module.exports = function () {
   this.get = function (key) {
     client.get(key, function (err, data) {
       if (err) throw err
-      console.log('data got '+data)
       self.send(data)
     })
   }
