@@ -5,13 +5,16 @@ var redis = require('redis')
 var users = [ // prototype user model
   { name:'default',
   host:'localhost',
-  modules:['data']}, 
+  modules:['data'], 
+  onns:['data>console']},
   { name:'blacksea',
   host:'theblacksea.cc',
-  modules:['data']},
+  modules:['data'],
+  conns:['data>console']},
   { name:'waffles',
   host:'waffles.cc',
-  modules:['data']}
+  modules:['data'],
+  conns:['data>console']}
 ]
 
 async.forEach(users, function (user, cb) {
@@ -36,7 +39,10 @@ module.exports = function () {
   }
 
   this.add = function (usrObj) {
+
   }
+
   this.remove = function (usrObj) {
+
   }
 }
