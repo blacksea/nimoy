@@ -6,15 +6,15 @@ var users = [ // prototype user model
   { name:'default',
   host:'localhost',
   modules:['data'], 
-  onns:['data>console']},
+  conns:[{1367804332183:'data>console'}]},
   { name:'blacksea',
   host:'theblacksea.cc',
   modules:['data'],
-  conns:['data>console']},
+  conns:[{1367804270001:'data>console'}]},
   { name:'waffles',
   host:'waffles.cc',
   modules:['data'],
-  conns:['data>console']}
+  conns:[{1367804262251:'data>console'}]}
 ]
 // or make conns like : [{timestampID:modA>modB}, ..etc]
 
