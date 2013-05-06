@@ -23,22 +23,26 @@ module.exports = function (usr) { // BRICOLEUR
     }
   }
 
-  this.build = function () { // load modules
+  this.build = function () { // load modules && handle connections
     if (!map) throw new Error('no map')
+    console.log(map)
 
-    async.forEach(map, match, function () {
-      console.log(usr.host+' modules loaded')
-    })
+    async.forEach(map, lookupModule, connModules)
 
-    function match (mod, cb) {
+    function lookupModule (mod, cb) {
       var modules = self.usr.modules
       for (var i=0;i<modules.length;i++) {
         if (modules[i]===mod.id) {
           self.loadModule(mod)
-          cb()
           break
-        } else cb()
+        } 
       }
+      cb()
+    }
+
+    function connModules () {
+      console.log('modules loaded :: connecting modules...')
+      
     }
   }
 
