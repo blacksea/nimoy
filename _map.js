@@ -27,19 +27,18 @@ module.exports = function (dir) { // MAPPER
       for (var i=0;i<data.length;i++) { // parse out data object
         buf += data[i]
         if (data[i] === '}' && data[1]==='*' && data[2]==='{') { // super clumsy replace**
-          moduleData = JSON.parse(buf.toString().replace('/*',''))
-          if (typeof moduleData !== 'object') throw new Error('no module data!') // kind of weird
+          moduleData = JSON.parse(buf.toString().replace('/*','')) // maybe find a way to check valid json
           moduleData.filePath = filepath
           break
         }
       }
       
-      if (moduleData !== null && moduleData.deps) { // if there are deps handle them
+      if (moduleData && moduleData.deps) { // if there are deps handle them
         async.each(moduleData.deps, HandleDeps, function () {
           self.send(moduleData)
           callback()
         })
-      } else if (moduleData !== null) {
+      } else if (moduleData) {
         self.send(moduleData)
         callback()
       } else callback()
