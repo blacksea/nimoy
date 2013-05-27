@@ -50,11 +50,11 @@ module.exports = function (usr) { // BRICOLEUR
     }
   }
 
-  this.connModule = function (conn, cb) { // ['modA>modB','modB>modC']
+  this.connModule = function (conn, cb) { // ['modA>modB','modB>modC'] make module connections
     var modA = null
     , modB = null
 
-    for (key in conn) {
+    for (key in conn) { // could be clearer
       modA = _[conn[key].split('>')[0]]
       modB = _[conn[key].split('>')[1]]
      if (!modA.out || !modB.in) throw new Error(modA+','+modB+' :no .out or .in connections')
@@ -64,7 +64,6 @@ module.exports = function (usr) { // BRICOLEUR
   }
 
   this.disconnModule = function (disconn) {
-
   }
 
   this.loadModule = function (mod) { // load module!
@@ -74,14 +73,14 @@ module.exports = function (usr) { // BRICOLEUR
   }
 
   this.unloadModule = function (mod) {
-
   }
 
-  // ----------------------------------------------------
-  this.addConnection = function (key) {
+  // ------------------------------------------------------------
+  this.addConnection = function (key) { // user socket connection
     self[key] = {}
     var s = self[key]
-
+    s.id = key
+    
     // add write stream
     s.in = new stream.Writable()
     s.in._write = function (chunk, encoding, cb) {
@@ -102,3 +101,7 @@ module.exports = function (usr) { // BRICOLEUR
     delete self[key]
   }// ---------------------------------------------------
 }
+// client communication stream
+// user > brico.in[usr] [module.in] [module.out] brico.out[usr] > user
+// save | persist connections(flows) : easy to make manipulate module flows
+// mux -- demux ?!? howto handle multiples???
