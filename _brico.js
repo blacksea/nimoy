@@ -23,8 +23,8 @@ module.exports = function (usr) { // BRICOLEUR
       map = data[self.scope]
       self.build()
     } else {
-      console.log(data)
-      self.send(data)
+      console.log(data) // map to context
+      self.out.emit('data',data)
     }
 
   }
@@ -61,6 +61,7 @@ module.exports = function (usr) { // BRICOLEUR
     , modB = null
 
     for (key in conn) { // could be clearer
+      // create a start / end place to connect to on client soc conn
       modA = _[conn[key].split('>')[0]]
       modB = _[conn[key].split('>')[1]]
      if (!modA.out || !modB.in) throw new Error(modA+','+modB+' :no .out or .in connections')
@@ -112,3 +113,5 @@ module.exports = function (usr) { // BRICOLEUR
 // user > brico.in[usr] [module.in] [module.out] brico.out[usr] > user
 // save | persist connections(flows) : easy to make manipulate module flows
 // mux -- demux ?!? howto handle multiples???
+
+// context is f'd how to map/route conns
