@@ -8,6 +8,8 @@ module.exports = function (usr) { // BRICOLEUR
   , _ = {} // module scope
   telepath(this)
 
+  _.brico = this // hack!!!
+
   // detect if running in node or browser
   if (global.process && global.process.title === 'node') self.scope = 'server'
   if (!global.process) self.scope = 'client'
@@ -20,7 +22,11 @@ module.exports = function (usr) { // BRICOLEUR
     if (data.meta === 'module_map') { // add map 
       map = data[self.scope]
       self.build()
+    } else {
+      console.log(data)
+      self.send(data)
     }
+
   }
 
   this.build = function () { // load modules && handle connections
@@ -80,7 +86,7 @@ module.exports = function (usr) { // BRICOLEUR
     self[key] = {}
     var s = self[key]
     s.id = key
-    
+
     // add write stream
     s.in = new stream.Writable()
     s.in._write = function (chunk, encoding, cb) {
@@ -101,6 +107,7 @@ module.exports = function (usr) { // BRICOLEUR
     delete self[key]
   }// ---------------------------------------------------
 }
+
 // client communication stream
 // user > brico.in[usr] [module.in] [module.out] brico.out[usr] > user
 // save | persist connections(flows) : easy to make manipulate module flows

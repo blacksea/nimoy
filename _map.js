@@ -54,6 +54,7 @@ module.exports = function (dir) { // MAPPER
   }
 
   function MappingDone () {
+    // can't emit end because it will close brico in stream - modules should signal start and end of their process
     self.out.emit('end')
   }
 }
