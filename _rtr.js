@@ -44,6 +44,11 @@ module.exports = function (opts) { // ROUTER
     brico.addConnection(key)
     wss.pipe(brico[key].in)
     brico[key].out.pipe(wss)
+
+    // shit to send asap
+    brico.map.key = key
+    brico.map.meta = 'module_map'
+    brico[key].send(brico.map)
    
     // when socket closes remove connection
     ws.on('close', function () {

@@ -5,22 +5,28 @@ var redis = require('redis')
 var users = [ // user model
   { name:'default',
   host:'localhost',
-  modules: [
-    {client:['c_test']},
-    {server:['data','test']}
-  ],
-  conns:[
-    {client:[]},
-    {server:{1367804262251:'test>data'}}
-  ]},
+  modules: {
+    client:['console'],
+    server:['data','test']
+  },
+  conns:{
+    client:[],
+    server:{1367804262251:'test>data'}
+  }},
 
   { name:'blacksea',
   host:'theblacksea.cc',
-  modules:['data']},
+  modules: {
+    client:['console'],
+    server:['data','test']
+  }},
 
   { name:'waffles',
   host:'waffles.cc',
-  modules:['data','test']}
+  modules: {
+    client:['console'],
+    server:['data','test']
+  }}
 ]
 // entry / exit placeholder *
 
