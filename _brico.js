@@ -14,34 +14,34 @@ module.exports = function (usr) { // BRICOLEUR
 
   if (self.scope === 'client') { // client side > fix it ...
     console.log('running client side')
-    setTimeout(function () {
-      self.send({quadnor:'xontorbius'})
-    }, 1000)
   }
 
   if (usr) self.usr = usr
     
   this.recv = function (buffer) {
     var data = JSON.parse(buffer.toString())
+    console.log(data)
 
     if (data.meta === 'module_map') { // add map 
-      map = data[self.scope]
+      console.log(data)
+      map = data
+      self.map = data
       self.build()
-    } else {
-      console.log(data) // map to context
-      self.out.emit('data',data)
+    } else if (self.scope==='client' && data.key){
+      console.log(data.key)
     }
   }
 
   this.build = function () { // load modules && handle connections
     if (!map) throw new Error('no map')
-
-    async.forEach(map, lookupModule, connModules)
+    // add client side map build
+    async.forEach(map[self.scope], lookupModule, connModules)
 
     function lookupModule (mod, cb) {
-      var modules = self.usr.modules
+      var modules = self.usr.modules[self.scope]
       for (var i=0;i<modules.length;i++) {
         if (modules[i]===mod.id) {
+          console.log('loading mod '+mod.id)
           self.loadModule(mod)
           break
         } 
@@ -52,7 +52,7 @@ module.exports = function (usr) { // BRICOLEUR
     function connModules () {
       if (usr.conns) {
         console.log('modules loaded :: connecting modules...')
-        async.forEach(usr.conns, self.connModule, function () {
+        async.forEach(usr.conns[self.scope], self.connModule, function () {
           console.log('connected modules for : '+usr.host)
         })
       }
@@ -68,9 +68,10 @@ module.exports = function (usr) { // BRICOLEUR
       // create a start / end place to connect to on client soc conn
       modA = _[conn[key].split('>')[0]]
       modB = _[conn[key].split('>')[1]]
-     if (!modA.out || !modB.in) throw new Error(modA+','+modB+' :no .out or .in connections')
-     if (modA.out && modB.in) modA.out.pipe(modB.in)
-     cb()
+      console.log('connecting '+conn[key])
+      if (!modA.out || !modB.in) throw new Error(modA+','+modB+' :no .out or .in connections')
+      if (modA.out && modB.in) modA.out.pipe(modB.in)
+      cb()
     }
   }
 
