@@ -5,9 +5,5 @@ var websocket = require('websocket-stream')
 , ws = websocket('ws://'+host)
 
 var brico = new bricoleur()
-
-ws.on('data', function (json) {
-  var data = JSON.parse(json)
-  console.log(data)
-
-})
+ws.pipe(brico.in)
+brico.out.pipe(ws)

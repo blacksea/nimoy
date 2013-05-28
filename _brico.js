@@ -12,6 +12,13 @@ module.exports = function (usr) { // BRICOLEUR
   if (global.process && global.process.title === 'node') self.scope = 'server'
   if (!global.process) self.scope = 'client'
 
+  if (self.scope === 'client') { // client side > fix it ...
+    console.log('running client side')
+    setTimeout(function () {
+      self.send({quadnor:'xontorbius'})
+    }, 1000)
+  }
+
   if (usr) self.usr = usr
     
   this.recv = function (buffer) {
@@ -24,7 +31,6 @@ module.exports = function (usr) { // BRICOLEUR
       console.log(data) // map to context
       self.out.emit('data',data)
     }
-
   }
 
   this.build = function () { // load modules && handle connections
@@ -89,7 +95,7 @@ module.exports = function (usr) { // BRICOLEUR
     // add write stream
     s.in = new stream.Writable()
     s.in._write = function (chunk, encoding, cb) {
-      self.recv(chunk)
+      self.recv(chunk) // add id to obj -- for filtering
       cb()
     }
 

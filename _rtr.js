@@ -44,7 +44,7 @@ module.exports = function (opts) { // ROUTER
     brico.addConnection(key)
     wss.pipe(brico[key].in)
     brico[key].out.pipe(wss)
-
+  
     // when socket closes remove connection
     ws.on('close', function () {
       brico.removeConnection(key)
