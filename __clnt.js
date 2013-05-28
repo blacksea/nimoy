@@ -4,6 +4,7 @@ var websocket = require('websocket-stream')
 , host = window.location.host.replace('www.','')
 , ws = websocket('ws://'+host)
 
+// need to get key and user
 var brico = new bricoleur()
 ws.pipe(brico.in)
 brico.out.pipe(ws)
