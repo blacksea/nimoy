@@ -5,18 +5,25 @@ var redis = require('redis')
 var users = [ // user model
   { name:'default',
   host:'localhost',
-  modules:['data','test'],
-  // conns:[{1367804262251:'test>data'},{1367804270001:'data>*'}]},
-  conns:[{1367804262251:'test>data'}]},
+  modules: [
+    {client:['c_test']},
+    {server:['data','test']}
+  ],
+  conns:[
+    {client:[]},
+    {server:{1367804262251:'test>data'}}
+  ]},
+
   { name:'blacksea',
   host:'theblacksea.cc',
   modules:['data']},
+
   { name:'waffles',
   host:'waffles.cc',
   modules:['data','test']}
 ]
 // entry / exit placeholder *
-//
+
 // or make conns like : [{timestampID:modA>modB}, ..etc]
 // how to handle client/server connections?
 // make sure user has modules + conns avail. -- warn if conn's not avail or if wrong mods
