@@ -8,8 +8,6 @@ module.exports = function (usr) { // BRICOLEUR
   , _ = {} // module scope
   telepath(this)
 
-  _.brico = this // hack!!!
-
   // detect if running in node or browser
   if (global.process && global.process.title === 'node') self.scope = 'server'
   if (!global.process) self.scope = 'client'
