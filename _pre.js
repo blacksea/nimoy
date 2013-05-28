@@ -2,6 +2,7 @@ var browserify = require('browserify')
 , uglifyJS = require('uglify-js')
 , stylus = require('stylus')
 , telepath = require('tele')
+, async = require('async')
 , fs = require('fs')
 
 module.exports = function (opts) { // PRECOMPILER
@@ -38,18 +39,26 @@ module.exports = function (opts) { // PRECOMPILER
     self.send(map)
   })
 
-  function compile () {
-    browserify(opts.js).bundle({}, function (err, bundle) {
-      if (err) throw err
-      if (opts.compress === true) {
-        var bundleMin = uglifyJS.minify(bundle,{fromString: true})
-        bundle = bundleMin.code
-      }
-      fs.writeFile(destJS, bundle, function (err) {
+  function compile () { // rewrite this to handle browserify properly
+    var b = browserify(opts.js)
+
+    async.forEach(opts.js, function (item, cb) {
+      var path = item.split('/')
+      if (path[1]==='_wilds') b.require(item, {expose:path[2].replace('.js','')}) 
+      cb()
+    }, function () {
+      b.bundle(function (err, bundle) {
         if (err) throw err
-        console.log('fin')
-        // self.out.emit('end') // closes brico - figure out somekind of micro-stream-process api
-      })
+        if (opts.compress === true) {
+          var bundleMin = uglifyJS.minify(bundle,{fromString: true})
+          bundle = bundleMin.code
+        }
+        fs.writeFile(destJS, bundle, function (err) {
+          if (err) throw err
+          console.log('fin')
+          // self.out.emit('end') // closes brico - figure out somekind of micro-stream-process api
+        })
+      })   
     })
 
     fs.readFile(opts.css, function (err, buffer) {
