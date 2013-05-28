@@ -11,11 +11,6 @@ module.exports = function (usr) { // BRICOLEUR
   // detect if running in node or browser
   if (global.process && global.process.title === 'node') self.scope = 'server'
   if (!global.process) self.scope = 'client'
-
-  if (self.scope === 'client') { // client side > fix it ...
-    console.log('running client side')
-  }
-
   if (usr) self.usr = usr
     
   this.recv = function (buffer) {
@@ -23,22 +18,20 @@ module.exports = function (usr) { // BRICOLEUR
     console.log(data)
 
     if (data.meta === 'module_map') { // add map 
-      console.log(data)
       map = data
       self.map = data
       self.build()
-    } else if (self.scope==='client' && data.key){
+    } else if (self.scope === 'client' && data.key){
       console.log(data.key)
     }
   }
 
   this.build = function () { // load modules && handle connections
     if (!map) throw new Error('no map')
-    // add client side map build
     async.forEach(map[self.scope], lookupModule, connModules)
 
     function lookupModule (mod, cb) {
-      var modules = self.usr.modules[self.scope]
+      var modules = usr.modules[self.scope]
       for (var i=0;i<modules.length;i++) {
         if (modules[i]===mod.id) {
           console.log('loading mod '+mod.id)
@@ -79,7 +72,9 @@ module.exports = function (usr) { // BRICOLEUR
   }
 
   this.loadModule = function (mod) { // load module!
-    _[mod.id.toUpperCase()] = require(mod.filePath)
+    if (self.scope==='server') _[mod.id.toUpperCase()] = require(mod.filePath)
+    if (self.scope==='client') _[mod.id.toUpperCase()] = require(mod.id)
+
     _[mod.id] = new _[mod.id.toUpperCase()]()
     if (mod.html) _[mod.id].template = mod.html
   }
@@ -114,9 +109,4 @@ module.exports = function (usr) { // BRICOLEUR
   }// ---------------------------------------------------
 }
 
-// client communication stream
-// user > brico.in[usr] [module.in] [module.out] brico.out[usr] > user
-// save | persist connections(flows) : easy to make manipulate module flows
-// mux -- demux ?!? howto handle multiples???
 
-// context is f'd how to map/route conns
