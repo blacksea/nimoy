@@ -11,7 +11,7 @@ var users = [ // user model
   },
   conns:{
     client:[],
-    server:{1367804262251:'test>data'}
+    server:[{1367804262251:'test>data'}]
   }},
 
   { name:'blacksea',
@@ -28,14 +28,6 @@ var users = [ // user model
     server:['data','test']
   }}
 ]
-// entry / exit placeholder *
-
-// or make conns like : [{timestampID:modA>modB}, ..etc]
-// how to handle client/server connections?
-// make sure user has modules + conns avail. -- warn if conn's not avail or if wrong mods
-// should there be seperate conns for bus in or out
-
-// make an entry and end point for mod conn's
 
 async.forEach(users, function (user, cb) {
   client.hset('users', user.name, JSON.stringify(user), function (err) {
