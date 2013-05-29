@@ -11,7 +11,10 @@ var users = [ // user model
   },
   conns:{
     client:[],
-    server:[{1367804262251:'test>data'}]
+    server:[
+       {1367804262251:'test>data'},
+       {1367804262259:'bus>test'}
+    ]
   }},
 
   { name:'blacksea',
