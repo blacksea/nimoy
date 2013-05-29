@@ -12,13 +12,9 @@ ws.on('data', function (buffer) {
   var data = JSON.parse(buffer)
   if (data.client_id) {
     var brico = new bricoleur(data.usr)
-    brico.recv(JSON.stringify(data.map))
     brico.client_id = data.client_id
+    brico.recv(JSON.stringify(data.map))
     ws.pipe(brico.in) 
     brico.out.pipe(ws)
   }
 })
-
-setTimeout(function () {
-  brico.send({test:'test'})
-}, 1000)

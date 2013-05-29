@@ -13,7 +13,7 @@ module.exports = function () {
 
   this.recv = function (json) {
     var data = JSON.parse(json)
-    console.dir('________________-----_____'+data)
+    console.dir(data)
   }
 
   setInterval(function () { // setting redis key
