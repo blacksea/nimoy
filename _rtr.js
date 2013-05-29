@@ -45,11 +45,12 @@ module.exports = function (opts) { // ROUTER
     wss.pipe(brico[key].in)
     brico[key].out.pipe(wss)
 
-    // shit to send asap
-    brico.map.key = key
-    brico.map.meta = 'module_map'
-    brico[key].send(brico.map)
-   
+    var initObj = {}
+    initObj.client_id = key
+    initObj.usr = brico.usr
+    initObj.map = brico.map
+    initObj.map.meta = 'module_map'
+    brico.send(initObj)
     // when socket closes remove connection
     ws.on('close', function () {
       brico.removeConnection(key)
