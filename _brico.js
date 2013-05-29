@@ -21,7 +21,8 @@ module.exports = function (usr) { // BRICOLEUR
       map = data
       self.map = data
       self.build()
-    } else { // pass through to out
+    } else if (!data.client_id) { // pass through to out
+      if (self.client_id) data.id = self.client_id
       self.send(data)
     }
   }
@@ -73,10 +74,12 @@ module.exports = function (usr) { // BRICOLEUR
 
   this.loadModule = function (mod) { // load module!
     if (self.scope==='server') _[mod.id.toUpperCase()] = require(mod.filePath)
-    if (self.scope==='client') _[mod.id.toUpperCase()] = require(mod.id)
+    if (self.scope==='client') {
+      _[mod.id.toUpperCase()] = require(mod.id)
+    }
 
     _[mod.id] = new _[mod.id.toUpperCase()]()
-    if (mod.html) _[mod.id].template = mod.html
+    if (mod.html) _[mod.id].render(mod.html)
   }
 
   this.unloadModule = function (mod) {
