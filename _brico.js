@@ -6,6 +6,7 @@ module.exports = function (usr) { // BRICOLEUR
   var self = this
   , map = null
   , _ = {} // module scope
+  _.bus = self
   telepath(this)
 
   // detect if running in node or browser
@@ -23,6 +24,8 @@ module.exports = function (usr) { // BRICOLEUR
       self.build()
     } else if (self.scope === 'client' && data.key){
       console.log(data.key)
+    } else { // pass through to out
+      self.send(data)
     }
   }
 
@@ -58,10 +61,12 @@ module.exports = function (usr) { // BRICOLEUR
     , modB = null
 
     for (key in conn) { // could be clearer
-      // create a start / end place to connect to on client soc conn
-      modA = _[conn[key].split('>')[0]]
-      modB = _[conn[key].split('>')[1]]
-      console.log('connecting '+conn[key])
+      modA = _[conn[key].split('>')[0]] 
+      modB = _[conn[key].split('>')[1]] 
+      console.log('connecting ' + conn[key])
+      console.dir(modA)
+      console.dir(modB)
+      
       if (!modA.out || !modB.in) throw new Error(modA+','+modB+' :no .out or .in connections')
       if (modA.out && modB.in) modA.out.pipe(modB.in)
       cb()
