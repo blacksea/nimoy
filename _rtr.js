@@ -50,7 +50,7 @@ module.exports = function (opts) { // ROUTER
     initObj.usr = brico.usr
     initObj.map = brico.map
     initObj.map.meta = 'module_map'
-    brico.send(initObj)
+    brico[key].send(initObj)
     // when socket closes remove connection
     ws.on('close', function () {
       brico.removeConnection(key)
