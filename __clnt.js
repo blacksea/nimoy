@@ -18,3 +18,7 @@ ws.on('data', function (buffer) {
     brico.out.pipe(ws)
   }
 })
+
+setTimeout(function () {
+  brico.send({test:'test'})
+}, 1000)

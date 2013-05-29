@@ -1,4 +1,24 @@
-;(function(e,t,n,r){function i(r){if(!n[r]){if(!t[r]){if(e)return e(r);throw new Error("Cannot find module '"+r+"'")}var s=n[r]={exports:{}};t[r][0](function(e){var n=t[r][1][e];return i(n?n:e)},s,s.exports)}return n[r].exports}for(var s=0;s<r.length;s++)i(r[s]);return i})(typeof require!=="undefined"&&require,{1:[function(require,module,exports){
+require=(function(e,t,n,r){function i(r){if(!n[r]){if(!t[r]){if(e)return e(r);throw new Error("Cannot find module '"+r+"'")}var s=n[r]={exports:{}};t[r][0](function(e){var n=t[r][1][e];return i(n?n:e)},s,s.exports)}return n[r].exports}for(var s=0;s<r.length;s++)i(r[s]);return i})(typeof require!=="undefined"&&require,{"recv":[function(require,module,exports){
+module.exports=require('bM81ck');
+},{}],"bM81ck":[function(require,module,exports){
+/*{
+  "id":"recv",
+	"scope":["client","server"],
+	"desc":"send data"
+}*/
+
+var _ = Object._;
+
+module.exports = function () {
+  var self = this;
+  setTimeout(function() {
+    // _.send.test(); // never call specific modules just provide output or input
+  }, 3000);
+}
+
+},{}],"send":[function(require,module,exports){
+module.exports=require('ECIHju');
+},{}],"ECIHju":[function(require,module,exports){
 /*{
   "id":"send",
 	"scope":["client","server"],
@@ -20,73 +40,33 @@ module.exports = function () {
   // default output function
 }
 
-},{}],2:[function(require,module,exports){
-/*{
-  "id":"console",
-	"scope":["client"],
-	"desc":"cli",
-  "deps":["console.html","console.styl"]
-}*/
+},{}],1:[function(require,module,exports){
+var websocket = require('websocket-stream')
+, bricoleur = require('./_brico')
+, id = null
+, host = window.location.host.replace('www.','')
+, ws = websocket('ws://'+host)
 
-var Stream = require('stream');
+var brico = new bricoleur() // need to get key and user
+ws.pipe(brico.in)
+brico.out.pipe(ws)
 
-module.exports = function () {
-
-  var self = this;
-  this.template = null;
-  this.output = new Stream();
-
-  this.init = function () {
-
-    var container = document.getElementById('container')
-    , log = document.createElement('div');
-
-    log.setAttribute('id','console');
-    log.innerHTML = self.template;
-
-    container.appendChild(log);
-
-    var form = document.getElementById('x')
-    , prompt = form.querySelector('.console');
-
-    form.onsubmit = function (e) {
-      e.preventDefault();
-      var cmd = e.target[0].value; // entered text
-      self.output.emit('data',cmd);
-      prompt.blur();
-    }
-    
-    prompt.onfocus = function () {
-      prompt.value = '';
-    }
-
-    prompt.onblur = function () {
-      prompt.value = '>';
-    }
+ws.on('data', function (buffer) {
+  var data = JSON.parse(buffer)
+  if (data.client_id) {
+    var brico = new bricoleur(data.usr)
+    brico.recv(JSON.stringify(data.map))
+    brico.client_id = data.client_id
+    ws.pipe(brico.in) 
+    brico.out.pipe(ws)
   }
+})
 
-  this.output.on('data', function (data) {
-    console.dir(data);
-  });
-}
+setTimeout(function () {
+  brico.send({test:'test'})
+}, 1000)
 
-},{"stream":3}],4:[function(require,module,exports){
-/*{
-  "id":"recv",
-	"scope":["client","server"],
-	"desc":"send data"
-}*/
-
-var _ = Object._;
-
-module.exports = function () {
-  var self = this;
-  setTimeout(function() {
-    // _.send.test(); // never call specific modules just provide output or input
-  }, 3000);
-}
-
-},{}],3:[function(require,module,exports){
+},{"./_brico":2,"websocket-stream":3}],4:[function(require,module,exports){
 var events = require('events');
 var util = require('util');
 
@@ -207,7 +187,122 @@ Stream.prototype.pipe = function(dest, options) {
   return dest;
 };
 
-},{"events":5,"util":6}],7:[function(require,module,exports){
+},{"events":5,"util":6}],3:[function(require,module,exports){
+var stream = require('stream')
+var util = require('util')
+
+function WebsocketStream(server, protocol) {
+  var self = this
+  stream.Stream.call(this)
+  this.readable = true
+  this.writable = true
+  if (typeof server === "object") {
+    this.ws = server
+    this.ws.on('message', this.onMessage.bind(this))
+    this.ws.on('error', this.onError.bind(this))
+    this.ws.on('close', this.onClose.bind(this))
+    this.ws.on('open', function() {
+      self.emit('open')
+    })
+  } else {
+    this.ws = new WebSocket(server, protocol)
+    this.ws.onmessage = this.onMessage.bind(this)
+    this.ws.onerror = this.onError.bind(this)
+    this.ws.onclose = this.onClose.bind(this)
+  }
+}
+
+util.inherits(WebsocketStream, stream.Stream)
+
+module.exports = function(server, protocol) {
+  return new WebsocketStream(server, protocol)
+}
+
+module.exports.WebsocketStream = WebsocketStream
+
+WebsocketStream.prototype.onMessage = function(e, flags) {
+  if (e.data) return this.emit('data', e.data, flags)
+  this.emit('data', e, flags)
+}
+
+WebsocketStream.prototype.onError = function(err) {
+  this.emit('error', err)
+}
+
+WebsocketStream.prototype.onClose = function(err) {
+  this.emit('end')
+}
+
+WebsocketStream.prototype.write = function(data) {
+  return this.ws.send(data)
+}
+
+WebsocketStream.prototype.end = function() {
+  this.ws.close()
+}
+
+},{"stream":4,"util":6}],"console":[function(require,module,exports){
+module.exports=require('OkCvNS');
+},{}],"OkCvNS":[function(require,module,exports){
+/*{
+  "id":"console",
+	"scope":["client"],
+	"desc":"cli",
+  "deps":["console.html","console.styl"]
+}*/
+var telepath = require('tele')
+
+module.exports = function () {
+  var self = this
+  telepath(this)
+
+  this.recv = function (buffer) {
+    var data = JSON.parse(buffer.toString())
+    console.dir(data)
+  }
+
+  setInterval(function () {
+    self.send({test:Math.random()})
+  }, 300)
+
+  // this.template = null;
+  // this.output = new Stream();
+
+  // this.init = function () {
+
+  //   var container = document.getElementById('container')
+  //   , log = document.createElement('div');
+
+  //   log.setAttribute('id','console');
+  //   log.innerHTML = self.template;
+
+  //   container.appendChild(log);
+
+  //   var form = document.getElementById('x')
+  //   , prompt = form.querySelector('.console');
+
+  //   form.onsubmit = function (e) {
+  //     e.preventDefault();
+  //     var cmd = e.target[0].value; // entered text
+  //     self.output.emit('data',cmd);
+  //     prompt.blur();
+  //   }
+  //   
+  //   prompt.onfocus = function () {
+  //     prompt.value = '';
+  //   }
+
+  //   prompt.onblur = function () {
+  //     prompt.value = '>';
+  //   }
+  // }
+
+  // this.output.on('data', function (data) {
+  //   console.dir(data);
+  // });
+}
+
+},{"tele":7}],8:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -447,7 +542,7 @@ EventEmitter.prototype.listeners = function(type) {
 };
 
 })(require("__browserify_process"))
-},{"__browserify_process":7}],6:[function(require,module,exports){
+},{"__browserify_process":8}],6:[function(require,module,exports){
 var events = require('events');
 
 exports.isArray = isArray;
@@ -800,81 +895,7 @@ exports.format = function(f) {
   return str;
 };
 
-},{"events":5}],8:[function(require,module,exports){
-var websocket = require('websocket-stream')
-, bricoleur = require('./_brico')
-, id = null
-, host = window.location.host.replace('www.','')
-, ws = websocket('ws://'+host)
-
-var brico = new bricoleur()
-
-ws.on('data', function (json) {
-  var data = JSON.parse(json)
-
-  if (data.new_id) { // make new connection
-    id = data.new_id
-    ws.write(JSON.stringify({newConn:host,id:id}))
-    ws.pipe(brico.in)
-    brico.out.pipe(ws)
-  }
-})
-
-},{"./_brico":9,"websocket-stream":10}],10:[function(require,module,exports){
-var stream = require('stream')
-var util = require('util')
-
-function WebsocketStream(server, protocol) {
-  var self = this
-  stream.Stream.call(this)
-  this.readable = true
-  this.writable = true
-  if (typeof server === "object") {
-    this.ws = server
-    this.ws.on('message', this.onMessage.bind(this))
-    this.ws.on('error', this.onError.bind(this))
-    this.ws.on('close', this.onClose.bind(this))
-    this.ws.on('open', function() {
-      self.emit('open')
-    })
-  } else {
-    this.ws = new WebSocket(server, protocol)
-    this.ws.onmessage = this.onMessage.bind(this)
-    this.ws.onerror = this.onError.bind(this)
-    this.ws.onclose = this.onClose.bind(this)
-  }
-}
-
-util.inherits(WebsocketStream, stream.Stream)
-
-module.exports = function(server, protocol) {
-  return new WebsocketStream(server, protocol)
-}
-
-module.exports.WebsocketStream = WebsocketStream
-
-WebsocketStream.prototype.onMessage = function(e, flags) {
-  if (e.data) return this.emit('data', e.data, flags)
-  this.emit('data', e, flags)
-}
-
-WebsocketStream.prototype.onError = function(err) {
-  this.emit('error', err)
-}
-
-WebsocketStream.prototype.onClose = function(err) {
-  this.emit('end')
-}
-
-WebsocketStream.prototype.write = function(data) {
-  return this.ws.send(data)
-}
-
-WebsocketStream.prototype.end = function() {
-  this.ws.close()
-}
-
-},{"stream":3,"util":6}],9:[function(require,module,exports){
+},{"events":5}],2:[function(require,module,exports){
 (function(global){var telepath = require('tele')
 , stream = require('stream')
 , async = require ('async')
@@ -883,33 +904,38 @@ module.exports = function (usr) { // BRICOLEUR
   var self = this
   , map = null
   , _ = {} // module scope
+  _.bus = self
   telepath(this)
 
   // detect if running in node or browser
   if (global.process && global.process.title === 'node') self.scope = 'server'
   if (!global.process) self.scope = 'client'
-
   if (usr) self.usr = usr
     
   this.recv = function (buffer) {
     var data = JSON.parse(buffer.toString())
+    console.log(data)
 
     if (data.meta === 'module_map') { // add map 
-      map = data[self.scope]
+      map = data
+      self.map = data
       self.build()
+    } else if (self.scope === 'client' && data.key){
+      console.log(data.key)
+    } else { // pass through to out
+      self.send(data)
     }
   }
 
   this.build = function () { // load modules && handle connections
     if (!map) throw new Error('no map')
-    console.log(map)
-
-    async.forEach(map, lookupModule, connModules)
+    async.forEach(map[self.scope], lookupModule, connModules)
 
     function lookupModule (mod, cb) {
-      var modules = self.usr.modules
+      var modules = usr.modules[self.scope]
       for (var i=0;i<modules.length;i++) {
         if (modules[i]===mod.id) {
+          console.log('loading mod '+mod.id)
           self.loadModule(mod)
           break
         } 
@@ -920,7 +946,7 @@ module.exports = function (usr) { // BRICOLEUR
     function connModules () {
       if (usr.conns) {
         console.log('modules loaded :: connecting modules...')
-        async.forEach(usr.conns, self.connModule, function () {
+        async.forEach(usr.conns[self.scope], self.connModule, function () {
           console.log('connected modules for : '+usr.host)
         })
       }
@@ -928,42 +954,47 @@ module.exports = function (usr) { // BRICOLEUR
     }
   }
 
-  this.connModule = function (conn, cb) { // ['modA>modB','modB>modC']
+  this.connModule = function (conn, cb) { // ['modA>modB','modB>modC'] make module connections
     var modA = null
     , modB = null
 
-    for (key in conn) {
-      modA = _[conn[key].split('>')[0]]
-      modB = _[conn[key].split('>')[1]]
-     if (!modA.out || !modB.in) throw new Error(modA+','+modB+' :no .out or .in connections')
-     if (modA.out && modB.in) modA.out.pipe(modB.in)
-     cb()
+    for (key in conn) { // could be clearer
+      modA = _[conn[key].split('>')[0]] 
+      modB = _[conn[key].split('>')[1]] 
+      console.log('connecting ' + conn[key])
+      console.dir(modA)
+      console.dir(modB)
+      
+      if (!modA.out || !modB.in) throw new Error(modA+','+modB+' :no .out or .in connections')
+      if (modA.out && modB.in) modA.out.pipe(modB.in)
+      cb()
     }
   }
 
   this.disconnModule = function (disconn) {
-
   }
 
   this.loadModule = function (mod) { // load module!
-    _[mod.id.toUpperCase()] = require(mod.filePath)
+    if (self.scope==='server') _[mod.id.toUpperCase()] = require(mod.filePath)
+    if (self.scope==='client') _[mod.id.toUpperCase()] = require(mod.id)
+
     _[mod.id] = new _[mod.id.toUpperCase()]()
     if (mod.html) _[mod.id].template = mod.html
   }
 
   this.unloadModule = function (mod) {
-
   }
 
-  // ----------------------------------------------------
-  this.addConnection = function (key) {
+  // ------------------------------------------------------------
+  this.addConnection = function (key) { // user socket connection
     self[key] = {}
     var s = self[key]
+    s.id = key
 
     // add write stream
     s.in = new stream.Writable()
     s.in._write = function (chunk, encoding, cb) {
-      self.recv(chunk)
+      self.recv(chunk) // add id to obj -- for filtering
       cb()
     }
 
@@ -981,8 +1012,10 @@ module.exports = function (usr) { // BRICOLEUR
   }// ---------------------------------------------------
 }
 
+
+
 })(window)
-},{"stream":3,"tele":11,"async":12}],11:[function(require,module,exports){
+},{"stream":4,"tele":7,"async":9}],7:[function(require,module,exports){
 var stream = require('stream')
 , browser = false
 if (!stream.Writable) browser = true // browser ugliness
@@ -1039,7 +1072,7 @@ module.exports = function (mod) { // pass in module & make it telepathic!
   })
 }
 
-},{"stream":3}],12:[function(require,module,exports){
+},{"stream":4}],9:[function(require,module,exports){
 (function(process){/*global setImmediate: false, setTimeout: false, console: false */
 (function () {
 
@@ -2024,5 +2057,5 @@ module.exports = function (mod) { // pass in module & make it telepathic!
 }());
 
 })(require("__browserify_process"))
-},{"__browserify_process":7}]},{},[8,1,4,2])
+},{"__browserify_process":8}]},{},[1,"bM81ck","ECIHju","OkCvNS"])
 ;
