@@ -42,8 +42,10 @@ module.exports = function (opts) { // ROUTER
 
     // add connection
     brico.addConnection(key)
+
     wss.pipe(brico[key].in)
     brico[key].out.pipe(wss)
+    brico.out.pipe(wss) // creating somekind of horrid feedback loop
 
     var initObj = {}
     initObj.client_id = key
