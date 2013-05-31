@@ -1,36 +1,547 @@
 body {
-  font-family: 'Liberation Mono';
+  font-family: courier, monospace;
   font-size: 10px;
-  background: #f1f1f1;
+  background: #001424;
   color: #333;
   margin: 0;
   padding: 0;
+}
+.lc,
+.rc,
+.uc {
+  width: 15px;
+  height: 15px;
+}
+.lc {
+  position: fixed;
+  bottom: 6px;
+  left: 6px;
+  border-left: 1px solid #999;
+  border-bottom: 1px solid #999;
+}
+.rc {
+  position: fixed;
+  bottom: 6px;
+  right: 6px;
+  border-right: 1px solid #999;
+  border-bottom: 1px solid #999;
+}
+.uc {
+  position: fixed;
+  top: 6px;
+  right: 6px;
+  border-right: 1px solid #999;
+  border-top: 1px solid #999;
 }
 form {
   top: 0;
   left: 0;
   position: fixed;
   x-oveflow: hidden;
-  width: 100%;
+  width: 400px;
   height: 16px;
+  padding: 6px;
 }
 input {
   height: 16px;
   line-height: 16px;
   width: inherit;
   background: transparent;
-  color: #000;
-  border: 1px dotted #000;
-  font-size: 9px;
-  font-family: 'monaco';
-  letter-spacing: 1px;
+  color: #999;
+  border: none;
+  border-left: 1px solid #999;
+  border-top: 1px solid #999;
+  font-size: 15px;
+  font-family: 'ProggySquareTT';
 }
 input:focus {
   padding: 2px;
-  padding-left: 10px;
-  color: #00f;
+  padding-top: 4px;
+  padding-left: 4px;
+  color: #f1f1f1;
   background: transparent;
   outline: none;
-  text-transform: uppercase;
-  border: 2px solid #00f;
+  opacity: 0.6;
+  border: 1px solid #999;
+  border-bottom: 1px solid #f1f1f1;
+}
+form {
+  top: 0;
+  left: 0;
+  position: fixed;
+  x-oveflow: hidden;
+  width: 400px;
+  height: 16px;
+  padding: 6px;
+}
+input {
+  height: 16px;
+  line-height: 16px;
+  width: inherit;
+  background: transparent;
+  color: #999;
+  border: none;
+  border-left: 1px solid #999;
+  border-top: 1px solid #999;
+  font-size: 15px;
+  font-family: 'ProggySquareTT';
+}
+input:focus {
+  padding: 2px;
+  padding-top: 4px;
+  padding-left: 4px;
+  color: #f1f1f1;
+  background: transparent;
+  outline: none;
+  opacity: 0.7;
+  border: 1px solid #999;
+  border-bottom: 1px solid #f1f1f1;
+}
+form {
+  top: 0;
+  left: 0;
+  position: fixed;
+  x-oveflow: hidden;
+  width: 400px;
+  height: 16px;
+  padding: 6px;
+}
+input {
+  height: 16px;
+  line-height: 16px;
+  width: inherit;
+  background: transparent;
+  color: #999;
+  border: none;
+  border-left: 1px solid #999;
+  border-top: 1px solid #999;
+  font-size: 15px;
+  font-family: 'ProggySquareTT';
+}
+input:focus {
+  padding: 2px;
+  padding-top: 4px;
+  padding-left: 4px;
+  color: #f1f1f1;
+  background: transparent;
+  outline: none;
+  opacity: 0.7;
+  border: 1px solid #999;
+  border-bottom: 1px solid #f1f1f1;
+}
+form {
+  top: 0;
+  left: 0;
+  position: fixed;
+  x-oveflow: hidden;
+  width: 400px;
+  height: 16px;
+  padding: 6px;
+}
+input {
+  height: 16px;
+  line-height: 16px;
+  width: inherit;
+  background: transparent;
+  color: #999;
+  border: none;
+  border-left: 1px solid #999;
+  border-top: 1px solid #999;
+  font-size: 15px;
+  font-family: 'ProggySquareTT';
+}
+input:focus {
+  padding: 2px;
+  padding-top: 4px;
+  padding-left: 4px;
+  color: #f1f1f1;
+  background: transparent;
+  outline: none;
+  opacity: 0.7;
+  border: 1px solid #999;
+  border-bottom: 1px solid #f1f1f1;
+}
+form {
+  top: 0;
+  left: 0;
+  position: fixed;
+  x-oveflow: hidden;
+  width: 400px;
+  height: 16px;
+  padding: 6px;
+}
+input {
+  height: 16px;
+  line-height: 16px;
+  width: inherit;
+  background: transparent;
+  color: #999;
+  border: none;
+  border-left: 1px solid #999;
+  border-top: 1px solid #999;
+  font-size: 15px;
+  font-family: 'ProggySquareTT';
+}
+input:focus {
+  padding: 2px;
+  padding-top: 4px;
+  padding-left: 4px;
+  color: #f1f1f1;
+  background: transparent;
+  outline: none;
+  opacity: 0.7;
+  border: 1px solid #999;
+  border-bottom: 2px solid #f1f1f1;
+}
+form {
+  top: 0;
+  left: 0;
+  position: fixed;
+  x-oveflow: hidden;
+  width: 400px;
+  height: 16px;
+  padding: 6px;
+}
+input {
+  height: 16px;
+  line-height: 16px;
+  width: inherit;
+  background: transparent;
+  color: #999;
+  border: none;
+  border-left: 1px solid #999;
+  border-top: 1px solid #999;
+  font-size: 15px;
+  font-family: 'ProggySquareTT';
+}
+input:focus {
+  padding: 2px;
+  padding-top: 4px;
+  padding-left: 4px;
+  color: #f1f1f1;
+  background: transparent;
+  outline: none;
+  opacity: 0.7;
+  border: 1px solid #999;
+  border-bottom: 2px solid #f1f1f1;
+}
+form {
+  top: 0;
+  left: 0;
+  position: fixed;
+  x-oveflow: hidden;
+  width: 400px;
+  height: 16px;
+  padding: 6px;
+}
+input {
+  height: 16px;
+  line-height: 16px;
+  width: inherit;
+  background: transparent;
+  color: #999;
+  border: none;
+  border-left: 1px solid #999;
+  border-top: 1px solid #999;
+  font-size: 15px;
+  font-family: 'ProggySquareTT';
+}
+input:focus {
+  padding: 2px;
+  padding-top: 4px;
+  padding-left: 4px;
+  color: #f1f1f1;
+  background: transparent;
+  outline: none;
+  opacity: 0.7;
+  border: 1px solid #999;
+  border-bottom: 2px solid #f1f1f1;
+}
+form {
+  top: 0;
+  left: 0;
+  position: fixed;
+  x-oveflow: hidden;
+  width: 400px;
+  height: 16px;
+  padding: 6px;
+}
+input {
+  height: 16px;
+  line-height: 16px;
+  width: inherit;
+  background: transparent;
+  color: #999;
+  border: none;
+  border-left: 1px solid #999;
+  border-top: 1px solid #999;
+  font-size: 15px;
+  font-family: 'ProggySquareTT';
+}
+input:focus {
+  padding: 2px;
+  padding-top: 4px;
+  padding-left: 4px;
+  color: #f1f1f1;
+  background: transparent;
+  outline: none;
+  opacity: 0.7;
+  border: 1px solid #999;
+  border-bottom: 1px solid #f1f1f1;
+}
+form {
+  top: 0;
+  left: 0;
+  position: fixed;
+  x-oveflow: hidden;
+  width: 400px;
+  height: 16px;
+  padding: 6px;
+}
+input {
+  height: 16px;
+  line-height: 16px;
+  width: inherit;
+  background: transparent;
+  color: #999;
+  border: none;
+  border-left: 1px solid #999;
+  border-top: 1px solid #999;
+  font-size: 15px;
+  font-family: 'ProggySquareTT';
+}
+input:focus {
+  padding: 2px;
+  padding-top: 4px;
+  padding-left: 4px;
+  color: #f1f1f1;
+  background: transparent;
+  outline: none;
+  opacity: 0.7;
+  border: 1px solid #999;
+  border-bottom: 1px solid #f1f1f1;
+}
+form {
+  top: 0;
+  left: 0;
+  position: fixed;
+  x-oveflow: hidden;
+  width: 400px;
+  height: 16px;
+  padding: 6px;
+}
+input {
+  height: 16px;
+  line-height: 16px;
+  width: inherit;
+  background: transparent;
+  color: #999;
+  border: none;
+  border-left: 1px solid #999;
+  border-top: 1px solid #999;
+  font-size: 15px;
+  font-family: 'ProggySquareTT';
+}
+input:focus {
+  padding: 2px;
+  padding-top: 4px;
+  padding-left: 4px;
+  color: #f1f1f1;
+  background: transparent;
+  outline: none;
+  opacity: 0.7;
+  border: 1px solid #999;
+  border-bottom: 1px solid #f1f1f1;
+}
+form {
+  top: 0;
+  left: 0;
+  position: fixed;
+  x-oveflow: hidden;
+  width: 400px;
+  height: 16px;
+  padding: 6px;
+}
+input {
+  height: 16px;
+  line-height: 16px;
+  width: inherit;
+  background: transparent;
+  color: #999;
+  border: none;
+  border-left: 1px solid #999;
+  border-top: 1px solid #999;
+  font-size: 15px;
+  font-family: 'ProggySquareTT';
+}
+input:focus {
+  padding: 2px;
+  padding-top: 4px;
+  padding-left: 4px;
+  color: #f1f1f1;
+  background: transparent;
+  outline: none;
+  opacity: 0.7;
+  border: 1px solid #999;
+  border-bottom: 1px solid #f1f1f1;
+}
+form {
+  top: 0;
+  left: 0;
+  position: fixed;
+  x-oveflow: hidden;
+  width: 400px;
+  height: 16px;
+  padding: 6px;
+}
+input {
+  height: 16px;
+  line-height: 16px;
+  width: inherit;
+  background: transparent;
+  color: #999;
+  border: none;
+  border-left: 1px solid #999;
+  border-top: 1px solid #999;
+  font-size: 15px;
+  font-family: 'ProggySquareTT';
+}
+input:focus {
+  padding: 2px;
+  padding-top: 4px;
+  padding-left: 4px;
+  color: #f1f1f1;
+  background: transparent;
+  outline: none;
+  opacity: 0.7;
+  border: 1px solid #999;
+  border-bottom: 1px solid #f1f1f1;
+}
+form {
+  top: 0;
+  left: 0;
+  position: fixed;
+  x-oveflow: hidden;
+  width: 400px;
+  height: 16px;
+  padding: 6px;
+}
+input {
+  height: 16px;
+  line-height: 16px;
+  width: inherit;
+  background: transparent;
+  color: #999;
+  border: none;
+  border-left: 1px solid #999;
+  border-top: 1px solid #999;
+  font-size: 15px;
+  font-family: 'ProggySquareTT';
+}
+input:focus {
+  padding: 2px;
+  padding-top: 4px;
+  padding-left: 4px;
+  color: #f1f1f1;
+  background: transparent;
+  outline: none;
+  opacity: 0.7;
+  border: 1px solid #999;
+  border-bottom: 1px solid #f1f1f1;
+}
+form {
+  top: 0;
+  left: 0;
+  position: fixed;
+  x-oveflow: hidden;
+  width: 400px;
+  height: 16px;
+  padding: 6px;
+}
+input {
+  height: 16px;
+  line-height: 16px;
+  width: inherit;
+  background: transparent;
+  color: #999;
+  border: none;
+  border-left: 1px solid #999;
+  border-top: 1px solid #999;
+  font-size: 15px;
+  font-family: 'ProggySquareTT';
+}
+input:focus {
+  padding: 2px;
+  padding-top: 4px;
+  padding-left: 4px;
+  color: #f1f1f1;
+  background: transparent;
+  outline: none;
+  opacity: 0.7;
+  border: 1px solid #999;
+  border-bottom: 1px solid #f1f1f1;
+}
+form {
+  top: 0;
+  left: 0;
+  position: fixed;
+  x-oveflow: hidden;
+  width: 400px;
+  height: 16px;
+  padding: 6px;
+}
+input {
+  height: 16px;
+  line-height: 16px;
+  width: inherit;
+  background: transparent;
+  color: #999;
+  border: none;
+  border-left: 1px solid #999;
+  border-top: 1px solid #999;
+  font-size: 15px;
+  font-family: 'ProggySquareTT';
+}
+input:focus {
+  padding: 2px;
+  padding-top: 4px;
+  padding-left: 4px;
+  color: #f1f1f1;
+  background: transparent;
+  outline: none;
+  opacity: 0.7;
+  border: 1px solid #999;
+  border-bottom: 1px solid #f1f1f1;
+}
+form {
+  top: 0;
+  left: 0;
+  position: fixed;
+  x-oveflow: hidden;
+  width: 400px;
+  height: 16px;
+  padding: 6px;
+}
+input {
+  height: 16px;
+  line-height: 16px;
+  width: inherit;
+  background: transparent;
+  color: #999;
+  border: none;
+  border-left: 1px solid #999;
+  border-top: 1px solid #999;
+  font-size: 15px;
+  font-family: 'ProggySquareTT';
+}
+input:focus {
+  padding: 2px;
+  padding-top: 4px;
+  padding-left: 4px;
+  color: #f1f1f1;
+  background: transparent;
+  outline: none;
+  opacity: 0.7;
+  border: 1px solid #999;
+  border-bottom: 1px solid #f1f1f1;
 }

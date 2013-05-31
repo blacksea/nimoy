@@ -4,7 +4,8 @@ var redis = require('redis')
 , fs = require('fs')
 
 var users = [ // user model
-  { name:'default',
+  {
+  name:'default',
   host:'localhost',
   modules: {
     client:['console'],
@@ -22,14 +23,16 @@ var users = [ // user model
     ]
   }},
 
-  { name:'blacksea',
+  {
+  name:'blacksea',
   host:'theblacksea.cc',
   modules: {
     client:['console'],
     server:['data','test']
   }},
 
-  { name:'waffles',
+  {
+  name:'waffles',
   host:'waffles.cc',
   modules: {
     client:['console'],

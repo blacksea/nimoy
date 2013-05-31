@@ -6,6 +6,10 @@ module.exports = function (dir) { // MAPPER
   telepath(this) 
   var self = this
   
+  this.start = function (dir) {
+    fs.readdir(dir, HandleFiles)
+  }
+
   fs.readdir(dir, HandleFiles)
 
   function HandleFiles (err, files) {
@@ -55,6 +59,7 @@ module.exports = function (dir) { // MAPPER
 
   function MappingDone () {
     // can't emit end because it will close brico in stream - modules should signal start and end of their process
-    self.out.emit('end')
+    // self.out.emit('end')
+    self.send({event:'finish'})
   }
 }

@@ -32,15 +32,23 @@ module.exports = function (opts) { // PRECOMPILER
         map[scope].push(mod)
       }
     }
+    if (mod.event === 'finish') {
+      console.log('updating')
+      compile()
+      self.send(map)
+      fs.writeFile('./_info/moduleMap.json', JSON.stringify(map,null,2), function (err) {
+        if (!err)  console.log('wrote moduleMap.json')
+      })
+    }
   }
     
-  self.in.on('finish', function () {
-    compile()
-    self.send(map)
-    fs.writeFile('./_info/moduleMap.json', JSON.stringify(map,null,2), function (err) {
-      if (!err)  console.log('wrote moduleMap.json')
-    })
-  })
+  // self.in.on('finish', function () {
+  //   compile()
+  //   self.send(map)
+  //   fs.writeFile('./_info/moduleMap.json', JSON.stringify(map,null,2), function (err) {
+  //     if (!err)  console.log('wrote moduleMap.json')
+  //   })
+  // })
 
   function compile () { // rewrite this to handle browserify properly
     var b = browserify(opts.js)

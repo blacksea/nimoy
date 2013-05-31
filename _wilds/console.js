@@ -35,7 +35,7 @@ module.exports = function () {
     }
 
     prompt.onblur = function () {
-      prompt.value = '>'
+      prompt.value = ''
     }
   }
 }
