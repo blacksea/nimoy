@@ -24,6 +24,8 @@ module.exports = function (usr) { // BRICOLEUR
     } else if (!data.client_id) { // pass through to out
       if (self.client_id) data.id = self.client_id
       self.send(data)
+    } else if (data.id) {
+      console.log('send to '+id)
     }
   }
 

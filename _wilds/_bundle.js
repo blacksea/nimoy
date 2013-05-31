@@ -1,4 +1,22 @@
-require=(function(e,t,n,r){function i(r){if(!n[r]){if(!t[r]){if(e)return e(r);throw new Error("Cannot find module '"+r+"'")}var s=n[r]={exports:{}};t[r][0](function(e){var n=t[r][1][e];return i(n?n:e)},s,s.exports)}return n[r].exports}for(var s=0;s<r.length;s++)i(r[s]);return i})(typeof require!=="undefined"&&require,{"send":[function(require,module,exports){
+require=(function(e,t,n,r){function i(r){if(!n[r]){if(!t[r]){if(e)return e(r);throw new Error("Cannot find module '"+r+"'")}var s=n[r]={exports:{}};t[r][0](function(e){var n=t[r][1][e];return i(n?n:e)},s,s.exports)}return n[r].exports}for(var s=0;s<r.length;s++)i(r[s]);return i})(typeof require!=="undefined"&&require,{"recv":[function(require,module,exports){
+module.exports=require('bM81ck');
+},{}],"bM81ck":[function(require,module,exports){
+/*{
+  "id":"recv",
+	"scope":["client","server"],
+	"desc":"send data"
+}*/
+
+var _ = Object._;
+
+module.exports = function () {
+  var self = this;
+  setTimeout(function() {
+    // _.send.test(); // never call specific modules just provide output or input
+  }, 3000);
+}
+
+},{}],"send":[function(require,module,exports){
 module.exports=require('ECIHju');
 },{}],"ECIHju":[function(require,module,exports){
 /*{
@@ -20,24 +38,6 @@ module.exports = function () {
   this.output = function (data) {
   }
   // default output function
-}
-
-},{}],"recv":[function(require,module,exports){
-module.exports=require('bM81ck');
-},{}],"bM81ck":[function(require,module,exports){
-/*{
-  "id":"recv",
-	"scope":["client","server"],
-	"desc":"send data"
-}*/
-
-var _ = Object._;
-
-module.exports = function () {
-  var self = this;
-  setTimeout(function() {
-    // _.send.test(); // never call specific modules just provide output or input
-  }, 3000);
 }
 
 },{}],1:[function(require,module,exports){
@@ -902,6 +902,8 @@ module.exports = function (usr) { // BRICOLEUR
     } else if (!data.client_id) { // pass through to out
       if (self.client_id) data.id = self.client_id
       self.send(data)
+    } else if (data.id) {
+      console.log('send to '+id)
     }
   }
 
@@ -2034,5 +2036,5 @@ module.exports = function (mod) { // pass in module & make it telepathic!
 }());
 
 })(require("__browserify_process"))
-},{"__browserify_process":8}]},{},[1,"ECIHju","bM81ck","OkCvNS"])
+},{"__browserify_process":8}]},{},[1,"bM81ck","ECIHju","OkCvNS"])
 ;
