@@ -1,6 +1,7 @@
 var redis = require('redis')
 , async = require('async')
 , client = redis.createClient()
+, fs = require('fs')
 
 var users = [ // user model
   { name:'default',
@@ -43,6 +44,9 @@ async.forEach(users, function (user, cb) {
   })
 }, function () {
   console.log('users added')
+  fs.write('./_wilds/info/users.json', JSON.stringify(users), function () {
+    console.log('wrote users.json')
+  })
 })
 
 module.exports = function () {
