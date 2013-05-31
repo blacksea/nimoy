@@ -1,6 +1,5 @@
 var websocket = require('websocket-stream')
 , bricoleur = require('./_brico')
-, id = null
 , host = window.location.host.replace('www.','')
 , ws = websocket('ws://'+host)
 
