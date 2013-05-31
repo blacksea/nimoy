@@ -44,8 +44,9 @@ async.forEach(users, function (user, cb) {
   })
 }, function () {
   console.log('users added')
-  fs.write('./_info/users.json', JSON.stringify(users), function () {
-    console.log('wrote users.json')
+  var usersJson = JSON.stringify(users)
+  fs.writeFile('./_info/users.json', usersJson, function (err) {
+    if (!err) console.log('wrote users.json')
   })
 })
 
