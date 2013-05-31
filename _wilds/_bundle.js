@@ -884,7 +884,7 @@ module.exports = function (usr) { // BRICOLEUR
   var self = this
   , map = null
   , _ = {} // module scope
-  _.bus = self
+  _.bus = self // fix this hack!
   telepath(this)
 
   // detect if running in node or browser
@@ -907,7 +907,7 @@ module.exports = function (usr) { // BRICOLEUR
     }
   }
 
-  this.build = function () { // load modules && handle connections
+  this.build = function () { // loadModule with mods from map array
     if (!map) throw new Error('no map')
     async.forEach(map[self.scope], lookupModule, connModules)
 
