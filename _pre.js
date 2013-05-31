@@ -37,6 +37,9 @@ module.exports = function (opts) { // PRECOMPILER
   self.in.on('finish', function () {
     compile()
     self.send(map)
+    fs.write('./_info/moduleMap.json', JSON.stringify(map), function () {
+      console.log('wrote moduleMap.json')
+    })
   })
 
   function compile () { // rewrite this to handle browserify properly
