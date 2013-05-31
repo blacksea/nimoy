@@ -13,6 +13,7 @@ module.exports = function () {
 
   this.recv = function (json) {
     var data = JSON.parse(json)
+    console.log('+++')
     console.dir(data)
   }
 

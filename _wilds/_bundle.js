@@ -1,22 +1,4 @@
-require=(function(e,t,n,r){function i(r){if(!n[r]){if(!t[r]){if(e)return e(r);throw new Error("Cannot find module '"+r+"'")}var s=n[r]={exports:{}};t[r][0](function(e){var n=t[r][1][e];return i(n?n:e)},s,s.exports)}return n[r].exports}for(var s=0;s<r.length;s++)i(r[s]);return i})(typeof require!=="undefined"&&require,{"recv":[function(require,module,exports){
-module.exports=require('bM81ck');
-},{}],"bM81ck":[function(require,module,exports){
-/*{
-  "id":"recv",
-	"scope":["client","server"],
-	"desc":"send data"
-}*/
-
-var _ = Object._;
-
-module.exports = function () {
-  var self = this;
-  setTimeout(function() {
-    // _.send.test(); // never call specific modules just provide output or input
-  }, 3000);
-}
-
-},{}],"send":[function(require,module,exports){
+require=(function(e,t,n,r){function i(r){if(!n[r]){if(!t[r]){if(e)return e(r);throw new Error("Cannot find module '"+r+"'")}var s=n[r]={exports:{}};t[r][0](function(e){var n=t[r][1][e];return i(n?n:e)},s,s.exports)}return n[r].exports}for(var s=0;s<r.length;s++)i(r[s]);return i})(typeof require!=="undefined"&&require,{"send":[function(require,module,exports){
 module.exports=require('ECIHju');
 },{}],"ECIHju":[function(require,module,exports){
 /*{
@@ -38,6 +20,24 @@ module.exports = function () {
   this.output = function (data) {
   }
   // default output function
+}
+
+},{}],"recv":[function(require,module,exports){
+module.exports=require('bM81ck');
+},{}],"bM81ck":[function(require,module,exports){
+/*{
+  "id":"recv",
+	"scope":["client","server"],
+	"desc":"send data"
+}*/
+
+var _ = Object._;
+
+module.exports = function () {
+  var self = this;
+  setTimeout(function() {
+    // _.send.test(); // never call specific modules just provide output or input
+  }, 3000);
 }
 
 },{}],1:[function(require,module,exports){
@@ -237,7 +237,52 @@ WebsocketStream.prototype.end = function() {
   this.ws.close()
 }
 
-},{"stream":4,"util":6}],7:[function(require,module,exports){
+},{"stream":4,"util":6}],"console":[function(require,module,exports){
+module.exports=require('OkCvNS');
+},{}],"OkCvNS":[function(require,module,exports){
+/*{
+  "id":"console",
+	"scope":["client"],
+	"desc":"cli",
+  "deps":["console.html","console.styl"]
+}*/
+var telepath = require('tele')
+
+module.exports = function () {
+  var self = this
+  telepath(this)
+
+  this.recv = function (buffer) {
+    var data = JSON.parse(buffer.toString())
+    console.dir(data)
+  }
+
+  this.render = function (html) {
+    var container = document.getElementById('container')
+    , log = document.createElement('div')
+    log.innerHTML = html
+    container.appendChild(log)
+    var form = document.getElementById('x')
+    , prompt = form.querySelector('.console')
+
+    form.onsubmit = function (e) {
+      e.preventDefault()
+      var cmd = e.target[0].value
+      self.send({cmd:cmd})
+      prompt.blur()
+    }
+
+    prompt.onfocus = function () {
+      prompt.value = ''
+    }
+
+    prompt.onblur = function () {
+      prompt.value = '>'
+    }
+  }
+}
+
+},{"tele":7}],8:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -477,7 +522,7 @@ EventEmitter.prototype.listeners = function(type) {
 };
 
 })(require("__browserify_process"))
-},{"__browserify_process":7}],6:[function(require,module,exports){
+},{"__browserify_process":8}],6:[function(require,module,exports){
 var events = require('events');
 
 exports.isArray = isArray;
@@ -830,52 +875,7 @@ exports.format = function(f) {
   return str;
 };
 
-},{"events":5}],"console":[function(require,module,exports){
-module.exports=require('OkCvNS');
-},{}],"OkCvNS":[function(require,module,exports){
-/*{
-  "id":"console",
-	"scope":["client"],
-	"desc":"cli",
-  "deps":["console.html","console.styl"]
-}*/
-var telepath = require('tele')
-
-module.exports = function () {
-  var self = this
-  telepath(this)
-
-  this.recv = function (buffer) {
-    var data = JSON.parse(buffer.toString())
-    console.dir(data)
-  }
-
-  this.render = function (html) {
-    var container = document.getElementById('container')
-    , log = document.createElement('div')
-    log.innerHTML = html
-    container.appendChild(log)
-    var form = document.getElementById('x')
-    , prompt = form.querySelector('.console')
-
-    form.onsubmit = function (e) {
-      e.preventDefault()
-      var cmd = e.target[0].value
-      self.send({cmd:cmd})
-      prompt.blur()
-    }
-
-    prompt.onfocus = function () {
-      prompt.value = ''
-    }
-
-    prompt.onblur = function () {
-      prompt.value = '>'
-    }
-  }
-}
-
-},{"tele":8}],2:[function(require,module,exports){
+},{"events":5}],2:[function(require,module,exports){
 (function(global){var telepath = require('tele')
 , stream = require('stream')
 , async = require ('async')
@@ -924,7 +924,7 @@ module.exports = function (usr) { // BRICOLEUR
     function connModules () {
       if (usr.conns) {
         console.log('modules loaded :: connecting modules...')
-        async.forEach(usr.conns[self.scope], self.connModule, function () {
+        async.eachSeries(usr.conns[self.scope], self.connModule, function () {
           console.log('connected modules for : '+usr.host)
         })
       }
@@ -988,10 +988,11 @@ module.exports = function (usr) { // BRICOLEUR
     self[key].out.emit('close')
     delete self[key]
   }// ---------------------------------------------------
+
 }
 
 })(window)
-},{"stream":4,"tele":8,"async":9}],8:[function(require,module,exports){
+},{"stream":4,"tele":7,"async":9}],7:[function(require,module,exports){
 var stream = require('stream')
 , browser = false
 if (!stream.Writable) browser = true // browser ugliness
@@ -2033,5 +2034,5 @@ module.exports = function (mod) { // pass in module & make it telepathic!
 }());
 
 })(require("__browserify_process"))
-},{"__browserify_process":7}]},{},[1,"bM81ck","ECIHju","OkCvNS"])
+},{"__browserify_process":8}]},{},[1,"ECIHju","bM81ck","OkCvNS"])
 ;

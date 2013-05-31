@@ -42,10 +42,8 @@ module.exports = function (opts) { // ROUTER
 
     // add connection
     brico.addConnection(key)
-
     wss.pipe(brico[key].in)
     brico[key].out.pipe(wss)
-    brico.out.pipe(wss) // creating somekind of horrid feedback loop
 
     var initObj = {}
     initObj.client_id = key
@@ -53,6 +51,7 @@ module.exports = function (opts) { // ROUTER
     initObj.map = brico.map
     initObj.map.meta = 'module_map'
     brico[key].send(initObj)
+
     // when socket closes remove connection
     ws.on('close', function () {
       brico.removeConnection(key)

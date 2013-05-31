@@ -16,7 +16,7 @@ var users = [ // user model
     ],
     server:[
       {1367804262251:'test>data'},
-      // {1367804262259:'bus>test'},
+      {1367804262259:'bus>test'},
       {1367804262252:'data>bus'}
     ]
   }},

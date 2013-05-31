@@ -46,7 +46,7 @@ module.exports = function (usr) { // BRICOLEUR
     function connModules () {
       if (usr.conns) {
         console.log('modules loaded :: connecting modules...')
-        async.forEach(usr.conns[self.scope], self.connModule, function () {
+        async.eachSeries(usr.conns[self.scope], self.connModule, function () {
           console.log('connected modules for : '+usr.host)
         })
       }
@@ -110,4 +110,5 @@ module.exports = function (usr) { // BRICOLEUR
     self[key].out.emit('close')
     delete self[key]
   }// ---------------------------------------------------
+
 }
