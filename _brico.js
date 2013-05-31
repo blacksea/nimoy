@@ -1,6 +1,7 @@
 var telepath = require('tele')
 , stream = require('stream')
 , async = require ('async')
+, hash = require('hashish')
 
 module.exports = function (usr) { // BRICOLEUR
   var self = this
