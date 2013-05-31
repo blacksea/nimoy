@@ -14,6 +14,9 @@ module.exports = function () {
 
   this.recv = function (json) {
     var data = JSON.parse(json)
+    if (data.id) {
+      self.send(data) 
+    }
     for (key in data) {
       switch (key) {
         case 'set': self.set(data[key]);break;
