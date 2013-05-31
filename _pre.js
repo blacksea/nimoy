@@ -37,7 +37,7 @@ module.exports = function (opts) { // PRECOMPILER
   self.in.on('finish', function () {
     compile()
     self.send(map)
-    fs.writeFile('./_info/moduleMap.json', JSON.stringify(map), function (err) {
+    fs.writeFile('./_info/moduleMap.json', JSON.stringify(map,null,2), function (err) {
       if (!err)  console.log('wrote moduleMap.json')
     })
   })
