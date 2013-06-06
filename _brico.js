@@ -10,7 +10,8 @@ module.exports = function (usr) { // BRICOLEUR
   _.bus = self // fix this hack!
   telepath(this)
 
-  // detect if running in node or browser
+  // detect if running in node or in browser
+  console.dir(global.process)
   if (global.process && global.process.title === 'node') self.scope = 'server'
   if (!global.process) self.scope = 'client'
   if (usr) self.usr = usr
