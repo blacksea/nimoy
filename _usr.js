@@ -37,6 +37,17 @@ var users = [ // user model
   modules: {
     client:['console'],
     server:['data','test']
+  },
+  conns:{
+    client:[   
+      {1367804262258:'console>bus'},
+      {1367804262250:'bus>console'}
+    ],
+    server:[
+      {1367804262251:'test>data'},
+      {1367804262259:'bus>test'},
+      {1367804262252:'data>bus'}
+    ]
   }}
 ]
 
