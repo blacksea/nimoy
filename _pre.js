@@ -38,6 +38,11 @@ module.exports = function (opts) { // PRECOMPILER
       self.send(map)
       fs.writeFile('./_info/moduleMap.json', JSON.stringify(map,null,2), function (err) {
         if (!err)  console.log('wrote moduleMap.json')
+        map = {
+          meta: 'module_map',
+          client: [],
+          server: []
+        }
       })
     }
   }
