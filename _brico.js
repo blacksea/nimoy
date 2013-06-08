@@ -19,6 +19,20 @@ module.exports = function (usr) { // BRICOLEUR
     var data = JSON.parse(buffer.toString())
 
     if (data.meta === 'module_map') { // add map 
+      // check for loaded modules if there are modules clear first
+      // arrrg!!! super hacky!
+      for (key in _) {
+        if (_[key]!=='bus') {
+          console.log('map exists -- clearing brico')
+          _ = {}
+          _.bus = self
+          if (self.scope === 'client') {
+            var stage = document.getElementById('container')
+            stage.innerHTML = ''
+          }
+          break
+        }
+      }
       map = data
       self.map = data
       self.build()
@@ -113,5 +127,4 @@ module.exports = function (usr) { // BRICOLEUR
     self[key].out.emit('close')
     delete self[key]
   }// ---------------------------------------------------
-
 }
