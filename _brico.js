@@ -19,23 +19,26 @@ module.exports = function (usr) { // BRICOLEUR
     var data = JSON.parse(buffer.toString())
 
     if (data.meta === 'module_map') { // add map 
-      // check for loaded modules if there are modules clear first
-      // arrrg!!! super hacky!
+      // check to see if moduels are loaded 
+      var modules_loaded = false
       for (key in _) {
-        if (_[key]!=='bus') {
-          console.log('map exists -- clearing brico')
-          _ = {}
-          _.bus = self
-          if (self.scope === 'client') {
-            var stage = document.getElementById('container')
-            stage.innerHTML = ''
-          }
+        if (key!=='bus') {
+          modules_loaded = true
           break
         }
       }
-      map = data
-      self.map = data
-      self.build()
+      if (modules_loaded === true ) {
+        map = null
+        _ = {}
+        _.bus = self
+        map = data
+        self.map = data
+        self.build()
+      } else {
+        map = data
+        self.map = data
+        self.build()
+      }
     } else if (!data.client_id) { // pass through to out
       if (self.client_id) data.id = self.client_id
       self.send(data)
@@ -46,6 +49,7 @@ module.exports = function (usr) { // BRICOLEUR
 
   this.build = function () { // loadModule with mods from map array
     if (!map) throw new Error('no map')
+    console.log(map[self.scope])
     async.forEach(map[self.scope], lookupModule, connModules)
 
     function lookupModule (mod, cb) {

@@ -22,7 +22,6 @@ module.exports = function () {
   this.render = function (html) {
     var container = document.getElementById('container')
     disp = document.createElement('div')
-    console.log(html)
     disp.innerHTML = html
     container.appendChild(disp)
   }

@@ -24,6 +24,7 @@ module.exports = function (opts) { // PRECOMPILER
 
   this.recv = function (moduleData) {
     var mod = JSON.parse(moduleData.toString())
+
     if (typeof mod === 'object' && !mod.event) {
       for (var i=0;i<mod.scope.length;i++) {
         var scope = mod.scope[i]
@@ -32,29 +33,17 @@ module.exports = function (opts) { // PRECOMPILER
         map[scope].push(mod)
       }
     }
+
     if (mod.event === 'finish') {
       console.log('updating')
       compile()
       self.send(map)
       fs.writeFile('./_info/moduleMap.json', JSON.stringify(map,null,2), function (err) {
         if (!err)  console.log('wrote moduleMap.json')
-        map = {
-          meta: 'module_map',
-          client: [],
-          server: []
-        }
       })
     }
   }
     
-  // self.in.on('finish', function () {
-  //   compile()
-  //   self.send(map)
-  //   fs.writeFile('./_info/moduleMap.json', JSON.stringify(map,null,2), function (err) {
-  //     if (!err)  console.log('wrote moduleMap.json')
-  //   })
-  // })
-
   function compile () { // rewrite this to handle browserify properly
     var b = browserify(opts.js)
 
@@ -63,16 +52,24 @@ module.exports = function (opts) { // PRECOMPILER
       if (path[1]==='_wilds') b.require(item, {expose:path[2].replace('.js','')}) 
       cb()
     }, function () {
+
       b.bundle(function (err, bundle) {
         if (err) throw err
+
         if (opts.compress === true) {
           var bundleMin = uglifyJS.minify(bundle,{fromString: true})
           bundle = bundleMin.code
         }
+
         fs.writeFile(destJS, bundle, function (err) {
           if (err) throw err
           console.log('fin')
-          // self.out.emit('end') // closes brico - figure out somekind of micro-stream-process api
+          console.log(map) 
+          map = {
+            meta: 'module_map',
+            client: [],
+            server: []
+          }
         })
       })   
     })
@@ -86,7 +83,6 @@ module.exports = function (opts) { // PRECOMPILER
         fs.writeFile(destCSS, css, function (err) {
           if (err) throw err
           console.log('css compiled')
-          // cb();
         })
       })
     })

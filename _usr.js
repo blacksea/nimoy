@@ -8,13 +8,13 @@ var users = [ // user model
   name:'default',
   host:'localhost',
   modules: {
-    client:['console'],
+    client:['console','mdisp'],
     server:['data','test']
   },
   conns:{
     client:[   
       {1367804262258:'console>bus'},
-      {1367804262250:'bus>console'}
+      {1367804262250:'bus>mdisp'}
     ],
     server:[
       {1367804262251:'test>data'},
@@ -49,6 +49,7 @@ var users = [ // user model
       {1367804262252:'data>bus'}
     ]
   }},
+
  {
   name:'raspberry',
   host:'192.168.0.100',
@@ -67,7 +68,6 @@ var users = [ // user model
       {1367804262252:'data>bus'}
     ]
   }}
-
 ]
 
 async.forEach(users, function (user, cb) {

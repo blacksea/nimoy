@@ -2,15 +2,31 @@ var telepath = require('tele')
 , async = require('async')
 , fs = require('fs')
 
-module.exports = function (dir) { // MAPPER
+module.exports = function (opts) { // MAPPER
   telepath(this) 
   var self = this
-  
-  this.start = function (dir) {
-    fs.readdir(dir, HandleFiles)
+  , stat = null // hacky stat var for putting stat obj
+
+  if (opts.watch === true) { 
+    fs.watch(opts.dir, function (event, file) {
+      if (event === 'change') checkFileChange(file)
+    })
   }
 
-  fs.readdir(dir, HandleFiles)
+  function checkFileChange (file) {
+    fs.stat(opts.dir+'/'+file, function (err, stats) {
+      if (!err) {
+        if (!stat) stat = stats
+        if (stat.size !== stats.size) {
+          console.log(file+' modified on: '+stat.mtime+' new size is: '+stat.size)
+        }
+      }
+    })
+  }
+  
+  this.survey = function () {
+    fs.readdir(opts.dir, HandleFiles)
+  }
 
   function HandleFiles (err, files) {
     if (!err) async.each(files, HandleFile, MappingDone)
@@ -58,8 +74,6 @@ module.exports = function (dir) { // MAPPER
   }
 
   function MappingDone () {
-    // can't emit end because it will close brico in stream - modules should signal start and end of their process
-    // self.out.emit('end')
     self.send({event:'finish'})
   }
 }
