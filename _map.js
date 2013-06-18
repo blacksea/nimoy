@@ -1,4 +1,7 @@
 var telepath = require('tele')
+, browserify = require('browserify')
+, uglifyJS = require('uglify-js')
+, stylus = require('stylus')
 , async = require('async')
 , fs = require('fs')
 
@@ -6,6 +9,9 @@ module.exports = function (opts) { // MAPPER
   telepath(this) 
   var self = this
   , stat = null // hacky stat var for putting stat obj
+  , destCSS = './_wilds/_styles.css'
+  , destJS = './_wilds/_bundle.js'
+  , CSS = ''
 
   if (opts.watch === true) { 
     fs.watch(opts.dir, function (event, file) {
@@ -18,6 +24,8 @@ module.exports = function (opts) { // MAPPER
       if (!err) {
         if (!stat) stat = stats
         if (stat.size !== stats.size) {
+          // send recompile event
+          // resurvey
           console.log(file+' modified on: '+stat.mtime+' new size is: '+stat.size)
         }
       }
@@ -25,7 +33,38 @@ module.exports = function (opts) { // MAPPER
   }
   
   this.survey = function () {
+    // make browserify bundle
+    var b = browserify(opts.js)
+    async.forEach(opts.js, function (item, cb) {
+      var path = item.split('/')
+      if (path[1]==='_wilds') b.require(item, {expose:path[2].replace('.js','')}) 
+      cb()
+    }, makeBundle)
+
+    // handle files 
     fs.readdir(opts.dir, HandleFiles)
+  }
+
+  function makeBundle () {
+    b.bundle(function (err, bundle) {
+      if (err) throw err
+
+      if (opts.compress === true) {
+        var bundleMin = uglifyJS.minify(bundle,{fromString: true})
+        bundle = bundleMin.code
+      }
+
+      fs.writeFile(destJS, bundle, function (err) {
+        if (err) throw err
+        console.log('fin')
+        console.log(map) 
+        map = {
+          meta: 'module_map',
+          client: [],
+          server: []
+        }
+      })
+    })   
   }
 
   function HandleFiles (err, files) {
@@ -76,4 +115,5 @@ module.exports = function (opts) { // MAPPER
   function MappingDone () {
     self.send({event:'finish'})
   }
-}
+  
+  }
