@@ -7,7 +7,6 @@ var Bricoleur = require('./_brico')
 , ws = require('ws').Server
 
 var port = 80 // set port
-// combine map + pre
 
 var _usr = new usr() // setup user
 var _map = new map({dir:'./_wilds', watch:true}) // map _wilds modules
