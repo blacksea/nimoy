@@ -1,6 +1,6 @@
 var telepath = require('tele')
 , stream = require('stream')
-, async = require ('async')
+, asyncMap = require ('slide').asyncMap
 , hash = require('hashish')
 
 module.exports = function (usr) { // BRICOLEUR
@@ -50,7 +50,7 @@ module.exports = function (usr) { // BRICOLEUR
   this.build = function () { // loadModule with mods from map array
     if (!map) throw new Error('no map')
     console.log(map[self.scope])
-    async.forEach(map[self.scope], lookupModule, connModules)
+    asyncMap(map[self.scope], lookupModule, connModules)
 
     function lookupModule (mod, cb) {
       var modules = usr.modules[self.scope]

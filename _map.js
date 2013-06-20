@@ -2,7 +2,7 @@ var telepath = require('tele')
 , browserify = require('browserify')
 , uglifyJS = require('uglify-js')
 , stylus = require('stylus')
-, async = require('async')
+, asyncMap = require('slide').asyncMap
 , fs = require('fs')
 
 module.exports = function (opts) { // MAPPER
