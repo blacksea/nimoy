@@ -14,6 +14,7 @@ var _map = new map({dir:'./_wilds', watch:true}) // map _wilds modules
 _usr.buildUsers(function (user) { // fix this
    Object[user.host] = new Bricoleur(user) // not too sure about this prob a temp hack
    _map.out.pipe(Object[user.host].in)
+   _map.survey()
 })
 
 var _rtr = new rtr() // do routing 

@@ -19,7 +19,7 @@ module.exports = function (usr) { // BRICOLEUR
     var data = JSON.parse(buffer.toString())
 
     if (data.meta === 'module_map') { // add map 
-      // check to see if moduels are loaded 
+      // check to see if modules are loaded 
       var modules_loaded = false
       for (key in _) {
         if (key!=='bus') {
@@ -83,7 +83,6 @@ module.exports = function (usr) { // BRICOLEUR
       modA = _[conn[key].split('>')[0]] 
       modB = _[conn[key].split('>')[1]] 
       console.log('connecting ' + conn[key])
-      
       if (!modA.out || !modB.in) throw new Error(modA+','+modB+' :no .out or .in connections')
       if (modA.out && modB.in) modA.out.pipe(modB.in)
       cb()
@@ -95,10 +94,7 @@ module.exports = function (usr) { // BRICOLEUR
 
   this.loadModule = function (mod) { // load module!
     if (self.scope==='server') _[mod.id.toUpperCase()] = require(mod.filePath)
-    if (self.scope==='client') {
-      _[mod.id.toUpperCase()] = require(mod.id)
-    }
-
+    if (self.scope==='client') _[mod.id.toUpperCase()] = require(mod.id)
     _[mod.id] = new _[mod.id.toUpperCase()]()
     if (mod.html) _[mod.id].render(mod.html)
   }
@@ -130,5 +126,5 @@ module.exports = function (usr) { // BRICOLEUR
   this.removeConnection = function (key) {
     self[key].out.emit('close')
     delete self[key]
-  }// ---------------------------------------------------
+  } // -----------------------------------------------------------
 }
