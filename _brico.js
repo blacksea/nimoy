@@ -22,6 +22,7 @@ module.exports = function (usr) { // BRICOLEUR
     
   this.recv = function (buffer) { // clean up!
     var data = JSON.parse(buffer.toString())
+    console.log(data)
 
     if (data.event === 'mapping_done') {
       console.log('map complete')
@@ -59,7 +60,7 @@ module.exports = function (usr) { // BRICOLEUR
     function connModules () {
       if (usr.conns) {
         console.log('modules loaded :: connecting modules...')
-        async.eachSeries(usr.conns[self.scope], self.connModule, function () {
+        asyncMap(usr.conns[self.scope], self.connModule, function () {
           console.log('connected modules for : '+usr.host)
         })
       }
