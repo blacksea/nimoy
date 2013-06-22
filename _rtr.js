@@ -1,6 +1,6 @@
 var filed = require('filed')
 , ws_stream = require('websocket-stream')
-, async = require('async')
+, asyncMap = require('slide').asyncMap
 
 module.exports = function (opts) { // ROUTER 
   if (!opts) var opts = [
@@ -19,7 +19,7 @@ module.exports = function (opts) { // ROUTER
     , agent = headers['user-agent']
     , host = headers.host
 
-    async.forEach(opts, function (route, cb) {
+    asyncMap(opts, function (route, cb) {
       if (route.url === req.url) {
         filed(route.file).pipe(res)
         match = true
@@ -48,7 +48,7 @@ module.exports = function (opts) { // ROUTER
     var initObj = {}
     initObj.client_id = key
     initObj.usr = brico.usr
-    initObj.map = brico.map
+    initObj.map = brico.map.client
     initObj.map.meta = 'module_map'
     brico[key].send(initObj)
 

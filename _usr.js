@@ -1,5 +1,5 @@
 var redis = require('redis')
-, async = require('async')
+, asyncMap = require('slide').asyncMap
 , client = redis.createClient()
 , fs = require('fs')
 
@@ -70,7 +70,7 @@ var users = [ // user model
   }}
 ]
 
-async.forEach(users, function (user, cb) {
+asyncMap(users, function (user, cb) {
   client.hset('users', user.name, JSON.stringify(user), function (err) {
     if (err) throw err
     cb()

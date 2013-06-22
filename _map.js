@@ -3,7 +3,7 @@ var telepath = require('tele')
 , uglifyJS = require('uglify-js')
 , stylus = require('stylus')
 , asyncMap = require('slide').asyncMap
-, chain = require('fern').chain
+// , chain = require('fern').chain
 , fs = require('fs')
 
 module.exports = function (opts) { // MAPPER
@@ -19,9 +19,9 @@ module.exports = function (opts) { // MAPPER
   if (opts.watch === true) fs.watch(opts.dir, function (event, file) { 
     if (event === 'change') {
       fs.stat(opts.dir+'/'+file, function (err, stats) {
-        if (err) throw new Error(err)
         if (!stat) stat = stats
         if (stat.size !== stats.size) {
+          stat = stats
           // trigger recompile
           console.log(file+' modified on: '+stat.mtime+' new size is: '+stat.size)
         }
@@ -30,14 +30,11 @@ module.exports = function (opts) { // MAPPER
   })
  
   this.survey = function (cb) { 
-    var map = []
-    , first = chain.first
-    , last = chain.last
-
     fs.readdir(opts.dir, function (err, files) {
-      if (err) throw new Error(err)
+      if (err) cb(err)
       asyncMap(files, HandleFile, function () {
         // send map
+        self.send({event:'mapping_done'})
         compile(cb) 
       })
     })
@@ -54,14 +51,15 @@ module.exports = function (opts) { // MAPPER
         buf += data[i]
         if (data[i] === '}' && data[1] === '*' && data[2] === '{') {
           moduleData = JSON.parse(buf.toString().replace('/*',''))
-          moduleData.filePath = filePath
+          moduleData.filePath = filepath
+          moduleData.key = 'module_map' // intent of data packet !?
           break
         }
       }
 
       if (moduleData && moduleData.deps) { // if there are deps handle them
-        async.each(moduleData.deps, function (dep, cb) {
-          fs.readFile(dir+'/'+dep, function (err,buffer) {
+        asyncMap(moduleData.deps, function (dep, cb) {
+          fs.readFile(opts.dir+'/'+dep, function (err,buffer) {
             moduleData[dep.split('.')[1]] = buffer.toString()
             cb()
           })
@@ -77,13 +75,13 @@ module.exports = function (opts) { // MAPPER
     else cb()
   }
 
-  function compile (cb) {
+  function compile (callback) {
     fs.readFile(opts.css, function (err, buffer) { // handle css
-      if (err) cb(err)
+      if (err) callback(err)
       var styles = buffer.toString()
       stylus.render(styles, {filename:destCSS}, function (err, css) {
-        if (err) cb(err)
-        fs.writeFile(destCSS, css, compilejs) 
+        if (err) callback(err)
+        fs.writeFile(destCSS, css, compilejs)
       })
     })
 
@@ -100,7 +98,7 @@ module.exports = function (opts) { // MAPPER
             bundle = bundlemin.code
           }
           fs.writeFile(destJS, bundle, function (err) {
-            cb(err)
+            callback(err)
           })
         })   
       })

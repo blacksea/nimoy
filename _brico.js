@@ -10,47 +10,39 @@ module.exports = function (usr) { // BRICOLEUR
   _.bus = self // fix this hack!
   telepath(this)
 
+  this.map = {
+    server:[],
+    client:[]
+  }
+
   // detect if running in node or in browser
   if (global.process) self.scope = 'server' // on sunos global.process.title != node
   if (!global.process) self.scope = 'client'
   if (usr) self.usr = usr
     
-  this.recv = function (buffer) {
+  this.recv = function (buffer) { // clean up!
     var data = JSON.parse(buffer.toString())
 
-    if (data.meta === 'module_map') { // add map 
-      // check to see if modules are loaded 
-      var modules_loaded = false
-      for (key in _) {
-        if (key!=='bus') {
-          modules_loaded = true
-          break
-        }
-      }
-      if (modules_loaded === true ) {
-        map = null
-        _ = {}
-        _.bus = self
-        map = data
-        self.map = data
-        self.build()
-      } else {
-        map = data
-        self.map = data
-        self.build()
+    if (data.event === 'mapping_done') {
+      console.log('map complete')
+    }
+    if (data.key === 'module_map') { // handle incoming module data 
+      for (var i = 0;i<data.scope.length;i++) {
+        self.map[data.scope[i]].push(data)
       }
     } else if (!data.client_id) { // pass through to out
       if (self.client_id) data.id = self.client_id
       self.send(data)
-    } else if (data.id) {
-      console.log('send to '+id)
+    } else if (data.client_id) {
+      self.map[self.scope] = data.map 
+      if (data.map) self.build()
     }
   }
 
   this.build = function () { // loadModule with mods from map array
-    if (!map) throw new Error('no map')
-    console.log(map[self.scope])
-    asyncMap(map[self.scope], lookupModule, connModules)
+    console.log(self.map[self.scope])
+
+    asyncMap(self.map[self.scope], lookupModule, connModules)
 
     function lookupModule (mod, cb) {
       var modules = usr.modules[self.scope]
