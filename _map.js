@@ -53,6 +53,9 @@ module.exports = function (opts) { // MAPPER
           moduleData = JSON.parse(buf.toString().replace('/*',''))
           moduleData.filePath = filepath
           moduleData.key = 'module_map' // intent of data packet !?
+          for (var i=0;i<moduleData.scope.length;i++) {
+            if (moduleData.scope[i]==='client') opts.js.push(filepath)
+          }
           break
         }
       }
@@ -61,6 +64,7 @@ module.exports = function (opts) { // MAPPER
         asyncMap(moduleData.deps, function (dep, cb) {
           fs.readFile(opts.dir+'/'+dep, function (err,buffer) {
             moduleData[dep.split('.')[1]] = buffer.toString()
+            if (dep.split('.')[1]==='styl') CSS += buffer.toString()
             cb()
           })
         }, function () {
@@ -79,6 +83,7 @@ module.exports = function (opts) { // MAPPER
     fs.readFile(opts.css, function (err, buffer) { // handle css
       if (err) callback(err)
       var styles = buffer.toString()
+      styles += CSS
       stylus.render(styles, {filename:destCSS}, function (err, css) {
         if (err) callback(err)
         fs.writeFile(destCSS, css, compilejs)
@@ -89,6 +94,7 @@ module.exports = function (opts) { // MAPPER
       var b = browserify(opts.js)
       asyncMap(opts.js, function (item, cb) {
         var path = item.split('/')
+        console.log(path)
         if (path[1] === '_wilds') b.require(item, {expose:path[2].replace('.js','')}) 
         cb()
       }, function () {
