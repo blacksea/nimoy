@@ -94,7 +94,6 @@ module.exports = function (opts) { // MAPPER
       var b = browserify(opts.js)
       asyncMap(opts.js, function (item, cb) {
         var path = item.split('/')
-        console.log(path)
         if (path[1] === '_wilds') b.require(item, {expose:path[2].replace('.js','')}) 
         cb()
       }, function () {
