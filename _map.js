@@ -15,22 +15,29 @@ module.exports = function (opts) { // MAPPER
   , destJS = './_wilds/_bundle.js'
   , CSS = ''
 
+  this.update = function () {} 
+
   // watch _wilds dir and reload brico's on change
-  if (opts.watch === true) fs.watch(opts.dir, function (event, file) { 
-    if (event === 'change') {
-      fs.stat(opts.dir+'/'+file, function (err, stats) {
-        if (!stat) stat = stats
-        if (stat.size !== stats.size) {
-          stat = stats
-          // trigger recompile
-          console.log(file+' modified on: '+stat.mtime+' new size is: '+stat.size)
-        }
-      })
-    }
-  })
+  this.autoUpdate = function (cb) {
+    fs.watch(opts.dir, function (event, file) { 
+      if (event === 'change') {
+        fs.stat(opts.dir+'/'+file, function (err, stats) {
+          if (!stat) stat = stats
+          if (stat.size !== stats.size) {
+            stat = stats
+            cb({
+              file: file,
+              time: stats.mtime,
+              size: stats.size
+            })
+          }
+        })
+      }
+    })
+  }
  
   this.survey = function (cb) { 
-    // SEQ ///////////////////
+    // SEQ ////////////////////
     fern([  
       [self.map, opts.dir]
       , self.compileCSS
@@ -50,6 +57,7 @@ module.exports = function (opts) { // MAPPER
         cb()
       })
     }
+
     function HandleFile (file, cb) {
       var filepath = opts.dir+'/'+file
       if (file.split('.')[1] === 'js') fs.readFile(filepath, function (err, buffer) {
