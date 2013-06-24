@@ -31,19 +31,18 @@ module.exports = function (opts) { // MAPPER
  
   this.survey = function (cb) { 
     // SEQ ///////////////////
-    fern([ 
-      [getFiles, './_wilds']
-      , handleFiles
-      , compileCSS
-      , compileJS
+    fern([  
+      [self.map, opts.dir]
+      , self.compileCSS
+      , self.compileJS
     ], cb)
     ///////////////////////////
+  }
     
-    function getFiles (dir, cb) {
-      fs.readdir(dir, function (err, files) {
-        if (!err) cb(files)
-      })
-    }
+  this.map = function (dir, cb) {
+    fs.readdir(dir, function (err, files) {
+      if (!err) handleFiles(files, cb)
+    })
 
     function handleFiles (files, cb) {
       asyncMap(files, HandleFile, function () {
@@ -91,35 +90,35 @@ module.exports = function (opts) { // MAPPER
       }
     }
   }
+}
 
-  function compileCSS (cb) {
-    fs.readFile(opts.css, function (err, buffer) { // handle css
+this.compileCSS = function (cb) {
+  fs.readFile(opts.css, function (err, buffer) { // handle css
+    if (err) cb(err)
+    var styles = buffer.toString()
+    styles += CSS
+    stylus.render(styles, {filename:destCSS}, function (err, css) {
       if (err) cb(err)
-      var styles = buffer.toString()
-      styles += CSS
-      stylus.render(styles, {filename:destCSS}, function (err, css) {
-        if (err) cb(err)
-        fs.writeFile(destCSS, css, cb)
-      })
+      fs.writeFile(destCSS, css, cb)
     })
-  }
+  })
+}
 
-  function compileJS (cb) { 
-    var b = browserify(opts.js)
-    asyncMap(opts.js, function (item, cb) {
-      var path = item.split('/')
-      if (path[1] === '_wilds') b.require(item, {expose:path[2].replace('.js','')}) 
-      cb()
-    }, function () {
-      b.bundle(function (err, bundle) {
-        if (opts.compress === true) {
-          var bundlemin = uglifyjs.minify(bundle,{fromstring: true})
-          bundle = bundlemin.code
-        }
-        fs.writeFile(destJS, bundle, function (err) {
-          cb(err)
-        })
-      })   
-    })
-  }
+this.compileJS = function (cb) { 
+  var b = browserify(opts.js)
+  asyncMap(opts.js, function (item, cb) {
+    var path = item.split('/')
+    if (path[1] === '_wilds') b.require(item, {expose:path[2].replace('.js','')}) 
+    cb()
+  }, function () {
+    b.bundle(function (err, bundle) {
+      if (opts.compress === true) {
+        var bundlemin = uglifyjs.minify(bundle,{fromstring: true})
+        bundle = bundlemin.code
+      }
+      fs.writeFile(destJS, bundle, function (err) {
+        cb(err)
+      })
+    })   
+  })
 }
