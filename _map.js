@@ -90,20 +90,15 @@ module.exports = function (opts) { // MAPPER
         else cb()
       }
     }
-
-    fs.readdir(opts.dir, function (err, files) {
-      if (err) cb(err)
-      
-    })
   }
 
   function compileCSS (cb) {
     fs.readFile(opts.css, function (err, buffer) { // handle css
-      if (err) callback(err)
+      if (err) cb(err)
       var styles = buffer.toString()
       styles += CSS
       stylus.render(styles, {filename:destCSS}, function (err, css) {
-        if (err) callback(err)
+        if (err) cb(err)
         fs.writeFile(destCSS, css, cb)
       })
     })
