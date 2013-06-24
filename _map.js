@@ -49,45 +49,44 @@ module.exports = function (opts) { // MAPPER
         self.send({event:'mapping_done'})
         cb()
       })
+    }
+    function HandleFile (file, cb) {
+      var filepath = opts.dir+'/'+file
+      if (file.split('.')[1] === 'js') fs.readFile(filepath, function (err, buffer) {
+        var data = buffer.toString()
+        , moduleData = null
+        , buf = ''
 
-      function HandleFile (file, cb) {
-        var filepath = opts.dir+'/'+file
-        if (file.split('.')[1] === 'js') fs.readFile(filepath, function (err, buffer) {
-          var data = buffer.toString()
-          , moduleData = null
-          , buf = ''
-
-          for (var i=0;i<data.length;i++) { // parse out data object
-            buf += data[i]
-            if (data[i] === '}' && data[1] === '*' && data[2] === '{') {
-              moduleData = JSON.parse(buf.toString().replace('/*',''))
-              moduleData.filePath = filepath
-              moduleData.key = 'module_map' // intent of data packet !?
-              for (var i=0;i<moduleData.scope.length;i++) {
-                if (moduleData.scope[i]==='client') opts.js.push(filepath)
-              }
-              break
+        for (var i=0;i<data.length;i++) { // parse out data object
+          buf += data[i]
+          if (data[i] === '}' && data[1] === '*' && data[2] === '{') {
+            moduleData = JSON.parse(buf.toString().replace('/*',''))
+            moduleData.filePath = filepath
+            moduleData.key = 'module_map' // intent of data packet !?
+            for (var i=0;i<moduleData.scope.length;i++) {
+              if (moduleData.scope[i]==='client') opts.js.push(filepath)
             }
+            break
           }
+        }
 
-          if (moduleData && moduleData.deps) { // if there are deps handle them
-            asyncMap(moduleData.deps, function (dep, cb) {
-              fs.readFile(opts.dir+'/'+dep, function (err,buffer) {
-                moduleData[dep.split('.')[1]] = buffer.toString()
-                if (dep.split('.')[1]==='styl') CSS += buffer.toString()
-                cb()
-              })
-            }, function () {
-              self.send(moduleData)
+        if (moduleData && moduleData.deps) { // if there are deps handle them
+          asyncMap(moduleData.deps, function (dep, cb) {
+            fs.readFile(opts.dir+'/'+dep, function (err,buffer) {
+              moduleData[dep.split('.')[1]] = buffer.toString()
+              if (dep.split('.')[1]==='styl') CSS += buffer.toString()
               cb()
             })
-          } else if (moduleData) {
+          }, function () {
             self.send(moduleData)
             cb()
-          } else cb()
-        })
-        else cb()
-      }
+          })
+        } else if (moduleData) {
+          self.send(moduleData)
+          cb()
+        } else cb()
+      })
+      else cb()
     }
   }
 }
