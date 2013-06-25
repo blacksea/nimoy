@@ -83,6 +83,7 @@ module.exports = function (usr) { // BRICOLEUR
   }
 
   this.disconnModule = function (disconn) {
+
   }
 
   this.loadModule = function (mod) { // load module!
@@ -93,6 +94,8 @@ module.exports = function (usr) { // BRICOLEUR
   }
 
   this.unloadModule = function (mod) {
+    if (self.scope === 'client') _[mod.id].destroy()
+    delete _[mod.id]
   }
 
   // ------------------------------------------------------------
