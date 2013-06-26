@@ -27,6 +27,9 @@ module.exports = function (usr) { // BRICOLEUR
     if (data.event === 'mapping_done') {
       console.log('map complete')
     }
+    if (data.event === 'clear') {
+      console.log(usr.modules)
+    }
     if (data.key === 'module_map') { // handle incoming module data 
       for (var i = 0;i<data.scope.length;i++) {
         self.map[data.scope[i]].push(data)
