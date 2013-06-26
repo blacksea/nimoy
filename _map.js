@@ -15,8 +15,6 @@ module.exports = function (opts) { // MAPPER
   , destJS = './_wilds/_bundle.js'
   , CSS = ''
 
-  this.update = function () {} 
-
   // watch _wilds dir and reload brico's on change
   this.autoUpdate = function (cb) {
     fs.watch(opts.dir, function (event, file) { 
