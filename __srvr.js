@@ -20,6 +20,11 @@ _map.survey(function (err) {
  console.log('map survey complete')
 })
 
+_map.autoUpdate(function (res) {
+  console.log(res)
+  ws.emit('data', JSON.stringify({event:'clear'}))
+})
+
 var _rtr = new rtr() // do routing 
 var server = http.createServer(_rtr.handleReqs) // handle http requests
 server.listen(port)
