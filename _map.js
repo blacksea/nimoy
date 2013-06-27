@@ -95,35 +95,35 @@ module.exports = function (opts) { // MAPPER
       else cb()
     }
   }
-}
 
-this.compileCSS = function (cb) {
-  fs.readFile(opts.css, function (err, buffer) { // handle css
-    if (err) cb(err)
-    var styles = buffer.toString()
-    styles += CSS
-    stylus.render(styles, {filename:destCSS}, function (err, css) {
+  this.compileCSS = function (cb) {
+    fs.readFile(opts.css, function (err, buffer) { // handle css
       if (err) cb(err)
-      fs.writeFile(destCSS, css, cb)
-    })
-  })
-}
-
-this.compileJS = function (cb) { 
-  var b = browserify(opts.js)
-  asyncMap(opts.js, function (item, cb) {
-    var path = item.split('/')
-    if (path[1] === '_wilds') b.require(item, {expose:path[2].replace('.js','')}) 
-    cb()
-  }, function () {
-    b.bundle(function (err, bundle) {
-      if (opts.compress === true) {
-        var bundlemin = uglifyjs.minify(bundle,{fromstring: true})
-        bundle = bundlemin.code
-      }
-      fs.writeFile(destJS, bundle, function (err) {
-        cb(err)
+      var styles = buffer.toString()
+      styles += CSS
+      stylus.render(styles, {filename:destCSS}, function (err, css) {
+        if (err) cb(err)
+        fs.writeFile(destCSS, css, cb)
       })
-    })   
-  })
+    })
+  }
+
+  this.compileJS = function (cb) { 
+    var b = browserify(opts.js)
+    asyncMap(opts.js, function (item, cb) {
+      var path = item.split('/')
+      if (path[1] === '_wilds') b.require(item, {expose:path[2].replace('.js','')}) 
+      cb()
+    }, function () {
+      b.bundle(function (err, bundle) {
+        if (opts.compress === true) {
+          var bundlemin = uglifyjs.minify(bundle,{fromstring: true})
+          bundle = bundlemin.code
+        }
+        fs.writeFile(destJS, bundle, function (err) {
+          cb(err)
+        })
+      })   
+    })
+  }
 }
