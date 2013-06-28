@@ -10,6 +10,8 @@ module.exports = function (usr) { // BRICOLEUR
   _.bus = self // fix this hack!
   telepath(this)
 
+  this.conns = []
+
   this.map = {
     server:[],
     client:[]
@@ -22,15 +24,14 @@ module.exports = function (usr) { // BRICOLEUR
     
   this.recv = function (buffer) { // clean up!
     var data = JSON.parse(buffer.toString())
-    console.log(data)
 
-    if (data.event === 'mapping_done') {
-      console.log('map complete')
+    if (data.event) {
+      switch (data.event) {
+        case 'mapping_done' : self.build(); break;
+      }
     }
-    if (data.event === 'clear') {
-      console.log(usr.modules)
-    }
-    if (data.key === 'module_map') { // handle incoming module data 
+    
+    else if (data.key === 'module_map') { // handle incoming module data 
       for (var i = 0;i<data.scope.length;i++) {
         self.map[data.scope[i]].push(data)
       }
@@ -44,8 +45,6 @@ module.exports = function (usr) { // BRICOLEUR
   }
 
   this.build = function () { // loadModule with mods from map array
-    console.log(self.map[self.scope])
-
     asyncMap(self.map[self.scope], lookupModule, connModules)
 
     function lookupModule (mod, cb) {
@@ -85,8 +84,7 @@ module.exports = function (usr) { // BRICOLEUR
     }
   }
 
-  this.disconnModule = function (disconn) {
-  }
+  this.disconnModule = function (disconn) {}
 
   this.loadModule = function (mod) { // load module!
     if (self.scope==='server') _[mod.id.toUpperCase()] = require(mod.filePath)
@@ -109,6 +107,7 @@ module.exports = function (usr) { // BRICOLEUR
     self[key] = {}
     var s = self[key]
     s.id = key
+    self.conns.push(key)
 
     // add write stream
     s.in = new stream.Writable()
