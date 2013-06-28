@@ -40,7 +40,10 @@ module.exports = function (opts) { // MAPPER
       [self.map, opts.dir]
       , self.compileCSS
       , self.compileJS
-    ], cb)
+    ], function () {
+        self.send({event:'mapping_done'})
+        cb()
+    })
     ///////////////////////////
   }
     
@@ -51,7 +54,6 @@ module.exports = function (opts) { // MAPPER
 
     function handleFiles (files, cb) {
       asyncMap(files, HandleFile, function () {
-        self.send({event:'mapping_done'})
         cb()
       })
     }
@@ -96,7 +98,7 @@ module.exports = function (opts) { // MAPPER
     }
   }
 
-  this.compileCSS = function (cb) {
+  this.compileCSS = function (arr, cb) {
     fs.readFile(opts.css, function (err, buffer) { // handle css
       if (err) cb(err)
       var styles = buffer.toString()
@@ -108,7 +110,7 @@ module.exports = function (opts) { // MAPPER
     })
   }
 
-  this.compileJS = function (cb) { 
+  this.compileJS = function (arr, cb) { 
     var b = browserify(opts.js)
     asyncMap(opts.js, function (item, cb) {
       var path = item.split('/')
