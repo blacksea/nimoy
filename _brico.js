@@ -24,6 +24,7 @@ module.exports = function (usr) { // BRICOLEUR
     
   this.recv = function (buffer) { // clean up!
     var data = JSON.parse(buffer.toString())
+    console.log(data)
 
     if (data.event) {
       switch (data.event) {
