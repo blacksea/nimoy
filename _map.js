@@ -16,23 +16,34 @@ module.exports = function (opts) { // MAPPER
   , CSS = ''
 
   // watch _wilds dir and reload brico's on change
-  this.autoUpdate = function (cb) {
-    fs.watch(opts.dir, function (event, file) { 
-      if (event === 'change') {
-        fs.stat(opts.dir+'/'+file, function (err, stats) {
-          if (!stat) stat = stats
-          if (stat.size !== stats.size) {
-            stat = stats
-            cb({
-              file: file,
-              time: stats.mtime,
-              size: stats.size
-            })
+  fs.watch(opts.dir, function (event, file) { 
+    if (event === 'change') {
+      fs.stat(opts.dir+'/'+file, function (err, stats) {
+        if (!stat) stat = stats
+        if (stat.size !== stats.size) {
+          stat = stats
+          var name = stats.file.split('.')[0]
+          , fileType = stats.file.split('.')[1]
+          , filePath = opts.dir+'/'+stats.file
+
+          switch (fileType) {
+            case 'js' : jsUpdate(mod); break; // add trigger function for cb
+            case 'html' : htmlUpdate(filePath); break;
+            case 'style' : cssUpdate(filePath); break;
           }
-        })
-      }
-    })
-  }
+        }
+      })
+    }
+    function jsUpdate(mod) {
+      console.log('reload '+mod)
+    }
+    function htmlUpdate(file) {
+      fs.readFile
+    }
+    function cssUpdate(file) {
+
+    }
+  })
  
   this.survey = function (cb) { 
     // SEQ ////////////////////
@@ -42,9 +53,8 @@ module.exports = function (opts) { // MAPPER
       , self.compileJS
     ], function () {
         self.send({event:'mapping_done'})
-        cb()
+    /////////////////////////////////////
     })
-    ///////////////////////////
   }
     
   this.map = function (dir, cb) {
@@ -78,24 +88,25 @@ module.exports = function (opts) { // MAPPER
           }
         }
 
-        if (moduleData && moduleData.deps) { // if there are deps handle them
-          asyncMap(moduleData.deps, function (dep, cb) {
-            fs.readFile(opts.dir+'/'+dep, function (err,buffer) {
-              moduleData[dep.split('.')[1]] = buffer.toString()
-              if (dep.split('.')[1]==='styl') CSS += buffer.toString()
+        if (moduleData) {
+          if (moduleData.deps) {
+             asyncMap(moduleData.deps, function (dep, cb) {
+              fs.readFile(opts.dir+'/'+dep, function (err,buffer) {
+                moduleData[dep.split('.')[1]] = buffer.toString()
+                if (dep.split('.')[1]==='styl') CSS += buffer.toString()
+                cb()
+              })
+            }, function () {
+              self.send(moduleData)
               cb()
             })
-          }, function () {
+          } else if (!moduleData.deps) {
             self.send(moduleData)
             cb()
-          })
-        } else if (moduleData) {
-          self.send(moduleData)
-          cb()
+          }
         } else cb()
-      })
-      else cb()
-    }
+      }); else cb()
+    } 
   }
 
   this.compileCSS = function (arr, cb) {
