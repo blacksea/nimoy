@@ -45,7 +45,10 @@ module.exports = function (opts) { // MAPPER
       })
     }
     function cssUpdate(file) {
-
+      fs.readFile(file, function (err, buffer) {
+        if (err) console.log(err)
+        var css = buffer.toString()
+      })
     }
   })
  
