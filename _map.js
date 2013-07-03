@@ -37,8 +37,12 @@ module.exports = function (opts) { // MAPPER
     function jsUpdate(mod) {
       console.log('reload '+mod)
     }
-    function htmlUpdate(file) {
-      fs.readFile
+    function htmlUpdate (file, cb) {
+      fs.readFile(file, function (err, buffer) {
+        if (err) console.log(err)
+        var html = buffer.toString()
+        cb(html)
+      })
     }
     function cssUpdate(file) {
 
