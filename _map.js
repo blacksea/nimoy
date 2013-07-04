@@ -16,6 +16,7 @@ module.exports = function (opts) { // MAPPER
   , CSS = ''
 
   // watch _wilds dir and reload brico's on change
+  // completely restructure this thing with a tidy fern/event harness!
   this.autoUpdate = function (cb) {
     fs.watch(opts.dir, function (event, file) { 
       if (event === 'change') {
