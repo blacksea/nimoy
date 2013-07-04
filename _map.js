@@ -16,40 +16,18 @@ module.exports = function (opts) { // MAPPER
   , CSS = ''
 
   // watch _wilds dir and reload brico's on change
-  fs.watch(opts.dir, function (event, file) { 
-    if (event === 'change') {
-      fs.stat(opts.dir+'/'+file, function (err, stats) {
-        if (!stat) stat = stats
-        if (stat.size !== stats.size) {
-          stat = stats
-          var name = stats.file.split('.')[0]
-          , fileType = stats.file.split('.')[1]
-          , filePath = opts.dir+'/'+stats.file
 
-          switch (fileType) {
-            case 'js' : jsUpdate(mod); break; // add trigger function for cb
-            case 'html' : htmlUpdate(filePath); break;
-            case 'style' : cssUpdate(filePath); break;
-          }
-        }
-      })
-    }
-    function jsUpdate(mod) {
-      console.log('reload '+mod)
-    }
-    function htmlUpdate (file, cb) {
-      fs.readFile(file, function (err, buffer) {
-        if (err) console.log(err)
-        var html = buffer.toString()
-        cb(html)
-      })
-    }
-    function cssUpdate(file) {
-      fs.readFile(file, function (err, buffer) {
-        if (err) console.log(err)
-        var css = buffer.toString()
-      })
-    }
+  // somekind of harness / network with simple interface //
+  // > check dir
+  // > process files > readfile > parse object > analyze
+  // > push deps
+  // > push to map
+  // > send done! event
+
+  fs.watch(opts.dir, function (event, file) {
+    fs.stat(opts.sid+'/'+file, function checkChange (err, stats) {
+    
+    })
   })
  
   this.survey = function (cb) { 
