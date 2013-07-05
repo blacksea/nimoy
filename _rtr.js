@@ -19,13 +19,13 @@ module.exports = function (opts) { // ROUTER
     , agent = headers['user-agent']
     , host = headers.host
 
-    asyncMap(opts, function (route, cb) {
+    asyncMap(opts, function matchFile (route, cb) {
       if (route.url === req.url) {
         filed(route.file).pipe(res)
         match = true
       }
       cb()
-    }, function () {
+    }, function matchFileDone () {
       if (match === false) { // do something with url!
         var path = req.url
         filed('./_wilds/_index.html').pipe(res)
@@ -53,7 +53,7 @@ module.exports = function (opts) { // ROUTER
     brico[key].send(initObj)
 
     // when socket closes remove connection
-    ws.on('close', function () {
+    ws.on('close', function socClosed () {
       brico.removeConnection(key)
       console.log('soc '+key+' closed!')
     })
