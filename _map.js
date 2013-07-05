@@ -10,33 +10,30 @@ module.exports = function (opts) { // MAPPER
   telepath(this) 
 
   var self = this
-  , stat = null // hacky stat var for putting stat obj
-  , destCSS = './_wilds/_styles.css'
-  , destJS = './_wilds/_bundle.js'
+  , DESTCSS = './_wilds/_styles.css'
+  , DESTJS = './_wilds/_bundle.js'
   , CSS = ''
+  , FILESTAT = null
 
-  // watch _wilds dir and reload brico's on change
   // completely restructure this thing with a tidy fern/event harness!
-  this.autoUpdate = function (cb) {
-    fs.watch(opts.dir, function (event, file) { 
-      if (event === 'change') {
-        fs.stat(opts.dir+'/'+file, function (err, stats) {
-          if (!stat) stat = stats
-          if (stat.size !== stats.size) {
-            stat = stats
-            cb({
-              file: file,
-              time: stats.mtime,
-              size: stats.size
-            })
-          }
-        })
-      }
+  fs.watch(opts.dir, function (event, file) { 
+    var filepath = opts.dir+'/'+file
+    fs.stat(filepath, function (err, stats) {
+      // make a good data object here
+      stats.filepath = filepath
+      if (err) console.log(err)
+      if (!fileStat) fileStat = stats
+      if (fileStat.size !== stats.size) update(stats)
+      fileStat = stats
     })
+  })
+
+  function update (stats) {
+    console.log(stats)
   }
  
   this.survey = function (cb) { 
-    // SEQ ////////////////////
+
     fern([  
       [self.map, opts.dir]
       , self.compileCSS
@@ -45,7 +42,7 @@ module.exports = function (opts) { // MAPPER
         self.send({event:'mapping_done'})
         cb()
     })
-    ///////////////////////////
+
   }
     
   this.map = function (dir, cb) {
