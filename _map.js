@@ -33,7 +33,6 @@ module.exports = function (opts) { // MAPPER
   }
  
   this.survey = function (cb) { 
-
     fern([  
       [self.map, opts.dir]
       , self.compileCSS
@@ -42,7 +41,6 @@ module.exports = function (opts) { // MAPPER
         self.send({event:'mapping_done'})
         cb()
     })
-
   }
     
   this.map = function (dir, cb) {

@@ -1,4 +1,46 @@
-;(function(e,t,n,r){function i(r){if(!n[r]){if(!t[r]){if(e)return e(r);throw new Error("Cannot find module '"+r+"'")}var s=n[r]={exports:{}};t[r][0](function(e){var n=t[r][1][e];return i(n?n:e)},s,s.exports)}return n[r].exports}for(var s=0;s<r.length;s++)i(r[s]);return i})(typeof require!=="undefined"&&require,{1:[function(require,module,exports){
+require=(function(e,t,n,r){function i(r){if(!n[r]){if(!t[r]){if(e)return e(r);throw new Error("Cannot find module '"+r+"'")}var s=n[r]={exports:{}};t[r][0](function(e){var n=t[r][1][e];return i(n?n:e)},s,s.exports)}return n[r].exports}for(var s=0;s<r.length;s++)i(r[s]);return i})(typeof require!=="undefined"&&require,{"send":[function(require,module,exports){
+module.exports=require('ECIHju');
+},{}],"ECIHju":[function(require,module,exports){
+/*{
+  "id":"send",
+	"scope":["client","server"],
+	"desc":"information"
+}*/
+
+var _ = Object._;
+
+module.exports = function () {
+  // default input function
+  var self = this;
+  this.test = function () {
+    console.log('send called!!!!!!');
+  }
+  this.input = function (data) {
+  }
+  this.output = function (data) {
+  }
+  // default output function
+}
+
+},{}],"recv":[function(require,module,exports){
+module.exports=require('bM81ck');
+},{}],"bM81ck":[function(require,module,exports){
+/*{
+  "id":"recv",
+	"scope":["client","server"],
+	"desc":"send data"
+}*/
+
+var _ = Object._;
+
+module.exports = function () {
+  var self = this;
+  setTimeout(function() {
+    // _.send.test(); // never call specific modules just provide output or input
+  }, 3000);
+}
+
+},{}],1:[function(require,module,exports){
 var websocket = require('websocket-stream')
 , bricoleur = require('./_brico')
 , host = window.location.host.replace('www.','')
@@ -6,13 +48,13 @@ var websocket = require('websocket-stream')
 
 ws.on('data', function (buffer) {
   var data = JSON.parse(buffer)
-  console.log(data)
   if (data.client_id) {
-    console.log(data.usr)
     var brico = new bricoleur(data.usr)
+    brico.map.client = data.map
     brico.client_id = data.client_id
     ws.pipe(brico.in) 
     brico.out.pipe(ws)
+    brico.build()
   }
 })
 
@@ -191,7 +233,84 @@ WebsocketStream.prototype.end = function() {
   this.ws.close()
 }
 
-},{"stream":4,"util":6}],7:[function(require,module,exports){
+},{"stream":4,"util":6}],"console":[function(require,module,exports){
+module.exports=require('OkCvNS');
+},{}],"OkCvNS":[function(require,module,exports){
+/*{
+  "id":"console",
+	"scope":["client"],
+	"desc":"cli",
+  "deps":["console.html","console.styl"]
+}*/
+var telepath = require('tele')
+
+module.exports = function () {
+  var self = this
+  telepath(this)
+
+  this.recv = function (buffer) {
+    var data = JSON.parse(buffer.toString())
+    console.dir(data)
+  }
+
+  this.render = function (html) {
+    var container = document.getElementById('container')
+    , log = document.createElement('div')
+    log.innerHTML = html
+    container.appendChild(log)
+    var form = document.getElementById('x')
+    , prompt = form.querySelector('.console')
+
+    form.onsubmit = function (e) {
+      e.preventDefault()
+      var cmd = e.target[0].value
+      self.send({cmd:cmd})
+      prompt.blur()
+    }
+
+    prompt.onfocus = function () {
+      prompt.value = ''
+    }
+
+    prompt.onblur = function () {
+      prompt.value = ''
+    }
+  }
+}
+
+},{"tele":7}],"mdisp":[function(require,module,exports){
+module.exports=require('bs3Twp');
+},{}],"bs3Twp":[function(require,module,exports){
+/*{
+  "id":"mdisp",
+	"scope":["client"],
+	"desc":"micro display",
+  "deps":["mdisp.html","mdisp.styl"]
+}*/
+var telepath = require('tele')
+
+module.exports = function () {
+  var self = this
+  , element = null
+  telepath(this)
+
+  this.recv = function (buffer) {
+    var data = JSON.parse(buffer.toString())
+    console.dir(data)
+    if (data.dest==='mdisp') {
+     console.log('write!') 
+    }
+  }
+
+  this.render = function (html) {
+    var container = document.getElementById('container')
+    disp = document.createElement('div')
+    disp.innerHTML = html
+    container.appendChild(disp)
+  }
+}
+
+},{"tele":7}],8:[function(require,module,exports){
 // shim for using process in browser
 
 var process = module.exports = {};
@@ -431,132 +550,7 @@ EventEmitter.prototype.listeners = function(type) {
 };
 
 })(require("__browserify_process"))
-},{"__browserify_process":7}],2:[function(require,module,exports){
-(function(global){var telepath = require('tele')
-, stream = require('stream')
-, asyncMap = require ('slide').asyncMap
-, hash = require('hashish')
-
-module.exports = function (usr) { // BRICOLEUR
-  var self = this
-  , map = null
-  , _ = {} // module scope
-  _.bus = self // fix this hack!
-  telepath(this)
-
-  this.map = {
-    server:[],
-    client:[]
-  }
-
-  // detect if running in node or in browser
-  if (global.process) self.scope = 'server' // on sunos global.process.title != node
-  if (!global.process) self.scope = 'client'
-  if (usr) self.usr = usr
-    
-  this.recv = function (buffer) { // clean up!
-    var data = JSON.parse(buffer.toString())
-
-    if (data.event === 'mapping_done') {
-      console.log('map complete')
-    }
-    if (data.key === 'module_map') { // handle incoming module data 
-      for (var i = 0;i<data.scope.length;i++) {
-        self.map[data.scope[i]].push(data)
-      }
-    } else if (!data.client_id) { // pass through to out
-      if (self.client_id) data.id = self.client_id
-      self.send(data)
-    } else if (data.client_id) {
-      self.map[self.scope] = data.map 
-      if (data.map) self.build()
-    }
-  }
-
-  this.build = function () { // loadModule with mods from map array
-    console.log(self.map[self.scope])
-
-    asyncMap(self.map[self.scope], lookupModule, connModules)
-
-    function lookupModule (mod, cb) {
-      var modules = usr.modules[self.scope]
-      for (var i=0;i<modules.length;i++) {
-        if (modules[i]===mod.id) {
-          console.log('loading mod '+mod.id)
-          self.loadModule(mod)
-          break
-        } 
-      }
-      cb()
-    }
-
-    function connModules () {
-      if (usr.conns) {
-        console.log('modules loaded :: connecting modules...')
-        async.eachSeries(usr.conns[self.scope], self.connModule, function () {
-          console.log('connected modules for : '+usr.host)
-        })
-      }
-      if (!usr.conns) console.log('no conns for : '+usr.host)
-    }
-  }
-
-  this.connModule = function (conn, cb) { // ['modA>modB','modB>modC'] make module connections
-    var modA = null
-    , modB = null
-
-    for (key in conn) { // could be clearer
-      modA = _[conn[key].split('>')[0]] 
-      modB = _[conn[key].split('>')[1]] 
-      console.log('connecting ' + conn[key])
-      if (!modA.out || !modB.in) throw new Error(modA+','+modB+' :no .out or .in connections')
-      if (modA.out && modB.in) modA.out.pipe(modB.in)
-      cb()
-    }
-  }
-
-  this.disconnModule = function (disconn) {
-  }
-
-  this.loadModule = function (mod) { // load module!
-    if (self.scope==='server') _[mod.id.toUpperCase()] = require(mod.filePath)
-    if (self.scope==='client') _[mod.id.toUpperCase()] = require(mod.id)
-    _[mod.id] = new _[mod.id.toUpperCase()]()
-    if (mod.html) _[mod.id].render(mod.html)
-  }
-
-  this.unloadModule = function (mod) {
-  }
-
-  // ------------------------------------------------------------
-  this.addConnection = function (key) { // user socket connection
-    self[key] = {}
-    var s = self[key]
-    s.id = key
-
-    // add write stream
-    s.in = new stream.Writable()
-    s.in._write = function (chunk, encoding, cb) {
-      self.recv(chunk) // add id to obj -- for filtering
-      cb()
-    }
-
-    // add read stream
-    s.out = new stream()
-    s.out.readable = true
-    s.send = function (data) {
-      s.out.emit('data',JSON.stringify(data))
-    }
-  }
-
-  this.removeConnection = function (key) {
-    self[key].out.emit('close')
-    delete self[key]
-  } // -----------------------------------------------------------
-}
-
-})(window)
-},{"stream":4,"tele":8,"slide":9,"hashish":10}],6:[function(require,module,exports){
+},{"__browserify_process":8}],6:[function(require,module,exports){
 var events = require('events');
 
 exports.isArray = isArray;
@@ -909,7 +903,144 @@ exports.format = function(f) {
   return str;
 };
 
-},{"events":5}],8:[function(require,module,exports){
+},{"events":5}],2:[function(require,module,exports){
+(function(global){var telepath = require('tele')
+, stream = require('stream')
+, asyncMap = require ('slide').asyncMap
+, hash = require('hashish')
+
+module.exports = function (usr) { // BRICOLEUR
+  var self = this
+  , map = null
+  , _ = {} // module scope
+  _.bus = self // fix this hack!
+  telepath(this)
+
+  this.conns = []
+
+  this.map = {
+    server:[],
+    client:[]
+  }
+
+  // detect if running in node or in browser
+  if (global.process) self.scope = 'server' // on sunos global.process.title != node
+  if (!global.process) self.scope = 'client'
+  if (usr) self.usr = usr
+    
+  this.recv = function (buffer) { // clean up!
+    var data = JSON.parse(buffer.toString())
+
+    if (data.event) {
+      switch (data.event) {
+        case 'mapping_done' : self.build(); break;
+      }
+    }
+    else if (data.cmd) {
+      console.log(data)
+    }
+    else if (data.key === 'module_map') { // handle incoming module data 
+      for (var i = 0;i<data.scope.length;i++) {
+        self.map[data.scope[i]].push(data)
+      }
+    } else if (!data.client_id) { // pass through to out
+      if (self.client_id) data.id = self.client_id
+      // self.send(data)
+    } else if (data.client_id) {
+      self.map[self.scope] = data.map 
+      if (data.map) self.build()
+    }
+  }
+
+  this.build = function () { // loadModule with mods from map array
+    asyncMap(self.map[self.scope], lookupModule, connModules)
+    console.log(self.map[self.scope])
+
+    function lookupModule (mod, cb) {
+      var modules = usr.modules[self.scope]
+      for (var i=0;i<modules.length;i++) {
+        if (modules[i]===mod.id) {
+          console.log('loading mod '+mod.id)
+          self.loadModule(mod)
+          break
+        } 
+      }
+      cb()
+    }
+
+    function connModules () {
+      if (usr.conns) {
+        console.log('modules loaded :: connecting modules...')
+        asyncMap(usr.conns[self.scope], self.connModule, function () {
+          console.log('connected modules for : '+usr.host)
+        })
+      }
+      if (!usr.conns) console.log('no conns for : '+usr.host)
+    }
+  }
+
+  this.connModule = function (conn, cb) { // ['modA>modB','modB>modC'] make module connections
+    var modA = null
+    , modB = null
+
+    for (key in conn) { // could be clearer
+      modA = _[conn[key].split('>')[0]] 
+      modB = _[conn[key].split('>')[1]] 
+      console.log('connecting ' + conn[key])
+      if (!modA.out || !modB.in) throw new Error(modA+','+modB+' :no .out or .in connections')
+      if (modA.out && modB.in) modA.out.pipe(modB.in)
+      cb()
+    }
+  }
+
+  this.disconnModule = function (disconn) {}
+
+  this.loadModule = function (mod) { // load module!
+    if (self.scope==='server') _[mod.id.toUpperCase()] = require(mod.filePath)
+    if (self.scope==='client') _[mod.id.toUpperCase()] = require(mod.id)
+    _[mod.id] = new _[mod.id.toUpperCase()]()
+    if (mod.html) _[mod.id].render(mod.html)
+  }
+
+  this.clear = function (cb) {
+    asyncMap(usr.modules[self.scope], unloadModule, cb)
+  }
+
+  this.unloadModule = function (mod) {
+    if (self.scope === 'client') _[mod].destroy()
+    delete _[mod]
+  }
+
+  // ------------------------------------------------------------
+  this.addConnection = function (key) { // user socket connection
+    self[key] = {}
+    var s = self[key]
+    s.id = key
+    self.conns.push(key)
+
+    // add write stream
+    s.in = new stream.Writable()
+    s.in._write = function (chunk, encoding, cb) {
+      self.recv(chunk) // add id to obj -- for filtering
+      cb()
+    }
+
+    // add read stream
+    s.out = new stream()
+    s.out.readable = true
+    s.send = function (data) {
+      s.out.emit('data',JSON.stringify(data))
+    }
+  }
+
+  this.removeConnection = function (key) {
+    self[key].out.emit('close')
+    delete self[key]
+  } // -----------------------------------------------------------
+}
+
+})(window)
+},{"stream":4,"tele":7,"slide":9,"hashish":10}],7:[function(require,module,exports){
 var stream = require('stream')
 , browser = false
 if (!stream.Writable) browser = true // browser ugliness
@@ -971,7 +1102,7 @@ exports.asyncMap = require("./async-map")
 exports.bindActor = require("./bind-actor")
 exports.chain = require("./chain")
 
-},{"./bind-actor":11,"./async-map":12,"./chain":13}],11:[function(require,module,exports){
+},{"./async-map":11,"./bind-actor":12,"./chain":13}],12:[function(require,module,exports){
 module.exports = bindActor
 function bindActor () {
   var args = 
@@ -989,7 +1120,7 @@ function bindActor () {
     fn.apply(obj, args.concat(cb)) }
 }
 
-},{}],12:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 (function(process){
 /*
 usage:
@@ -1048,7 +1179,7 @@ function asyncMap () {
 }
 
 })(require("__browserify_process"))
-},{"__browserify_process":7}],13:[function(require,module,exports){
+},{"__browserify_process":8}],13:[function(require,module,exports){
 module.exports = chain
 var bindActor = require("./bind-actor.js")
 chain.first = {} ; chain.last = {}
@@ -1070,7 +1201,7 @@ function chain (things, cb) {
     })
   })(0, things.length) }
 
-},{"./bind-actor.js":11}],10:[function(require,module,exports){
+},{"./bind-actor.js":12}],10:[function(require,module,exports){
 module.exports = Hash;
 var Traverse = require('traverse');
 
@@ -1637,5 +1768,5 @@ forEach(objectKeys(Traverse.prototype), function (key) {
     };
 });
 
-},{}]},{},[1])
+},{}]},{},[1,"OkCvNS","bs3Twp","ECIHju","bM81ck"])
 ;

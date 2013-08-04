@@ -9,7 +9,6 @@ module.exports = function (usr) { // BRICOLEUR
   , _ = {} // module scope
   _.bus = self // fix this hack!
   telepath(this)
-
   this.conns = []
 
   this.map = {
@@ -24,21 +23,21 @@ module.exports = function (usr) { // BRICOLEUR
     
   this.recv = function (buffer) { // clean up!
     var data = JSON.parse(buffer.toString())
-    console.log(data)
 
     if (data.event) {
       switch (data.event) {
         case 'mapping_done' : self.build(); break;
       }
     }
-    
+    else if (data.cmd) {
+      console.log(data)
+    }
     else if (data.key === 'module_map') { // handle incoming module data 
       for (var i = 0;i<data.scope.length;i++) {
         self.map[data.scope[i]].push(data)
       }
     } else if (!data.client_id) { // pass through to out
       if (self.client_id) data.id = self.client_id
-      self.send(data)
     } else if (data.client_id) {
       self.map[self.scope] = data.map 
       if (data.map) self.build()
@@ -47,6 +46,7 @@ module.exports = function (usr) { // BRICOLEUR
 
   this.build = function () { // loadModule with mods from map array
     asyncMap(self.map[self.scope], lookupModule, connModules)
+    console.log(self.map[self.scope])
 
     function lookupModule (mod, cb) {
       var modules = usr.modules[self.scope]
@@ -78,7 +78,6 @@ module.exports = function (usr) { // BRICOLEUR
     for (key in conn) { // could be clearer
       modA = _[conn[key].split('>')[0]] 
       modB = _[conn[key].split('>')[1]] 
-      console.log('connecting ' + conn[key])
       if (!modA.out || !modB.in) throw new Error(modA+','+modB+' :no .out or .in connections')
       if (modA.out && modB.in) modA.out.pipe(modB.in)
       cb()
