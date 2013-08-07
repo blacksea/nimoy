@@ -1,8 +1,8 @@
 var telepath = require('tele')
+, asyncMap = require('slide').asyncMap
 , browserify = require('browserify')
 , uglifyJS = require('uglify-js')
 , stylus = require('stylus')
-, asyncMap = require('slide').asyncMap
 , fern = require('fern')
 , fs = require('fs')
 

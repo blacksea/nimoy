@@ -1,8 +1,9 @@
+// HTTP ROUTER
 var filed = require('filed')
 , ws_stream = require('websocket-stream')
 , asyncMap = require('slide').asyncMap
 
-module.exports = function (opts) { // ROUTER 
+module.exports = function Router (opts) { 
   if (!opts) var opts = [
     {url:"/",
     file:"./_wilds/_index.html"},

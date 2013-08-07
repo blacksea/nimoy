@@ -1,3 +1,4 @@
+// SERVER START SCRIPT
 var Bricoleur = require('./_brico')
 , map = require('./_map')
 , rtr = require('./_rtr')

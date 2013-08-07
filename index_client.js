@@ -1,3 +1,4 @@
+// CLIENT START SCRIPT
 var websocket = require('websocket-stream')
 , bricoleur = require('./_brico')
 , host = window.location.host.replace('www.','')
