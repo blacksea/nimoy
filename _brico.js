@@ -1,17 +1,16 @@
 var asyncMap = require ('slide').asyncMap
-, Duplex = require('stream').Duplex
+, stream = require('stream')
 , hash = require('hashish')
-, level = require('level')
 , util = require('util')
 
-util.inherits(Bricoleur, Duplex)
+util.inherits(Bricoleur, stream.Duplex)
 
 module.exports = Bricoleur
 
 function Bricoleur (opts) { // provide a scope option to set server/browser
   if (!(this instanceof Bricoleur)) return new Bricoleur(opts)
   if (!opts) opts = {}
-  Duplex.call(this,opts)
+  stream.Duplex.call(this,opts)
 
   // CONSTANTS
   var SELF = this
@@ -23,7 +22,7 @@ function Bricoleur (opts) { // provide a scope option to set server/browser
   }
 
   this._write  = function (chunk,enc,next) {
-    console.log(chunk)
+    console.log(chunk.toString())
     next()
   }
 
@@ -32,20 +31,17 @@ function Bricoleur (opts) { // provide a scope option to set server/browser
   this.end = function () {
   }
 
-  // ------------------------------------------------------------
   this.addConnection = function (key) { // user socket connection
     self[key] = {}
     var s = self[key]
     s.id = key
     self.conns.push(key)
-
     // add write stream
     s.in = new stream.Writable()
     s.in._write = function (chunk, encoding, cb) {
       self.recv(chunk) // add id to obj -- for filtering
       cb()
     }
-
     // add read stream
     s.out = new stream()
     s.out.readable = true
@@ -53,9 +49,8 @@ function Bricoleur (opts) { // provide a scope option to set server/browser
       s.out.emit('data',JSON.stringify(data))
     }
   }
-
   this.removeConnection = function (key) {
     self[key].out.emit('close')
     delete self[key]
-  } // -----------------------------------------------------------
+  } 
 }
