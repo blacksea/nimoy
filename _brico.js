@@ -1,105 +1,35 @@
-var telepath = require('tele')
-, stream = require('stream')
-, asyncMap = require ('slide').asyncMap
+var asyncMap = require ('slide').asyncMap
+, Duplex = require('stream').Duplex
 , hash = require('hashish')
+, level = require('level')
+, util = require('util')
 
-module.exports = function (usr) { // BRICOLEUR
-  var self = this
-  , map = null
+util.inherits(Bricoleur, Duplex)
+
+module.exports = Bricoleur
+
+function Bricoleur (opts) { // provide a scope option to set server/browser
+  if (!(this instanceof Bricoleur)) return new Bricoleur(opts)
+  if (!opts) opts = {}
+  Duplex.call(this,opts)
+
+  // CONSTANTS
+  var SELF = this
+  , MAP = null
   , _ = {} // module scope
-  _.bus = self // fix this hack!
-  telepath(this)
-  this.conns = []
 
-  this.map = {
-    server:[],
-    client:[]
-  }
-
-  // detect if running in node or in browser
-  if (global.process) self.scope = 'server' // on sunos global.process.title != node
-  if (!global.process) self.scope = 'client'
-  if (usr) self.usr = usr
+  this.compile = function compileClient (next) {
     
-  this.recv = function (buffer) { // clean up!
-    var data = JSON.parse(buffer.toString())
-
-    if (data.event) {
-      switch (data.event) {
-        case 'mapping_done' : self.build(); break;
-      }
-    }
-    else if (data.cmd) {
-      console.log(data)
-    }
-    else if (data.key === 'module_map') { // handle incoming module data 
-      for (var i = 0;i<data.scope.length;i++) {
-        self.map[data.scope[i]].push(data)
-      }
-    } else if (!data.client_id) { // pass through to out
-      if (self.client_id) data.id = self.client_id
-    } else if (data.client_id) {
-      self.map[self.scope] = data.map 
-      if (data.map) self.build()
-    }
   }
 
-  this.build = function () { // loadModule with mods from map array
-    asyncMap(self.map[self.scope], lookupModule, connModules)
-    console.log(self.map[self.scope])
-
-    function lookupModule (mod, cb) {
-      var modules = usr.modules[self.scope]
-      for (var i=0;i<modules.length;i++) {
-        if (modules[i]===mod.id) {
-          console.log('loading mod '+mod.id)
-          self.loadModule(mod)
-          break
-        } 
-      }
-      cb()
-    }
-
-    function connModules () {
-      if (usr.conns) {
-        console.log('modules loaded :: connecting modules...')
-        asyncMap(usr.conns[self.scope], self.connModule, function () {
-          console.log('connected modules for : '+usr.host)
-        })
-      }
-      if (!usr.conns) console.log('no conns for : '+usr.host)
-    }
+  this._write  = function (chunk,enc,next) {
+    console.log(chunk)
+    next()
   }
 
-  this.connModule = function (conn, cb) { // ['modA>modB','modB>modC'] make module connections
-    var modA = null
-    , modB = null
+  this._read = function (size) {} // !?!
 
-    for (key in conn) { // could be clearer
-      modA = _[conn[key].split('>')[0]] 
-      modB = _[conn[key].split('>')[1]] 
-      if (!modA.out || !modB.in) throw new Error(modA+','+modB+' :no .out or .in connections')
-      if (modA.out && modB.in) modA.out.pipe(modB.in)
-      cb()
-    }
-  }
-
-  this.disconnModule = function (disconn) {}
-
-  this.loadModule = function (mod) { // load module!
-    if (self.scope==='server') _[mod.id.toUpperCase()] = require(mod.filePath)
-    if (self.scope==='client') _[mod.id.toUpperCase()] = require(mod.id)
-    _[mod.id] = new _[mod.id.toUpperCase()]()
-    if (mod.html) _[mod.id].render(mod.html)
-  }
-
-  this.clear = function (cb) {
-    asyncMap(usr.modules[self.scope], unloadModule, cb)
-  }
-
-  this.unloadModule = function (mod) {
-    if (self.scope === 'client') _[mod].destroy()
-    delete _[mod]
+  this.end = function () {
   }
 
   // ------------------------------------------------------------
