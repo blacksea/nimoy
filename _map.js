@@ -1,127 +1,63 @@
-var telepath = require('tele')
+var Readable = require('stream').Readable
 , asyncMap = require('slide').asyncMap
-, browserify = require('browserify')
-, uglifyJS = require('uglify-js')
-, stylus = require('stylus')
-, fern = require('fern')
+, compressor = require('./_cmp')
 , fs = require('fs')
 
-module.exports = function (opts) { // MAPPER
-  telepath(this) 
+module.exports = function (opts, callback) {
 
   var self = this
   , DESTCSS = './_wilds/_styles.css'
   , DESTJS = './_wilds/_bundle.js'
+  , DIR = opts.dir+'/'
   , CSS = ''
   , FILESTAT = null
 
-  // completely restructure this thing with a tidy fern/event harness!
-  fs.watch(opts.dir, function (event, file) { 
-    var filepath = opts.dir+'/'+file
-    fs.stat(filepath, function (err, stats) {
-      // make a good data object here
-      stats.filepath = filepath
-      if (err) console.log(err)
-      if (!fileStat) fileStat = stats
-      if (fileStat.size !== stats.size) update(stats)
-      fileStat = stats
+  this.server = new Readable
+  this.client = new Readable
+
+  this.server._read = function (size) {} // WTF!
+  this.client._read = function (size) {}
+
+  fs.readdir(DIR, function handleWildsFiles (e, files) {
+    callback(self.server)
+    asyncMap(files, parse, function doneWildsFiles () {
+      console.log('enddddddd')
+      self.server.push(null)
     })
   })
 
-  function update (stats) {
-    console.log(stats)
-  }
- 
-  this.survey = function (cb) { 
-    fern([  
-      [self.map, opts.dir]
-      , self.compileCSS
-      , self.compileJS
-    ], function () {
-        self.send({event:'mapping_done'})
-        cb()
+  fs.watch(DIR, function handleFileChange (event, file) { 
+    var filepath = DIR+file
+    fs.stat(filepath, function statFile (err, stats) {
+      // make a good data object here
+      stats.filepath = filepath
+      if (err) console.error(err)
+      if (!FILESTAT) FILESTAT = stats
+      if (FILESTAT.size !== stats.size) self.server.emit('change',FILESTAT)
+      FILESTAT = stats
     })
-  }
-    
-  this.map = function (dir, cb) {
-    fs.readdir(dir, function (err, files) {
-      if (!err) handleFiles(files, cb)
-    })
-
-    function handleFiles (files, cb) {
-      asyncMap(files, HandleFile, function () {
-        cb()
-      })
-    }
-
-    function HandleFile (file, cb) {
-      var filepath = opts.dir+'/'+file
-      if (file.split('.')[1] === 'js') fs.readFile(filepath, function (err, buffer) {
-        var data = buffer.toString()
-        , moduleData = null
-        , buf = ''
-
-        for (var i=0;i<data.length;i++) { // parse out data object
-          buf += data[i]
-          if (data[i] === '}' && data[1] === '*' && data[2] === '{') {
-            moduleData = JSON.parse(buf.toString().replace('/*',''))
-            moduleData.filePath = filepath
-            moduleData.key = 'module_map' // intent of data packet !?
-            for (var i=0;i<moduleData.scope.length;i++) {
-              if (moduleData.scope[i]==='client') opts.js.push(filepath)
-            }
-            break
-          }
-        }
-
-        if (moduleData && moduleData.deps) { // if there are deps handle them
-          asyncMap(moduleData.deps, function (dep, cb) {
-            fs.readFile(opts.dir+'/'+dep, function (err,buffer) {
-              moduleData[dep.split('.')[1]] = buffer.toString()
-              if (dep.split('.')[1]==='styl') CSS += buffer.toString()
-              cb()
-            })
-          }, function () {
-            self.send(moduleData)
-            cb()
-          })
-        } else if (moduleData) {
-          self.send(moduleData)
-          cb()
-        } else cb()
-      })
-      else cb()
-    }
-  }
-
-  this.compileCSS = function (arr, cb) {
-    fs.readFile(opts.css, function (err, buffer) { // handle css
-      if (err) cb(err)
-      var styles = buffer.toString()
-      styles += CSS
-      stylus.render(styles, {filename:destCSS}, function (err, css) {
-        if (err) cb(err)
-        fs.writeFile(destCSS, css, cb)
-      })
-    })
-  }
-
-  this.compileJS = function (arr, cb) { 
-    var b = browserify(opts.js)
-    asyncMap(opts.js, function (item, cb) {
-      var path = item.split('/')
-      if (path[1] === '_wilds') b.require(item, {expose:path[2].replace('.js','')}) 
-      cb()
-    }, function () {
-      b.bundle(function (err, bundle) {
-        if (opts.compress === true) {
-          var bundlemin = uglifyjs.minify(bundle,{fromstring: true})
-          bundle = bundlemin.code
-        }
-        fs.writeFile(destJS, bundle, function (err) {
-          cb(err)
+  })
+  
+  function parse (file,cb) {
+    var ext = file.split('.')[1]
+    if (ext === 'js' && file[0] !=='_') {
+      var f = fs.createReadStream(DIR+file)
+      f.on('data', function (chunk) {
+        var buf = chunk.toString()
+        var m = buf.match(/\/\*\{([\S\s]*)\}\*\//) // fix up this regex
+        var modJSON = m[0].replace('/*','').replace('*/','')
+        var modOBJ = JSON.parse(modJSON)
+        modOBJ.scope.forEach(function (scope) { // push to scoped stream
+          self[scope].push(modJSON)
         })
-      })   
-    })
+      })
+      f.on('end',cb) 
+    } else {
+      cb()
+    }
   }
+
+  self.client.on('data', function (d) {
+    console.log('plexd'+d.toString())
+  })
 }
