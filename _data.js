@@ -1,5 +1,5 @@
 var level = require('level')
-, Dupelx = require('stream').Duplex
+, Duplex = require('stream').Duplex
 , util = require('util')
 
 util.inherits(Data, Duplex)
@@ -11,6 +11,4 @@ function Data (opts) {
   Duplex.call(this)
 
   var SELF = this
-  
-
 }
