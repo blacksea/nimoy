@@ -1,16 +1,14 @@
-var asyncMap = require ('slide').asyncMap
-, stream = require('stream')
-, hash = require('hashish')
-, util = require('util')
-
-util.inherits(Bricoleur, stream.Duplex)
-
-module.exports = Bricoleur
+// var asyncMap = require ('slide').asyncMap
+var stream = require('stream')
+, eventEmitter = require('events').EventEmitter
+, inherits = require('inherits')
 
 function Bricoleur (opts) { // provide a scope option to set server/browser
   if (!(this instanceof Bricoleur)) return new Bricoleur(opts)
   if (!opts) opts = {}
-  stream.Duplex.call(this,opts)
+  stream.Stream.call(this)
+  this.readable = true
+  this.writable = true
 
   // CONSTANTS
   var SELF = this
@@ -23,14 +21,9 @@ function Bricoleur (opts) { // provide a scope option to set server/browser
     
   }
 
-  this._write  = function (chunk,enc,next) {
-    // console.log(chunk.toString())
-    next()
+  this.write  = function (chunk,enc,next) {
+    console.log(chunk.toString())
   }
-
-  this.on('pop', function () {
-    console.log('gumshoe')
-  })
 
   this._read = function (size) {} // !?!
 
@@ -60,3 +53,7 @@ function Bricoleur (opts) { // provide a scope option to set server/browser
     delete self[key]
   } 
 }
+
+inherits(Bricoleur, stream.Stream)
+
+module.exports = Bricoleur
