@@ -19,10 +19,10 @@ module.exports = function (opts, callback) {
   this.client._read = function (size) {}
 
   fs.readdir(DIR, function handleWildsFiles (e, files) {
-    callback(self.server)
+    callback(self)
     asyncMap(files, parse, function doneWildsFiles () {
-      console.log('enddddddd')
-      self.server.push(null)
+      self.server.emit('end') // call end method but dont' close stream
+      self.client.emit('end')
     })
   })
 
@@ -33,7 +33,17 @@ module.exports = function (opts, callback) {
       stats.filepath = filepath
       if (err) console.error(err)
       if (!FILESTAT) FILESTAT = stats
-      if (FILESTAT.size !== stats.size) self.server.emit('change',FILESTAT)
+      if (FILESTAT.size !== stats.size) {
+        var mod = stats.filepath.split('/')[2]
+        var ext = mod.split('.')[1]
+        var file = mod
+        if (ext !== 'js') file = mod.split('.')[0]+'.js' 
+        if (file[0] !== '_') {
+          parse(file, function () {
+            console.log('updated file '+file)
+          })
+        }
+      } 
       FILESTAT = stats
     })
   })
@@ -56,8 +66,4 @@ module.exports = function (opts, callback) {
       cb()
     }
   }
-
-  self.client.on('data', function (d) {
-    console.log('plexd'+d.toString())
-  })
 }

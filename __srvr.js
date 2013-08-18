@@ -1,5 +1,6 @@
 // SERVER START SCRIPT
 var Bricoleur = require('./_brico')
+, Compiler = require('./_cmp')
 , map = require('./_map')
 , rtr = require('./_rtr')
 , usr = require('./_usr')
@@ -9,21 +10,18 @@ var Bricoleur = require('./_brico')
 
 var port = 80 // set port
 
-var _usr = new usr() // setup user
-var _map = new map({dir:'./_wilds', watch:true, css: './_wilds/_css.styl', js:['./__clnt.js']}) // map _wilds modules
+var brico = new Bricoleur()
+var _cmp = new Compiler({end:false})
 
-_usr.buildUsers(function (user) { // fix this
-   Object[user.host] = new Bricoleur(user) // not too sure about this prob a temp hack
-   _map.out.pipe(Object[user.host].in)
+// brico.pipe(process.stdout)
+
+var _map = new map({dir:'./_wilds',end:false}, function mapStream (s) {
+  s.server.pipe(brico)
+  s.client.pipe(_cmp)
 })
 
-_map.survey(function (err) {
- console.log('map survey complete')
-})
-
-// _map.autoUpdate(function (res) {
-//   console.log(res)
-//   ws.emit('data', JSON.stringify({event:'clear'}))
+// _map.on('change', function (stat) {
+//   console.log(stat)
 // })
 
 var _rtr = new rtr() // do routing 
