@@ -78,7 +78,7 @@ function Compiler (opts) {
       next()
     }, function () {
       var bunF = fs.createWriteStream(DIR+'_bundle.js')
-      b.bundle().pipe(bunF)
+      b.bundle({debug:true}).pipe(bunF)
       bunF.on('close', function () {
         console.log('wrote _bundle.js')
         if (opts.compress === true) {
