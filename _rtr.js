@@ -39,23 +39,23 @@ module.exports = function Router (opts) {
     , headers = ws.upgradeReq.headers
     , key = headers['sec-websocket-key']
     , host = headers.host
-    , brico = Object[host]
+    // , brico = Object[host]
 
     // add connection
-    brico.addConnection(key)
-    wss.pipe(brico[key].in)
-    brico[key].out.pipe(wss)
+    // brico.addConnection(key)
+    // wss.pipe(brico[key].in)
+    // brico[key].out.pipe(wss)
 
-    var initObj = {}
-    initObj.client_id = key
-    initObj.usr = brico.usr
-    initObj.map = brico.map.client
-    initObj.map.meta = 'module_map'
-    brico[key].send(initObj)
+    // var initObj = {}
+    // initObj.client_id = key
+    // initObj.usr = brico.usr
+    // initObj.map = brico.map.client
+    // initObj.map.meta = 'module_map'
+    // brico[key].send(initObj)
 
     // when socket closes remove connection
     ws.on('close', function socClosed () {
-      brico.removeConnection(key)
+      // brico.removeConnection(key)
       console.log('soc '+key+' closed!')
     })
   }
