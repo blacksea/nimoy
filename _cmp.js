@@ -23,7 +23,12 @@ function Compiler (opts) {
   , MODS = []
   , B = browserify()
 
+  fs.readFile(DIR+'_css.styl', function (e, buf) { // load base styles
+    CSS += buf.toString()
+  })
+
   this._write = function (chunk, enc, next) {
+    if (READ1===false) MODCOUNT++
     var mod = JSON.parse(chunk.toString())
     handleModule(mod)
     next()
@@ -34,7 +39,6 @@ function Compiler (opts) {
   }
 
   function handleModule (mod) {
-    if (READ1===false) MODCOUNT++
     asyncMap(mod.deps, function readModDeps (file, next) {
       var filepath = DIR+file
       var ext = file.split('.')[1]
@@ -59,14 +63,17 @@ function Compiler (opts) {
       var bunF = fs.createWriteStream(DIR+'_bundle.js')
       B.bundle().pipe(bunF)
       bunF.on('finish', function () {
-        console.log('wrote bundle')
+        console.log('wrote _bundle.js')
       })
       bunF.on('error', function (e) {
         console.error(e)
       })
-      stylus.render(CSS, {filename:'_styles.css'}, function (e) {
+      stylus.render(CSS, {filename:'_styles.css'}, function (e, css) {
         if (e) console.error(e)
-        console.log('wrote css')
+        fs.writeFile(DIR+'_styles.css', css, function (e) {
+          if (e) cosole.error(e)
+          console.log('wrote _styles.css')
+        })
       })
     })
   }
