@@ -85,7 +85,7 @@ function Compiler (opts) {
         if (opts.compress === true) {
           console.log('gonna cmp!')
           var min = uglifyJS.minify('./_wilds/_bundle.js') 
-          fs.writeFile('./_wilds/_bundle.min.js', min.code, function (e) {
+          fs.writeFile('./_wilds/_bundle.js', min.code, function (e) {
             if (!e) console.log('minified bundle')
           })
         }
