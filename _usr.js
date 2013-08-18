@@ -1,6 +1,4 @@
-var redis = require('redis')
-, asyncMap = require('slide').asyncMap
-, client = redis.createClient()
+var asyncMap = require('slide').asyncMap
 , fs = require('fs')
 
 var users = [ // user model
@@ -42,30 +40,15 @@ var users = [ // user model
   }}
 ]
 
-asyncMap(users, function (user, cb) {
-  client.hset('users', user.name, JSON.stringify(user), function (err) {
-    if (err) throw err
-    cb()
-  })
-}, function () {
-  console.log('users added')
-})
-
 module.exports = function () {
   var self = this
 
   this.buildUsers = function (cb) {
-    client.hgetall('users', function (err, users) { 
-      for (user in users) {
-        var usr = JSON.parse(users[user])
-        cb(usr)
-      }
+    asyncMap(users, function (usr, next) {
+      cb(usr)
+      next()
+    }, function () {
+      console.log('users added')
     })
-  }
-
-  this.add = function (usrObj) {
-  }
-
-  this.remove = function (usrObj) {
   }
 }
