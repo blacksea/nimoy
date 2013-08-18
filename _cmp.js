@@ -53,7 +53,7 @@ function Compiler (opts) {
          }
          ready()
        }
-       if (MODCOUNT === MODS.length) {
+       if (MODCOUNT === MODS.length && UPDATE === false) {
          ready()
          UPDATE = true
        }
@@ -80,10 +80,9 @@ function Compiler (opts) {
     }, function () {
       var bunF = fs.createWriteStream(DIR+'_bundle.js')
       b.bundle().pipe(bunF)
-      bunF.on('finish', function () {
-        console.log('wrote _bundle.js')
+      bunF.on('close', function () {
+        console.log('bundle written!')
         if (opts.compress === true) {
-          console.log('gonna cmp!')
           var min = uglifyJS.minify('./_wilds/_bundle.js') 
           fs.writeFile('./_wilds/_bundle.js', min.code, function (e) {
             if (!e) console.log('minified bundle')
