@@ -70,6 +70,7 @@ function Compiler (opts) {
   }
 
   function compile (CSS) {
+    B.add('./__clnt.js')
     asyncMap(MODS, function (mod, next) {
       if (mod.styl) CSS += mod.styl // add style to css
       var fil = DIR+mod.id+'.js'
