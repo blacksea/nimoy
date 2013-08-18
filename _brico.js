@@ -17,14 +17,20 @@ function Bricoleur (opts) { // provide a scope option to set server/browser
   , MAP = null
   , _ = {} // module scope
 
+  // browser scope needs to handle html templates
+
   this.compile = function compileClient (next) {
     
   }
 
   this._write  = function (chunk,enc,next) {
-    console.log(chunk.toString())
+    // console.log(chunk.toString())
     next()
   }
+
+  this.on('pop', function () {
+    console.log('gumshoe')
+  })
 
   this._read = function (size) {} // !?!
 
