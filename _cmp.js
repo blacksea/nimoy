@@ -61,6 +61,7 @@ function Compiler (opts) {
   }
 
   function ready () {
+    var CSS = ''
     fs.readFile(DIR+'_css.styl', function (e, buf) { // load base styles
       if (e) console.error(e)
       CSS += buf.toString()
