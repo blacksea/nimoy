@@ -51,39 +51,43 @@ function Compiler (opts) {
            var m = MODS[i]
            if (m.id === mod.id) MODS[i] = mod 
          }
-         self.compile()
+         ready()
        }
        if (MODCOUNT === MODS.length) {
-         self.compile()
+         ready()
          UPDATE = true
        }
     })
   }
 
-  this.compile = function () {
-    var CSS = ''
+  function ready () {
     fs.readFile(DIR+'_css.styl', function (e, buf) { // load base styles
+      if (e) console.error(e)
       CSS += buf.toString()
-      asyncMap(MODS, function (mod, next) {
-        if (mod.styl) CSS += mod.styl // add style to css
-        var fil = DIR+mod.id+'.js'
-        B.add(DIR+mod.id+'.js') // add js to browserify
-        next()
-      }, function () {
-        var bunF = fs.createWriteStream(DIR+'_bundle.js')
-        B.bundle().pipe(bunF)
-        bunF.on('finish', function () {
-          console.log('wrote _bundle.js')
-        })
-        bunF.on('error', function (e) {
-          console.error(e)
-        })
-        stylus.render(CSS, {filename:'_styles.css'}, function (e, css) {
-          if (e) console.error(e)
-          fs.writeFile(DIR+'_styles.css', css, function (e) {
-            if (e) cosole.error(e)
-            console.log('wrote _styles.css')
-          })
+      compile(CSS) 
+    })
+  }
+
+  function compile (CSS) {
+    asyncMap(MODS, function (mod, next) {
+      if (mod.styl) CSS += mod.styl // add style to css
+      var fil = DIR+mod.id+'.js'
+      B.add(DIR+mod.id+'.js') // add js to browserify
+      next()
+    }, function () {
+      var bunF = fs.createWriteStream(DIR+'_bundle.js')
+      B.bundle().pipe(bunF)
+      bunF.on('finish', function () {
+        console.log('wrote _bundle.js')
+      })
+      bunF.on('error', function (e) {
+        console.error(e)
+      })
+      stylus.render(CSS, {filename:'_styles.css'}, function (e, css) {
+        if (e) console.error(e)
+        fs.writeFile(DIR+'_styles.css', css, function (e) {
+          if (e) cosole.error(e)
+          console.log('wrote _styles.css')
         })
       })
     })
