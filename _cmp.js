@@ -22,7 +22,6 @@ function Compiler (opts) {
   , UPDATE = false
   , MODCOUNT = 0
   , MODS = []
-  , B = browserify()
 
 
   this._write = function (chunk, enc, next) {
@@ -71,15 +70,16 @@ function Compiler (opts) {
   }
 
   function compile (CSS) {
-    B.add('./__clnt.js')
+    var b = browserify()
+    b.add('./__clnt.js')
     asyncMap(MODS, function (mod, next) {
       if (mod.styl) CSS += mod.styl // add style to css
       var fil = DIR+mod.id+'.js'
-      B.add(DIR+mod.id+'.js') // add js to browserify
+      b.add(DIR+mod.id+'.js') // add js to browserify
       next()
     }, function () {
       var bunF = fs.createWriteStream(DIR+'_bundle.js')
-      B.bundle().pipe(bunF)
+      b.bundle().pipe(bunF)
       bunF.on('finish', function () {
         console.log('wrote _bundle.js')
         if (opts.compress === true) {
