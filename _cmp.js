@@ -14,6 +14,7 @@ module.exports = Compiler
 function Compiler (opts) {
   if (!(this instanceof Compiler)) return new Compiler(opts)
   Duplex.call(this, opts)
+  console.log(opts)
 
   var self = this
   , DIR = './_wilds/'
@@ -81,6 +82,13 @@ function Compiler (opts) {
       B.bundle().pipe(bunF)
       bunF.on('finish', function () {
         console.log('wrote _bundle.js')
+        if (opts.compress === true) {
+          console.log('gonna cmp!')
+          var min = uglifyJS.minify('./_wilds/_bundle.js') 
+          fs.writeFile('./_wilds/_bundle.min.js', min.code, function (e) {
+            if (!e) console.log('minified bundle')
+          })
+        }
       })
       bunF.on('error', function (e) {
         console.error(e)
