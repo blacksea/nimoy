@@ -18,14 +18,11 @@ function Compiler (opts) {
   var self = this
   , DIR = './_wilds/'
   , READ1 = false
-  , CSS = ''
+  , UPDATE = false
   , MODCOUNT = 0
   , MODS = []
   , B = browserify()
 
-  fs.readFile(DIR+'_css.styl', function (e, buf) { // load base styles
-    CSS += buf.toString()
-  })
 
   this._write = function (chunk, enc, next) {
     if (READ1===false) MODCOUNT++
@@ -48,31 +45,45 @@ function Compiler (opts) {
         next()
       })
     }, function handledDeps () {
-       MODS.push(mod) 
-       if (MODCOUNT === MODS.length) self.compile()
+       if (UPDATE === false) MODS.push(mod) 
+       if (UPDATE === true) {
+         for (var i=0;i<MODS.length;i++) {
+           var m = MODS[i]
+           if (m.id === mod.id) MODS[i] = mod 
+         }
+         self.compile()
+       }
+       if (MODCOUNT === MODS.length) {
+         self.compile()
+         UPDATE = true
+       }
     })
   }
 
   this.compile = function () {
-    asyncMap(MODS, function (mod, next) {
-      if (mod.styl) CSS += mod.styl // add style to css
-      var fil = DIR+mod.id+'.js'
-      B.add(DIR+mod.id+'.js') // add js to browserify
-      next()
-    }, function () {
-      var bunF = fs.createWriteStream(DIR+'_bundle.js')
-      B.bundle().pipe(bunF)
-      bunF.on('finish', function () {
-        console.log('wrote _bundle.js')
-      })
-      bunF.on('error', function (e) {
-        console.error(e)
-      })
-      stylus.render(CSS, {filename:'_styles.css'}, function (e, css) {
-        if (e) console.error(e)
-        fs.writeFile(DIR+'_styles.css', css, function (e) {
-          if (e) cosole.error(e)
-          console.log('wrote _styles.css')
+    var CSS = ''
+    fs.readFile(DIR+'_css.styl', function (e, buf) { // load base styles
+      CSS += buf.toString()
+      asyncMap(MODS, function (mod, next) {
+        if (mod.styl) CSS += mod.styl // add style to css
+        var fil = DIR+mod.id+'.js'
+        B.add(DIR+mod.id+'.js') // add js to browserify
+        next()
+      }, function () {
+        var bunF = fs.createWriteStream(DIR+'_bundle.js')
+        B.bundle().pipe(bunF)
+        bunF.on('finish', function () {
+          console.log('wrote _bundle.js')
+        })
+        bunF.on('error', function (e) {
+          console.error(e)
+        })
+        stylus.render(CSS, {filename:'_styles.css'}, function (e, css) {
+          if (e) console.error(e)
+          fs.writeFile(DIR+'_styles.css', css, function (e) {
+            if (e) cosole.error(e)
+            console.log('wrote _styles.css')
+          })
         })
       })
     })
