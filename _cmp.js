@@ -14,7 +14,6 @@ module.exports = Compiler
 function Compiler (opts) {
   if (!(this instanceof Compiler)) return new Compiler(opts)
   Duplex.call(this, opts)
-  console.log(opts)
 
   var self = this
   , DIR = './_wilds/'
