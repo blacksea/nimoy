@@ -3,10 +3,10 @@ var Duplex = require('stream').Duplex
 , browserify = require('browserify')
 , uglifyJS = require('uglify-js')
 , stylus = require('stylus') 
-, util = require('util')
+, inherits = require('inherits')
 , fs = require('fs')
 
-util.inherits(Compiler, Duplex)
+inherits(Compiler, Duplex);
 
 module.exports = Compiler
 // compiler prepares files for client
@@ -21,7 +21,6 @@ function Compiler (opts) {
   , UPDATE = false
   , MODCOUNT = 0
   , MODS = []
-
 
   this._write = function (chunk, enc, next) {
     if (READ1===false) MODCOUNT++
