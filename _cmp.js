@@ -80,11 +80,11 @@ function Compiler (opts) {
       var bunF = fs.createWriteStream(DIR+'_bundle.js')
       b.bundle().pipe(bunF)
       bunF.on('close', function () {
-        console.log('bundle written!')
+        console.log('wrote _bundle.js')
         if (opts.compress === true) {
           var min = uglifyJS.minify('./_wilds/_bundle.js') 
           fs.writeFile('./_wilds/_bundle.js', min.code, function (e) {
-            if (!e) console.log('minified bundle')
+            if (!e) console.log('wrote minified _bundle.js')
           })
         }
       })
