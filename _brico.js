@@ -12,10 +12,7 @@ function Bricoleur (opts) { // provide a scope option to set server/browser
   // CONSTANTS
   var SELF = this
   , MAP = null
-  , BROWSER = false
   , _ = {} // module scope
-
-  if (process.browser) BROWSER = true
 
   this.write  = function (chunk, enc, next) {
     console.log(chunk.toString())
@@ -25,24 +22,31 @@ function Bricoleur (opts) { // provide a scope option to set server/browser
 
   this.end = function () {}
 
-  this.loadModule = function (mod) {
+  this.make = function (mod) {
     console.log('loading mod '+mod.id)
-    if (BROWSER===true&&mod.html){
+    if (process.browser&&mod.html){
       var m = require(mod.id.toUpperCase())
       _[mod.id] = new m(mod.html)
     }
   }
 
-  this.unloadModule = function (mod) {
-
+  this.unmake = function (mod) {
+    if (process.browser) mod.destroy()
   }
 
-  this.connect = function (mod,mod) {
-
-  }
-
-  this.disconnect = function (mod,mod) {
-
+  this.conn = function (conns) {
+    conns.forEach(function handleConnection (conn) {
+      if (conn.match(/\+/)!==null) {
+        var modA = conn.split('+')[0]
+        , modB = conn.split('+')[1]
+        modA.pipe(modB)
+      }
+      if (conn.match(/\+/)!==null) {
+        var modA = conn.split('-')[0]
+        , modB = conn.split('-')[1]
+        modA.unpipe(modB)
+      }
+    })
   }
 
   this.addConnection = function (key) { // user socket connection
