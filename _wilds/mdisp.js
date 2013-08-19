@@ -4,25 +4,30 @@
 	"desc":"micro display",
   "deps":["mdisp.html","mdisp.styl"]
 }*/
-var telepath = require('tele')
+var stream = require('stream')
+, inherits = require('inherits')
 
-module.exports = function () {
+function mdisp (template) {
+  if (!(this instanceof mdisp)) return new mdisp(template)
+  stream.Stream.call(this)
+  this.readable = true
+  this.writable = true
   var self = this
   , element = null
-  telepath(this)
 
-  this.recv = function (buffer) {
-    var data = JSON.parse(buffer.toString())
-    console.dir(data)
-    if (data.dest==='mdisp') {
-     console.log('write!') 
-    }
+  this._read = function (size) {}
+  this.write = function (chunk) {
+    console.log(chunk)
   }
 
-  this.render = function (html) {
+  render(template)
+
+  function render (html) {
     var container = document.getElementById('container')
     disp = document.createElement('div')
     disp.innerHTML = html
     container.appendChild(disp)
   }
 }
+inherits(mdisp,stream.Stream)
+module.exports = mdisp 
