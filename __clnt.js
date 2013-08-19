@@ -6,17 +6,12 @@ var websocket = require('websocket-stream')
 
 var brico = new bricoleur()
 
-ws.pipe(brico)
+setTimeout(function () {
+  brico.conn(['console+mdisp'])
+}, 3000)
 
-// ws.on('data', function (buffer) {
-//   console.log(buffer)
-//   var data = JSON.parse(buffer)
-//   if (data.client_id) {
-//     var brico = new bricoleur(data.usr)
-//     brico.map.client = data.map
-//     brico.client_id = data.client_id
-//     ws.pipe(brico.in) 
-//     brico.out.pipe(ws)
-//     brico.build()
-//   }
-// })
+ws.on('data', function (buffer) {
+  var data = JSON.parse(buffer)
+  console.log(data)
+  if (data.id) brico.make(data)
+})
