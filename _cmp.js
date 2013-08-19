@@ -9,16 +9,15 @@ var Duplex = require('stream').Duplex
 inherits(Compiler, Duplex);
 
 module.exports = Compiler
-// compiler prepares files for client
 
-function Compiler (opts) {
+function Compiler (opts) { // compiler prepares files for client
   if (!(this instanceof Compiler)) return new Compiler(opts)
   Duplex.call(this, opts)
 
   var self = this
   , DIR = './_wilds/'
-  , READ1 = false
   , UPDATE = false
+  , READ1 = false
   , MODCOUNT = 0
   , MODS = []
 
@@ -31,6 +30,10 @@ function Compiler (opts) {
 
   this.end = function () {
     READ1 = true
+  }
+
+  this.getMods = function (cb) {
+    cb(MODS)
   }
 
   function handleModule (mod) {
@@ -73,7 +76,7 @@ function Compiler (opts) {
     asyncMap(MODS, function (mod, next) {
       if (mod.styl) CSS += mod.styl // add style to css
       var fil = DIR+mod.id+'.js'
-      b.add(DIR+mod.id+'.js') // add js to browserify
+      b.require(DIR+mod.id+'.js',{expose:mod.id.toUpperCase()}) // add js to browserify
       next()
     }, function () {
       var bunF = fs.createWriteStream(DIR+'_bundle.js')
