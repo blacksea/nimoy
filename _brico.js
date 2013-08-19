@@ -1,24 +1,23 @@
-// var asyncMap = require ('slide').asyncMap
 var stream = require('stream')
 , eventEmitter = require('events').EventEmitter
 , inherits = require('inherits')
 
 function Bricoleur (opts) { // provide a scope option to set server/browser
   if (!(this instanceof Bricoleur)) return new Bricoleur(opts)
-  if (!opts) opts = {}
   stream.Stream.call(this)
+  if (!opts) opts = {}
   this.readable = true
   this.writable = true
 
   // CONSTANTS
   var SELF = this
   , MAP = null
+  , BROWSER = false
   , _ = {} // module scope
 
-  // browser scope needs to handle html templates
+  if (process.browser) BROWSER = true
 
   this.compile = function compileClient (next) {
-    
   }
 
   this.write  = function (chunk,enc,next) {
@@ -35,12 +34,14 @@ function Bricoleur (opts) { // provide a scope option to set server/browser
     var s = self[key]
     s.id = key
     self.conns.push(key)
+
     // add write stream
     s.in = new stream.Writable()
     s.in._write = function (chunk, encoding, cb) {
-      self.recv(chunk) // add id to obj -- for filtering
+      self.recv(chunk)  
       cb()
     }
+
     // add read stream
     s.out = new stream()
     s.out.readable = true
@@ -48,6 +49,7 @@ function Bricoleur (opts) { // provide a scope option to set server/browser
       s.out.emit('data',JSON.stringify(data))
     }
   }
+
   this.removeConnection = function (key) {
     self[key].out.emit('close')
     delete self[key]
@@ -55,5 +57,4 @@ function Bricoleur (opts) { // provide a scope option to set server/browser
 }
 
 inherits(Bricoleur, stream.Stream)
-
 module.exports = Bricoleur
