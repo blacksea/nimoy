@@ -1,9 +1,16 @@
 // HTTP ROUTER
 var filed = require('filed')
 , ws_stream = require('websocket-stream')
+, inherits = require('inherits')
+, Writable = require('stream').Writable
 , asyncMap = require('slide').asyncMap
 
-module.exports = function Router (opts) { 
+inherits(Router, Writable)
+
+module.exports = Router
+
+function Router (opts) { 
+  Writable.call(this)
   if (!opts) var opts = [
     {url:"/",
     file:"./_wilds/_index.html"},
@@ -12,6 +19,12 @@ module.exports = function Router (opts) {
     {url:"/_styles.css",
     file:"./_wilds/_styles.css"}
   ]
+
+  this._write = function (chunk,enc,next) {
+    var map = chunk.toString()
+    console.log(chunk)    
+    next()
+  }
 
   this.handleReqs = function (req, res) {
     var match = false
@@ -33,30 +46,29 @@ module.exports = function Router (opts) {
       }
     })
   }
-
-  this.handleSoc = function (ws) { // new connection
-    var wss = ws_stream(ws)
-    , headers = ws.upgradeReq.headers
-    , key = headers['sec-websocket-key']
-    , host = headers.host
-    // , brico = Object[host]
-
-    // add connection
-    // brico.addConnection(key)
-    // wss.pipe(brico[key].in)
-    // brico[key].out.pipe(wss)
-
-    // var initObj = {}
-    // initObj.client_id = key
-    // initObj.usr = brico.usr
-    // initObj.map = brico.map.client
-    // initObj.map.meta = 'module_map'
-    // brico[key].send(initObj)
-
-    // when socket closes remove connection
-    ws.on('close', function socClosed () {
-      // brico.removeConnection(key)
-      console.log('soc '+key+' closed!')
-    })
-  }
 }
+// this.handleSoc = function (ws) { // new connection
+//   var wss = ws_stream(ws)
+//   , headers = ws.upgradeReq.headers
+//   , key = headers['sec-websocket-key']
+//   , host = headers.host
+//   // , brico = Object[host]
+
+//   // add connection
+//   // brico.addConnection(key)
+//   // wss.pipe(brico[key].in)
+//   // brico[key].out.pipe(wss)
+
+//   // var initObj = {}
+//   // initObj.client_id = key
+//   // initObj.usr = brico.usr
+//   // initObj.map = brico.map.client
+//   // initObj.map.meta = 'module_map'
+//   // brico[key].send(initObj)
+
+//   // when socket closes remove connection
+//   ws.on('close', function socClosed () {
+//     // brico.removeConnection(key)
+//     console.log('soc '+key+' closed!')
+//   })
+// }
