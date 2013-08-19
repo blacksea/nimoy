@@ -8,6 +8,7 @@ function Bricoleur (opts) { // provide a scope option to set server/browser
   if (!opts) opts = {}
   this.readable = true
   this.writable = true
+  this._buffer = []
 
   // CONSTANTS
   var SELF = this
@@ -23,10 +24,11 @@ function Bricoleur (opts) { // provide a scope option to set server/browser
   this.end = function () {}
 
   this.make = function (mod) {
-    console.log('loading mod '+mod.id)
     if (process.browser&&mod.html){
       var m = require(mod.id.toUpperCase())
-      _[mod.id] = new m(mod.html)
+      var modo = new m(mod.html)
+      console.log(modo)
+      _[mod.id] = modo
     }
   }
 
@@ -39,9 +41,9 @@ function Bricoleur (opts) { // provide a scope option to set server/browser
       if (conn.match(/\+/)!==null) {
         var modA = conn.split('+')[0]
         , modB = conn.split('+')[1]
-        modA.pipe(modB)
+        _[modA].pipe(_[modB])
       }
-      if (conn.match(/\+/)!==null) {
+      if (conn.match(/\-/)!==null) {
         var modA = conn.split('-')[0]
         , modB = conn.split('-')[1]
         modA.unpipe(modB)
