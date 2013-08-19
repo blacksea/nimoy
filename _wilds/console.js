@@ -4,18 +4,29 @@
 	"desc":"cli",
   "deps":["console.html","console.styl"]
 }*/
-var telepath = require('tele')
+var stream = require('stream')
+, inherits = require('inherits')
 
-module.exports = function () {
+function Console (template) {
+  if (!(this instanceof Console)) return new Console(template)
+  stream.Stream.call(this)
+  this.readable = true
+  this.writable = true
+  this._buffer = []
   var self = this
-  telepath(this)
 
-  this.recv = function (buffer) {
-    var data = JSON.parse(buffer.toString())
-    console.dir(data)
+  this.write = function (chunk, enc, next) {
+    console.log(chunk)
   }
 
-  this.render = function (html) {
+  this._read = function (size) {}
+
+  this.end = function () {}
+
+  render(template)
+
+  function render (html) {
+    console.log(html)
     var container = document.getElementById('container')
     , log = document.createElement('div')
     log.innerHTML = html
@@ -26,7 +37,7 @@ module.exports = function () {
     form.onsubmit = function (e) {
       e.preventDefault()
       var cmd = e.target[0].value
-      self.send({cmd:cmd})
+      self.emit('data', JSON.stringify({cmd:cmd}))
       prompt.blur()
     }
 
@@ -39,3 +50,6 @@ module.exports = function () {
     }
   }
 }
+
+inherits(Console,stream.Stream)
+module.exports = Console
