@@ -63,29 +63,30 @@ function Compiler (opts) { // compiler prepares files for client
 
   function ready () {
     var CSS = ''
-    fs.readFile(DIR+'_css.styl', function (e, buf) { // load base styles
+    fs.readFile(opts.stylesPath, function (e, buf) { // load base styles
       if (e) console.error(e)
       CSS += buf.toString()
       compile(CSS) 
     })
   }
 
+  // refactor this!
   function compile (CSS) {
     var b = browserify()
-    b.add('./__clnt.js')
+    b.add(opts.jsPath)
     asyncMap(MODS, function (mod, next) {
       if (mod.styl) CSS += mod.styl // add style to css
       var fil = DIR+mod.id+'.js'
       b.require(DIR+mod.id+'.js',{expose:mod.id.toUpperCase()}) // add js to browserify
       next()
     }, function () {
-      var bunF = fs.createWriteStream(DIR+'_bundle.js')
+      var bunF = fs.createWriteStream(opts.bundlePath)
       b.bundle({debug:true}).pipe(bunF)
       bunF.on('close', function () {
         console.log('wrote _bundle.js')
         if (opts.compress === true) {
-          var min = uglifyJS.minify('./_wilds/_bundle.js') 
-          fs.writeFile('./_wilds/_bundle.js', min.code, function (e) {
+          var min = uglifyJS.minify(opts.bundlePath) 
+          fs.writeFile(opts.bundlePath, min.code, function (e) {
             if (!e) console.log('wrote minified _bundle.js')
           })
         }
@@ -93,9 +94,9 @@ function Compiler (opts) { // compiler prepares files for client
       bunF.on('error', function (e) {
         console.error(e)
       })
-      stylus.render(CSS, {filename:'_styles.css'}, function (e, css) {
+      stylus.render(CSS, {filename:opts.cssPath}, function (e, css) {
         if (e) console.error(e)
-        fs.writeFile(DIR+'_styles.css', css, function (e) {
+        fs.writeFile(opts.cssPath, css, function (e) {
           if (e) cosole.error(e)
           console.log('wrote _styles.css')
         })
