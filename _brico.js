@@ -1,5 +1,4 @@
 var stream = require('stream')
-, eventEmitter = require('events').EventEmitter
 , inherits = require('inherits')
 
 function Bricoleur (opts) { // provide a scope option to set server/browser
@@ -10,8 +9,11 @@ function Bricoleur (opts) { // provide a scope option to set server/browser
   this.writable = true
   this._buffer = []
 
+  // use a custom event for updating environment
+  // hook env data into local storage for cache or db for saving
+
   // CONSTANTS
-  var SELF = this
+  var self = this
   , MAP = null
   , _ = {} // module scope
 
