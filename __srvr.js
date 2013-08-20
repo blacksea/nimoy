@@ -12,7 +12,15 @@ var Bricoleur = require('./_brico')
 var port = 80 // set port
 
 var brico = new Bricoleur()
-var _cmp = new Compiler({compress:false,stylesPath:'./_wilds/_css.styl',jsPath:'./__clnt.js',bundlePath:'./_wilds/_bundle.js'})
+
+var _cmp = new Compiler({
+  compress:false,
+  stylesPath:'./_wilds/_css.styl',
+  jsPath:'./__clnt.js',
+  cssPath: './_wilds/_styles.css',
+  bundlePath:'./_wilds/_bundle.js'
+})
+
 var _map = new map({dir:'./_wilds'}, function mapStream (s) {
   s.server.pipe(brico)
   s.client.pipe(_cmp)
