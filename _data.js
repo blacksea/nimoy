@@ -1,14 +1,13 @@
 var level = require('level')
 , Duplex = require('stream').Duplex
-, util = require('util')
+, inherits = require('inherits')
 
-util.inherits(Data, Duplex)
+inherits(Data, Duplex)
 
 module.exports = Data
 
 function Data (opts) {
   if (!(this instanceof Data)) return new Data(opts)
   Duplex.call(this)
-
-  var SELF = this
+  var self = this
 }
