@@ -18,13 +18,15 @@ function Bricoleur (opts) { // provide a scope option to set server/browser
   , ENV = {}
   , _ = {} // module scope
 
-  this.write  = function (chunk, enc, next) {
-    console.log(chunk.toString())
+  this.write  = function (chunk) {
+    var d = chunk.toString()
+  }
+
+  this.end = function () {
+
   }
 
   this._read = function (size) {} // !?!
-
-  this.end = function () {}
 
   this.make = function (mod) {
     if (process.browser&&mod.html){
