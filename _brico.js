@@ -15,6 +15,7 @@ function Bricoleur (opts) { // provide a scope option to set server/browser
   // CONSTANTS
   var self = this
   , MAP = null
+  , ENV = {}
   , _ = {} // module scope
 
   this.write  = function (chunk, enc, next) {
