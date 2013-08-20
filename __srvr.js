@@ -1,9 +1,9 @@
 // SERVER START SCRIPT
 var Bricoleur = require('./_brico')
 , Compiler = require('./_cmp')
+, data = require('./_data')
 , map = require('./_map')
 , rtr = require('./_rtr')
-, usr = require('./_usr')
 , http = require('http')
 , fs = require('fs')
 , ws = require('ws').Server
@@ -12,8 +12,7 @@ var Bricoleur = require('./_brico')
 var port = 80 // set port
 
 var brico = new Bricoleur()
-var _cmp = new Compiler({end:false,compress:false})
-
+var _cmp = new Compiler({compress:false,stylesPath:'./_wilds/_css.styl',jsPath:'./__clnt.js',bundlePath:'./_wilds/_bundle.js'})
 var _map = new map({dir:'./_wilds'}, function mapStream (s) {
   s.server.pipe(brico)
   s.client.pipe(_cmp)
@@ -27,8 +26,9 @@ var wss = new ws({server:server})
 // wss.on('connection', _rtr.handleSoc)
 wss.on('connection', function handleSoc (soc) {
   var s = wsstream(soc)
-  console.log(soc)
   _cmp.getMods(function (mods) {
-    s.write(JSON.stringify(mods[0]))
+    mods.forEach(function (mod) {
+      s.write(JSON.stringify(mod))
+    })
   })
 })
