@@ -29,9 +29,7 @@ function Bricoleur (opts) { // provide a scope option to set server/browser
   this.make = function (mod) {
     if (process.browser&&mod.html){
       var m = require(mod.id.toUpperCase())
-      var modo = new m(mod.html)
-      console.log(modo)
-      _[mod.id] = modo
+      _[mod.id] = new m(mod.html)
     }
   }
 
