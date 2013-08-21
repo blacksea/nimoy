@@ -36,7 +36,7 @@ wss.on('connection', function handleSoc (soc) {
   , headers = soc.upgradeReq.headers
   , key = headers['sec-websocket-key']
 
-  s.write(JSON.stringify({r:'key',v:key}))
+  s.write(JSON.stringify({k:key}))
 
   brico.addSoc(key, function keyAdded () {
     s.pipe(brico[key]).pipe(s)

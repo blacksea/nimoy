@@ -1,4 +1,5 @@
 var stream = require('stream')
+, Duplex = require('stream').Duplex
 , inherits = require('inherits')
 
 function Bricoleur (opts) { 
@@ -15,19 +16,20 @@ function Bricoleur (opts) {
   , _ = {} // module scope
   
   this.addSoc = function (key, cb) { // user socket connection
-    self[key] = new stream.Duplex
-    self[key]._read = function (size) {}
-    self[key]._write = function (chunk,enc,next) { //add key to each obj
+    self[key] = new stream.Stream
+    self[key].writable = true
+    self[key].readable = true
+    self[key].read = function (size) {}
+    self[key].end = function () {
+      console.log('closed')
+    }
+    self[key].write = function (chunk) { //add key to each obj
       var d = JSON.parse(chunk.toString())
       d.k = key
       self.recv(d)
-      next()
     }
-    var s = self[key]
-    s.id = key
     cb()
   }
-
   this.rmSoc = function (key) {
     self[key].emit('close')
     delete self[key]
@@ -43,10 +45,10 @@ function Bricoleur (opts) {
   }
 
   function handleRoute (d) {
-      switch (d.r) {
-        case 'key' : self.ID = d.v; console.log(self.ID);break;
-        default : console.error('route not recognized');break;
-      } 
+    switch (d.r) {
+      case 'key' : self.ID = d.v; console.log(self.ID);break;
+      default : console.error('route not recognized');break;
+    } 
   }
   function make (mod) {
     if (process.browser&&mod.html){
