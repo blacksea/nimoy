@@ -38,7 +38,7 @@ wss.on('connection', function handleSoc (soc) {
 
   s.write(JSON.stringify({r:'key',v:key}))
 
-  brico.addConnection(key, function keyAdded () {
+  brico.addSoc(key, function keyAdded () {
     s.pipe(brico[key]).pipe(s)
   })
 
