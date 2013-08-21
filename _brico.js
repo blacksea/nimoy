@@ -1,7 +1,7 @@
 var stream = require('stream')
 , inherits = require('inherits')
 
-function Bricoleur (opts) { // provide a scope option to set server/browser
+function Bricoleur (opts) { 
   if (!(this instanceof Bricoleur)) return new Bricoleur(opts)
   stream.Stream.call(this)
   if (!opts) opts = {}
@@ -9,34 +9,32 @@ function Bricoleur (opts) { // provide a scope option to set server/browser
   this.writable = true
   this._buffer = []
 
-  // use a custom event for updating environment
-  // hook env data into local storage for cache or db for saving
-
-  // CONSTANTS
   var self = this
   , MAP = null
   , ENV = {}
   , _ = {} // module scope
 
-  this.write  = function (chunk) {
-    var d = chunk.toString()
-  }
-
-  this.end = function () {
-
-  }
-
   this._read = function (size) {} // !?!
+  this.end = function () {}
+
+  this.write  = function (chunk) {
+    var d = JSON.parse(chunk.toString())
+    if (d.r&&d.v) handleRoute(d)
+    if (d.cmd&&d.val) self[d.cmd](d.val) // point cmd to internal function 
+  }
+
+  function handleRoute (d) {
+    switch (d.r) {
+      case 'key' : self.ID = d.v; console.log(self.ID);break;
+      default : console.error('route not recognized');break;
+    } 
+  }
 
   this.make = function (mod) {
     if (process.browser&&mod.html){
       var m = require(mod.id.toUpperCase())
       _[mod.id] = new m(mod.html)
     }
-  }
-
-  this.unmake = function (mod) {
-    if (process.browser) mod.destroy()
   }
 
   this.conn = function (conns) {
@@ -54,28 +52,24 @@ function Bricoleur (opts) { // provide a scope option to set server/browser
     })
   }
 
-  this.addConnection = function (key) { // user socket connection
-    self[key] = {}
+  this.unmake = function (mod) {
+    if (process.browser) mod.destroy()
+  }
+
+  this.addConnection = function (key, cb) { // user socket connection
+    self[key] = new stream.Duplex
+    self[key]._read = function (size) {}
+    self[key]._write = function (chunk,enc,next) {
+      self.write(chunk)
+      next()
+    }
     var s = self[key]
     s.id = key
-    self.conns.push(key)
-
-    // add write stream
-    s.in = new stream.Writable()
-    s.in._write = function (chunk, encoding, cb) {
-      self.recv(chunk)  
-      cb()
-    }
-    // add read stream
-    s.out = new stream()
-    s.out.readable = true
-    s.send = function (data) {
-      s.out.emit('data',JSON.stringify(data))
-    }
+    cb()
   }
 
   this.removeConnection = function (key) {
-    self[key].out.emit('close')
+    self[key].emit('close')
     delete self[key]
   } 
 }
