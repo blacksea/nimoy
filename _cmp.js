@@ -14,12 +14,19 @@ function Compiler (opts) { // compiler prepares files for client
   if (!(this instanceof Compiler)) return new Compiler(opts)
   Duplex.call(this, opts)
 
+  // store filepaths & generate index.html
+
   var self = this
   , DIR = './_wilds/'
   , UPDATE = false
   , READ1 = false
   , MODCOUNT = 0
   , MODS = []
+
+  var index = '<!Doctype>\n<html>\n\t<head>\n\t'
+  +'<script type="text/javascript" src="'+bundle+'"</script>'
+  +'<link rel="stylesheet" type="text/css" href="'+stylesheet+'"</link>'
+  +'</head>\n\t<body>\n\t<div id="container"></div>\n\t</body>\n</html>';
 
   this._write = function (chunk, enc, next) {
     if (READ1===false) MODCOUNT++
