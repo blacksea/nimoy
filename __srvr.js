@@ -31,9 +31,17 @@ var server = http.createServer(_rtr.handleReqs) // handle http requests
 server.listen(port)
 
 var wss = new ws({server:server})
-// wss.on('connection', _rtr.handleSoc)
 wss.on('connection', function handleSoc (soc) {
   var s = wsstream(soc)
+  , headers = soc.upgradeReq.headers
+  , key = headers['sec-websocket-key']
+
+  s.write(JSON.stringify({r:'key',v:key}))
+
+  brico.addConnection(key, function keyAdded () {
+    s.pipe(brico[key]).pipe(s)
+  })
+
   _cmp.getMods(function (mods) {
     mods.forEach(function (mod) {
       s.write(JSON.stringify(mod))
