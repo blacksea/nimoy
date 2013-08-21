@@ -41,7 +41,6 @@ function Bricoleur (opts) {
   }
   this.recv = function (d) {
     if (d.r&&d.v) handleRoute(d)
-    if (d.cmd&&d.val) self[d.cmd](d.val) // point cmd to internal function 
   }
 
   function handleRoute (d) {
