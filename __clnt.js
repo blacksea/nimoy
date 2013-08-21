@@ -6,4 +6,11 @@ var Bricoleur = require('./_brico.js')
 
 var brico = new Bricoleur()
 
-ws.pipe(brico).pipe(ws)
+ws.on('data', function (buf) {
+  var d = JSON.parse(buf.toString())
+  if (d.k) {
+    brico.addConnection(d.k, function connectionAdded () {
+      ws.pipe(brico[d.k]).pipe(ws)
+    })
+  }
+})
