@@ -9,7 +9,7 @@ var brico = new Bricoleur()
 ws.on('data', function (buf) {
   var d = JSON.parse(buf.toString())
   if (d.k) {
-    brico.addConnection(d.k, function connectionAdded () {
+    brico.addSoc(d.k, function connectionAdded () {
       ws.pipe(brico[d.k]).pipe(ws)
     })
   }
