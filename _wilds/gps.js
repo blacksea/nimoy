@@ -4,7 +4,7 @@
 	"desc":"interface for gps serial data"
 }*/
 
-// built with wgps module
+//shout out to werners gps: https://github.com/vesteraas/wgps
 
 var SerialPort = require('serialport')
 , Stream = require('stream').Stream
@@ -30,11 +30,11 @@ function Gps (opts) {
 
   serialStream.pipe(this)
 
+  this._read = function (size) {}
   this._write = function (enc, chunk, next) {
     parse(chunk) 
     next()
   }
-  this._read = function (size) {}
   this.end = function () {
     console.log('data end')
   }
@@ -43,8 +43,10 @@ function Gps (opts) {
   })
 
   function parse (data) {
+    console.log(data)
+    // examine nmea sentances from serial and parse
+    // look at werners logic module https://github.com/vesteraas/aarlogic_gps_3t/blob/master/lib/aarlogic_gps_3t.js
     var gd = {
-
     }
     self.emit('data', JSON.stringify(gd))
   }
