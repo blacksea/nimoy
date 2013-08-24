@@ -16,12 +16,10 @@ var Parser = function () {
     var degrees;
     var minutes;
     var seconds;
-
     if (parts[0].length === 4) {
       degrees = parseInt(parts[0].substr(0, 2), 10);
       minutes = parseInt(parts[0].substr(2, 2), 10);
       seconds = parseFloat('0.' + parts[1]) * 60.0;
-
       if (direction.toLowerCase() === 's') {
         sign = -1;
       }
@@ -29,28 +27,29 @@ var Parser = function () {
       degrees = parseInt(parts[0].substr(0, 3), 10);
       minutes = parseInt(parts[0].substr(3, 2), 10);
       seconds = parseFloat('0.' + parts[1]) * 60.0;
-
       if (direction.toLowerCase() === 'w') {
         sign = -1;
       }
     }
     return sign * (degrees + minutes / 60.0 + seconds / 3600.0);
   }
-  // this.GPGGA = function (data, cb) {
-  //   var o = {
-  //     code:        code,
-  //     time:        tools.timestamp_object(parts[pc++]),
-  //     latitude:    tools.decimal_degrees(parts[pc++], parts[pc++]),
-  //     longitude:   tools.decimal_degrees(parts[pc++], parts[pc++]),
-  //     fixQuality: parseInt(parts[pc++], 10),
-  //     numberOfSatellites: parseInt(parts[pc++], 10),
-  //     hdop: parseFloat(parts[pc++]),
-  //     altitudeInMeters: tools.altitude_in_meters(parts[pc++], parts[pc++]),
-  //     heightAboveGeoidInMeters: tools.altitude_in_meters(parts[pc++], parts[pc++]),
-  //     DGPSAgeInSeconds: parseInt(parts[pc++]),
-  //     DGPSStationId: parts[pc++]
-  //   }
-  // }
+  this.GPGGA = function (data, cb) {
+    console.log(data)
+    var o = {
+      code:data[0],
+      time:data[1],
+      latitude:decimalDegrees(data[2], data[3]),
+      longitude:decimalDegrees(data[4], data[5]),
+      fixQuality: parseInt(data[6], 10),
+      numberOfSatellites: parseInt(data[7], 10),
+      hdop: parseFloat(data[8]),
+      altitudeInMeters: data[9],
+      heightAboveGeoidInMeters: data[11],
+      DGPSAgeInSeconds: parseInt(data[13]),
+      DGPSStationId: data[14]
+    }
+    cb(null,o)
+  } 
   // this.GPGSV = function (data, cb) {
   //   var o = {
   //     code:        code,
@@ -69,18 +68,19 @@ var Parser = function () {
   //     satellites: [tools.satellite(parts[pc++], parts[pc++], parts[pc++], parts[pc++]), tools.satellite(parts[pc++], parts[pc++], parts[pc++], parts[pc++]), tools.satellite(parts[pc++], parts[pc++], parts[pc++], parts[pc++]), tools.satellite(parts[pc++], parts[pc++], parts[pc++], parts[pc++])]
   //   }
   // }
-  // this.GPVTG = function (data, cb) {
-  //   var o = {
-  //     code:        code,
-  //     trackMadeGood: parseFloat(parts[1]),
-  //     speedOverGroundInKnots: parseFloat(parts[5]),
-  //     speedOverGroundInKilometersPerHour: parseFloat(parts[7])
-  //   }
-  // }
+  this.GPVTG = function (data, cb) {
+    var o = {
+      code:data[0],
+      trackMadeGood: parseFloat(data[1]),
+      speedOverGroundInKnots: parseFloat(data[5]),
+      speedOverGroundInKilometersPerHour: parseFloat(data[7])
+    }
+    cb(null,o)
+  }
   this.GPRMC = function (data, cb) {
     var o = {
       code:data[0],
-      // time:      tools.timestamp_object(parts[pc++]),
+      // time:tools.timestamp_object(parts[pc++]),
       status:data[2],
       latitude:decimalDegrees(data[3], data[4]),
       longitude:decimalDegrees(data[5], data[6]),
@@ -119,9 +119,9 @@ function Gps (opts) {
     var sentence = chunk.substring(1).split(',')
     var type = sentence[0]
     if (parser[type]) {
-      parser[type](sentence, function handleData (e, d) {
+      parser[type](sentence, function handleData (e, json) {
         if (e) self.emit('error', e)
-        if (!e) self.emit('data', JSON.stringify(d,null,'\t'))
+        if (!e) self.emit('data', JSON.stringify(json,null,'\t'))
       })
     }
   }
