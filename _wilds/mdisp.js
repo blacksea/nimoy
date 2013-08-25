@@ -8,7 +8,6 @@ var stream = require('stream')
 , inherits = require('inherits')
 
 function mdisp (template) {
-  if (!(this instanceof mdisp)) return new mdisp(template)
   stream.Stream.call(this)
   this.readable = true
   this.writable = true
