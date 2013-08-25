@@ -3,7 +3,7 @@ var Bricoleur = require('./_brico')
 , Compiler = require('./_cmp')
 , data = require('./_data')
 , map = require('./_map')
-, rtr = require('./_rtr')
+, rtr = require('./_env')
 , http = require('http')
 , fs = require('fs')
 , ws = require('ws').Server
@@ -31,16 +31,18 @@ var server = http.createServer(_rtr.handleReqs) // handle http requests
 server.listen(port)
 
 var wss = new ws({server:server})
+
 wss.on('connection', function handleSoc (soc) {
   var s = wsstream(soc)
   , headers = soc.upgradeReq.headers
   , key = headers['sec-websocket-key']
 
-  s.write(JSON.stringify({k:key}))
-
   brico.addSoc(key, function keyAdded () {
     s.pipe(brico[key]).pipe(s)
   })
+
+  s.write(JSON.stringify({sk:key}))
+  s.write(JSON.stringify({k:key,test:'tor'}))
 
   _cmp.getMods(function (mods) {
     mods.forEach(function (mod) {
