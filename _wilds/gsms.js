@@ -6,9 +6,9 @@
 
 var stream = require('stream')
 , inherits = require('inherits')
+, gsms = require('gsms')
 
-function Console (template) {
-  if (!(this instanceof Console)) return new Console(template)
+function Gsms (template) {
   stream.Stream.call(this)
   this.readable = true
   this.writable = true
@@ -51,5 +51,5 @@ function Console (template) {
   }
 }
 
-inherits(Console,stream.Stream)
-module.exports = Console
+inherits(Gsms,stream.Stream)
+module.exports = Gsms
