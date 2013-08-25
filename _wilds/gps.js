@@ -24,9 +24,7 @@ var Parser = function () {
         sign = -1;
       }
     } else if (parts[0].length === 5) {
-      degrees = parseInt(parts[0].substr(0, 3), 10);
-      minutes = parseInt(parts[0].substr(3, 2), 10);
-      seconds = parseFloat('0.' + parts[1]) * 60.0;
+      degrees = parseInt(parts[0].substr(0, 3), 10); minutes = parseInt(parts[0].substr(3, 2), 10); seconds = parseFloat('0.' + parts[1]) * 60.0;
       if (direction.toLowerCase() === 'w') {
         sign = -1;
       }
@@ -34,7 +32,6 @@ var Parser = function () {
     return sign * (degrees + minutes / 60.0 + seconds / 3600.0);
   }
   this.GPGGA = function (data, cb) {
-    console.log(data)
     var o = {
       code:data[0],
       time:data[1],
@@ -116,12 +113,13 @@ function Gps (opts) {
 
   this._read = function (size) {}
   this.write = function (chunk) {
+    console.log(chunk)
     var sentence = chunk.substring(1).split(',')
     var type = sentence[0]
     if (parser[type]) {
       parser[type](sentence, function handleData (e, json) {
         if (e) self.emit('error', e)
-        if (!e) self.emit('data', JSON.stringify(json,null,'\t'))
+        if (!e) self.emit('data', JSON.stringify(json,null,2))
       })
     }
   }
@@ -132,6 +130,5 @@ function Gps (opts) {
     console.error(e)
   })
 }  
-
 inherits(Gps, Stream)
 module.exports = Gps
