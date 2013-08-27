@@ -1,9 +1,15 @@
 var Readable = require('stream').Readable
+, inherits = require('inherits')
 , asyncMap = require('slide').asyncMap
 , compressor = require('./_cmp')
 , fs = require('fs')
 
-module.exports = function (opts, callback) {
+inherits(Map, Readable)
+
+module.exports = Map
+
+function Map (opts, callback) {
+  Readable.call(this)
 
   var self = this
   , DESTCSS = './_wilds/_styles.css'
@@ -12,17 +18,13 @@ module.exports = function (opts, callback) {
   , CSS = ''
   , FILESTAT = null
 
-  this.server = new Readable
-  this.client = new Readable
 
-  this.server._read = function (size) {} // WTF!
-  this.client._read = function (size) {}
+  this._read = function (size) {} // WTF!
 
   fs.readdir(DIR, function handleWildsFiles (e, files) {
     callback(self)
     asyncMap(files, parse, function doneWildsFiles () {
-      self.server.emit('end') // call end method but dont' close stream
-      self.client.emit('end')
+      self.emit('end')
     })
   })
 
@@ -58,7 +60,7 @@ module.exports = function (opts, callback) {
         var modJSON = m[0].replace('/*','').replace('*/','')
         var modOBJ = JSON.parse(modJSON)
         modOBJ.scope.forEach(function (scope) { // push to scoped stream
-          self[scope].push(modJSON)
+          self.push(modJSON)
         })
       })
       f.on('end',cb) 
