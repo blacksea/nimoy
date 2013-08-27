@@ -1,17 +1,25 @@
-// HTTP ROUTER
+// ENVIRONMENT
 var filed = require('filed')
-, ws_stream = require('websocket-stream')
+, cmp = require('./_cmp')
 , inherits = require('inherits')
-, Writable = require('stream').Writable
+, Duplex = require('Stream').Duplex
 , asyncMap = require('slide').asyncMap
 
-inherits(Router, Writable)
+inherits(Env, Duplex)
+module.exports = Env
 
-module.exports = Router
+function Env (opts) { 
+  Duplex.call(this)
 
-function Router (opts) { 
-// dynamic index generator
-  Writable.call(this)
+  var _cmp = new Compiler({
+    compress:false,
+    stylesPath:'./_wilds/_css.styl',
+    jsPath:'./__clnt.js',
+    cssPath: './_wilds/_styles.css',
+    bundlePath:'./_wilds/_bundle.js'
+  })
+
+  // dynamic index generator
   if (!opts) var opts = [
     {url:"/",
     file:"./_wilds/_index.html"},
