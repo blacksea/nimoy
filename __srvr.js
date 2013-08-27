@@ -1,6 +1,5 @@
 // SERVER START SCRIPT
 var Bricoleur = require('./_brico')
-, Compiler = require('./_cmp')
 , data = require('./_data')
 , map = require('./_map')
 , rtr = require('./_env')
@@ -13,17 +12,8 @@ var port = 80 // set port
 
 var brico = new Bricoleur()
 
-var _cmp = new Compiler({
-  compress:false,
-  stylesPath:'./_wilds/_css.styl',
-  jsPath:'./__clnt.js',
-  cssPath: './_wilds/_styles.css',
-  bundlePath:'./_wilds/_bundle.js'
-})
-
 var _map = new map({dir:'./_wilds'}, function mapStream (s) {
-  s.server.pipe(brico)
-  s.client.pipe(_cmp)
+  s.pipe(env)
 })
 
 var _rtr = new rtr() // do routing 
@@ -37,7 +27,7 @@ wss.on('connection', function handleSoc (soc) {
   , headers = soc.upgradeReq.headers
   , key = headers['sec-websocket-key']
 
-  brico.addSoc(key, function keyAdded () {
+  brico.socAdd(key, function keyAdded () {
     s.pipe(brico[key]).pipe(s)
   })
 
