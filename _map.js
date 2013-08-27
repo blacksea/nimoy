@@ -58,10 +58,7 @@ function Map (opts, callback) {
         var buf = chunk.toString()
         var m = buf.match(/\/\*\{([\S\s]*)\}\*\//) // fix up this regex
         var modJSON = m[0].replace('/*','').replace('*/','')
-        var modOBJ = JSON.parse(modJSON)
-        modOBJ.scope.forEach(function (scope) { // push to scoped stream
-          self.push(modJSON)
-        })
+        self.push(modJSON)
       })
       f.on('end',cb) 
     } else {
