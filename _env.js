@@ -1,8 +1,8 @@
 // ENVIRONMENT
 var filed = require('filed')
-, cmp = require('./_cmp')
+, Compiler = require('./_cmp')
 , inherits = require('inherits')
-, Duplex = require('Stream').Duplex
+, Duplex = require('stream').Duplex
 , asyncMap = require('slide').asyncMap
 
 inherits(Env, Duplex)
@@ -19,8 +19,7 @@ function Env (opts) {
     bundlePath:'./_wilds/_bundle.js'
   })
 
-  // dynamic index generator
-  if (!opts) var opts = [
+  if (!opts) var opts = [ 
     {url:"/",
     file:"./_wilds/_index.html"},
     {url:"/_bundle.min.js",
@@ -29,10 +28,8 @@ function Env (opts) {
     file:"./_wilds/_styles.css"}
   ]
 
-  this._write = function (chunk,enc,next) {
-    var map = chunk.toString()
-    console.log(chunk)    
-    next()
+  this.write = function (chunk) {
+    console.log(chunk)
   }
 
   this.handleReqs = function (req, res) {
