@@ -1,6 +1,6 @@
 /*{
   "id":"data",
-	"scope":["server"],
+	"scope":["node"],
 	"desc":"data(redis) api/interface"
 }*/
 

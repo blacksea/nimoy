@@ -1,6 +1,6 @@
 /*{
   "id":"mdisp",
-	"scope":["client"],
+	"scope":["browser"],
 	"desc":"micro display",
   "deps":["mdisp.html","mdisp.styl"]
 }*/

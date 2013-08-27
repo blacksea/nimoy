@@ -1,6 +1,6 @@
 /*{
   "id":"gps",
-	"scope":["server"],
+	"scope":["node"],
 	"desc":"interface for gps serial data"
 }*/
 
@@ -130,5 +130,6 @@ function Gps (opts) {
     console.error(e)
   })
 }  
+
 inherits(Gps, Stream)
 module.exports = Gps

@@ -1,6 +1,6 @@
 /*{
   "id":"console",
-	"scope":["client"],
+	"scope":["browser"],
 	"desc":"cli",
   "deps":["console.html","console.styl"]
 }*/
@@ -8,7 +8,6 @@ var stream = require('stream')
 , inherits = require('inherits')
 
 function Console (template) {
-  if (!(this instanceof Console)) return new Console(template)
   stream.Stream.call(this)
   this.readable = true
   this.writable = true
