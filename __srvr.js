@@ -15,7 +15,7 @@ var brico = new Bricoleur()
 var _env = new env()
 
 var _map = new map({dir:'./_wilds'}, function mapStream (s) {
-  s.pipe(_env)
+  s.pipe(_env,{end:false})
 })
 
 var server = http.createServer(_env.handleReqs) // handle http requests
