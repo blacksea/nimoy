@@ -23,6 +23,10 @@ function Bricoleur (opts) { // BRICOLEUR
     self.socSend(d)
   }
 
+  this.addMap = function (map) {
+    MAP = map
+  }
+
   this.socAdd = function (key, cb) { // user socket connection
     self.key = key
     self[key] = new stream.Stream
@@ -46,7 +50,7 @@ function Bricoleur (opts) { // BRICOLEUR
     if (d.k) self[d.k].emit('data', JSON.stringify(d))
   }
   this.socRecv = function (d) {// in from brico
-    if (d.k) console.log(d)
+    if (d.k) console.log(d) // handle input from console
     if (d.r&&d.v) handleRoute(d)
     if (d.id&&d.process) make(d)
   }
@@ -55,7 +59,7 @@ function Bricoleur (opts) { // BRICOLEUR
     delete self[key]
   } 
   
-  function handleRoute (d) {
+  function handleRoute (d) { // direct function call map
     switch (d.r) {
       case 'key' : self.ID = d.v; console.log(self.ID); break;
       case 'con' : conn(d.v); break;
@@ -63,7 +67,6 @@ function Bricoleur (opts) { // BRICOLEUR
     } 
   }
   function make (mod) {
-    console.log(mod)
     if (process.browser&&mod.html) {
       var m = require(mod.id.toUpperCase())
       _[mod.id] = new m(mod.html)
@@ -78,7 +81,6 @@ function Bricoleur (opts) { // BRICOLEUR
         var modA = conn.split('+')[0]
         , modB = conn.split('+')[1]
         _[modA].pipe(_[modB])
-        console.log(_[modB])
       }
       if (conn.match(/\-/) !== null) {
         var modA = conn.split('-')[0]
@@ -88,4 +90,3 @@ function Bricoleur (opts) { // BRICOLEUR
     })
   }
 }
-
