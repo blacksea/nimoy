@@ -1,9 +1,8 @@
 var stream = require('stream')
-, Duplex = require('stream').Duplex
-, inherits = require('inherits')
+
+module.exports = Bricoleur
 
 function Bricoleur (opts) { // BRICOLEUR
-  stream.Stream.call(this)
   if (!opts) opts = {}
   this.readable = true
   this.writable = true
@@ -14,9 +13,18 @@ function Bricoleur (opts) { // BRICOLEUR
   , ENV = {}
   , _ = {} // module scope
 
-  console.log(process.title)
-  
+  _.brico = new stream.Stream
+  _.brico.readable = true
+  _.brico.writable = true
+  _.brico._read = function (size) {}
+  _.brico.write = function (chunk) {
+    var d = JSON.parse(chunk)
+    d.k = self.key
+    self.socSend(d)
+  }
+
   this.socAdd = function (key, cb) { // user socket connection
+    self.key = key
     self[key] = new stream.Stream
     self[key].writable = true
     self[key].readable = true
@@ -38,6 +46,7 @@ function Bricoleur (opts) { // BRICOLEUR
     if (d.k) self[d.k].emit('data', JSON.stringify(d))
   }
   this.socRecv = function (d) {// in from brico
+    if (d.k) console.log(d)
     if (d.r&&d.v) handleRoute(d)
     if (d.id&&d.process) make(d)
   }
@@ -54,6 +63,7 @@ function Bricoleur (opts) { // BRICOLEUR
     } 
   }
   function make (mod) {
+    console.log(mod)
     if (process.browser&&mod.html) {
       var m = require(mod.id.toUpperCase())
       _[mod.id] = new m(mod.html)
@@ -68,6 +78,7 @@ function Bricoleur (opts) { // BRICOLEUR
         var modA = conn.split('+')[0]
         , modB = conn.split('+')[1]
         _[modA].pipe(_[modB])
+        console.log(_[modB])
       }
       if (conn.match(/\-/) !== null) {
         var modA = conn.split('-')[0]
@@ -76,13 +87,5 @@ function Bricoleur (opts) { // BRICOLEUR
       }
     })
   }
-
-  this._read = function (size) {} // !?!
-  this.end = function () {}
-  this.write  = function (chunk) { // get map stream
-    var d = JSON.parse(chunk.toString())
-  }
 }
 
-inherits(Bricoleur, stream.Stream)
-module.exports = Bricoleur
