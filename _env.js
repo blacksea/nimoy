@@ -9,15 +9,11 @@ inherits(Env, Duplex)
 module.exports = Env
 
 function Env (opts) { 
+  var browserMods = []
+  , self = this
   Duplex.call(this)
 
-  var _cmp = new Compiler({
-    compress:false,
-    stylesPath:'./_wilds/_css.styl',
-    jsPath:'./__clnt.js',
-    cssPath: './_wilds/_styles.css',
-    bundlePath:'./_wilds/_bundle.js'
-  })
+  this._read = function (size) {}
 
   if (!opts) var opts = [ 
     {url:"/",
@@ -28,8 +24,32 @@ function Env (opts) {
     file:"./_wilds/_styles.css"}
   ]
 
+  var _cmp = new Compiler({
+    compress:false,
+    stylesPath:'./_wilds/_css.styl',
+    jsPath:'./__clnt.js',
+    cssPath: './_wilds/_styles.css',
+    bundlePath:'./_wilds/_bundle.js'
+  })
+
+  self.pipe(_cmp)
+
   this.write = function (chunk) {
-    console.log(chunk)
+    var mod = JSON.parse(chunk.toString())
+    mod.process.forEach(function (pro) {
+      if (pro==='browser') {
+        self.push(chunk)
+        browserMods.push(mod)
+      }
+    })
+  }
+
+  this.getMods = function (cb) {
+    cb(browserMods)
+  }
+
+  this.end = function () {
+    console.log('compile!')
   }
 
   this.handleReqs = function (req, res) {
