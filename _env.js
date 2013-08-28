@@ -1,9 +1,15 @@
 // ENVIRONMENT
 var filed = require('filed')
+, Bricoleur = require('./_brico')
 , Compiler = require('./_cmp')
-, inherits = require('inherits')
+, Map = require('./_map')
+, Data = require('./_data')
 , Duplex = require('stream').Duplex
+, inherits = require('inherits')
+, ws = require('ws').Server
+, http = require('http')
 , asyncMap = require('slide').asyncMap
+, websocketStream = require('websocket-stream')
 
 inherits(Env, Duplex)
 module.exports = Env
@@ -24,6 +30,37 @@ function Env (opts) {
     file:"./_wilds/_styles.css"}
   ]
 
+  var _map = new Map({end:false,dir:'./_wilds'}, function (s) {
+    s.pipe(self)
+  })
+
+  var brico = new Bricoleur()
+
+  var Server = http.createServer(handleReqs)
+  Server.listen(opts.port)
+
+  var soc = new ws({server:Server})
+  soc.on('connection', function handleSoc (s) {
+    var wss = websocketStream(s)
+    , headers = soc.upgradeReq.headers
+    , key = headers['sec-websocket-key']
+
+    brico.socAdd(key, function keyAdded () {
+      s.pipe(brico[key]).pipe(s)
+    })
+    s.write(JSON.stringify({sk:key}))
+    _cmp.MODS.forEach(function (mod) {
+      s.write(JSON.stringify(mod))
+    })
+    setTimeout(function () {
+      var cmd = {
+        r:'con',
+        v:['console+brico','brico+mdisp']
+      }
+      s.write(JSON.stringify(cmd))
+    }, 200)
+  })
+
   var _cmp = new Compiler({
     compress:false,
     stylesPath:'./_wilds/_css.styl',
@@ -42,10 +79,6 @@ function Env (opts) {
         browserMods.push(mod)
       }
     })
-  }
-
-  this.getMods = function (cb) {
-    cb(browserMods)
   }
 
   this.end = function () {
