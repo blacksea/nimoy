@@ -14,14 +14,15 @@ function Bricoleur (opts) { // BRICOLEUR
   , ENV = {}
   , _ = {} // module scope
 
-  // _.com = new Duplex // module layer
+  console.log(process.title)
   
   this.socAdd = function (key, cb) { // user socket connection
     self[key] = new stream.Stream
     self[key].writable = true
     self[key].readable = true
     self[key].write = function (chunk) {
-      console.log(chunk)
+      var d = JSON.parse(chunk)
+      self.socRecv(d)
     }
     self[key]._read = function (size) {}
     self[key].on('error', function (e) {
@@ -30,15 +31,15 @@ function Bricoleur (opts) { // BRICOLEUR
     self[key].end = function () {
       console.log('closed')
     }
-    //self[key].pipe(_.com).pipe(self[key]) // patch into module scope
     cb()
   }
-  this.socSend = function (d) {
+  this.socSend = function (d) {// out to brico
     if (!d.k) console.error('no client id')
     if (d.k) self[d.k].emit('data', JSON.stringify(d))
   }
-  this.socRecv = function (d) {
+  this.socRecv = function (d) {// in from brico
     if (d.r&&d.v) handleRoute(d)
+    if (d.id&&d.process) make(d)
   }
   this.socRm = function (key) {
     self[key].emit('close')
@@ -46,9 +47,9 @@ function Bricoleur (opts) { // BRICOLEUR
   } 
   
   function handleRoute (d) {
-
     switch (d.r) {
       case 'key' : self.ID = d.v; console.log(self.ID); break;
+      case 'con' : conn(d.v); break;
       default : console.error('route not recognized'); break;
     } 
   }
