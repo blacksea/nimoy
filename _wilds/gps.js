@@ -1,6 +1,6 @@
 /*{
   "id":"gps",
-	"scope":["node"],
+	"process":["node"],
 	"desc":"interface for gps serial data"
 }*/
 
@@ -31,6 +31,7 @@ var Parser = function () {
     }
     return sign * (degrees + minutes / 60.0 + seconds / 3600.0);
   }
+
   this.GPGGA = function (data, cb) {
     var o = {
       code:data[0],

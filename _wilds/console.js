@@ -1,6 +1,6 @@
 /*{
   "id":"console",
-	"scope":["browser"],
+	"process":["browser"],
 	"desc":"cli",
   "deps":["console.html","console.styl"]
 }*/

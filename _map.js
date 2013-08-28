@@ -10,6 +10,7 @@ module.exports = Map
 
 function Map (opts, callback) {
   Readable.call(this)
+  this.readable = true
 
   var self = this
   , DESTCSS = './_wilds/_styles.css'
@@ -42,7 +43,7 @@ function Map (opts, callback) {
         if (ext !== 'js') file = mod.split('.')[0]+'.js' 
         if (file[0] !== '_') {
           parse(file, function () {
-            console.log('updated file '+file)
+            console.log('updated '+file)
           })
         }
       } 
@@ -53,6 +54,7 @@ function Map (opts, callback) {
   function parse (file,cb) {
     var ext = file.split('.')[1]
     if (ext === 'js' && file[0] !=='_') {
+      console.log(file)
       var f = fs.createReadStream(DIR+file)
       f.on('data', function (chunk) {
         var buf = chunk.toString()

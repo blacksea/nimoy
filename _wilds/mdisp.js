@@ -1,6 +1,6 @@
 /*{
   "id":"mdisp",
-	"scope":["browser"],
+	"process":["browser"],
 	"desc":"micro display",
   "deps":["mdisp.html","mdisp.styl"]
 }*/
@@ -28,5 +28,6 @@ function mdisp (template) {
     container.appendChild(disp)
   }
 }
+
 inherits(mdisp,stream.Stream)
 module.exports = mdisp 

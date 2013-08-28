@@ -1,6 +1,6 @@
 /*{
   "id":"gsms",
-	"scope":["node"],
+	"process":["node"],
 	"desc":"google voice sms interface"
 }*/
 
