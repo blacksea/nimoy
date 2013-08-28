@@ -1,13 +1,9 @@
 // SERVER START SCRIPT
-var Env = require('./_env')
-
-var port = 80 // set port
-
-
-var brico = new Bricoleur()
+var Env = require('./_env').node
 
 var _env = new Env({
-
+  port:80,
+  wilds: './_wilds'
 }, function EnvLoaded () {
-
+  
 })
