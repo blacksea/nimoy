@@ -1,5 +1,5 @@
 // BROWSER ENVIRONMENT 
-var Env = require('./_env.js').browser
+var Env = require('./_env.js').browserEnv
 
 var _env = new Env({
   
