@@ -1,8 +1,3 @@
 // BROWSER ENVIRONMENT 
-var Env = require('./_env.js').browserEnv
+var brico = require('./_brico.js')
 
-var _env = new Env({
-  
-}, function () {
-  console.log('created a new environment')
-})
