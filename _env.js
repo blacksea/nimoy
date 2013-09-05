@@ -2,60 +2,49 @@
 var Bricoleur = require('./_brico')
 , inherits = require('inherits')
 
-module.exports.nodeEnv = nodeEnv
-module.exports.browserEnv = browserEnv
-
-function browserEnv (opts, loaded) { // BROWSER ENVIRONMENT
-  // no mapping functionailty is available
+module.exports.browserEnv =  function (opts, loaded) { // BROWSER ENVIRONMENT
   loaded()
 }
 
-function nodeEnv (opts, loaded) { // NODE ENVIRONMENT
+module.exports.nodeEnv =  function (opts, loaded) { // NODE ENVIRONMENT
+  var websocketStream = require('websocket-stream')
+  var asyncMap = require('slide').asyncMap
+  var Compiler = require('./_cmp')
   var filed = require('filed')
   var Map = require('./_map')
-  var Compiler = require('./_cmp')
   var Data = require('./_data')
   var ws = require('ws').Server
   var http = require('http')
-  var asyncMap = require('slide').asyncMap
-  var websocketStream = require('websocket-stream')
 
   var self = this
-
-  if (!opts) var opts = [ 
-    {url:"/",
-    file:"./_wilds/_index.html"},
-    {url:"/_bundle.min.js",
-    file:"./_wilds/_bundle.js"},
-    {url:"/_styles.css",
-    file:"./_wilds/_styles.css"}
-  ]
-
-  var _map = new Map({end:false,dir:'./_wilds'}, function (s) {
-    s.pipe(self)
-  })
-
-  var _cmp = new Compiler({
-    compress:false,
-    stylesPath:'./_wilds/_css.styl',
-    jsPath:'./__clnt.js',
-    cssPath: './_wilds/_styles.css',
-    bundlePath:'./_wilds/_bundle.js'
-  })
-
-  _cmp.on('data', function (d) {
-
-  })
+  , MODS = []
 
   var brico = new Bricoleur()
 
-  var Server = http.createServer(handleReqs)
-  Server.listen(opts.port)
-  
-  var soc = new ws({server:Server})
-  soc.on('connection', newSocket)
+  this.load = function (loaded) {
+    var _cmp = new Compiler({
+      compress:false,
+      stylesPath:'./_wilds/_css.styl',
+      jsPath:'./__b.js',
+      cssPath: './_wilds/_styles.css',
+      bundlePath:'./_wilds/_bundle.js'
+    })
 
-  function newSocket (soc) {
+    var _map = new Map({end:false,dir:'./_wilds'}, function (s) {
+      s.on('data', function (buf) {
+        var mod = JSON.parse(buf)
+        mod.process.forEach(function (p) {
+          if (p === 'browser') _cmp.write(buf)
+          if (p === 'node') MODS.push(mod)
+        })
+      })
+      s.on('end', function () {
+        console.log('mapping done')
+      })
+    })   
+  }
+
+  function newSocket (s) {
     var wss = websocketStream(s)
     , headers = soc.upgradeReq.headers
     , key = headers['sec-websocket-key']
@@ -76,14 +65,23 @@ function nodeEnv (opts, loaded) { // NODE ENVIRONMENT
     }, 200)
   }
 
-  this.handleReqs = function (req, res) {
+  var Routes = [ 
+    {url:"/",
+    file:"./_wilds/_index.html"},
+    {url:"/_bundle.min.js",
+    file:"./_wilds/_bundle.js"},
+    {url:"/_styles.css",
+    file:"./_wilds/_styles.css"}
+  ]
+
+  function handleReqs (req, res) {
     var match = false
     , headers = req.headers
     , origin = headers.referer
     , agent = headers['user-agent']
     , host = headers.host
 
-    asyncMap(opts, function matchFile (route, cb) {
+    asyncMap(Routes, function matchFile (route, cb) {
       if (route.url === req.url) {
         filed(route.file).pipe(res)
         match = true
@@ -96,4 +94,18 @@ function nodeEnv (opts, loaded) { // NODE ENVIRONMENT
       }
     })
   }
+
+  var Server = http.createServer(handleReqs)
+  Server.listen(opts.port)
+
+  var webSoc = new ws({server:Server})
+  // soc.on('connection', newSocket)
+  webSoc.on('connection', function (soc) {
+    var wss = websocketStream(soc)
+    var gps = require('./_wilds/gps.js')
+    var g = new gps()
+    g.pipe(wss)
+//    wss.write(JSON.stringify({bam:'zpppo'}))
+    console.log('new connection!')
+  })
 }
