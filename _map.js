@@ -5,7 +5,6 @@ var Readable = require('stream').Readable
 , fs = require('fs')
 
 inherits(Map, Readable)
-
 module.exports = Map
 
 function Map (opts, callback) {
@@ -18,7 +17,6 @@ function Map (opts, callback) {
   , DIR = opts.dir+'/'
   , CSS = ''
   , FILESTAT = null
-
 
   this._read = function (size) {} // WTF!
 
@@ -54,7 +52,6 @@ function Map (opts, callback) {
   function parse (file,cb) {
     var ext = file.split('.')[1]
     if (ext === 'js' && file[0] !=='_') {
-      console.log(file)
       var f = fs.createReadStream(DIR+file)
       f.on('data', function (chunk) {
         var buf = chunk.toString()
