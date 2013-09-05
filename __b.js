@@ -1,3 +1,9 @@
 // BROWSER ENVIRONMENT 
-var brico = require('./_brico.js')
+if(!Function.prototype.bind) require('./bindshim.js') //kindle jalopy doesn't have bind
+var ws = require('websocket-stream');
+var wss = ws('ws://192.168.1.76/');
 
+wss.on('data', function (d) {
+  var c =document.getElementById('container')
+  c.innerHTML = d
+})
