@@ -1,8 +1,9 @@
+// BRICOLEUR
 var stream = require('stream')
 
 module.exports = Bricoleur
 
-function Bricoleur (opts) { // BRICOLEUR
+function Bricoleur (opts) { 
   if (!opts) opts = {}
   this.readable = true
   this.writable = true
@@ -26,7 +27,6 @@ function Bricoleur (opts) { // BRICOLEUR
   this.addMap = function (map) {
     MAP = map
   }
-
   this.socAdd = function (key, cb) { // user socket connection
     self.key = key
     self[key] = new stream.Stream

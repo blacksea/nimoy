@@ -1,21 +1,22 @@
 // ENVIRONMENT
+var http = require('http')
+var ws = require('ws').Server
+var websocketStream = require('websocket-stream')
+var filed = require('filed')
+
 var Bricoleur = require('./_brico')
-, inherits = require('inherits')
 
-module.exports.browserEnv =  function (opts, loaded) { // BROWSER ENVIRONMENT
-  loaded()
-}
+var Map = require('./_map')
+var Compiler = require('./_cmp')
 
-module.exports.nodeEnv =  function (opts, loaded) { // NODE ENVIRONMENT
-  var websocketStream = require('websocket-stream')
-  var asyncMap = require('slide').asyncMap
-  var Compiler = require('./_cmp')
-  var filed = require('filed')
-  var Map = require('./_map')
-  var Data = require('./_data')
-  var ws = require('ws').Server
-  var http = require('http')
+var Data = require('./_data')
 
+// static file routing 
+// soc-handling
+// data storage
+// process
+
+function Env(opts,loaded) {
   var self = this
   , MODS = []
 
@@ -99,13 +100,10 @@ module.exports.nodeEnv =  function (opts, loaded) { // NODE ENVIRONMENT
   Server.listen(opts.port)
 
   var webSoc = new ws({server:Server})
-  // soc.on('connection', newSocket)
   webSoc.on('connection', function (soc) {
     var wss = websocketStream(soc)
     var gps = require('./_wilds/gps.js')
-    var g = new gps()
-    g.pipe(wss)
-//    wss.write(JSON.stringify({bam:'zpppo'}))
-    console.log('new connection!')
   })
 }
+
+module.exports = Env
