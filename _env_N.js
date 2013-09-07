@@ -55,7 +55,6 @@ function Environment (opts) {
     var ws = websocketStream(soc)
     var headers = soc.upgradeReq.headers
     var key = headers['sec-websocket-key']
-    _
   }
   var webSocket = new ws({server:server})
   webSocket.on('connection', handleSoc)
