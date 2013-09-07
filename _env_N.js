@@ -15,7 +15,7 @@ module.exports = Environment
 function Environment (opts) { 
   var self = this
   , FILES = []
-  , serverMap = []
+  , nodeMap = []
   , browserMap = []
   , data = level(opts.db)
   , _ = {} // brico scope
@@ -58,6 +58,9 @@ function Environment (opts) {
     var ws = websocketStream(soc)
     var headers = soc.upgradeReq.headers
     var key = headers['sec-websocket-key']
+    var host = headers.host
+    _[host].addSocket(key)
+    ws.pipe(_[host][key]).pipe(ws)
   }
   var webSocket = new ws({server:server})
   webSocket.on('connection', handleSoc)
