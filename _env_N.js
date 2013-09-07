@@ -92,14 +92,14 @@ function Environment (opts, running) {
       s.on('data', function (buf) {
         var mod = JSON.parse(buf)
         mod.process.forEach(function (p) {
-          if (p === 'browser') {
-            _cmp.write(buf)
-            browserMap.push(mod)
+          if (p === 'browser')  _cmp.write(buf)
+          for (brico in _) {
+            _[brico].metaStream.write(mod)
           }
-          if (p === 'node') nodeMap.push(mod)
         })
       })
       s.on('end', function () {
+        // set bricos
         console.log('mapping done')
       })
     })   

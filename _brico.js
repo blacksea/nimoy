@@ -1,4 +1,4 @@
-var Stream = require('stream').Stream
+var stream = require('stream')
 
 module.exports = Bricoleur
 
@@ -9,10 +9,11 @@ function Bricoleur (opts) {
 
   // MODULE SCOPE
   var _ = {}
-  _.brico = new Stream
+  _.brico = new stream.Stream
   _.brico.readable = true
   _.brico.writable = true
 
+  // HANDLE SOCKET CONNECTIONS
   this.addSocket = function (id) {
     self[id] = new Stream
     self[id].writable = true
@@ -23,6 +24,18 @@ function Bricoleur (opts) {
     }
   }
 
+  // META STREAM INTERFACE
+  this.metaStream = new stream.Stream
+  this.metaStream.writable = true
+  this.metaStream.readable = true
+  this.metaStream.write = function (chunk) {
+    console.log(chunk)
+  }
+  this.metaStream.end = function () {
+    console.log('brico map done')
+  }
+
+  // API / COMMANDS
   function make (mod) {
   }
 
