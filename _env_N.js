@@ -59,7 +59,6 @@ function Environment (opts) {
     var headers = soc.upgradeReq.headers
     var key = headers['sec-websocket-key']
     var host = headers.host
-    console.log(host)
     _[host].addSocket(key)
     ws.pipe(_[host][key]).pipe(ws)
     ws.on('end', function (d) {
@@ -104,6 +103,7 @@ function Environment (opts) {
     })   
   }
 
+  //ADD USER
   this.addUser = function (user, cb) {
     var id = user.name
     data.get('users', function checkUsers (e, val) {
