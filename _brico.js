@@ -1,13 +1,9 @@
-// BRICOLEUR
 var stream = require('stream')
 
 module.exports = Bricoleur
 
 function Bricoleur (opts) { 
   if (!opts) opts = {}
-  this.readable = true
-  this.writable = true
-  this._buffer = []
 
   var self = this
   , MAP = null
@@ -24,27 +20,6 @@ function Bricoleur (opts) {
     self.socSend(d)
   }
 
-  this.addMap = function (map) {
-    MAP = map
-  }
-  this.socAdd = function (key, cb) { // user socket connection
-    self.key = key
-    self[key] = new stream.Stream
-    self[key].writable = true
-    self[key].readable = true
-    self[key].write = function (chunk) {
-      var d = JSON.parse(chunk)
-      self.socRecv(d)
-    }
-    self[key]._read = function (size) {}
-    self[key].on('error', function (e) {
-      console.error(e)
-    })
-    self[key].end = function () {
-      console.log('closed')
-    }
-    cb()
-  }
   this.socSend = function (d) {// out to brico
     if (!d.k) console.error('no client id')
     if (d.k) self[d.k].emit('data', JSON.stringify(d))
