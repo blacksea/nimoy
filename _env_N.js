@@ -67,7 +67,7 @@ function Environment (opts) {
     var _cmp = new Compiler({// compile for client side
       compress:false,
       stylesPath:'./_wilds/_css.styl',
-      jsPath:'./__b.js',
+      jsPath:'./_env_B.js',
       cssPath: './_wilds/_styles.css',
       bundlePath:'./_wilds/_bundle.js'
     })
