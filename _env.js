@@ -27,19 +27,19 @@ function Env(opts) {
   readdir(opts.wilds, function findStaticFiles (e,files) {
     if (e) console.error(e)
     files.forEach(function matchFile (file) {
-      if (file.substring[0] === '_') FILES.push(file)
+      if (file[0] === '_') FILES.push(file)
     })
   })
 
-  function getStaticFile (path, fileStream) {
-    if (path === '/') path = '/index.html'
+  function getStaticFile (path, filePath) {
+    if (path === '/') path = '/_index.html'
     var file = path.replace('/','')
 
     asyncMap(FILES, function matchPathToStatic (staticFile,cb) {
-      if (file === staticFile) fileStream(filed(opts.wilds+'/'+file))
-      if (file !== staticFile) fileStream(null)
+      if (file === staticFile) filePath(opts.wilds+'/'+file)
+      if (file !== staticFile) filePath(null)
     }, function () {
-      console.log('processed req')
+      console.log('for req '+path+' streamed file '+file)
     })
   }
 
@@ -48,10 +48,8 @@ function Env(opts) {
     , origin = headers.referer
     , agent = headers['user-agent']
     , host = headers.host
-
-    getStaticFile(req.url, function pipeFileStream (stream) {
-      if (stream===null) res.end() // 404
-      stream.pipe(res)
+    getStaticFile(req.url, function pipeFileStream (filepath) {
+      if (filepath !== null) filed(filepath).pipe(res)
     })
   }
 
