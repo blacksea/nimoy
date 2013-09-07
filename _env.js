@@ -1,7 +1,10 @@
 // ENVIRONMENT
-var http = require('http')
+var readdir = require('fs').readdir
+
 var ws = require('ws').Server
 var websocketStream = require('websocket-stream')
+
+var http = require('http')
 var filed = require('filed')
 
 var Bricoleur = require('./_brico')
@@ -11,17 +14,63 @@ var Compiler = require('./_cmp')
 
 var Data = require('./_data')
 
-// static file routing 
-// soc-handling
-// data storage
-// process
+var asyncMap = require('slide').asyncMap
 
-function Env(opts,loaded) {
+module.exports = Env
+
+function Env(opts) {
   var self = this
+  , FILES = []
   , MODS = []
 
-  var brico = new Bricoleur()
+  // HANDLE STATIC FILES
+  readdir(opts.wilds, function findStaticFiles (e,files) {
+    if (e) console.error(e)
+    files.forEach(function matchFile (file) {
+      if (file.substring[0] === '_') FILES.push(file)
+    })
+  })
 
+  function getStaticFile (path, fileStream) {
+    if (path === '/') path = '/index.html'
+    var file = path.replace('/','')
+
+    asyncMap(FILES, function matchPathToStatic (staticFile,cb) {
+      if (file === staticFile) fileStream(filed(opts.wilds+'/'+file))
+      if (file !== staticFile) fileStream(null)
+    }, function () {
+      console.log('processed req')
+    })
+  }
+
+  function handleReqs (req, res) {
+    var headers = req.headers
+    , origin = headers.referer
+    , agent = headers['user-agent']
+    , host = headers.host
+
+    getStaticFile(req.url, function pipeFileStream (stream) {
+      if (stream===null) res.end() // 404
+      stream.pipe(res)
+    })
+  }
+
+  // CREATE A NEW HTTP SERVER
+  var server = http.createServer(handleReqs)
+  server.listen(opts.port, function () {
+    console.log('running on port '+opts.port)
+  })
+
+  function handleSoc (soc) {
+    var ws = websocketStream(soc)
+    var headers = soc.upgradeReq.headers
+    var key = headers['sec-websocket-key']
+  }
+  
+  // add socket connection
+  var webSocket = new ws({server:server})
+  webSocket.on('connection', handleSoc)
+  
   this.load = function (loaded) {
     var _cmp = new Compiler({
       compress:false,
@@ -44,66 +93,4 @@ function Env(opts,loaded) {
       })
     })   
   }
-
-  function newSocket (s) {
-    var wss = websocketStream(s)
-    , headers = soc.upgradeReq.headers
-    , key = headers['sec-websocket-key']
-
-    brico.socAdd(key, function keyAdded () {
-      s.pipe(brico[key]).pipe(s)
-    })
-    s.write(JSON.stringify({sk:key}))
-    _cmp.MODS.forEach(function (mod) {
-      s.write(JSON.stringify(mod))
-    })
-    setTimeout(function () {
-      var cmd = {
-        r:'con',
-        v:['console+brico','brico+mdisp']
-      }
-      s.write(JSON.stringify(cmd))
-    }, 200)
-  }
-
-  var Routes = [ 
-    {url:"/",
-    file:"./_wilds/_index.html"},
-    {url:"/_bundle.min.js",
-    file:"./_wilds/_bundle.js"},
-    {url:"/_styles.css",
-    file:"./_wilds/_styles.css"}
-  ]
-
-  function handleReqs (req, res) {
-    var match = false
-    , headers = req.headers
-    , origin = headers.referer
-    , agent = headers['user-agent']
-    , host = headers.host
-
-    asyncMap(Routes, function matchFile (route, cb) {
-      if (route.url === req.url) {
-        filed(route.file).pipe(res)
-        match = true
-      }
-      cb()
-    }, function matchFileDone () {
-      if (match === false) { // do something with url!
-        var path = req.url
-        filed('./_wilds/_index.html').pipe(res)
-      }
-    })
-  }
-
-  var Server = http.createServer(handleReqs)
-  Server.listen(opts.port)
-
-  var webSoc = new ws({server:Server})
-  webSoc.on('connection', function (soc) {
-    var wss = websocketStream(soc)
-    var gps = require('./_wilds/gps.js')
-  })
 }
-
-module.exports = Env
