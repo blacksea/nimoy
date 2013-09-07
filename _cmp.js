@@ -1,6 +1,6 @@
 var Duplex = require('stream').Duplex
 , asyncMap = require('slide').asyncMap
-//, uglifyJS = require('uglify-js')
+, uglifyJS = require('uglify-js')
 , stylus = require('stylus') 
 , inherits = require('inherits')
 , fs = require('fs')
