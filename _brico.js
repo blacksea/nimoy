@@ -15,7 +15,7 @@ function Bricoleur (opts) {
 
   // HANDLE SOCKET CONNECTIONS
   this.addSocket = function (id) {
-    self[id] = new Stream
+    self[id] = new stream.Stream
     self[id].writable = true
     self[id].readable = true
     self[id].pipe(_.brico).pipe(self[id])
