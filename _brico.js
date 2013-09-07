@@ -1,4 +1,4 @@
-var stream = require('stream').Stream
+var Stream = require('stream').Stream
 
 module.exports = Bricoleur
 

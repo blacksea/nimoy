@@ -15,8 +15,10 @@ module.exports = Environment
 function Environment (opts) { 
   var self = this
   , FILES = []
-  , MODS = []
+  , serverMap = []
+  , browserMap = []
   , data = level(opts.db)
+  , _ = {} // brico scope
 
   // HTTP SERVER :: HANDLE STATIC FILES
   readdir(opts.wilds, function findStaticFiles (e,files) {
@@ -62,19 +64,31 @@ function Environment (opts) {
   
   // LOAD ENVIRONMENT
   this.load = function (loaded) { // build a brico per user
-    var _cmp = new Compiler({ // compile for client side
-      compress:false,
-      stylesPath:'./_wilds/_css.styl',
-      jsPath:'./_env_B.js',
-      cssPath: './_wilds/_styles.css',
-      bundlePath:'./_wilds/_bundle.js'
+
+    data.get('users', function LoadBricos (e, val) { 
+      var users = JSON.parse(val)
+      for (u in users) {
+        _[u.host] = new Bricoleur() 
+      }
     })
+
+    var _cmp = new Compiler({ // compile for client side
+      stylesPath:'./_wilds/_css.styl',
+      cssPath: './_wilds/_styles.css',
+      bundlePath:'./_wilds/_bundle.js',
+      jsPath:'./_env_B.js',
+      compress:false
+    })
+
     var _map = new Map({end:false,dir:'./_wilds'}, function (s) {// map wilds
       s.on('data', function (buf) {
         var mod = JSON.parse(buf)
         mod.process.forEach(function (p) {
-          if (p === 'browser') _cmp.write(buf)
-          if (p === 'node') MODS.push(mod)
+          if (p === 'browser') {
+            _cmp.write(buf)
+            browserMap.push(mod)
+          }
+          if (p === 'node') nodeMap.push(mod)
         })
       })
       s.on('end', function () {
@@ -84,9 +98,12 @@ function Environment (opts) {
   }
 
   this.addUser = function (user, cb) {
+    var id = user.name
     data.get('users', function checkUsers (e, val) {
-      if (e) console.error(e)
-      data.put('users', user, function (e) {
+      if (!val) var users = {}
+      if (val) var users = JSON.parse(val)
+      users[id] = user
+      data.put('users', JSON.stringify(users), function (e) {
         if (e) console.error(e)
       })
     })
