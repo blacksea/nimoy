@@ -12,12 +12,12 @@ var Bricoleur = require('./_brico')
 
 module.exports = Environment
 
-function Environment (opts) { 
+function Environment (opts, running) { 
   var self = this
   , FILES = []
   , nodeMap = []
   , browserMap = []
-  , data = level(opts.db)
+  , data = null
   , _ = {} // brico scope
 
   // HTTP SERVER :: HANDLE STATIC FILES
@@ -50,7 +50,10 @@ function Environment (opts) {
   }
   var server = http.createServer(handleReqs)
   server.listen(opts.port, function () {
-    console.log('running on port '+opts.port)
+    var uid = parseInt(process.env.SUDO_UID)
+    if (uid) process.setuid(uid)
+    data = level(opts.db) // dont' run level as sudo
+    running()
   })
   
   // CREATE WEBSOCKET
@@ -70,7 +73,6 @@ function Environment (opts) {
   
   // LOAD ENVIRONMENT
   this.load = function (loaded) { // build a brico per user
-
     data.get('users', function LoadBricos (e, val) { 
       var users = JSON.parse(val)
       for (u in users) {
@@ -112,6 +114,7 @@ function Environment (opts) {
       users[id] = user
       data.put('users', JSON.stringify(users), function (e) {
         if (e) console.error(e)
+        cb()
       })
     })
   }
