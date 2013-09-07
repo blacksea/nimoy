@@ -18,6 +18,9 @@ function Bricoleur (opts) {
     self[id].writable = true
     self[id].readable = true
     self[id].pipe(_.brico).pipe(self[id])
+    self[id].end = function () {
+      console.log(id+' closed')
+    }
   }
 
   function make (mod) {

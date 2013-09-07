@@ -59,8 +59,12 @@ function Environment (opts) {
     var headers = soc.upgradeReq.headers
     var key = headers['sec-websocket-key']
     var host = headers.host
+    console.log(host)
     _[host].addSocket(key)
     ws.pipe(_[host][key]).pipe(ws)
+    ws.on('end', function (d) {
+      console.log('disconnected')
+    })
   }
   var webSocket = new ws({server:server})
   webSocket.on('connection', handleSoc)
@@ -71,7 +75,7 @@ function Environment (opts) {
     data.get('users', function LoadBricos (e, val) { 
       var users = JSON.parse(val)
       for (u in users) {
-        _[u.host] = new Bricoleur() 
+        _[users[u].host] = new Bricoleur() 
       }
     })
 
