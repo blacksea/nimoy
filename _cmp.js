@@ -1,32 +1,25 @@
 var Duplex = require('stream').Duplex
 , asyncMap = require('slide').asyncMap
-, browserify = require('browserify')
-, uglifyJS = require('uglify-js')
+//, uglifyJS = require('uglify-js')
 , stylus = require('stylus') 
 , inherits = require('inherits')
 , fs = require('fs')
 
-inherits(Compiler, Duplex);
+var browserify = require('browserify')
 
+inherits(Compiler, Duplex);
 module.exports = Compiler
 
-function Compiler (opts) { // compiler prepares files for client
-  if (!(this instanceof Compiler)) return new Compiler(opts)
+function Compiler (opts) { 
   Duplex.call(this, opts)
-
-  // store filepaths & generate index.html
-
   var self = this
   , DIR = './_wilds/'
   , UPDATE = false
   , READ1 = false
   , MODCOUNT = 0
   , MODS = []
-
-  var index = '<!Doctype>\n<html>\n\t<head>\n\t'
-  +'<script type="text/javascript" src="'+bundle+'"</script>'
-  +'<link rel="stylesheet" type="text/css" href="'+stylesheet+'"</link>'
-  +'</head>\n\t<body>\n\t<div id="container"></div>\n\t</body>\n</html>';
+  , stylesheet
+  , bundle
 
   this._write = function (chunk, enc, next) {
     if (READ1===false) MODCOUNT++
@@ -34,13 +27,8 @@ function Compiler (opts) { // compiler prepares files for client
     handleModule(mod)
     next()
   }
-
   this.end = function () {
     READ1 = true
-  }
-
-  this.getMods = function (cb) {
-    cb(MODS)
   }
 
   function handleModule (mod) {
@@ -53,22 +41,22 @@ function Compiler (opts) { // compiler prepares files for client
         next()
       })
     }, function handledDeps () {
-       if (UPDATE === false) MODS.push(mod) 
-       if (UPDATE === true) {
+       if (UPDATE===false) MODS.push(mod) 
+       if (UPDATE===true) {
          for (var i=0;i<MODS.length;i++) {
            var m = MODS[i]
-           if (m.id === mod.id) MODS[i] = mod 
+           if (m.id===mod.id) MODS[i] = mod 
          }
          ready()
        }
-       if (MODCOUNT === MODS.length && UPDATE === false) {
+       if (MODCOUNT===MODS.length&&UPDATE===false) {
          ready()
          UPDATE = true
        }
     })
   }
-
   function ready () {
+    self.MODS = MODS
     var CSS = ''
     fs.readFile(opts.stylesPath, function (e, buf) { // load base styles
       if (e) console.error(e)
@@ -76,9 +64,7 @@ function Compiler (opts) { // compiler prepares files for client
       compile(CSS) 
     })
   }
-
-  // refactor this!
-  function compile (CSS) {
+  function compile (CSS) {// refactor this!
     var b = browserify()
     b.add(opts.jsPath)
     asyncMap(MODS, function (mod, next) {
@@ -88,7 +74,7 @@ function Compiler (opts) { // compiler prepares files for client
       next()
     }, function () {
       var bunF = fs.createWriteStream(opts.bundlePath)
-      b.bundle({debug:true}).pipe(bunF)
+      b.bundle().pipe(bunF)
       bunF.on('close', function () {
         console.log('wrote _bundle.js')
         if (opts.compress === true) {
