@@ -1,15 +1,15 @@
 // NIMOY 
 var Env = require('./_env_N')
 var _env = new Env({
-  port:80,
-  wilds: './_wilds'
+  wilds: './_wilds',
+  port:80
 })
 
 var defaultUser = {
   name : 'default',
   host : 'localhost',
-  connections: ''
-  modules : '',
+  connections: '',
+  modules : ''
 }
 _env.addUser(defaultUser)
 

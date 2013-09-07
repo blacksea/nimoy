@@ -6,7 +6,7 @@ var websocketStream = require('websocket-stream')
 var http = require('http')
 var filed = require('filed')
 var Map = require('./_map')
-var Data = require('./_data')
+var level = require('level')
 var Compiler = require('./_cmp')
 var Bricoleur = require('./_brico')
 
@@ -16,6 +16,7 @@ function Environment (opts) {
   var self = this
   , FILES = []
   , MODS = []
+  , data = level(opts.db)
 
   // HTTP SERVER :: HANDLE STATIC FILES
   readdir(opts.wilds, function findStaticFiles (e,files) {
@@ -60,10 +61,8 @@ function Environment (opts) {
   webSocket.on('connection', handleSoc)
   
   // LOAD ENVIRONMENT
-  this.load = function (loaded) {
-    // build bricos for each user
-    
-    var _cmp = new Compiler({// compile for client side
+  this.load = function (loaded) { // build a brico per user
+    var _cmp = new Compiler({ // compile for client side
       compress:false,
       stylesPath:'./_wilds/_css.styl',
       jsPath:'./_env_B.js',
@@ -82,5 +81,14 @@ function Environment (opts) {
         console.log('mapping done')
       })
     })   
+  }
+
+  this.addUser = function (user, cb) {
+    data.get('users', function checkUsers (e, val) {
+      if (e) console.error(e)
+      data.put('users', user, function (e) {
+        if (e) console.error(e)
+      })
+    })
   }
 }
