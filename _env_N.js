@@ -53,7 +53,7 @@ function Environment (opts, running) {
     var uid = parseInt(process.env.SUDO_UID)
     if (uid) process.setuid(uid)
     data = level(opts.db) // dont' run level as sudo
-    running()
+    running() // we're running cb!
   })
   
   // CREATE WEBSOCKET
