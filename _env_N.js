@@ -1,8 +1,8 @@
 // NODE ENVIRONMENT
+var websocketStream = require('websocket-stream')
+var ws = require('ws').Server
 var asyncMap = require('slide').asyncMap
 var readdir = require('fs').readdir
-var ws = require('ws').Server
-var websocketStream = require('websocket-stream')
 var http = require('http')
 var filed = require('filed')
 var Map = require('./_map')
@@ -94,12 +94,11 @@ function Environment (opts, running) {
         mod.process.forEach(function (p) {
           if (p === 'browser')  _cmp.write(buf)
           for (brico in _) {
-            _[brico].metaStream.write(mod)
+            _[brico].metaStream.write(JSON.stringify(mod))
           }
         })
       })
       s.on('end', function () {
-        // set bricos
         console.log('mapping done')
       })
     })   
@@ -119,4 +118,4 @@ function Environment (opts, running) {
       })
     })
   }
-}
+k

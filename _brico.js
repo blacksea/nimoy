@@ -13,6 +13,12 @@ function Bricoleur (opts) {
   _.brico.readable = true
   _.brico.writable = true
 
+  // UTILITIES
+  function handleMapData (mod) {
+    if (!self.moduleMap) self.moduleMap = []
+    self.moduleMap.push(mod)
+  }
+
   // HANDLE SOCKET CONNECTIONS
   this.addSocket = function (id) {
     self[id] = new stream.Stream
@@ -26,13 +32,15 @@ function Bricoleur (opts) {
 
   // META STREAM INTERFACE
   this.metaStream = new stream.Stream
+  this.metaStream.type = null
   this.metaStream.writable = true
   this.metaStream.readable = true
   this.metaStream.write = function (chunk) {
-    console.log(chunk)
-  }
-  this.metaStream.end = function () {
-    console.log('brico map done')
+    var data = JSON.parse(chunk)
+    if (data.process) {
+      self.metaStream.type = 'moduleData'
+      handleMapData(data) // map data
+    }
   }
 
   // API / COMMANDS
