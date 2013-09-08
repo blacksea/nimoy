@@ -113,6 +113,7 @@ function Environment (opts, running) {
       if (val) var users = JSON.parse(val)
       users[id] = user
       data.put('users', JSON.stringify(users), function (e) {
+        console.log(users)
         if (e) console.error(e)
         cb()
       })
