@@ -6,7 +6,7 @@ var websocketStream = require('websocket-stream')
 var http = require('http')
 var filed = require('filed')
 var Map = require('./_map')
-var level = require('level')
+var level = require('levelup')
 var Compiler = require('./_cmp')
 var Bricoleur = require('./_brico')
 
