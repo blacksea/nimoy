@@ -4,9 +4,9 @@ var host = window.document.location.host.replace(/:.*/, '')
 var ws = require('websocket-stream')
 var wss = ws('ws://'+host)
 
-wss.onopen = function () {
+wss.on('open', function () {
   console.log('connected')
-}
+})
 wss.on('data', function (d) {
   console.log(d)
 })
