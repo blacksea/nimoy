@@ -1,9 +1,15 @@
 // BROWSER ENVIRONMENT 
 if(!Function.prototype.bind) require('bindshim') //kindle jalopy doesn't have bind
-var ws = require('websocket-stream');
-var wss = ws('ws://192.168.1.76/');
+var host = window.document.location.host.replace(/:.*/, '')
+var ws = require('websocket-stream')
+var wss = ws('ws://'+host)
 
+wss.onopen = function () {
+  console.log('connected')
+}
 wss.on('data', function (d) {
-  var c =document.getElementById('container')
-  c.innerHTML = d
+  console.log(d)
+})
+wss.on('close', function () {
+  console.log('server close')
 })
