@@ -44,25 +44,34 @@ function Bricoleur (opts) {
   }
 
   // API / COMMANDS
-  function make (mod) {
+  var api = {
+    make: function (mod) {
+      var libName = mod.id.toUpperCase()
+      var lib = require(libName)
+      _[mod.id] = new lib() 
+      if (process.browser && mod.html) _[mod.id].render(html)
+    },
+    unmake: function (mod) {
+      _[mod.id].destroy()
+    },
+    conn: function (conss) { // fix ugliness
+      conns.forEach(function handleConnection (conn) {
+        if (conn.match(/\+/) !== null) {
+          var modA = conn.split('+')[0]
+          , modB = conn.split('+')[1]
+          _[modA].pipe(_[modB])
+        }
+        if (conn.match(/\-/) !== null) {
+          var modA = conn.split('-')[0]
+          , modB = conn.split('-')[1]
+          modA.unpipe(modB)
+        }
+      })
+    }
   }
-
-  function unmake (mod) {
-    if (process.browser) mod.destroy()
-  }
-
-  function conn (conns) {
-    conns.forEach(function handleConnection (conn) {
-      if (conn.match(/\+/) !== null) {
-        var modA = conn.split('+')[0]
-        , modB = conn.split('+')[1]
-        _[modA].pipe(_[modB])
-      }
-      if (conn.match(/\-/) !== null) {
-        var modA = conn.split('-')[0]
-        , modB = conn.split('-')[1]
-        modA.unpipe(modB)
-      }
-    })
+  this.cmd = function (params) {
+    var cmd = params[0]
+    if (!api[cmd]) console.error('command '+cmd+' unknown')
+    if (api[cmd]) api[cmd](params.slice(1))
   }
 }
