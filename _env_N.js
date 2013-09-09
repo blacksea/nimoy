@@ -79,7 +79,6 @@ function Environment (opts, running) {
         _[users[u].host] = new Bricoleur() 
       }
     })
-
     var _cmp = new Compiler({ // compile for client side
       stylesPath:'./_wilds/_css.styl',
       cssPath: './_wilds/_styles.css',
@@ -87,7 +86,6 @@ function Environment (opts, running) {
       jsPath:'./_env_B.js',
       compress:false
     })
-
     var _map = new Map({end:false,dir:'./_wilds'}, function (s) {// map wilds
       s.on('data', function (buf) {
         var mod = JSON.parse(buf)
@@ -104,7 +102,7 @@ function Environment (opts, running) {
     })   
   }
 
-  //ADD USER
+  // ADD A NEW USER
   this.addUser = function (user, cb) {
     var id = user.name
     data.get('users', function checkUsers (e, val) {
