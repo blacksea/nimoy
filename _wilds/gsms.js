@@ -6,7 +6,7 @@
 
 var stream = require('stream')
 , inherits = require('inherits')
-, gsms = require('gsms')
+//, gsms = require('gsms')
 
 function Gsms (template) {
   stream.Stream.call(this)
