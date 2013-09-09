@@ -5,11 +5,11 @@ var ws = require('websocket-stream')
 var wss = ws('ws://'+host)
 
 wss.on('open', function () {
-  console.log('connected')
+  window.document.title = 'connnnnnn'
 })
 wss.on('data', function (d) {
   console.log(d)
 })
-wss.on('close', function () {
+wss.on('end', function () {
   console.log('server close')
 })

@@ -118,4 +118,4 @@ function Environment (opts, running) {
       })
     })
   }
-k
+}
