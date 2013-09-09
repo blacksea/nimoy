@@ -1,8 +1,8 @@
 var Readable = require('stream').Readable
-, inherits = require('inherits')
-, asyncMap = require('slide').asyncMap
-, compressor = require('./_cmp')
-, fs = require('fs')
+var inherits = require('inherits')
+var asyncMap = require('slide').asyncMap
+var compressor = require('./_cmp')
+var fs = require('fs')
 
 inherits(Map, Readable)
 module.exports = Map
@@ -12,11 +12,11 @@ function Map (opts, callback) {
   this.readable = true
 
   var self = this
-  , DESTCSS = './_wilds/_styles.css'
-  , DESTJS = './_wilds/_bundle.js'
-  , DIR = opts.dir+'/'
-  , CSS = ''
-  , FILESTAT = null
+  var DESTCSS = './_wilds/_styles.css'
+  var DESTJS = './_wilds/_bundle.js'
+  var DIR = opts.dir+'/'
+  var CSS = ''
+  var FILESTAT = null
 
   this._read = function (size) {} // WTF!
 
