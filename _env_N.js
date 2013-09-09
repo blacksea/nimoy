@@ -73,29 +73,26 @@ function Environment (opts, running) {
   
   // LOAD ENVIRONMENT
   this.load = function (loaded) { // build a brico per user
+    var compileOpts = {
+      path_wilds:'./_wilds/'
+      path_styl:'./_wilds/_css.styl',
+      path_css: './_wilds/_styles.css',
+      path_bundle:'./_wilds/_bundle.js',
+      path_env:'./_env_B.js',
+      compress:false
+    }
     data.get('users', function LoadBricos (e, val) { 
       var users = JSON.parse(val)
       for (u in users) {
         _[users[u].host] = new Bricoleur() 
       }
     })
-    var _cmp = new Compiler({ // compile for client side
-      stylesPath:'./_wilds/_css.styl',
-      cssPath: './_wilds/_styles.css',
-      bundlePath:'./_wilds/_bundle.js',
-      jsPath:'./_env_B.js',
-      compress:false
-    })
+    var _cmp = new Compiler(compileOpts) 
     var _map = new Map({end:false,dir:'./_wilds'}, function (s) {// map wilds
-      s.on('data', function (buf) {
-        var mod = JSON.parse(buf)
-        mod.process.forEach(function (p) {
-          if (p === 'browser')  _cmp.write(buf)
-          for (brico in _) {
-            _[brico].metaStream.write(JSON.stringify(mod))
-          }
-        })
-      })
+      s.pipe(_cmp.s)
+      for (brico in _) {
+        _cmp.s.pipe(_[brico].metaStream)
+      }
       s.on('end', function () {
         console.log('mapping done')
       })

@@ -1,4 +1,4 @@
-var Duplex = require('stream').Duplex
+var through = require('through')
 var asyncMap = require('slide').asyncMap
 var uglifyJS = require('uglify-js')
 var stylus = require('stylus') 
@@ -7,93 +7,66 @@ var fs = require('fs')
 
 var browserify = require('browserify')
 
-inherits(Compiler, Duplex);
 module.exports = Compiler
 
 function Compiler (opts) { 
-  Duplex.call(this, opts)
   var self = this
-  var DIR = './_wilds/'
-  var UPDATE = false
-  var READ1 = false
-  var MODCOUNT = 0
-  var MODS = []
-  var stylesheet
-  var bundle
+  var b = browserify()
+  var wilds = opts.path_wilds
+  var css = ''
 
-  this._write = function (chunk, enc, next) {
-    if (READ1===false) MODCOUNT++
+  fs.readFile(opts.path_styl, function (e, buf) {
+    if (e) console.error(e)
+    if (!e) css += buf.toString()
+  })
+
+  b.add(wilds+opts.path_env)
+
+  // TRANSFORM STREAM
+  function handleModule (chunk) {
+    var s = this
     var mod = JSON.parse(chunk.toString())
-    handleModule(mod)
-    next()
-  }
-  this.end = function () {
-    READ1 = true
-  }
-
-  function handleModule (mod) {
-    asyncMap(mod.deps, function readModDeps (file, next) {
-      var filepath = DIR+file
-      var ext = file.split('.')[1]
-      fs.readFile(filepath, function addDepToMod (err, buf) {
-        if (err) console.error(err)
-        mod[ext] = buf.toString()
-        next()
-      })
-    }, function handledDeps () {
-       if (UPDATE===false) MODS.push(mod) 
-       if (UPDATE===true) {
-         for (var i=0;i<MODS.length;i++) {
-           var m = MODS[i]
-           if (m.id===mod.id) MODS[i] = mod 
-         }
-         ready()
-       }
-       if (MODCOUNT===MODS.length&&UPDATE===false) {
-         ready()
-         UPDATE = true
-       }
-    })
-  }
-  function ready () {
-    self.MODS = MODS
-    var CSS = ''
-    fs.readFile(opts.stylesPath, function (e, buf) { // load base styles
-      if (e) console.error(e)
-      CSS += buf.toString()
-      compile(CSS) 
-    })
-  }
-  function compile (CSS) {// refactor this!
-    var b = browserify()
-    b.add(opts.jsPath)
-    asyncMap(MODS, function (mod, next) {
-      if (mod.styl) CSS += mod.styl // add style to css
-      var fil = DIR+mod.id+'.js'
-      b.require(DIR+mod.id+'.js',{expose:mod.id.toUpperCase()}) // add js to browserify
-      next()
-    }, function () {
-      var bunF = fs.createWriteStream(opts.bundlePath)
-      b.bundle().pipe(bunF)
-      bunF.on('close', function () {
-        console.log('wrote _bundle.js')
-        if (opts.compress === true) {
-          var min = uglifyJS.minify(opts.bundlePath) 
-          fs.writeFile(opts.bundlePath, min.code, function (e) {
-            if (!e) console.log('wrote minified _bundle.js')
-          })
-        }
-      })
-      bunF.on('error', function (e) {
-        console.error(e)
-      })
-      stylus.render(CSS, {filename:opts.cssPath}, function (e, css) {
-        if (e) console.error(e)
-        fs.writeFile(opts.cssPath, css, function (e) {
-          if (e) cosole.error(e)
-          console.log('wrote _styles.css')
+    b.require(mod.path,{expose:mod.id.toUpperCase()}) // kind of hacky :(
+    if (!mod.deps) s.queue(chunk)
+    if (mod.deps) {
+      function handleDep (file, next) {
+        var dep = ''
+        var ext = file.split('.')[1]
+        fs.readFile(wilds+file, function (e,buf) {
+          if (e) console.error(e)
+          dep = buf.toString()
+          if (ext==='styl') css += dep
+          if (ext==='html') mod[ext] = dep
+          next()
         })
+      }
+      asyncMap(mod.deps, handleDep, function () {
+        s.queue(JSON.stringify(mod))
+      }) 
+    }
+  }
+  function compile () {
+    var bundleFile = fs.createWriteStream(opts.path_bundle)
+    b.bundle().pipe(bundleFile)
+    bundleFile.on('close', function () {
+      console.log('wrote '+opts.path_bundle)
+      if (opts.compress === true) {
+        var min = uglifyJS.minify(opts.path_bundle) 
+        fs.writeFile(opts.path_bundle, min.code, function (e) {
+          if (!e) console.log('wrote minified _bundle.js')
+        })
+      }
+    })
+    bundleFile.on('error', function (e) {
+      console.error(e)
+    })
+    stylus.render(css, {filename:opts.path_css}, function (e, compiledCSS) {
+      if (e) console.error(e)
+      fs.writeFile(opts.path_css, compiledCSS, function (e) {
+        if (e) cosole.error(e)
+        console.log('wrote '+opts.path_css)
       })
     })
   }
+  this.s = through(handleModule, compile,{autoDestroy:false})
 }
