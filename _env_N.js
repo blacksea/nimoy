@@ -14,11 +14,11 @@ module.exports = Environment
 
 function Environment (opts, running) { 
   var self = this
-  , FILES = []
-  , nodeMap = []
-  , browserMap = []
-  , data = null
-  , _ = {} // brico scope
+  var FILES = []
+  var nodeMap = []
+  var browserMap = []
+  var data = null
+  var _ = {} // brico scope
 
   // HTTP SERVER :: HANDLE STATIC FILES
   readdir(opts.wilds, function findStaticFiles (e,files) {

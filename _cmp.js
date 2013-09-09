@@ -1,9 +1,9 @@
 var Duplex = require('stream').Duplex
-, asyncMap = require('slide').asyncMap
-, uglifyJS = require('uglify-js')
-, stylus = require('stylus') 
-, inherits = require('inherits')
-, fs = require('fs')
+var asyncMap = require('slide').asyncMap
+var uglifyJS = require('uglify-js')
+var stylus = require('stylus') 
+var inherits = require('inherits')
+var fs = require('fs')
 
 var browserify = require('browserify')
 
@@ -13,13 +13,13 @@ module.exports = Compiler
 function Compiler (opts) { 
   Duplex.call(this, opts)
   var self = this
-  , DIR = './_wilds/'
-  , UPDATE = false
-  , READ1 = false
-  , MODCOUNT = 0
-  , MODS = []
-  , stylesheet
-  , bundle
+  var DIR = './_wilds/'
+  var UPDATE = false
+  var READ1 = false
+  var MODCOUNT = 0
+  var MODS = []
+  var stylesheet
+  var bundle
 
   this._write = function (chunk, enc, next) {
     if (READ1===false) MODCOUNT++
