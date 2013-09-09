@@ -49,6 +49,7 @@ function Compiler (opts) {
     }
   }
   function compile () {
+    self.s.emit('end')
     var bundleFile = fs.createWriteStream(opts.path_bundle)
     b.bundle().pipe(bundleFile)
     bundleFile.on('close', function () {
