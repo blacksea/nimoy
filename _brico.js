@@ -34,14 +34,12 @@ function Bricoleur (opts) {
   // META STREAM INTERFACE
   this.metaStream = through(metaWrite,metaEnd,{autoDestroy:false})
   function metaWrite (chunk) {
-    console.log(chunk)
     var data = JSON.parse(chunk)
-    if (data.process) {
-      handleMapData(data) // map data
-    }
+    if (data.process) handleMapData(data) // map data
+    if (data.fresh && data.fresh === true) console.log(JSON.parse(chunk))
   }
   function metaEnd () {
-    console.log(self.moduleMap)
+    console.log('map ready')
   }
 
   // API / COMMANDS

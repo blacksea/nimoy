@@ -16,6 +16,7 @@ function Compiler (opts) {
   var self = this
   var b = browserify()
   var wilds = opts.path_wilds
+  var wildsProcessed = false
   var css = ''
 
   fs.readFile(opts.path_styl, function (e, buf) {
@@ -29,6 +30,7 @@ function Compiler (opts) {
   function handleModule (chunk) {
     var s = this
     var mod = JSON.parse(chunk.toString())
+    if (wildsProcessed === true) mod.fresh = true // if module is updated make it fresh!
     b.require(wilds+mod.id+'.js',{expose:mod.id.toUpperCase()}) // kind of hacky :(
     if (!mod.deps) s.queue(JSON.stringify(mod)) // doesn't make sense...but for consistency...
     if (mod.deps) {
@@ -49,7 +51,8 @@ function Compiler (opts) {
     }
   }
   function compile () {
-    self.s.emit('end')
+    wildsProcessed = true
+    self.s.emit('data', JSON.stringify({stat:'mapReady'}))
     var bundleFile = fs.createWriteStream(opts.path_bundle)
     b.bundle().pipe(bundleFile)
     bundleFile.on('close', function () {
