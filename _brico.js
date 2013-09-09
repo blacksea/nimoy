@@ -1,4 +1,5 @@
 var stream = require('stream')
+var through = require('through')
 
 module.exports = Bricoleur
 
@@ -31,16 +32,16 @@ function Bricoleur (opts) {
   }
 
   // META STREAM INTERFACE
-  this.metaStream = new stream.Stream
-  this.metaStream.type = null
-  this.metaStream.writable = true
-  this.metaStream.readable = true
-  this.metaStream.write = function (chunk) {
+  this.metaStream = through(metaWrite,metaEnd,{autoDestroy:false})
+  function metaWrite (chunk) {
+    console.log(chunk)
     var data = JSON.parse(chunk)
     if (data.process) {
-      self.metaStream.type = 'moduleData'
       handleMapData(data) // map data
     }
+  }
+  function metaEnd () {
+    console.log(self.moduleMap)
   }
 
   // API / COMMANDS
