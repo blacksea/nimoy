@@ -10,14 +10,13 @@ var browserify = require('browserify')
 module.exports = Compiler
 
 function Compiler (opts) { 
+  var L = opts.path_wilds[opts.path_wilds.length-1]
+  if (L !== '/') opts.path_wilds += '/'
+
   var self = this
   var b = browserify()
   var wilds = opts.path_wilds
   var css = ''
-
-  var L = opts.path_wilds[opts.path_wilds.length-1]
-  if (L !== '/') opts.path_wilds += '/'
-
 
   fs.readFile(opts.path_styl, function (e, buf) {
     if (e) console.error(e)
@@ -31,7 +30,7 @@ function Compiler (opts) {
     var s = this
     var mod = JSON.parse(chunk.toString())
     b.require(wilds+mod.id+'.js',{expose:mod.id.toUpperCase()}) // kind of hacky :(
-    if (!mod.deps) s.queue(chunk)
+    if (!mod.deps) s.queue(JSON.stringify(chunk.toString())) // doesn't make sense...but for consistency...
     if (mod.deps) {
       function handleDep (file, next) {
         var dep = ''
