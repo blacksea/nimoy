@@ -9,6 +9,9 @@ module.exports = Map
 function Map (opts, callback) {
   Readable.call(this)
 
+  var L = opts.path_wilds[opts.path_wilds.length-1]
+  if (L !== '/') opts.path_wilds += '/'
+
   var self = this
   var FILESTAT 
 

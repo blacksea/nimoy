@@ -74,7 +74,7 @@ function Environment (opts, running) {
   // LOAD ENVIRONMENT
   this.load = function (loaded) { // build a brico per user
     var compileOpts = {
-      path_wilds:'./_wilds/'
+      path_wilds:'./_wilds',
       path_styl:'./_wilds/_css.styl',
       path_css: './_wilds/_styles.css',
       path_bundle:'./_wilds/_bundle.js',
@@ -88,7 +88,7 @@ function Environment (opts, running) {
       }
     })
     var _cmp = new Compiler(compileOpts) 
-    var _map = new Map({end:false,dir:'./_wilds'}, function (s) {// map wilds
+    var _map = new Map({end:false,path_wilds:'./_wilds'}, function (s) {// map wilds
       s.pipe(_cmp.s)
       for (brico in _) {
         _cmp.s.pipe(_[brico].metaStream)
