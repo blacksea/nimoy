@@ -6,7 +6,7 @@ var readdir = require('fs').readdir
 var http = require('http')
 var filed = require('filed')
 var Map = require('./_map')
-var level = require('levelup')
+var Data = require('levelup')
 var Compiler = require('./_cmp')
 var Bricoleur = require('./_brico')
 
@@ -52,7 +52,7 @@ function Environment (opts, running) {
   server.listen(opts.port, function () {
     var uid = parseInt(process.env.SUDO_UID)
     if (uid) process.setuid(uid)
-    data = level(opts.db) // dont' run level as sudo
+    data = Data(opts.db) // dont' run level as sudo
     running() // we're running cb!
   })
   
