@@ -1,7 +1,6 @@
 var Readable = require('stream').Readable
 var inherits = require('inherits')
 var asyncMap = require('slide').asyncMap
-var compressor = require('./_cmp')
 var fs = require('fs')
 
 inherits(Map, Readable)
@@ -9,26 +8,21 @@ module.exports = Map
 
 function Map (opts, callback) {
   Readable.call(this)
-  this.readable = true
 
   var self = this
-  var DESTCSS = './_wilds/_styles.css'
-  var DESTJS = './_wilds/_bundle.js'
-  var DIR = opts.dir+'/'
-  var CSS = ''
-  var FILESTAT = null
+  var FILESTAT 
 
   this._read = function (size) {} // WTF!
 
-  fs.readdir(DIR, function handleWildsFiles (e, files) {
+  fs.readdir(opts.path_wilds, function handleWildsFiles (e, files) {
     callback(self)
     asyncMap(files, parse, function doneWildsFiles () {
       self.emit('end')
     })
   })
 
-  fs.watch(DIR, function handleFileChange (event, file) { 
-    var filepath = DIR+file
+  fs.watch(opts.path_wilds, function handleFileChange (event, file) { 
+    var filepath = opts.path_wilds+file
     fs.stat(filepath, function statFile (err, stats) {
       // make a good data object here
       stats.filepath = filepath
@@ -52,7 +46,7 @@ function Map (opts, callback) {
   function parse (file,cb) {
     var ext = file.split('.')[1]
     if (ext === 'js' && file[0] !=='_') {
-      var f = fs.createReadStream(DIR+file)
+      var f = fs.createReadStream(opts.path_wilds+file)
       f.on('data', function (chunk) {
         var buf = chunk.toString()
         var m = buf.match(/\/\*\{([\S\s]*)\}\*\//) // fix up this regex
