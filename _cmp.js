@@ -30,7 +30,7 @@ function Compiler (opts) {
     var s = this
     var mod = JSON.parse(chunk.toString())
     b.require(wilds+mod.id+'.js',{expose:mod.id.toUpperCase()}) // kind of hacky :(
-    if (!mod.deps) s.queue(JSON.stringify(chunk.toString())) // doesn't make sense...but for consistency...
+    if (!mod.deps) s.queue(JSON.stringify(mod)) // doesn't make sense...but for consistency...
     if (mod.deps) {
       function handleDep (file, next) {
         var dep = ''
