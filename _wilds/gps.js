@@ -4,12 +4,13 @@
 	"desc":"interface for gps serial data"
 }*/
 
-//shout out to werners gps: https://github.com/vesteraas/wgps
 var serial = require('serialport')
-, Stream = require('stream').Stream
-, inherits = require('inherits')
+var through = require('through')
 
-var Parser = function () {
+module.exports = Gps
+
+var Parser = function () { //shout out to werners gps: https://github.com/vesteraas/wgps
+
   function decimalDegrees (coordinate, direction) {
     var parts = coordinate.split('.');
     var sign = 1;
@@ -48,24 +49,6 @@ var Parser = function () {
     }
     cb(null,o)
   } 
-  // this.GPGSV = function (data, cb) {
-  //   var o = {
-  //     code:        code,
-  //     totalMessages: parseInt(parts[pc++]),
-  //     messageNumber: parseInt(parts[pc++]),
-  //     totalNumberOfSatellitesInView: parseInt(parts[pc++]),
-  //     satellites: [tools.satellite(parts[pc++], parts[pc++], parts[pc++], parts[pc++]), tools.satellite(parts[pc++], parts[pc++], parts[pc++], parts[pc++]), tools.satellite(parts[pc++], parts[pc++], parts[pc++], parts[pc++]), tools.satellite(parts[pc++], parts[pc++], parts[pc++], parts[pc++])]
-  //   }
-  // }
-  // this.GPGSA = function (data, cb) {
-  //   var o = {
-  //     code:        code,
-  //     totalMessages: parseInt(parts[pc++]),
-  //     messageNumber: parseInt(parts[pc++]),
-  //     totalNumberOfSatellitesInView: parseInt(parts[pc++]),
-  //     satellites: [tools.satellite(parts[pc++], parts[pc++], parts[pc++], parts[pc++]), tools.satellite(parts[pc++], parts[pc++], parts[pc++], parts[pc++]), tools.satellite(parts[pc++], parts[pc++], parts[pc++], parts[pc++]), tools.satellite(parts[pc++], parts[pc++], parts[pc++], parts[pc++])]
-  //   }
-  // }
   this.GPVTG = function (data, cb) {
     var o = {
       code:data[0],
@@ -92,9 +75,6 @@ var Parser = function () {
 }
 
 function Gps (opts) {
-  Stream.call(this)
-  this.readable = true
-  this.writable = true
   var self = this
   var parser = new Parser()
 
@@ -110,27 +90,21 @@ function Gps (opts) {
     parser:serial.parsers.readline('\n')
   })
 
-  serialStream.pipe(this)
+  this.s = through(write, end, {autoDestroy:false})
+  serialStream.pipe(self.s)
 
-  this._read = function (size) {}
-  this.write = function (chunk) {
+  function write (chunk) {
     console.log(chunk)
     var sentence = chunk.substring(1).split(',')
     var type = sentence[0]
     if (parser[type]) {
       parser[type](sentence, function handleData (e, json) {
-        if (e) self.emit('error', e)
-        if (!e) self.emit('data', JSON.stringify(json,null,2))
+        if (e) self.s.emit('error', e)
+        if (!e) self.s.queue(JSON.stringify(json,null,2))
       })
     }
   }
-  this.end = function () {
+  function end () {
     console.log('data end')
   }
-  this.on('error', function (e) {
-    console.error(e)
-  })
 }  
-
-inherits(Gps, Stream)
-module.exports = Gps
