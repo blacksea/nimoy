@@ -4,24 +4,19 @@
 	"desc":"google voice sms interface"
 }*/
 
-var stream = require('stream')
-, inherits = require('inherits')
 //, gsms = require('gsms')
+var through = require('through')
+
+module.exports = Gsms
 
 function Gsms (template) {
-  stream.Stream.call(this)
-  this.readable = true
-  this.writable = true
-  this._buffer = []
   var self = this
+  this.s = through(write,end,{autoDestroy:false})
 
-  this.write = function (chunk, enc, next) {
-    console.log(chunk)
+  function write (chunk) {
   }
-
-  this._read = function (size) {}
-
-  this.end = function () {}
+  function end () {
+  }
 
   render(template)
 
@@ -50,6 +45,3 @@ function Gsms (template) {
     }
   }
 }
-
-inherits(Gsms,stream.Stream)
-module.exports = Gsms
