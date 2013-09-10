@@ -22,7 +22,7 @@ function Bricoleur (opts) {
     }, function end () {
       console.log(id+' closed')
       this.emit('end')
-    })
+    }, {autoDestroy:false})
   }
 
   // META STREAM INTERFACE
