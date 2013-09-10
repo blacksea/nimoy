@@ -4,19 +4,21 @@
 	"desc":"micro display",
   "deps":["mdisp.html","mdisp.styl"]
 }*/
-var stream = require('stream')
-, inherits = require('inherits')
 
-function mdisp (template) {
-  stream.Stream.call(this)
-  this.readable = true
-  this.writable = true
+var through = require('through')
+
+module.exports = Mdisp
+
+function Mdisp (template) {
   var self = this
-  , element = null
+  this.s = through(write, end,{autoDestroy:false})
 
-  this._read = function (size) {}
-  this.write = function (chunk) {
-    console.log(chunk)
+  function write (chunk) {
+    this.queue(chunk)
+  }
+
+  function end () {
+    this.emit('end')
   }
 
   render(template)
@@ -28,6 +30,3 @@ function mdisp (template) {
     container.appendChild(disp)
   }
 }
-
-inherits(mdisp,stream.Stream)
-module.exports = mdisp 
