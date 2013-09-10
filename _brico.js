@@ -10,9 +10,11 @@ function Bricoleur (opts) {
 
   // MODULE SCOPE
   var _ = {}
-  _.brico = new stream.Stream
-  _.brico.readable = true
-  _.brico.writable = true
+  _.brico = through(function write (chunk) {
+    this.queue(chunk)
+  }, function end () {
+    this.emit('end')
+  })
 
   // UTILITIES
   function handleMapData (mod) {
@@ -22,13 +24,12 @@ function Bricoleur (opts) {
 
   // HANDLE SOCKET CONNECTIONS
   this.addSocket = function (id) { // send modulemap! & user environment data
-    self[id] = new stream.Stream
-    self[id].writable = true
-    self[id].readable = true
-    self[id].pipe(_.brico).pipe(self[id])
-    self[id].end = function () {
+    self[id] = through(function write (chunk) {
+      this.queue(chunk)
+    }, function end () {
       console.log(id+' closed')
-    }
+      this.emit('end')
+    })
   }
 
   // META STREAM INTERFACE
@@ -45,16 +46,19 @@ function Bricoleur (opts) {
 
   // API / COMMANDS
   var api = {
-    make: function (mod) {
+    loadEnv: function (user,cb) {
+    },
+    make: function (mod,cb) {
       var libName = mod.id.toUpperCase()
       var lib = require(libName)
       _[mod.id] = new lib() 
       if (process.browser && mod.html) _[mod.id].render(html)
+      // verify module creation somehow
     },
-    unmake: function (mod) {
+    unmake: function (mod,cb) {
       _[mod.id].destroy()
     },
-    conn: function (conss) { // fix ugliness
+    conn: function (conss,cb) { // fix ugliness
       conns.forEach(function handleConnection (conn) {
         if (conn.match(/\+/) !== null) {
           var modA = conn.split('+')[0]
