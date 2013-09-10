@@ -21,7 +21,7 @@ function Environment (opts, running) {
   var _ = {} // brico scope
 
   // HTTP SERVER :: HANDLE STATIC FILES
-  readdir(opts.wilds, function findStaticFiles (e,files) {
+  readdir(opts.path_wilds, function findStaticFiles (e,files) {
     if (e) console.error(e)
     files.forEach(function matchFile (file) {
       if (file[0] === '_') FILES.push(file)
@@ -42,7 +42,7 @@ function Environment (opts, running) {
     var file = path.replace('/','')
 
     asyncMap(FILES, function matchPathToStatic (staticFile,cb) {
-      if (file === staticFile) filePath(opts.wilds+'/'+file)
+      if (file === staticFile) filePath(opts.path_wilds+'/'+file)
       if (file !== staticFile) filePath(null)
     }, function () {
       console.log('for req '+path+' streamed file '+file)
@@ -84,12 +84,13 @@ function Environment (opts, running) {
   
   // LOAD ENVIRONMENT
   this.load = function (loaded) { 
+    // expose compile/map options 
     var compileOpts = {
-      path_wilds:'./_wilds',
-      path_styl:'./_wilds/_css.styl',
-      path_css: './_wilds/_styles.css',
-      path_bundle:'./_wilds/_bundle.js',
-      path_env:'./_env_B.js',
+      path_wilds:opts.path_wilds,
+      path_styl:opts.path_styl,
+      path_css:opts.path_css,
+      path_bundle:opts.path_bundle,
+      path_env:opts.path_js,
       compress:false
     }
     data.get('users', function LoadBricos (e, val) { 
@@ -100,7 +101,7 @@ function Environment (opts, running) {
       }
     })
     var _cmp = new Compiler(compileOpts) 
-    var _map = new Map({end:false,path_wilds:'./_wilds'}, function (s) {// map wilds
+    var _map = new Map({end:false,path_wilds:opts.path_wilds}, function (s) {// map wilds
       s.pipe(_cmp.s)
       for (brico in _) {
         _cmp.s.pipe(_[brico].metaStream)
