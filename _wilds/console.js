@@ -4,23 +4,20 @@
 	"desc":"cli",
   "deps":["console.html","console.styl"]
 }*/
-var stream = require('stream')
-, inherits = require('inherits')
+var through = require('through')
+
+module.exports = Console
 
 function Console (template) {
-  stream.Stream.call(this)
-  this.readable = true
-  this.writable = true
-  this._buffer = []
   var self = this
 
-  this.write = function (chunk, enc, next) {
-    console.log(chunk)
+  this.s = through(write, end, {autoDestroy:false})
+  function write (chunk) {
+    this.queue(chunk)
   }
-
-  this._read = function (size) {}
-
-  this.end = function () {}
+  function end () {
+    this.emit('end')
+  }
 
   render(template)
 
@@ -36,7 +33,7 @@ function Console (template) {
     form.onsubmit = function (e) {
       e.preventDefault()
       var cmd = e.target[0].value
-      self.emit('data', JSON.stringify({cmd:cmd}))
+      self.s.write(JSON.stringify({cmd:cmd}))
       prompt.blur()
     }
 
@@ -49,6 +46,3 @@ function Console (template) {
     }
   }
 }
-
-inherits(Console,stream.Stream)
-module.exports = Console
