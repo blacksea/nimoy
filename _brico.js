@@ -8,14 +8,6 @@ function Bricoleur (opts) {
 
   var self = this
 
-  // MODULE SCOPE
-  var _ = {}
-  _.brico = through(function write (chunk) {
-    this.queue(chunk)
-  }, function end () {
-    this.emit('end')
-  })
-
   // UTILITIES
   function handleMapData (mod) {
     if (!self.moduleMap) self.moduleMap = []
@@ -23,6 +15,7 @@ function Bricoleur (opts) {
   }
 
   // HANDLE SOCKET CONNECTIONS
+  // system for module connections / routing
   this.addSocket = function (id) { // send modulemap! & user environment data
     self[id] = through(function write (chunk) {
       this.queue(chunk)
