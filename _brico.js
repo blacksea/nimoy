@@ -21,7 +21,7 @@ function Bricoleur (opts) {
   }
 
   // HANDLE SOCKET CONNECTIONS
-  this.addSocket = function (id) {
+  this.addSocket = function (id) { // send modulemap! & user environment data
     self[id] = new stream.Stream
     self[id].writable = true
     self[id].readable = true
@@ -36,7 +36,8 @@ function Bricoleur (opts) {
   function metaWrite (chunk) {
     var data = JSON.parse(chunk)
     if (data.process) handleMapData(data) // map data
-    if (data.fresh && data.fresh === true) console.log(JSON.parse(chunk))
+    if (data.fresh && data.fresh === true) console.log(JSON.parse(chunk)) // update map when module changes
+    if (data.host) console.log(data)
   }
   function metaEnd () {
     console.log('map ready')

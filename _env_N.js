@@ -62,8 +62,19 @@ function Environment (opts, running) {
     var headers = soc.upgradeReq.headers
     var key = headers['sec-websocket-key']
     var host = headers.host
+
     _[host].addSocket(key)
+
     ws.pipe(_[host][key]).pipe(ws)
+
+    // SEND BROWSER BRICO MODULE MAP AND USER ENV DATA
+    asyncMap(_[host].moduleMap, function (mod,cb) {
+      ws.write(JSON.stringify(mod))
+      cb()
+    }, function () {
+      var user = self.users[host]
+      ws.write(JSON.stringify(user))
+    })
     ws.on('end', function (d) {
       console.log('disconnected')
     })
@@ -72,7 +83,7 @@ function Environment (opts, running) {
   webSocket.on('connection', handleSoc)
   
   // LOAD ENVIRONMENT
-  this.load = function (loaded) { // build a brico per user
+  this.load = function (loaded) { 
     var compileOpts = {
       path_wilds:'./_wilds',
       path_styl:'./_wilds/_css.styl',
@@ -83,6 +94,7 @@ function Environment (opts, running) {
     }
     data.get('users', function LoadBricos (e, val) { 
       var users = JSON.parse(val)
+      self.users = users
       for (u in users) {
         _[users[u].host] = new Bricoleur() 
       }
@@ -101,13 +113,12 @@ function Environment (opts, running) {
 
   // ADD A NEW USER
   this.addUser = function (user, cb) {
-    var id = user.name
+    var id = user.host
     data.get('users', function checkUsers (e, val) {
       if (!val) var users = {}
       if (val) var users = JSON.parse(val)
       users[id] = user
       data.put('users', JSON.stringify(users), function (e) {
-        console.log(users)
         if (e) console.error(e)
         cb()
       })
