@@ -14,8 +14,9 @@ function Bricoleur (opts) {
     self.moduleMap.push(mod)
   }
 
+  // system for module connections / routing / just connect directly to a module
+
   // HANDLE SOCKET CONNECTIONS
-  // system for module connections / routing
   this.addSocket = function (id) { // send modulemap! & user environment data
     self[id] = through(function write (chunk) {
       this.queue(chunk)

@@ -8,15 +8,17 @@ var defaultUser = {
   modules : ''
 }
 
-var _env = new Env({
-  path_wilds:'./_wilds',
+var envOpts = {
+   path_wilds:'./_wilds',
   path_styl:'./_wilds/_css.styl',
   path_css:'./_wilds/_styles.css', 
   path_bundle:'./_wilds/_bundle.js', 
   path_js:'./_env_B.js',
   port:80,
-  db:'./data'
-}, function serverRunning () {
+  db:'./data' 
+}
+
+var _env = new Env(envOpts, function serverRunning () {
   console.log('running')
   _env.addUser(defaultUser, function () {
     console.log('added user')
