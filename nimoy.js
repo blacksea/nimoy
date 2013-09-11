@@ -2,8 +2,8 @@
 var Env = require('./_env_N')
 
 var defaultUser = {
-  name : 'default',
-  host : 'localhost',
+  name : 'blackea',
+  host : 'theblacksea.cc',
   connections: '',
   modules : ''
 }
