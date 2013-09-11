@@ -24,6 +24,7 @@ function Map (opts, callback) {
     })
   })
 
+  // WATCH WILDS DIR FOR MODULE UPDATES AND RELOAD
   fs.watch(opts.path_wilds, function handleFileChange (event, file) { 
     var filepath = opts.path_wilds+file
     fs.stat(filepath, function statFile (err, stats) {
