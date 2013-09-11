@@ -6,7 +6,7 @@ var readdir = require('fs').readdir
 var http = require('http')
 var filed = require('filed')
 var Map = require('./_map')
-var Data = require('levelup')
+var Data = require('level')
 var Compiler = require('./_cmp')
 var Bricoleur = require('./_brico')
 
@@ -14,10 +14,10 @@ module.exports = Environment
 
 function Environment (opts, running) { 
   var self = this
+  var data = null
   var FILES = []
   var nodeMap = []
   var browserMap = []
-  var data = null
   var _ = {} // brico scope
 
   // HTTP SERVER :: HANDLE STATIC FILES

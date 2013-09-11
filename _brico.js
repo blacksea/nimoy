@@ -1,3 +1,4 @@
+// BRICO
 var stream = require('stream')
 var through = require('through')
 
@@ -15,8 +16,9 @@ function Bricoleur (opts) {
   }
 
   // system for module connections / routing / just connect directly to a module
+  // really fast connections -- streams -- object -- trees
 
-  // HANDLE SOCKET CONNECTIONS
+  // HANDLE SOCKET CONNECTIONS  to >---> from browser to map
   this.addSocket = function (id) { // send modulemap! & user environment data
     self[id] = through(function write (chunk) {
       this.queue(chunk)
