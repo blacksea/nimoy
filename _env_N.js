@@ -35,12 +35,12 @@ function Environment (opts, running) {
 
     getStaticFile(req.url, function pipeFileStream (filepath) {
       if (filepath !== null) filed(filepath).pipe(res)
+      // add 404 for filepath=null
     })
   }
   function getStaticFile (path, filePath) {
     if (path === '/') path = '/_index.html'
     var file = path.replace('/','')
-
     asyncMap(FILES, function matchPathToStatic (staticFile,cb) {
       if (file === staticFile) filePath(opts.path_wilds+'/'+file)
       if (file !== staticFile) filePath(null)
@@ -61,7 +61,10 @@ function Environment (opts, running) {
     var ws = websocketStream(soc)
     var headers = soc.upgradeReq.headers
     var key = headers['sec-websocket-key']
+    // kindle hack //
+    if (headers['sec-websocket-key1']) key = headers['sec-websocket-key1'].replace(/\s/g,'-')
     var host = headers.host
+    console.log(headers)
 
     _[host].addSocket(key)
 
@@ -84,7 +87,13 @@ function Environment (opts, running) {
   
   // LOAD ENVIRONMENT
   this.load = function (loaded) { 
-    // expose compile/map options 
+    data.get('users', function LoadBricos (e, val) { 
+      var users = JSON.parse(val)
+      self.users = users
+      for (u in users) {
+        _[users[u].host] = new Bricoleur() 
+      }
+    })
     var compileOpts = {
       path_wilds:opts.path_wilds,
       path_styl:opts.path_styl,
@@ -93,15 +102,11 @@ function Environment (opts, running) {
       path_env:opts.path_js,
       compress:false
     }
-    data.get('users', function LoadBricos (e, val) { 
-      var users = JSON.parse(val)
-      self.users = users
-      for (u in users) {
-        _[users[u].host] = new Bricoleur() 
-      }
-    })
     var _cmp = new Compiler(compileOpts) 
-    var _map = new Map({end:false,path_wilds:opts.path_wilds}, function (s) {// map wilds
+    var _map = new Map({
+      end:false,
+      path_wilds:opts.path_wilds
+    }, function (s) {// map wilds
       s.pipe(_cmp.s)
       for (brico in _) {
         _cmp.s.pipe(_[brico].metaStream)

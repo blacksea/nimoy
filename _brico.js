@@ -15,11 +15,11 @@ function Bricoleur (opts) {
     self.moduleMap.push(mod)
   }
 
-  // system for module connections / routing / just connect directly to a module
+  // adhoc system for module connections 
+  // just connect directly to a module
   // really fast connections -- streams -- object -- trees
-
   // HANDLE SOCKET CONNECTIONS  to >---> from browser to map
-  this.addSocket = function (id) { // send modulemap! & user environment data
+  this.addSocket = function (id) { 
     self[id] = through(function write (chunk) {
       this.queue(chunk)
     }, function end () {
@@ -33,8 +33,9 @@ function Bricoleur (opts) {
   function metaWrite (chunk) {
     var data = JSON.parse(chunk)
     if (data.process) handleMapData(data) // map data
-    if (data.fresh && data.fresh === true) console.log(JSON.parse(chunk)) // update map when module changes
     if (data.host) console.log(data)
+    // refresh module if its edited
+    if (data.fresh && data.fresh === true) console.log(JSON.parse(chunk)) 
   }
   function metaEnd () {
     console.log('map ready')

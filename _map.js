@@ -46,6 +46,8 @@ function Map (opts, callback) {
       FILESTAT = stats
     })
   })
+
+  // modify module data to test process /rpi?/amd64 etc...
   
   function parse (file,cb) {
     var ext = file.split('.')[1]
