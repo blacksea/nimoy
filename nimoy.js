@@ -2,14 +2,13 @@
 var Env = require('./_env_N')
 
 var defaultUser = {
-  name : 'default',
-  host : 'localhost',
-  connections: '',
-  modules : ''
+  host:'localhost',
+  connections:'',
+  modules:''
 }
 
 var envOpts = {
-   path_wilds:'./_wilds',
+  path_wilds:'./_wilds',
   path_styl:'./_wilds/_css.styl',
   path_css:'./_wilds/_styles.css', 
   path_bundle:'./_wilds/_bundle.js', 
@@ -19,11 +18,10 @@ var envOpts = {
 }
 
 var _env = new Env(envOpts, function serverRunning () {
-  console.log('running')
   _env.addUser(defaultUser, function () {
-    console.log('added user')
+    console.log('added user '+host)
     _env.load(function environmentLoaded () {
-      console.log('nimoy active!')
+      console.log('nimoy running on port '+80)
     })
   })
 })
