@@ -116,7 +116,7 @@ function Environment (opts, running) {
   }
 
   // ADD A NEW USER
-  this.addUser = function (user, cb) {
+  this.addBrico = function (user, cb) {
     var id = user.host
     data.get('users', function checkUsers (e, val) {
       if (!val) var users = {}
