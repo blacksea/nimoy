@@ -53,6 +53,7 @@ function Environment (opts, running) {
     var uid = parseInt(process.env.SUDO_UID)
     if (uid) process.setuid(uid)
     data = Data(opts.db) // dont' run level as sudo
+    data.del('users')
     running() // we're running cb!
   })
   
@@ -85,10 +86,13 @@ function Environment (opts, running) {
   
   // LOAD ENVIRONMENT
   this.load = function (loaded) { 
-    var bricos = data.createReadStream()
+    var bricos = data.createValueStream()
     bricos.on('data', function (d) {
-      var brico = JSON.parse(d.toString())
+      var brico = JSON.parse(d)
       _[brico.host] = new Bricoleur()
+    })
+    bricos.on('end', function () {
+      loaded()
     })
     var compileOpts = {
       path_wilds:opts.path_wilds,
@@ -115,7 +119,8 @@ function Environment (opts, running) {
 
   // ADD A NEW USER
   this.addBrico = function (user, cb) {
-    data.put(user.host, JSON.stringify(user), function (e) {
+    user = JSON.stringify(user)
+    data.put(user.host, user, function (e) {
       if (e) console.error(e)
       cb()
     })
