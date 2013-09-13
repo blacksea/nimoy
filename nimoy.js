@@ -19,9 +19,9 @@ var envOpts = {
 
 var _env = new Env(envOpts, function serverRunning () {
   _env.addUser(defaultUser, function () {
-    console.log('added user '+host)
+    console.log('added user '+defaultUser.host)
     _env.load(function environmentLoaded () {
-      console.log('nimoy running on port '+80)
+      console.log('nimoy active! '+port)
     })
   })
 })
