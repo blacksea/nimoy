@@ -61,10 +61,8 @@ function Environment (opts, running) {
     var ws = websocketStream(soc)
     var headers = soc.upgradeReq.headers
     var key = headers['sec-websocket-key']
-    // kindle hack //
     if (headers['sec-websocket-key1']) key = headers['sec-websocket-key1'].replace(/\s/g,'-')
     var host = headers.host
-    console.log(headers)
 
     _[host].addSocket(key)
 
