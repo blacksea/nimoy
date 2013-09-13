@@ -85,12 +85,10 @@ function Environment (opts, running) {
   
   // LOAD ENVIRONMENT
   this.load = function (loaded) { 
-    data.get('users', function LoadBricos (e, val) { 
-      var users = JSON.parse(val)
-      self.users = users
-      for (u in users) {
-        _[users[u].host] = new Bricoleur() 
-      }
+    var bricos = data.createReadStream()
+    bricos.on('data', function (d) {
+      var brico = JSON.parse(d.toString())
+      _[brico.host] = new Bricoleur()
     })
     var compileOpts = {
       path_wilds:opts.path_wilds,
@@ -117,15 +115,9 @@ function Environment (opts, running) {
 
   // ADD A NEW USER
   this.addBrico = function (user, cb) {
-    var id = user.host
-    data.get('users', function checkUsers (e, val) {
-      if (!val) var users = {}
-      if (val) var users = JSON.parse(val)
-      users[id] = user
-      data.put('users', JSON.stringify(users), function (e) {
-        if (e) console.error(e)
-        cb()
-      })
+    data.put(user.host, JSON.stringify(user), function (e) {
+      if (e) console.error(e)
+      cb()
     })
   }
 }
