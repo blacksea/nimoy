@@ -16,6 +16,11 @@ var Bricoleur = require('./_brico')
 module.exports = Environment
 
 function Environment (opts, running) { 
+  if (opts.path_data[(opts.path_data.length-1)] !== '/') opts.path_data += '/'
+  if (opts.path_static[(opts.path_static.length-1)] !== '/') opts.path_static += '/'
+  if (opts.path_wilds[(opts.path_wilds.length-1)] !== '/') opts.path_wilds += '/'
+  console.log(opts)
+
   var Self = this
   var StaticFiles = {}
   var Data
@@ -38,7 +43,6 @@ function Environment (opts, running) {
   
   // HTTP SERVER FOR STATIC FILES
   
-  if((opts.path_static.length-1) !== '/') opts.path_static += '/'
   readdir(opts.path_static, function GetStaticFiles (e, files) {
     if (e) console.error(e)
     files.forEach(function findStaticFiles (file) {
@@ -61,8 +65,7 @@ function Environment (opts, running) {
     // create level instance as user not root
     var uid = parseInt(process.env.SUDO_UID)
     if (uid) process.setuid(uid)
-    Data = level(opts.db) 
-    // cb that we're up!
+    Data = level(opts.path_data+'env') 
     running() 
   })
 
@@ -91,6 +94,7 @@ function Environment (opts, running) {
     bricoStream.on('data', function (d) {
       var brico = JSON.parse(d)
       _[brico.host] = new Bricoleur()
+      _[brico.host]['data'] = level(opts.path_data+brico.host)
     })
     bricoStream.on('end', function () {
       console.log(_)
