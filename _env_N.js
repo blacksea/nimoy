@@ -113,8 +113,7 @@ function Environment (opts, running) {
   }
 
   this.createBrico = function (user, cb) {
-    user = JSON.stringify(user)
-    Data.put(user.host, user, function (e) {
+    Data.put(user.host, JSON.stringify(user), function (e) {
       if (e) console.error(e)
       cb()
     })
