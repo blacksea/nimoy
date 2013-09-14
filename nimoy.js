@@ -15,7 +15,7 @@ var EnvOpts = {
   path_bundle:'./_static/bundle.js', 
   path_js:'./_env_B.js',
   port:80,
-  db:'./data' 
+  db:'./data/env' 
 }
 
 var _env = new Env(EnvOpts, function serverRunning () {
