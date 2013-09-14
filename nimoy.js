@@ -19,9 +19,9 @@ var envOpts = {
 }
 
 var _env = new Env(envOpts, function serverRunning () {
-  _env.addBrico(defaultUser, function () {
+  _env.createBrico(defaultUser, function () {
     console.log('added user '+defaultUser.host)
-    _env.load(function environmentLoaded () {
+    _env.loadEnvironment(function environmentLoaded () {
       console.log('nimoy active! '+envOpts.port)
     })
   })

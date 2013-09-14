@@ -12,7 +12,7 @@ var Compiler = require('./_cmp')
 var level = require('level')
 
 var asyncMap = require('slide').asyncMap
-var readDir = require('fs').readdir
+var readdir = require('fs').readdir
 
 
 module.exports = Environment
@@ -29,11 +29,11 @@ function Environment (opts, running) {
   readdir(opts.path_static, function GetStaticFiles (e, files) {
     if (e) console.error(e)
     files.forEach(function findStaticFiles (file) {
-      if (file[0] === '_') StaticFiles[file] = opts.path_static+file
+      StaticFiles[file] = opts.path_static+file
     })
   })
 
-  var Server = http.createServer(HandleReqs)
+  var Server = http.createServer(HandleRequests)
 
   function HandleRequests (req, res) {
     var url = req.url
@@ -55,7 +55,7 @@ function Environment (opts, running) {
   })
 
   // HANDLE WEBSOCKET CONNECTIONS
-  var WebSocket = new ws({server:server})
+  var WebSocket = new ws({server:Server})
 
   WebSocket.on('connection', HandleSoc)
 
@@ -77,7 +77,7 @@ function Environment (opts, running) {
       var brico = JSON.parse(d)
       _[brico.host] = new Bricoleur()
     })
-    bricosStream.on('end', function () {
+    bricoStream.on('end', function () {
       loaded()
     })
 
