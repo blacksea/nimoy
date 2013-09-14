@@ -1,64 +1,64 @@
 // NODE ENVIRONMENT
 var websocketStream = require('websocket-stream')
 var ws = require('ws').Server
-var asyncMap = require('slide').asyncMap
-var readdir = require('fs').readdir
+
 var http = require('http')
 var filed = require('filed')
-var Map = require('./_map')
-var Data = require('level')
-var Compiler = require('./_cmp')
+
 var Bricoleur = require('./_brico')
+
+var Map = require('./_map')
+var Compiler = require('./_cmp')
+var level = require('level')
+
+var asyncMap = require('slide').asyncMap
+var readDir = require('fs').readdir
+
 
 module.exports = Environment
 
 function Environment (opts, running) { 
-  var self = this
-  var data = null
-  var FILES = []
-  var nodeMap = []
-  var browserMap = []
-  var _ = {} // brico scope
+  var Self = this
+  var StaticFiles = {}
+  var Data
 
-  // HTTP SERVER :: HANDLE STATIC FILES
-  readdir(opts.path_wilds, function findStaticFiles (e,files) {
+  var _ = {} // brico scope container
+  
+  // HTTP SERVER FOR STATIC FILES
+  readdir(opts.path_wilds, function GetStaticFiles (e, files) {
     if (e) console.error(e)
-    files.forEach(function matchFile (file) {
-      if (file[0] === '_') FILES.push(file)
+    files.forEach(function findStaticFiles (file) {
+      if (file[0] === '_') StaticFiles[file] = opts.path_wilds+file
     })
   })
-  function handleReqs (req, res) {
-    var headers = req.headers
-    , origin = headers.referer
-    , agent = headers['user-agent']
-    , host = headers.host
 
-    getStaticFile(req.url, function pipeFileStream (filepath) {
-      if (filepath !== null) filed(filepath).pipe(res)
-      // add 404 for filepath=null
-    })
+  var Server = http.createServer(HandleReqs)
+
+  function HandleRequests (req, res) {
+    var url = req.url
+    if (url === '/') url = '/_index.html'
+    var file = url.replace('/','') 
+
+    if (StaticFiles[file]) filed(StaticFiles[file]).pipe(res)
+    if (!StaticFiles[file]) res.end() // todo: somekindof 404
   }
-  function getStaticFile (path, filePath) {
-    if (path === '/') path = '/_index.html'
-    var file = path.replace('/','')
-    asyncMap(FILES, function matchPathToStatic (staticFile,cb) {
-      if (file === staticFile) filePath(opts.path_wilds+'/'+file)
-      if (file !== staticFile) filePath(null)
-    }, function () {
-      console.log('for req '+path+' streamed file '+file)
-    })
-  }
-  var server = http.createServer(handleReqs)
-  server.listen(opts.port, function () {
+
+  Server.listen(opts.port, function () {
+    // change process permissions so node runs as user not root
+    // create level instance as user not root
     var uid = parseInt(process.env.SUDO_UID)
     if (uid) process.setuid(uid)
-    data = Data(opts.db) // dont' run level as sudo
-    data.del('users')
-    running() // we're running cb!
+    Data = level(opts.db) 
+    // cb that we're up!
+    running() 
   })
-  
-  // CREATE WEBSOCKET
-  function handleSoc (soc) { // fix this thing!
+
+  // HANDLE WEBSOCKET CONNECTIONS
+  var WebSocket = new ws({server:server})
+
+  WebSocket.on('connection', HandleSoc)
+
+  function HandleSoc (soc) { // fix this thing!
     var ws = websocketStream(soc)
     var headers = soc.upgradeReq.headers
     var key = headers['sec-websocket-key']
@@ -69,7 +69,6 @@ function Environment (opts, running) {
 
     ws.pipe(_[host][key]).pipe(ws)
 
-    // SEND BROWSER BRICO MODULE MAP AND USER ENV DATA
     asyncMap(_[host].moduleMap, function (mod,cb) {
       ws.write(JSON.stringify(mod))
       cb()
@@ -81,19 +80,8 @@ function Environment (opts, running) {
       console.log('disconnected')
     })
   }
-  var webSocket = new ws({server:server})
-  webSocket.on('connection', handleSoc)
   
-  // LOAD ENVIRONMENT
-  this.load = function (loaded) { 
-    var bricos = data.createValueStream()
-    bricos.on('data', function (d) {
-      var brico = JSON.parse(d)
-      _[brico.host] = new Bricoleur()
-    })
-    bricos.on('end', function () {
-      loaded()
-    })
+  this.loadEnvironment = function (loaded) { 
     var compileOpts = {
       path_wilds:opts.path_wilds,
       path_styl:opts.path_styl,
@@ -102,7 +90,19 @@ function Environment (opts, running) {
       path_env:opts.path_js,
       compress:false
     }
+
+    var bricoStream = Data.createValueStream()
+
+    bricoStream.on('Data', function (d) {
+      var brico = JSON.parse(d)
+      _[brico.host] = new Bricoleur()
+    })
+    bricosStream.on('end', function () {
+      loaded()
+    })
+
     var _cmp = new Compiler(compileOpts) 
+
     var _map = new Map({
       end:false,
       path_wilds:opts.path_wilds
@@ -117,10 +117,9 @@ function Environment (opts, running) {
     })   
   }
 
-  // ADD A NEW USER
-  this.addBrico = function (user, cb) {
+  this.createBrico = function (user, cb) {
     user = JSON.stringify(user)
-    data.put(user.host, user, function (e) {
+    Data.put(user.host, user, function (e) {
       if (e) console.error(e)
       cb()
     })
