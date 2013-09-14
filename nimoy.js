@@ -9,6 +9,7 @@ var defaultUser = {
 
 var envOpts = {
   path_wilds:'./_wilds',
+  path_static:'./static',
   path_styl:'./_wilds/_css.styl',
   path_css:'./_wilds/_styles.css', 
   path_bundle:'./_wilds/_bundle.js', 

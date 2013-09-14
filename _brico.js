@@ -1,6 +1,6 @@
 // BRICO
-var stream = require('stream')
 var through = require('through')
+var level = require('level')
 
 module.exports = Bricoleur
 
@@ -10,7 +10,7 @@ function Bricoleur (opts) {
   var self = this
 
   // UTILITIES
-  function handleMapData (mod) {
+  function HandleMapData (mod) {
     if (!self.moduleMap) self.moduleMap = []
     self.moduleMap.push(mod)
   }
@@ -23,21 +23,25 @@ function Bricoleur (opts) {
     self[id] = through(function write (chunk) {
       this.queue(chunk)
     }, function end () {
-      console.log(id+' closed')
       this.emit('end')
     }, {autoDestroy:false})
   }
 
-  // META STREAM INTERFACE
-  this.metaStream = through(metaWrite,metaEnd,{autoDestroy:false})
-  function metaWrite (chunk) {
+  // META STREAM INTERFACE // replace with api
+  this.metaStream = through(MetaWrite,MetaEnd,{autoDestroy:false})
+  
+  function MetaWrite (chunk) {
     var data = JSON.parse(chunk)
     if (data.process) handleMapData(data) // map data
-    if (data.host) console.log(data)
+    if (data.host) {
+      console.log(data)
+      if (process.browser) window.document.title = data.host
+    }
     // refresh module if its edited
     if (data.fresh && data.fresh === true) console.log(JSON.parse(chunk)) 
   }
-  function metaEnd () {
+
+  function MetaEnd () {
     console.log('map ready')
   }
 

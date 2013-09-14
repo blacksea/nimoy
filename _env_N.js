@@ -25,10 +25,11 @@ function Environment (opts, running) {
   var _ = {} // brico scope container
   
   // HTTP SERVER FOR STATIC FILES
-  readdir(opts.path_wilds, function GetStaticFiles (e, files) {
+  if((opts.path_static.length-1) !== '/') opts.path_static += '/'
+  readdir(opts.path_static, function GetStaticFiles (e, files) {
     if (e) console.error(e)
     files.forEach(function findStaticFiles (file) {
-      if (file[0] === '_') StaticFiles[file] = opts.path_wilds+file
+      if (file[0] === '_') StaticFiles[file] = opts.path_static+file
     })
   })
 
@@ -68,31 +69,10 @@ function Environment (opts, running) {
     _[host].addSocket(key)
 
     ws.pipe(_[host][key]).pipe(ws)
-
-    asyncMap(_[host].moduleMap, function (mod,cb) {
-      ws.write(JSON.stringify(mod))
-      cb()
-    }, function () {
-      var user = self.users[host]
-      ws.write(JSON.stringify(user))
-    })
-    ws.on('end', function (d) {
-      console.log('disconnected')
-    })
   }
   
   this.loadEnvironment = function (loaded) { 
-    var compileOpts = {
-      path_wilds:opts.path_wilds,
-      path_styl:opts.path_styl,
-      path_css:opts.path_css,
-      path_bundle:opts.path_bundle,
-      path_env:opts.path_js,
-      compress:false
-    }
-
     var bricoStream = Data.createValueStream()
-
     bricoStream.on('Data', function (d) {
       var brico = JSON.parse(d)
       _[brico.host] = new Bricoleur()
@@ -101,6 +81,14 @@ function Environment (opts, running) {
       loaded()
     })
 
+    var compileOpts = {
+      path_wilds:opts.path_wilds,
+      path_styl:opts.path_styl,
+      path_css:opts.path_css,
+      path_bundle:opts.path_bundle,
+      path_env:opts.path_js,
+      compress:false
+    }
     var _cmp = new Compiler(compileOpts) 
 
     var _map = new Map({
