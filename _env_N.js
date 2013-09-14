@@ -84,7 +84,7 @@ function Environment (opts, running) {
     ws.pipe(_[host][key]).pipe(ws)
   }
 
-  // API
+  // API LAYERS
   
   this.loadEnvironment = function (loaded) { 
     var bricoStream = Data.createValueStream()
@@ -113,6 +113,7 @@ function Environment (opts, running) {
   }
 
   this.createBrico = function (user, cb) {
+    // crete and attach a data instance per brico
     Data.put(user.host, JSON.stringify(user), function (e) {
       if (e) console.error(e)
       cb()

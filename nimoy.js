@@ -1,13 +1,13 @@
 // NIMOY 
 var Env = require('./_env_N')
 
-var defaultUser = {
+var DefaultUser = {
   host:'blacksea',
   connections:'',
   modules:''
 }
 
-var envOpts = {
+var EnvOpts = {
   path_wilds:'./_wilds',
   path_static:'./_static',
   path_styl:'./_static/default.styl',
@@ -18,11 +18,11 @@ var envOpts = {
   db:'./data' 
 }
 
-var _env = new Env(envOpts, function serverRunning () {
-  _env.createBrico(defaultUser, function () {
-    console.log('added user '+defaultUser.host)
+var _env = new Env(EnvOpts, function serverRunning () {
+  _env.createBrico(DefaultUser, function () {
+    console.log('added user '+DefaultUser.host)
     _env.loadEnvironment(function environmentLoaded () {
-      console.log('nimoy active! '+envOpts.port)
+      console.log('nimoy active! '+EnvOpts.port)
     })
   })
 })
