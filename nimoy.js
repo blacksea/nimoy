@@ -9,10 +9,10 @@ var defaultUser = {
 
 var envOpts = {
   path_wilds:'./_wilds',
-  path_static:'./static',
-  path_styl:'./_wilds/_css.styl',
-  path_css:'./_wilds/_styles.css', 
-  path_bundle:'./_wilds/_bundle.js', 
+  path_static:'./_static',
+  path_styl:'./_static/default.styl',
+  path_css:'./_static/styles.css', 
+  path_bundle:'./_static/bundle.js', 
   path_js:'./_env_B.js',
   port:80,
   db:'./data' 
