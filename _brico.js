@@ -1,6 +1,6 @@
 // BRICO
 var through = require('through')
-var level = require('level')
+// connect to external db
 
 module.exports = Bricoleur
 
