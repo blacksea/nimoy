@@ -30,7 +30,7 @@ function Environment (opts, running) {
     path_css:opts.path_css,
     path_bundle:opts.path_bundle,
     path_env:opts.path_js,
-    compress:false
+    compress:true
   }
   var MapOpts = {
     path_wilds:opts.path_wilds
