@@ -23,6 +23,19 @@ function Environment (opts, running) {
   var Data
 
   var _ = {} // brico scope container
+
+  // CONFIGS 
+  var CompileOpts = {
+    path_wilds:opts.path_wilds,
+    path_styl:opts.path_styl,
+    path_css:opts.path_css,
+    path_bundle:opts.path_bundle,
+    path_env:opts.path_js,
+    compress:false
+  }
+  var MapOpts = {
+    path_wilds:opts.path_wilds
+  }
   
   // HTTP SERVER FOR STATIC FILES
   if((opts.path_static.length-1) !== '/') opts.path_static += '/'
@@ -81,20 +94,10 @@ function Environment (opts, running) {
       loaded()
     })
 
-    var compileOpts = {
-      path_wilds:opts.path_wilds,
-      path_styl:opts.path_styl,
-      path_css:opts.path_css,
-      path_bundle:opts.path_bundle,
-      path_env:opts.path_js,
-      compress:false
-    }
-    var _cmp = new Compiler(compileOpts) 
+    var _cmp = new Compiler(CompileOpts) 
 
-    var _map = new Map({
-      end:false,
-      path_wilds:opts.path_wilds
-    }, function (s) {// map wilds
+    var _map = new Map(MapOpts, function (s) {// map wilds
+      s.end = false
       s.pipe(_cmp.s)
       for (brico in _) {
         _cmp.s.pipe(_[brico].metaStream)
