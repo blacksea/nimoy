@@ -26,7 +26,7 @@ function Bricoleur (opts) {
   
   function MetaWrite (chunk) {
     var data = JSON.parse(chunk)
-    if (data.process) handleMapData(data) // map data
+    //if (data.process) HandleMapData(data) // map data
     if (data.host) {
       console.log(data)
       if (process.browser) window.document.title = data.host
