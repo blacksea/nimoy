@@ -2,17 +2,15 @@
 var websocketStream = require('websocket-stream')
 var ws = require('ws').Server
 
+var readdir = require('fs').readdir
 var http = require('http')
 var filed = require('filed')
-
-var Bricoleur = require('./_brico')
 
 var Map = require('./_map')
 var Compiler = require('./_cmp')
 var level = require('level')
 
-var asyncMap = require('slide').asyncMap
-var readdir = require('fs').readdir
+var Bricoleur = require('./_brico')
 
 
 module.exports = Environment
@@ -24,7 +22,8 @@ function Environment (opts, running) {
 
   var _ = {} // brico scope container
 
-  // CONFIGS 
+  // CONFIGURATION 
+  
   var CompileOpts = {
     path_wilds:opts.path_wilds,
     path_styl:opts.path_styl,
@@ -38,6 +37,7 @@ function Environment (opts, running) {
   }
   
   // HTTP SERVER FOR STATIC FILES
+  
   if((opts.path_static.length-1) !== '/') opts.path_static += '/'
   readdir(opts.path_static, function GetStaticFiles (e, files) {
     if (e) console.error(e)
@@ -50,9 +50,8 @@ function Environment (opts, running) {
 
   function HandleRequests (req, res) {
     var url = req.url
-    if (url === '/') url = '/_index.html'
+    if (url === '/') url = '/index.html'
     var file = url.replace('/','') 
-
     if (StaticFiles[file]) filed(StaticFiles[file]).pipe(res)
     if (!StaticFiles[file]) res.end() // todo: somekindof 404
   }
@@ -67,7 +66,8 @@ function Environment (opts, running) {
     running() 
   })
 
-  // HANDLE WEBSOCKET CONNECTIONS
+  // WEBSOCKET CONNECTIONS
+  
   var WebSocket = new ws({server:Server})
 
   WebSocket.on('connection', HandleSoc)
@@ -83,20 +83,24 @@ function Environment (opts, running) {
 
     ws.pipe(_[host][key]).pipe(ws)
   }
+
+  // API
   
   this.loadEnvironment = function (loaded) { 
     var bricoStream = Data.createValueStream()
-    bricoStream.on('Data', function (d) {
+    bricoStream.on('data', function (d) {
       var brico = JSON.parse(d)
       _[brico.host] = new Bricoleur()
     })
     bricoStream.on('end', function () {
+      console.log(_)
       loaded()
     })
 
     var _cmp = new Compiler(CompileOpts) 
 
     var _map = new Map(MapOpts, function (s) {// map wilds
+      // add map to bricos stored in env db
       s.end = false
       s.pipe(_cmp.s)
       for (brico in _) {

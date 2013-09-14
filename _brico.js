@@ -9,16 +9,11 @@ function Bricoleur (opts) {
 
   var self = this
 
-  // UTILITIES
-  function HandleMapData (mod) {
-    if (!self.moduleMap) self.moduleMap = []
-    self.moduleMap.push(mod)
-  }
-
   // adhoc system for module connections 
   // just connect directly to a module
   // really fast connections -- streams -- object -- trees
   // HANDLE SOCKET CONNECTIONS  to >---> from browser to map
+  
   this.addSocket = function (id) { 
     self[id] = through(function write (chunk) {
       this.queue(chunk)
@@ -27,8 +22,7 @@ function Bricoleur (opts) {
     }, {autoDestroy:false})
   }
 
-  // META STREAM INTERFACE // replace with api
-  this.metaStream = through(MetaWrite,MetaEnd,{autoDestroy:false})
+  this.metaStream = through(MetaWrite, MetaEnd, {autoDestroy:false})
   
   function MetaWrite (chunk) {
     var data = JSON.parse(chunk)
@@ -37,13 +31,9 @@ function Bricoleur (opts) {
       console.log(data)
       if (process.browser) window.document.title = data.host
     }
-    // refresh module if its edited
     if (data.fresh && data.fresh === true) console.log(JSON.parse(chunk)) 
   }
-
-  function MetaEnd () {
-    console.log('map ready')
-  }
+  function MetaEnd () {}
 
   // API / COMMANDS
   var api = {
