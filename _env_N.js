@@ -99,7 +99,7 @@ function Environment (opts, running) {
   function APIwrite (chunk) {
     console.log(chunk)
     var cmd = chunk[0]
-    var params = chunk[2]
+    var params = chunk[1]
 
     API[cmd](params) 
   }
@@ -110,6 +110,7 @@ function Environment (opts, running) {
     load: function (loaded) {
       var streamBricos = Data.createValueStream()
       streamBricos.on('data', function (d) {
+        var brico = JSON.parse(d)
         _[brico.host] = new Bricoleur()
         _[brico.host].data = level(opts.path_data+brico.host)
       })

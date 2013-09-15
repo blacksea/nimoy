@@ -21,10 +21,9 @@ var EnvOpts = {
 
 var Environment = new Env(EnvOpts, function serverRunning () {
   console.log('nimoy running on port '+EnvOpts.port)
+  Environment.api.write(['load',Ready])
 })
-
-Environment.api.write(['load',Ready])
 
 function Ready () {
   console.log('Environment Loaded!')
-}
+:
