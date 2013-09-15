@@ -1,23 +1,20 @@
 // WILDS MAPPER
 
-var Readable = require('stream').Readable
-var inherits = require('inherits')
+var through = require('through')
 var asyncMap = require('slide').asyncMap
 var fs = require('fs')
 
-inherits(Map, Readable)
-
 module.exports = Map
 
-function Map (opts, callback) {
-  Readable.call(this)
-
+function Map (opts, mapStream) {
   if (opts.path_wilds[opts.path_wilds.length-1] !== '/') opts.path_wilds += '/'
-
-  var Self = this
   var FileStat 
 
-  this._read = function (size) {} // WTF!
+  var rs = through(function write (chunk) {
+    this.queue(chunk)
+  }, function end () {
+    this.emit('end')
+  }
 
   fs.watch(opts.path_wilds, function handleFileChange (event, file) { 
     var filepath = opts.path_wilds+file
@@ -37,15 +34,8 @@ function Map (opts, callback) {
       FileStat = stats
     })
   })
-
-  fs.readdir(opts.path_wilds, function handleWildsFiles (e, files) {
-    callback(self)
-    asyncMap(files, Parse, function doneWildsFiles () {
-      self.emit('end')
-    })
-  })
  
-  function Parse (file,cb) {
+  function Parse (file, next) {
     var ext = file.split('.')[1]
     if (ext === 'js' && file[0] !=='_') {
       var f = fs.createReadStream(opts.path_wilds+file)
@@ -53,11 +43,18 @@ function Map (opts, callback) {
         var buf = chunk.toString()
         var m = buf.match(/\/\*\{([\S\s]*)\}\*\//) // fix up this regex
         var modJSON = m[0].replace('/*','').replace('*/','')
-        self.push(modJSON)
+        rs.write(modJSON)
       })
-      f.on('end',cb) 
+      f.on('end', next) 
     } else {
-      cb()
+      next()
     }
   }
+
+  fs.readdir(opts.path_wilds, function handleWildsFiles (e, files) {
+    mapStream(rs)
+    asyncMap(files, Parse, function doneWildsFiles () {
+      rs.write(null)
+    })
+  })
 }
