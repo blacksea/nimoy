@@ -7,8 +7,8 @@ var readdir = require('fs').readdir
 var http = require('http')
 var filed = require('filed')
 
-var Map = require('./_map')
-var Compiler = require('./_cmp')
+var map = require('./_map')
+var cmp = require('./_cmp')
 var level = require('level')
 
 var Bricoleur = require('./_brico')
@@ -39,7 +39,14 @@ function Environment (opts, running) {
   var MapOpts = {
     path_wilds:opts.path_wilds
   }
-  
+  var Map = new map(MapOpts, function (s) {// map wilds
+    var compiler = new cmp(CompileOpts) 
+    s.pipe(compiler.s)
+    s.on('end', function () {
+      console.log('map of '+opts.path_wilds+' complete!')
+    })
+  })   
+ 
   // HTTP SERVER FOR STATIC FILES
   
   readdir(opts.path_static, function GetStaticFiles (e, files) {
@@ -86,37 +93,29 @@ function Environment (opts, running) {
 
   // API LAYERS
   
-  this.loadEnvironment = function (loaded) { 
-    var bricoStream = Data.createValueStream()
-    bricoStream.on('data', function (d) {
-      var brico = JSON.parse(d)
-      _[brico.host] = new Bricoleur()
-      _[brico.host]['data'] = level(opts.path_data+brico.host)
-    })
-    bricoStream.on('end', function () {
-      loaded()
-    })
+  this.api = through(APIwrite, APIend, {autoDestroy:false})
 
-    var _cmp = new Compiler(CompileOpts) 
+  function APIwrite (chunk) {
+    console.log(chunk)
+    var cmd = chunk[0]
+    var params = chunk[2]
 
-    var _map = new Map(MapOpts, function (s) {// map wilds
-      // add map to bricos stored in env db
-      s.end = false
-      s.pipe(_cmp.s)
-      for (brico in _) {
-        _cmp.s.pipe(_[brico].metaStream)
-      }
-      s.on('end', function () {
-        console.log('map of '+opts.path_wilds+' complete!')
-      })
-    })   
+    API[cmd](params) 
   }
 
-  this.createBrico = function (user, cb) {
-    // crete and attach a data instance per brico
-    Data.put(user.host, JSON.stringify(user), function (e) {
-      if (e) console.error(e)
-      cb()
-    })
+  function APIend () {}
+  
+  var API = {
+    load: function (loaded) {
+      var streamBricos = Data.createValueStream()
+      streamBricos.on('data', function (d) {
+        _[brico.host] = new Bricoleur()
+        _[brico.host].data = level(opts.path_data+brico.host)
+      })
+      streamBricos.on('end', loaded)
+    },
+    createBrico: function (brico, created) {
+      Data.put(brico.host, brico, created)
+    }
   }
 }
