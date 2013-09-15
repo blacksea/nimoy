@@ -19,11 +19,12 @@ var EnvOpts = {
   port:80,
 }
 
-var _env = new Env(EnvOpts, function serverRunning () {
-  _env.createBrico(DefaultUser, function () {
-    console.log('added user '+DefaultUser.host)
-    _env.loadEnvironment(function environmentLoaded () {
-      console.log('nimoy running on port '+EnvOpts.port)
-    })
-  })
+var Environment = new Env(EnvOpts, function serverRunning () {
+  console.log('nimoy running on port '+EnvOpts.port)
 })
+
+Environment.api.write(['load',Ready])
+
+function Ready () {
+  console.log('Environment Loaded!')
+}

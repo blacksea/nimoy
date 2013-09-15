@@ -6,6 +6,7 @@ var ws = require('ws').Server
 var readdir = require('fs').readdir
 var http = require('http')
 var filed = require('filed')
+var through = require('through')
 
 var map = require('./_map')
 var cmp = require('./_cmp')
