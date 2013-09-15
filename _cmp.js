@@ -70,7 +70,7 @@ function Compiler (opts) {
       if (opts.compress === true) {
         var min = uglifyJS.minify(opts.path_bundle) 
         fs.writeFile(opts.path_bundle, min.code, function (e) {
-          if (!e) console.log('wrote minified _bundle.js')
+          if (!e) console.log('wrote minified '+opts.path_bundle)
         })
       }
     })

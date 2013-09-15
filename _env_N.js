@@ -1,4 +1,5 @@
 // NODE ENVIRONMENT
+
 var websocketStream = require('websocket-stream')
 var ws = require('ws').Server
 
@@ -12,14 +13,12 @@ var level = require('level')
 
 var Bricoleur = require('./_brico')
 
-
 module.exports = Environment
 
 function Environment (opts, running) { 
   if (opts.path_data[(opts.path_data.length-1)] !== '/') opts.path_data += '/'
   if (opts.path_static[(opts.path_static.length-1)] !== '/') opts.path_static += '/'
   if (opts.path_wilds[(opts.path_wilds.length-1)] !== '/') opts.path_wilds += '/'
-  console.log(opts)
 
   var Self = this
   var StaticFiles = {}
@@ -61,11 +60,9 @@ function Environment (opts, running) {
   }
 
   Server.listen(opts.port, function () {
-    // change process permissions so node runs as user not root
-    // create level instance as user not root
-    var uid = parseInt(process.env.SUDO_UID)
-    if (uid) process.setuid(uid)
-    Data = level(opts.path_data+'env') 
+    var uid = parseInt(process.env.SUDO_UID) 
+    if (uid) process.setuid(uid) // switch to user permissions
+    Data = level(opts.path_data+'env') // wait until user permissions are active
     running() 
   })
 
@@ -97,7 +94,6 @@ function Environment (opts, running) {
       _[brico.host]['data'] = level(opts.path_data+brico.host)
     })
     bricoStream.on('end', function () {
-      console.log(_)
       loaded()
     })
 
@@ -111,7 +107,7 @@ function Environment (opts, running) {
         _cmp.s.pipe(_[brico].metaStream)
       }
       s.on('end', function () {
-        console.log('mapping done')
+        console.log('map of '+opts.path_wilds+' complete!')
       })
     })   
   }
