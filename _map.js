@@ -10,15 +10,15 @@ function Map (opts, mapStream) {
   if (opts.path_wilds[opts.path_wilds.length-1] !== '/') opts.path_wilds += '/'
   var FileStat 
 
-  var rs = through(function write (chunk) {
+  var s = through(function write (chunk) {
     this.queue(chunk)
   }, function end () {
     this.emit('end')
-  }
+  })
 
   fs.watch(opts.path_wilds, function handleFileChange (event, file) { 
     var filepath = opts.path_wilds+file
-    fs.stat(filepath, function statFile (err, stats) {
+    fs.stat(filepath, function statFile (e, stats) {
       if (e) console.error(e)
       stats.filepath = filepath
       if (!FileStat) FileStat = stats
@@ -43,7 +43,7 @@ function Map (opts, mapStream) {
         var buf = chunk.toString()
         var m = buf.match(/\/\*\{([\S\s]*)\}\*\//) // fix up this regex
         var modJSON = m[0].replace('/*','').replace('*/','')
-        rs.write(modJSON)
+        s.write(modJSON)
       })
       f.on('end', next) 
     } else {
@@ -52,9 +52,9 @@ function Map (opts, mapStream) {
   }
 
   fs.readdir(opts.path_wilds, function handleWildsFiles (e, files) {
-    mapStream(rs)
+    mapStream(s)
     asyncMap(files, Parse, function doneWildsFiles () {
-      rs.write(null)
+      s.write(null)
     })
   })
 }
