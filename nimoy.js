@@ -1,4 +1,5 @@
 // NIMOY 
+
 var Env = require('./_env_N')
 
 var DefaultUser = {
@@ -22,7 +23,7 @@ var _env = new Env(EnvOpts, function serverRunning () {
   _env.createBrico(DefaultUser, function () {
     console.log('added user '+DefaultUser.host)
     _env.loadEnvironment(function environmentLoaded () {
-      console.log('nimoy active! '+EnvOpts.port)
+      console.log('nimoy running on port '+EnvOpts.port)
     })
   })
 })
