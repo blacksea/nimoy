@@ -1,3 +1,5 @@
+// COMPILER
+
 var through = require('through')
 var asyncMap = require('slide').asyncMap
 var uglifyJS = require('uglify-js')
@@ -28,16 +30,18 @@ function Compiler (opts) {
   function HandleModule (chunk) {
     var s = this
     var mod = JSON.parse(chunk.toString())
-    
+
+    b.require(Wilds+mod.id+'.js',{expose:mod.id}) 
+
     // if module is updated make it fresh!
-    if (WildsProcessed === true) mod.fresh = true 
+    if (WildsProcessed === true) mod.fresh = true
 
-    // kind of hacky :(
-    b.require(Wilds+mod.id+'.js',{expose:mod.id.toUpperCase()}) 
-
-    // doesn't make sense...but for consistency...
-    if (!mod.deps) s.queue(JSON.stringify(mod)) 
-
+    // handle deps
+    if (!mod.deps) s.queue(chunk.toString()) 
+    if (mod.deps) asyncMap(mod.deps, handleDep, function () {
+      s.queue(JSON.stringify(mod))
+      if (mod.fresh===true) Compile()
+    })
     function handleDep (file, next) {
       var dep = ''
       var ext = file.split('.')[1]
@@ -49,10 +53,6 @@ function Compiler (opts) {
         next()
       })
     }
-
-    if (mod.deps) asyncMap(mod.deps, handleDep, function () {
-      s.queue(JSON.stringify(mod))
-    })
   }
 
   function Compile () {
@@ -62,6 +62,9 @@ function Compiler (opts) {
     var bundleFile = fs.createWriteStream(opts.path_bundle)
     b.bundle().pipe(bundleFile)
 
+    bundleFile.on('error', function (e) {
+      console.error(e)
+    })
     bundleFile.on('close', function () {
       console.log('wrote '+opts.path_bundle)
       if (opts.compress === true) {
@@ -70,9 +73,6 @@ function Compiler (opts) {
           if (!e) console.log('wrote minified _bundle.js')
         })
       }
-    })
-    bundleFile.on('error', function (e) {
-      console.error(e)
     })
 
     stylus.render(CSS, {filename:opts.path_css}, function (e, compiledCSS) {
