@@ -92,12 +92,11 @@ function Environment (opts, running) {
     ws.pipe(_[host][key]).pipe(ws)
   }
 
-  // API LAYERS
+  // API
   
   this.api = through(APIwrite, APIend, {autoDestroy:false})
 
   function APIwrite (chunk) {
-    console.log(chunk)
     var cmd = chunk[0]
     var params = chunk[1]
 

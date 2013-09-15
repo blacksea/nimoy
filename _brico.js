@@ -1,19 +1,14 @@
 // BRICO
+
 var through = require('through')
-// connect to external db
 
 module.exports = Bricoleur
 
 function Bricoleur (opts) { 
   if (!opts) opts = {}
-
   var self = this
-
-  // adhoc system for module connections 
-  // just connect directly to a module
-  // really fast connections -- streams -- object -- trees
-  // HANDLE SOCKET CONNECTIONS  to >---> from browser to map
   
+  // GRAFT ON SOCKET
   this.addSocket = function (id) { 
     self[id] = through(function write (chunk) {
       this.queue(chunk)
@@ -22,21 +17,20 @@ function Bricoleur (opts) {
     }, {autoDestroy:false})
   }
 
-  this.metaStream = through(MetaWrite, MetaEnd, {autoDestroy:false})
+  // API
   
-  function MetaWrite (chunk) {
-    var data = JSON.parse(chunk)
-    //if (data.process) HandleMapData(data) // map data
-    if (data.host) {
-      console.log(data)
-      if (process.browser) window.document.title = data.host
-    }
-    if (data.fresh && data.fresh === true) console.log(JSON.parse(chunk)) 
-  }
-  function MetaEnd () {}
+  this.api = through(APIwrite, APIend, {autoDestroy:false})
 
-  // API / COMMANDS
-  var api = {
+  function APIwrite (chunk) {
+    var cmd = chunk[0]
+    var params = chunk[1]
+
+    API[cmd](params)
+  }
+
+  function APIend () {}
+
+  var API = {
     loadEnv: function (user,cb) {
     },
     make: function (mod,cb) {
@@ -63,10 +57,5 @@ function Bricoleur (opts) {
         }
       })
     }
-  }
-  this.cmd = function (params) {
-    var cmd = params[0]
-    if (!api[cmd]) console.error('command '+cmd+' unknown')
-    if (api[cmd]) api[cmd](params.slice(1))
   }
 }
