@@ -1,6 +1,6 @@
 // WILDS MAPPER
 
-var through = require('through')
+var Readable = require('stream').Readable
 var asyncMap = require('slide').asyncMap
 var fs = require('fs')
 
@@ -8,13 +8,11 @@ module.exports = Map
 
 function Map (opts, mapStream) {
   if (opts.path_wilds[opts.path_wilds.length-1] !== '/') opts.path_wilds += '/'
+  var Fresh = false
   var FileStat 
 
-  var s = through(function write (chunk) {
-    this.queue(chunk)
-  }, function end () {
-    this.emit('end')
-  })
+  var s = new Readable({end:false})
+  s._read = function () {} // WTF!
 
   fs.watch(opts.path_wilds, function handleFileChange (event, file) { 
     var filepath = opts.path_wilds+file
@@ -26,9 +24,10 @@ function Map (opts, mapStream) {
         var mod = stats.filepath.split('/')[2]
         var ext = mod.split('.')[1]
         var file = mod
+        if (ext !== 'html') Fresh = true
         if (ext !== 'js') file = mod.split('.')[0]+'.js' 
         Parse(file, function () {
-          console.log('updated '+file)
+          console.log('updated '+filePath)
         })
       } 
       FileStat = stats
@@ -43,7 +42,12 @@ function Map (opts, mapStream) {
         var buf = chunk.toString()
         var m = buf.match(/\/\*\{([\S\s]*)\}\*\//) // fix up this regex
         var modJSON = m[0].replace('/*','').replace('*/','')
-        s.write(modJSON)
+        if (Fresh === true) {
+          var mod = JSON.parse(modJSON)
+          mod.fresh = true
+          modJSON = JSON.stringify(mod)
+        }
+        s.push(modJSON)
       })
       f.on('end', next) 
     } else {
@@ -54,7 +58,7 @@ function Map (opts, mapStream) {
   fs.readdir(opts.path_wilds, function handleWildsFiles (e, files) {
     mapStream(s)
     asyncMap(files, Parse, function doneWildsFiles () {
-      s.write(null)
+      s.emit('end')
     })
   })
 }

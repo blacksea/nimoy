@@ -14,13 +14,12 @@ function Compiler (opts) {
   if (opts.path_wilds[opts.path_wilds.length-1] !== '/') opts.path_wilds += '/'
   var Self = this
   var Wilds = opts.path_wilds
-  var WildsProcessed = false
   var CSS = ''
 
   var b = browserify()
   b.add(opts.path_env)
 
-  fs.readFile(opts.path_styl, function (e, buf) {
+  fs.readFile(opts.path_styl, function getDefaultStyl (e, buf) {
     if (e) console.error(e)
     if (!e) CSS += buf.toString()
   })
@@ -32,9 +31,6 @@ function Compiler (opts) {
     var mod = JSON.parse(chunk.toString())
 
     b.require(Wilds+mod.id+'.js',{expose:mod.id}) 
-
-    // if module is updated make it fresh!
-    if (WildsProcessed === true) mod.fresh = true
 
     // handle deps
     if (!mod.deps) s.queue(chunk.toString()) 
@@ -56,7 +52,6 @@ function Compiler (opts) {
   }
 
   function Compile () {
-    WildsProcessed = true
     Self.s.emit('data', JSON.stringify({stat:'mapReady'}))
 
     var bundleFile = fs.createWriteStream(opts.path_bundle)
