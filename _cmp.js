@@ -2,7 +2,6 @@ var through = require('through')
 var asyncMap = require('slide').asyncMap
 var uglifyJS = require('uglify-js')
 var stylus = require('stylus') 
-var inherits = require('inherits')
 var fs = require('fs')
 
 var browserify = require('browserify')
@@ -10,51 +9,59 @@ var browserify = require('browserify')
 module.exports = Compiler
 
 function Compiler (opts) { 
-  var L = opts.path_wilds[opts.path_wilds.length-1]
-  if (L !== '/') opts.path_wilds += '/'
+  if (opts.path_wilds[opts.path_wilds.length-1] !== '/') opts.path_wilds += '/'
+  var Self = this
+  var Wilds = opts.path_wilds
+  var WildsProcessed = false
+  var CSS = ''
 
-  var self = this
   var b = browserify()
-  var wilds = opts.path_wilds
-  var wildsProcessed = false
-  var css = ''
+  b.add(opts.path_env)
 
   fs.readFile(opts.path_styl, function (e, buf) {
     if (e) console.error(e)
-    if (!e) css += buf.toString()
+    if (!e) CSS += buf.toString()
   })
 
-  b.add(opts.path_env)
+  this.s = through(HandleModule, Compile, {autoDestroy:false})
 
-  // TRANSFORM STREAM
-  function handleModule (chunk) {
+  function HandleModule (chunk) {
     var s = this
     var mod = JSON.parse(chunk.toString())
-    if (wildsProcessed === true) mod.fresh = true // if module is updated make it fresh!
-    b.require(wilds+mod.id+'.js',{expose:mod.id.toUpperCase()}) // kind of hacky :(
-    if (!mod.deps) s.queue(JSON.stringify(mod)) // doesn't make sense...but for consistency...
-    if (mod.deps) {
-      function handleDep (file, next) {
-        var dep = ''
-        var ext = file.split('.')[1]
-        fs.readFile(wilds+file, function (e,buf) {
-          if (e) console.error(e)
-          dep = buf.toString()
-          if (ext==='styl') css += dep
-          if (ext==='html') mod[ext] = dep
-          next()
-        })
-      }
-      asyncMap(mod.deps, handleDep, function () {
-        s.queue(JSON.stringify(mod))
-      }) 
+    
+    // if module is updated make it fresh!
+    if (WildsProcessed === true) mod.fresh = true 
+
+    // kind of hacky :(
+    b.require(Wilds+mod.id+'.js',{expose:mod.id.toUpperCase()}) 
+
+    // doesn't make sense...but for consistency...
+    if (!mod.deps) s.queue(JSON.stringify(mod)) 
+
+    function handleDep (file, next) {
+      var dep = ''
+      var ext = file.split('.')[1]
+      fs.readFile(Wilds+file, function (e,buf) {
+        if (e) console.error(e)
+        dep = buf.toString()
+        if (ext==='styl') CSS += dep
+        if (ext==='html') mod[ext] = dep
+        next()
+      })
     }
+
+    if (mod.deps) asyncMap(mod.deps, handleDep, function () {
+      s.queue(JSON.stringify(mod))
+    })
   }
-  function compile () {
-    wildsProcessed = true
-    self.s.emit('data', JSON.stringify({stat:'mapReady'}))
+
+  function Compile () {
+    WildsProcessed = true
+    Self.s.emit('data', JSON.stringify({stat:'mapReady'}))
+
     var bundleFile = fs.createWriteStream(opts.path_bundle)
     b.bundle().pipe(bundleFile)
+
     bundleFile.on('close', function () {
       console.log('wrote '+opts.path_bundle)
       if (opts.compress === true) {
@@ -67,7 +74,8 @@ function Compiler (opts) {
     bundleFile.on('error', function (e) {
       console.error(e)
     })
-    stylus.render(css, {filename:opts.path_css}, function (e, compiledCSS) {
+
+    stylus.render(CSS, {filename:opts.path_css}, function (e, compiledCSS) {
       if (e) console.error(e)
       fs.writeFile(opts.path_css, compiledCSS, function (e) {
         if (e) cosole.error(e)
@@ -75,5 +83,4 @@ function Compiler (opts) {
       })
     })
   }
-  this.s = through(handleModule, compile,{autoDestroy:false})
 }
