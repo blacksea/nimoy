@@ -33,15 +33,15 @@ function Bricoleur (opts) {
 
   // coreblock of somekind to multiplex stream connections....
 
-  // API
+  // API : gets called through env
   
   this.api = through(APIwrite, APIend, {autoDestroy:false})
 
   function APIwrite (chunk) {
     var cmd = chunk[0]
     var params = chunk[1]
-
-    API[cmd](params)
+    if (!API[cmd]) console.error(cmd+' is not an API command')
+    if (API[cmd]) API[cmd](params)
   }
 
   function APIend () {}
