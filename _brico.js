@@ -8,14 +8,24 @@ function Bricoleur (opts) {
   if (!opts) opts = {}
   var self = this
   
-  // GRAFT ON SOCKET
-  this.addSocket = function (id) { 
-    self[id] = through(function write (chunk) {
-      this.queue(chunk)
-    }, function end () {
-      this.emit('end')
-    }, {autoDestroy:false})
+  this.addSocket = function (id, socketAdded) { // direct communication layer
+    self[id] = through(socWrite, socEnd, {autoDestroy:false})
+    console.log(self[id])
   }
+  this.removeSocket = function (id) {
+    self[id].destroy()
+    delete self[id]
+  }
+
+  function SocWrite (chunk) {
+    this.queue(chunk)
+  }
+  function SocEnd () {
+    this.emit('end')
+    console.log('socket closed...')
+  }
+
+  // coreblock of somekind to multiplex stream infos ....
 
   // API
   
