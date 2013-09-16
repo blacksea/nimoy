@@ -7,7 +7,6 @@ var readdir = require('fs').readdir
 var http = require('http')
 var filed = require('filed')
 var through = require('through')
-var filter = require('filter-stream')
 
 var map = require('./_map')
 var cmp = require('./_cmp')
@@ -88,11 +87,20 @@ function Environment (opts, running) {
     if (headers['sec-websocket-key1']) key = headers['sec-websocket-key1'].replace(/\s/g,'-')
     var host = headers.host
 
-    var comfilter = filter({key:'api',stream:_[host].api})
+    var comfilter = through(function write (chunk) {
+      if (typeof chunk === 'string') {
+        var d = JSON.parse(chunk)
+        if (d.api) _[host].api.write(d.api)
+        if (!d.api) this.queue(chunk)
+      }
+    }, function end () {
+      this.emit('end')
+    }, {autoDestroy:false})
 
     _[host].addSocket(key, function socketAdded() {
       console.log('opened socket: '+key+' to brico: '+host)
       wss.pipe(comfilter).pipe(_[host][key]).pipe(wss)
+      wss.write(JSON.stringify({'api':['test','xolander']}))
     })
   }
 
@@ -101,16 +109,20 @@ function Environment (opts, running) {
   this.api = through(APIwrite, APIend, {autoDestroy:false})
 
   function APIwrite (chunk) {
-    var cmd = chunk[0]
-    var params = chunk[1]
-
-    API[cmd](params) 
+    if (!(chunk instanceof Array)) console.error('please call API with array\n'+chunk)
+    if (chunk instanceof Array) {
+      var cmd = chunk[0]
+      var params = chunk.slice(1)
+      if (!API[cmd]) console.error(cmd+' is not an API command')
+      if (API[cmd]) API[cmd](params)
+    }
   }
 
   function APIend () {}
   
   var API = {
-    load: function (loaded) {
+    load: function (params) {
+      var cb = params[0]
       var streamBricos = Data.createValueStream()
       streamBricos.on('data', function (d) {
         var brico = JSON.parse(d)
@@ -118,10 +130,13 @@ function Environment (opts, running) {
         _[brico.host] = new Bricoleur()
         _[brico.host].data = level(opts.path_data+brico.host)
       })
-      streamBricos.on('end', loaded)
+      streamBricos.on('end', cb)
     },
-    createBrico: function (brico, created) {
-      Data.put(brico.host, brico, created)
+    createBrico: function (params) {
+      var key = params[0].host
+      var val = params[0]
+      var cb = params[1]
+      Data.put(key, JSON.stringify(val), cb) 
     }
   }
 }

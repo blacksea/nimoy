@@ -32,7 +32,6 @@ function Bricoleur (opts) {
   }
 
   // coreblock of somekind to multiplex stream connections....
-
   // API : gets called through env
   
   this.api = through(APIwrite, APIend, {autoDestroy:false})
