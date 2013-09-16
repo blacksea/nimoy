@@ -51,6 +51,7 @@ function Bricoleur (opts) {
   var API = {
     test: function (msg) {
       console.log(msg)
+      if (process.browser) window.document.title = msg
     },
     loadEnv: function (user,cb) {
     },
