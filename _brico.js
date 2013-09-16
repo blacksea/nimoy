@@ -10,8 +10,10 @@ function Bricoleur (opts) {
   
   this.addSocket = function (id, socketAdded) { // direct communication layer
     self[id] = through(socWrite, socEnd, {autoDestroy:false})
+    self[id].conn = id
     console.log(self[id])
   }
+
   this.removeSocket = function (id) {
     self[id].destroy()
     delete self[id]
@@ -20,12 +22,13 @@ function Bricoleur (opts) {
   function SocWrite (chunk) {
     this.queue(chunk)
   }
+
   function SocEnd () {
     this.emit('end')
     console.log('socket closed...')
   }
 
-  // coreblock of somekind to multiplex stream infos ....
+  // coreblock of somekind to multiplex stream connections....
 
   // API
   

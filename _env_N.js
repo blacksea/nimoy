@@ -87,7 +87,9 @@ function Environment (opts, running) {
     if (headers['sec-websocket-key1']) key = headers['sec-websocket-key1'].replace(/\s/g,'-')
     var host = headers.host
 
-    _[host].addSocket(key)
+    _[host].addSocket(key, function socketAdded() {
+      console.log('opened socket: '+key+' to brico: '+host)
+    })
 
     ws.pipe(_[host][key]).pipe(ws)
   }
