@@ -38,10 +38,13 @@ function Bricoleur (opts) {
   this.api = through(APIwrite, APIend, {autoDestroy:false})
 
   function APIwrite (chunk) {
-    var cmd = chunk[0]
-    var params = chunk[1]
-    if (!API[cmd]) console.error(cmd+' is not an API command')
-    if (API[cmd]) API[cmd](params)
+    if (!(chunk instanceof Array)) console.error('please call API with array')
+    if (chunk instanceof Array) {
+      var cmd = chunk[0]
+      var params = chunk[1]
+      if (!API[cmd]) console.error(cmd+' is not an API command')
+      if (API[cmd]) API[cmd](params)
+    }
   }
 
   function APIend () {}
