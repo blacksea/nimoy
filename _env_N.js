@@ -7,6 +7,7 @@ var readdir = require('fs').readdir
 var http = require('http')
 var filed = require('filed')
 var through = require('through')
+var filter = require('filter-stream')
 
 var map = require('./_map')
 var cmp = require('./_cmp')
@@ -87,17 +88,7 @@ function Environment (opts, running) {
     if (headers['sec-websocket-key1']) key = headers['sec-websocket-key1'].replace(/\s/g,'-')
     var host = headers.host
 
-    var comfilter = through(function filterAPI (chunk) {
-      if (typeof chunk === 'string') {
-        var d = JSON.parse(chunk)
-        if (d.api) _[host].api.write(d.api)
-        if (!d.api) this.queue(chunk)
-      }
-      // handle non string chunks too ... 
-    }, function end () {
-      this.emit(end)
-    })
-    comfilter.autoDestroy = false
+    var comfilter = filter({key:'api',stream:_[host].api})
 
     _[host].addSocket(key, function socketAdded() {
       console.log('opened socket: '+key+' to brico: '+host)
@@ -123,6 +114,7 @@ function Environment (opts, running) {
       var streamBricos = Data.createValueStream()
       streamBricos.on('data', function (d) {
         var brico = JSON.parse(d)
+        console.log(brico)
         _[brico.host] = new Bricoleur()
         _[brico.host].data = level(opts.path_data+brico.host)
       })

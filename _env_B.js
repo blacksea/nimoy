@@ -4,24 +4,14 @@ if(!Function.prototype.bind) require('bindshim') //kindle jalopy doesn't have bi
 var host = window.document.location.host.replace(/:.*/, '')
 var ws = require('websocket-stream')
 var through = require('through')
+var filter = require('filter-stream')
 var wss = ws('ws://'+host)
 
 var Bricoleur = require('./_brico')
 
 var b = new Bricoleur()
 
-var comfilter = through(function filterAPI (chunk) {
-  if (typeof chunk === 'string') {
-    console.log(chunk)
-    var d = JSON.parse(chunk)
-    if (d.api) b.api.write(d.api)
-    if (!d.api) this.queue(chunk)
-  }
-  // handle non string chunks too ... 
-}, function end () {
-  this.emit(end)
-})
-comfilter.autoDestroy = false
+var comfilter = filter({key:'api',stream:b.api})
 
 b.addSocket(host, function () {
   wss.pipe(comfilter).pipe(b[host]).pipe(wss)
