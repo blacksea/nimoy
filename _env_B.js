@@ -12,8 +12,9 @@ var b = new Bricoleur()
 
 var comfilter = through(function filterAPI (chunk) {
   if (typeof chunk === 'string') {
+    console.log(chunk)
     var d = JSON.parse(chunk)
-    if (d.api) _[host].api.write(d.api)
+    if (d.api) b.api.write(d.api)
     if (!d.api) this.queue(chunk)
   }
   // handle non string chunks too ... 
@@ -22,9 +23,9 @@ var comfilter = through(function filterAPI (chunk) {
 })
 comfilter.autoDestroy = false
 
-wss.pipe(comfilter).pipe(b[host])
-
-b[host].pipe(wss)
+b.addSocket(host, function () {
+  wss.pipe(comfilter).pipe(b[host]).pipe(wss)
+})
 
 wss.on('open', function () {
   console.log('socket open')

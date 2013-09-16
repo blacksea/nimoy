@@ -81,17 +81,28 @@ function Environment (opts, running) {
   WebSocket.on('connection', HandleSoc)
 
   function HandleSoc (soc) { // fix this thing!
-    var ws = websocketStream(soc)
+    var wss = websocketStream(soc)
     var headers = soc.upgradeReq.headers
     var key = headers['sec-websocket-key']
     if (headers['sec-websocket-key1']) key = headers['sec-websocket-key1'].replace(/\s/g,'-')
     var host = headers.host
 
+    var comfilter = through(function filterAPI (chunk) {
+      if (typeof chunk === 'string') {
+        var d = JSON.parse(chunk)
+        if (d.api) _[host].api.write(d.api)
+        if (!d.api) this.queue(chunk)
+      }
+      // handle non string chunks too ... 
+    }, function end () {
+      this.emit(end)
+    })
+    comfilter.autoDestroy = false
+
     _[host].addSocket(key, function socketAdded() {
       console.log('opened socket: '+key+' to brico: '+host)
+      wss.pipe(comfilter).pipe(_[host][key]).pipe(wss)
     })
-
-    ws.pipe(_[host][key]).pipe(ws)
   }
 
   // API
