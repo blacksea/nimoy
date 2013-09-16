@@ -9,9 +9,9 @@ function Bricoleur (opts) {
   var self = this
   
   this.addSocket = function (id, socketAdded) { // direct communication layer
-    self[id] = through(socWrite, socEnd, {autoDestroy:false})
-    self[id].conn = id
-    console.log(self[id])
+    self[id] = through(SocWrite, SocEnd, {autoDestroy:false})
+    self[id].key = id
+    socketAdded()
   }
 
   this.removeSocket = function (id) {
@@ -20,12 +20,15 @@ function Bricoleur (opts) {
   }
 
   function SocWrite (chunk) {
+    var d = JSON.parse(chunk)
+    if (d.api) self.api.write(d.api)
     this.queue(chunk)
   }
 
   function SocEnd () {
+    var k = this.key
     this.emit('end')
-    console.log('socket closed...')
+    console.log('closed socket: '+k)
   }
 
   // coreblock of somekind to multiplex stream connections....
@@ -44,6 +47,9 @@ function Bricoleur (opts) {
   function APIend () {}
 
   var API = {
+    test: function (msg) {
+      console.log(msg)
+    },
     loadEnv: function (user,cb) {
     },
     make: function (mod,cb) {
