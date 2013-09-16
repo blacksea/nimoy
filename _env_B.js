@@ -10,25 +10,24 @@ var Bricoleur = require('./_brico')
 
 var b = new Bricoleur()
 
-b.addSocket(host, function () {
-  var s = through(function write (chunk) {
-    if (typeof chunk === 'string') {
-      var d = JSON.parse(chunk)
-      if (d.api) b.api.write(d.api)
-      if (!d.api) b[host].write(d)
-    }
-  }, function end () {
-
-  })
-  s.autoDestroy = false
-  wss.pipe(s).pipe(wss)
+var comfilter = through(function filterAPI (chunk) {
+  if (typeof chunk === 'string') {
+    var d = JSON.parse(chunk)
+    if (d.api) _[host].api.write(d.api)
+    if (!d.api) this.queue(chunk)
+  }
+  // handle non string chunks too ... 
+}, function end () {
+  this.emit(end)
 })
+comfilter.autoDestroy = false
 
-// split comm into 2 layers ENV/BRICO
-// ENV DIRECT / BRICO SOCKET 
+wss.pipe(comfilter).pipe(b[host])
+
+b[host].pipe(wss)
 
 wss.on('open', function () {
-  console.log(wss)
+  console.log('socket open')
 })
 
 wss.on('close', function () {
