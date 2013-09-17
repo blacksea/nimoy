@@ -9,6 +9,18 @@ function Bricoleur (opts) {
   var self = this
   
   this.addSocket = function (id, socketAdded) { // direct communication layer
+    var comfilter = through(function write (chunk) {
+      if (typeof chunk === 'string') {
+        var d = JSON.parse(chunk)
+        if (d.api) self.api.write(d.api)
+        if (!d.api) (chunk)
+      }
+    }, function end () {
+      this.emit('end')
+    }, 
+      {autoDestroy:false}
+    ) 
+
     self[id] = through(SocWrite, SocEnd, {autoDestroy:false})
     self[id].key = id
     socketAdded()
@@ -21,7 +33,6 @@ function Bricoleur (opts) {
 
   function SocWrite (chunk) {
     var d = JSON.parse(chunk)
-    if (d.api) self.api.write(d.api)
     this.queue(chunk)
   }
 

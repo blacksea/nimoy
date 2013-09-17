@@ -10,18 +10,8 @@ var Bricoleur = require('./_brico')
 
 var b = new Bricoleur()
 
-var comfilter = through(function write (chunk) {
-  if (typeof chunk === 'string') {
-    var d = JSON.parse(chunk)
-    if (d.api) b.api.write(d.api)
-    if (!d.api) this.queue(chunk)
-  }
-}, function end () {
-  this.emit('end')
-}, {autoDestroy:false})
-
 b.addSocket(host, function () {
-  wss.pipe(comfilter).pipe(b[host]).pipe(wss)
+  wss.pipe(b[host]).pipe(wss)
 })
 
 wss.on('open', function () {

@@ -87,19 +87,9 @@ function Environment (opts, running) {
     if (headers['sec-websocket-key1']) key = headers['sec-websocket-key1'].replace(/\s/g,'-')
     var host = headers.host
 
-    var comfilter = through(function write (chunk) {
-      if (typeof chunk === 'string') {
-        var d = JSON.parse(chunk)
-        if (d.api) _[host].api.write(d.api)
-        if (!d.api) this.queue(chunk)
-      }
-    }, function end () {
-      this.emit('end')
-    }, {autoDestroy:false})
-
     _[host].addSocket(key, function socketAdded() {
       console.log('opened socket: '+key+' to brico: '+host)
-      wss.pipe(comfilter).pipe(_[host][key]).pipe(wss)
+      wss.pipe(_[host][key]).pipe(wss)
       wss.write(JSON.stringify({'api':['test','xolander']}))
     })
   }
