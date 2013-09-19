@@ -96,6 +96,9 @@ function Environment (opts, running) {
 
   // API
   
+  // use existing structure transparently // generic structure
+  // usable in brico or in environment
+
   this.api = through(APIwrite, APIend, {autoDestroy:false})
 
   function APIwrite (chunk) {

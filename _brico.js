@@ -13,7 +13,7 @@ function Bricoleur (opts) {
       if (typeof chunk === 'string') {
         var d = JSON.parse(chunk)
         if (d.api) self.api.write(d.api)
-        if (!d.api) (chunk)
+        if (!d.api) this.queue(chunk)
       }
     }, function end () {
       this.emit('end')
