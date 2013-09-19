@@ -37,12 +37,10 @@ function Bricoleur (opts) {
     console.log('closed socket: '+k)
   }
 
-  this.api = new fern({prop:'api',struct:API})
-
   var API = {
     test: function (msg,cb) {
       console.log(msg)
-      if (process.browser) window.document.title = obj.msg
+      if (process.browser) window.document.title = msg
       cb(msg)
     },
     loadEnv: function (user,cb) {
@@ -72,4 +70,6 @@ function Bricoleur (opts) {
       })
     }
   }
+
+  this.api = new fern({key:'api',tree:API})
 }
