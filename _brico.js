@@ -9,20 +9,9 @@ function Bricoleur (opts) {
   var self = this
   
   this.addSocket = function (id, socketAdded) { // direct communication layer
-    var comfilter = through(function write (chunk) {
-      if (typeof chunk === 'string') {
-        var d = JSON.parse(chunk)
-        if (d.api) self.api.write(d.api)
-        if (!d.api) this.queue(chunk)
-      }
-    }, function end () {
-      this.emit('end')
-    }, 
-      {autoDestroy:false}
-    ) 
-
     self[id] = through(SocWrite, SocEnd, {autoDestroy:false})
     self[id].key = id
+    self[id].pipe(self.api)
     socketAdded()
   }
 
@@ -34,7 +23,6 @@ function Bricoleur (opts) {
   function SocWrite (chunk) {
     // route to function ?!?
     var d = JSON.parse(chunk)
-    if (d.api) self.api.write(d)
   }
 
   function SocEnd () {
@@ -43,24 +31,7 @@ function Bricoleur (opts) {
     console.log('closed socket: '+k)
   }
 
-  // coreblock of somekind to multiplex stream connections....
-  // API : gets called through env
-  
-  this.api = through(APIwrite, APIend, {autoDestroy:false})
-
-  function APIwrite (chunk) {
-  // use objects instead of arrays as control structures
-
-    if (!(chunk instanceof Object)) console.error('please call API with array')
-    if (chunk instanceof Object) {
-      var cmd = chunk.api.cmd
-      var obj = chunk.api
-      if (!API[cmd]) console.error(cmd+' is not an API command')
-      if (API[cmd]) API[cmd](obj)
-    }
-  }
-
-  function APIend () {}
+  this.api = fern(API, 'api')
 
   var API = {
     test: function (obj) {
