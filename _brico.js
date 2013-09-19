@@ -32,8 +32,9 @@ function Bricoleur (opts) {
   }
 
   function SocWrite (chunk) {
+    // route to function ?!?
     var d = JSON.parse(chunk)
-    this.queue(chunk)
+    if (d.api) self.api.write(d)
   }
 
   function SocEnd () {
@@ -48,21 +49,23 @@ function Bricoleur (opts) {
   this.api = through(APIwrite, APIend, {autoDestroy:false})
 
   function APIwrite (chunk) {
-    if (!(chunk instanceof Array)) console.error('please call API with array')
-    if (chunk instanceof Array) {
-      var cmd = chunk[0]
-      var params = chunk[1]
+  // use objects instead of arrays as control structures
+
+    if (!(chunk instanceof Object)) console.error('please call API with array')
+    if (chunk instanceof Object) {
+      var cmd = chunk.api.cmd
+      var obj = chunk.api
       if (!API[cmd]) console.error(cmd+' is not an API command')
-      if (API[cmd]) API[cmd](params)
+      if (API[cmd]) API[cmd](obj)
     }
   }
 
   function APIend () {}
 
   var API = {
-    test: function (msg) {
-      console.log(msg)
-      if (process.browser) window.document.title = msg
+    test: function (obj) {
+      console.log(obj.msg)
+      if (process.browser) window.document.title = obj.msg
     },
     loadEnv: function (user,cb) {
     },

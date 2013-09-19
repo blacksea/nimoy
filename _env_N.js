@@ -25,7 +25,7 @@ function Environment (opts, running) {
   var StaticFiles = {}
   var Data
 
-  var _ = {} // brico scope container
+  var _ = {} // brico scope container // replace with com core --
 
   // CONFIGURATION 
   
@@ -90,7 +90,7 @@ function Environment (opts, running) {
     _[host].addSocket(key, function socketAdded() {
       console.log('opened socket: '+key+' to brico: '+host)
       wss.pipe(_[host][key]).pipe(wss)
-      wss.write(JSON.stringify({'api':['test','xolander']}))
+      wss.write(JSON.stringify({'api':{cmd:'test',msg:'xolander'}}))
     })
   }
 

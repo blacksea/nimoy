@@ -16,7 +16,7 @@ b.addSocket(host, function () {
 
 wss.on('open', function () {
   console.log('socket open')
-  wss.write(JSON.stringify({api:['test','zorb']}))
+  wss.write(JSON.stringify({api:{cmd:'test',msg:'xorb'}}))
 })
 
 wss.on('close', function () {
