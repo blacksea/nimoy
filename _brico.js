@@ -1,6 +1,6 @@
 // BRICO
-
 var through = require('through')
+var fern = require('fern')
 
 module.exports = Bricoleur
 
@@ -11,7 +11,12 @@ function Bricoleur (opts) {
   this.addSocket = function (id, socketAdded) { // direct communication layer
     self[id] = through(SocWrite, SocEnd, {autoDestroy:false})
     self[id].key = id
-    self[id].pipe(self.api)
+    self[id].pipe(self.api).pipe(through(function write (chunk) {
+      console.log(chunk)
+    }, function () {
+      this.emit('end')
+    }))
+
     socketAdded()
   }
 
@@ -22,7 +27,8 @@ function Bricoleur (opts) {
 
   function SocWrite (chunk) {
     // route to function ?!?
-    var d = JSON.parse(chunk)
+    console.log(chunk)
+    this.emit('data',chunk)
   }
 
   function SocEnd () {
@@ -31,12 +37,13 @@ function Bricoleur (opts) {
     console.log('closed socket: '+k)
   }
 
-  this.api = fern(API, 'api')
+  this.api = new fern({prop:'api',struct:API})
 
   var API = {
-    test: function (obj) {
-      console.log(obj.msg)
+    test: function (msg,cb) {
+      console.log(msg)
       if (process.browser) window.document.title = obj.msg
+      cb(msg)
     },
     loadEnv: function (user,cb) {
     },
