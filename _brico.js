@@ -28,7 +28,7 @@ function Bricoleur (opts) {
   function SocWrite (chunk) {
     // route to function ?!?
     console.log(chunk)
-    this.emit('data',chunk)
+    this.queue(chunk)
   }
 
   function SocEnd () {
@@ -70,6 +70,5 @@ function Bricoleur (opts) {
       })
     }
   }
-
   this.api = new fern({key:'api',tree:API})
 }

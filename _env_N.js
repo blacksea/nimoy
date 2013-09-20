@@ -7,6 +7,7 @@ var readdir = require('fs').readdir
 var http = require('http')
 var filed = require('filed')
 var through = require('through')
+var fern = require('fern')
 
 var map = require('./_map')
 var cmp = require('./_cmp')
@@ -89,30 +90,13 @@ function Environment (opts, running) {
 
     _[host].addSocket(key, function socketAdded() {
       console.log('opened socket: '+key+' to brico: '+host)
-      wss.pipe(_[host][key]).pipe(wss)
-      wss.write(JSON.stringify({'api':{cmd:'test',msg:'xolander'}}))
+      wss.pipe(_[host][key])
+      wss.write(JSON.stringify({'api':['test','xolander']}))
     })
   }
 
   // API
-  
-  // use existing structure transparently // generic structure
-  // usable in brico or in environment
-
-  this.api = through(APIwrite, APIend, {autoDestroy:false})
-
-  function APIwrite (chunk) {
-    if (!(chunk instanceof Array)) console.error('please call API with array\n'+chunk)
-    if (chunk instanceof Array) {
-      var cmd = chunk[0]
-      var params = chunk.slice(1)
-      if (!API[cmd]) console.error(cmd+' is not an API command')
-      if (API[cmd]) API[cmd](params)
-    }
-  }
-
-  function APIend () {}
-  
+   
   var API = {
     load: function (params) {
       var cb = params[0]
@@ -132,4 +116,5 @@ function Environment (opts, running) {
       Data.put(key, JSON.stringify(val), cb) 
     }
   }
+  this.api = fern({key:'api',tree:API})
 }
