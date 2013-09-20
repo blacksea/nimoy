@@ -15,6 +15,8 @@ var level = require('level')
 
 var Bricoleur = require('./_brico')
 
+inherits(Environment, Stream)
+
 module.exports = Environment
 
 function Environment (opts, running) { 
@@ -22,11 +24,16 @@ function Environment (opts, running) {
   if (opts.path_static[(opts.path_static.length-1)] !== '/') opts.path_static += '/'
   if (opts.path_wilds[(opts.path_wilds.length-1)] !== '/') opts.path_wilds += '/'
 
-  var Self = this
   var StaticFiles = {}
   var Data
 
   var _ = {} // brico scope container // replace with com core --
+
+  this.s = through(function write (chunk) {
+    this.queue(chunk)
+  }, function end () {
+    this.emit('end')
+  })
 
   // CONFIGURATION 
   
@@ -72,7 +79,7 @@ function Environment (opts, running) {
     var uid = parseInt(process.env.SUDO_UID) 
     if (uid) process.setuid(uid) // switch to user permissions
     Data = level(opts.path_data+'env') // wait until user permissions are active
-    running() 
+    running(Self.s) 
   })
 
   // WEBSOCKET CONNECTIONS
@@ -98,23 +105,21 @@ function Environment (opts, running) {
   // API
    
   var API = {
-    load: function (params) {
-      var cb = params[0]
+    load: function (u, cb) {
       var streamBricos = Data.createValueStream()
       streamBricos.on('data', function (d) {
         var brico = JSON.parse(d)
-        console.log(brico)
         _[brico.host] = new Bricoleur()
         _[brico.host].data = level(opts.path_data+brico.host)
       })
-      streamBricos.on('end', cb)
+      streamBricos.on('end', function () {
+        cb('done!')
+      })
     },
-    createBrico: function (params) {
-      var key = params[0].host
-      var val = params[0]
-      var cb = params[1]
-      Data.put(key, JSON.stringify(val), cb) 
+    createBrico: function (brico, cb) {
+      Data.put(brico.key, JSON.stringify(brico), cb) 
     }
   }
-  this.api = fern({key:'api',tree:API})
+  this.api = new fern({key:'api',tree:API})
+  Self.s.pipe(Self.api)
 }
