@@ -15,8 +15,6 @@ var level = require('level')
 
 var Bricoleur = require('./_brico')
 
-inherits(Environment, Stream)
-
 module.exports = Environment
 
 function Environment (opts, running) { 
@@ -24,13 +22,14 @@ function Environment (opts, running) {
   if (opts.path_static[(opts.path_static.length-1)] !== '/') opts.path_static += '/'
   if (opts.path_wilds[(opts.path_wilds.length-1)] !== '/') opts.path_wilds += '/'
 
+  var self = this
   var StaticFiles = {}
   var Data
 
   var _ = {} // brico scope container // replace with com core --
 
   this.s = through(function write (chunk) {
-    this.queue(chunk)
+    this.emit('data',chunk)
   }, function end () {
     this.emit('end')
   })
@@ -79,7 +78,7 @@ function Environment (opts, running) {
     var uid = parseInt(process.env.SUDO_UID) 
     if (uid) process.setuid(uid) // switch to user permissions
     Data = level(opts.path_data+'env') // wait until user permissions are active
-    running(Self.s) 
+    running(self.s) 
   })
 
   // WEBSOCKET CONNECTIONS
@@ -116,10 +115,13 @@ function Environment (opts, running) {
         cb('done!')
       })
     },
-    createBrico: function (brico, cb) {
-      Data.put(brico.key, JSON.stringify(brico), cb) 
+    createBrico: function (brico, next) {
+      Data.put(brico.key, JSON.stringify(brico), function () {
+        console.log(brico)
+        next(brico)
+      }) 
     }
   }
   this.api = new fern({key:'api',tree:API})
-  Self.s.pipe(Self.api)
+  self.s.pipe(self.api)
 }

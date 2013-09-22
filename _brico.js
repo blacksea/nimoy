@@ -1,4 +1,5 @@
 // BRICO
+
 var through = require('through')
 var fern = require('fern')
 
@@ -27,7 +28,6 @@ function Bricoleur (opts) {
 
   function SocWrite (chunk) {
     // route to function ?!?
-    console.log(chunk)
     this.queue(chunk)
   }
 
