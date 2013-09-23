@@ -6,7 +6,6 @@ var ws = require('ws').Server
 var readdir = require('fs').readdir
 var http = require('http')
 var filed = require('filed')
-var through = require('through')
 var fern = require('fern')
 
 var map = require('./_map')
@@ -27,12 +26,6 @@ function Environment (opts, running) {
   var Data
 
   var _ = {} // brico scope container // replace with com core --
-
-  this.s = through(function write (chunk) {
-    this.emit('data',chunk)
-  }, function end () {
-    this.emit('end')
-  })
 
   // CONFIGURATION 
   
@@ -122,6 +115,5 @@ function Environment (opts, running) {
       }) 
     }
   }
-  this.api = new fern({key:'api',tree:API})
-  self.s.pipe(self.api)
+  this.api = new fern({tree:API})
 }
