@@ -21,6 +21,9 @@ var EnvOpts = {
 
 var Environment = new Env(EnvOpts, function serverRunning () {
   console.log('nimoy running on port '+EnvOpts.port)
-  Environment.api.write(JSON.stringify(['load', null]))
-  Environment.api.pipe(process.stdout)
+  Environment.api.write(JSON.stringify(['load',null]))
 })
+Environment.api.on('data', function (d) {
+  console.log(d)
+})
+
