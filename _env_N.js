@@ -71,7 +71,7 @@ function Environment (opts, running) {
     var uid = parseInt(process.env.SUDO_UID) 
     if (uid) process.setuid(uid) // switch to user permissions
     Data = level(opts.path_data+'env') // wait until user permissions are active
-    running(self.s) 
+    running() 
   })
 
   // WEBSOCKET CONNECTIONS
