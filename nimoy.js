@@ -21,8 +21,11 @@ var EnvOpts = {
 
 var Environment = new Env(EnvOpts, function serverRunning () {
   console.log('nimoy running on port '+EnvOpts.port)
-  Environment.api.write(JSON.stringify(['load',null]))
+  Environment.api.write(['load',null])
 })
+
+Environment.api.write(['createBrico',DefaultUser])
+
 Environment.api.on('data', function (d) {
   console.log(d)
 })
