@@ -1,6 +1,6 @@
 // NIMOY 
 
-var Env = require('./_env_N')
+var Environment = require('./_env_N')
 
 var DefaultUser = {
   host:'blacksea',
@@ -19,14 +19,12 @@ var EnvOpts = {
   port:80,
 }
 
-var Environment = new Env(EnvOpts, function serverRunning () {
+var Env= new Environment(EnvOpts, function serverRunning () {
   console.log('nimoy running on port '+EnvOpts.port)
-  Environment.api.write(['load',null])
+  Env.api.write(['load',null])
+  Env.api.write(['createBrico',DefaultUser])
 })
 
-Environment.api.write(['createBrico',DefaultUser])
-
-Environment.api.on('data', function (d) {
+Env.api.on('data', function (d) {
   console.log(d)
 })
-
