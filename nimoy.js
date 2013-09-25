@@ -24,3 +24,4 @@ var Env= new Environment(EnvOpts, function serverRunning () {
   Env.api.write(['load',null])
   Env.api.write(['createBrico',DefaultUser])
 })
+
