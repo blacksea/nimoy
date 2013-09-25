@@ -8,16 +8,17 @@ module.exports = Bricoleur
 function Bricoleur (opts) { 
   if (!opts) opts = {}
   var self = this
+  var MAP
   
   this.addSocket = function (id, socketAdded) { // direct communication layer
     self[id] = through(SocWrite, SocEnd, {autoDestroy:false})
     self[id].key = id
+
     self[id].pipe(self.api).pipe(through(function write (chunk) {
       console.log(chunk)
     }, function () {
       this.emit('end')
     }))
-
     socketAdded()
   }
 
@@ -44,6 +45,10 @@ function Bricoleur (opts) {
       cb(msg)
     },
     loadEnv: function (user,cb) {
+    },
+    map: function (map, cb) {
+      MAP = map
+      cb('map loaded')
     },
     make: function (mod,cb) {
       var libName = mod.id.toUpperCase()
