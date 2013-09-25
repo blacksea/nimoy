@@ -23,6 +23,7 @@ function Environment (opts, running) {
 
   var self = this
   var StaticFiles = {}
+  var MAP = []
   var Data
 
   var _ = {} // brico scope container // replace with com core --
@@ -43,6 +44,12 @@ function Environment (opts, running) {
   var Map = new map(MapOpts, function (s) {// map wilds
     var compiler = new cmp(CompileOpts) 
     s.pipe(compiler.s)
+
+    compiler.s.on('data', function (chunk) {
+      var d = JSON.parse(chunk)      
+      MAP.push(chunk)
+    })
+
     s.on('end', function () {
       console.log('map of '+opts.path_wilds+' complete!')
     })
@@ -90,7 +97,7 @@ function Environment (opts, running) {
     _[host].addSocket(key, function socketAdded() {
       console.log('opened socket: '+key+' to brico: '+host)
       wss.pipe(_[host][key])
-      wss.write(JSON.stringify({'api':['test','xolander']}))
+      wss.write(JSON.stringify({'api':['map',MAP]}))
     })
   }
 
@@ -98,6 +105,7 @@ function Environment (opts, running) {
    
   var API = {
     load: function (u, cb) {
+      console.log('loading...')
       var streamBricos = Data.createValueStream()
       streamBricos.on('data', function (d) {
         var brico = JSON.parse(d)
