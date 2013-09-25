@@ -48,7 +48,7 @@ function Bricoleur (opts) {
     },
     map: function (map, cb) {
       MAP = map
-      cb('map loaded')
+      cb('loaded map')
     },
     make: function (mod,cb) {
       var libName = mod.id.toUpperCase()
