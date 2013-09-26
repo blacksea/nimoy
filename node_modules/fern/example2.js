@@ -1,12 +1,11 @@
 var fern = require('./index.js')
-var Readable = require('stream').Readable
+var through = require('through')
 
-var rs = new Readable
-rs._read = function () { 
-  setInterval(function () {
-    rs.push(JSON.stringify(['xTwo',Math.random()]))
-  }, 10)
-}
+var s = through(function write (chunk) {
+  this.emit('data', chunk)
+}, function end () {
+  this.emit('end')
+})
 
 var tree = {
   xTwo : function (input,output) {
@@ -19,4 +18,5 @@ var tree = {
 
 var f = new fern({tree:tree})
 
-rs.pipe(f).pipe(process.stdout)
+s.pipe(f).pipe(process.stdout)
+s.write(['xTwo',Math.random()])

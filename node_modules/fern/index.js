@@ -14,12 +14,24 @@ function Fern (opts) {
   var self = this  
   
   this.write = function (chunk) {
-    var d = JSON.parse(chunk) // todo: ignore if buffer
-    if (d instanceof Object && d[opts.key]) {
-      var a = d[opts.key]
-      var cmd = a[0]
-      var param = a[1]
-      var cb = a[2]
+    if (!(chunk instanceof Array)) {
+      var d = JSON.parse(chunk) // todo: ignore if buffer
+      if (d instanceof Object && d[opts.key]) {
+        var a = d[opts.key]
+        var cmd = a[0]
+        var param = a[1]
+        var cb = a[2]
+        if (!opts.tree[cmd]) console.error('no such command!')
+        if (opts.tree[cmd]) {
+          opts.tree[cmd](param, function handleResult (val) {
+            self.emit('data',JSON.stringify({res:val}))
+          })
+        }
+      }
+    }
+    if (chunk instanceof Array) {
+      var cmd = chunk[0]
+      var param = chunk[1]
       if (!opts.tree[cmd]) console.error('no such command!')
       if (opts.tree[cmd]) {
         opts.tree[cmd](param, function handleResult (val) {
@@ -27,18 +39,9 @@ function Fern (opts) {
         })
       }
     }
-    if (d instanceof Array && !d[opts.key]) {
-      var cmd = d[0]
-      var param = d[1]
-      if (opts.tree[cmd]) {
-        opts.tree[cmd](param, function handleResult (val) {
-          self.emit('data',JSON.stringify({res:val}))
-        })
-      }
-    }
-    if (!d[opts.key] && !(d instanceof Array)) {
-      self.emit('data', chunk)
-    }
+    // if (!d[opts.key] && !(d instanceof Array)) {
+    //   self.emit('data', chunk)
+    // }
   }
   this.end = function () {} 
 } 
