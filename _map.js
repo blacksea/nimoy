@@ -27,7 +27,7 @@ function Map (opts, mapStream) {
         if (ext !== 'html') Fresh = true
         if (ext !== 'js') file = mod.split('.')[0]+'.js' 
         Parse(file, function () {
-          console.log('updated '+filePath)
+          console.log('updated '+ stats.filepath)
         })
       } 
       FileStat = stats

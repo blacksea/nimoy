@@ -27,6 +27,7 @@ function Environment (opts, running) {
   var Data
 
   var _ = {} // brico scope container // replace with com core --
+
   // CONFIGURATION 
   
   var CompileOpts = {
