@@ -27,19 +27,6 @@ function Environment (opts, running) {
   var Data
 
   var _ = {} // brico scope container // replace with com core --
-
-  fs.readdir('./', function (e,d) {
-    var mkdir = true
-    if (e) console.error(e)
-    for(var i=0;i<d.length;i++) {
-      if (d[i]==='data') {
-        mkdir = false
-        break
-      }
-    }
-    if (mkdir===true) fs.mkdir('data')
-  })
-
   // CONFIGURATION 
   
   var CompileOpts = {
@@ -89,8 +76,19 @@ function Environment (opts, running) {
   Server.listen(opts.port, function () {
     var uid = parseInt(process.env.SUDO_UID) 
     if (uid) process.setuid(uid) // switch to user permissions
-    Data = level(opts.path_data+'env') // wait until user permissions are active
-    running() 
+    // wait until user permissions are active
+    fs.readdir('./data', function (e,d) {
+      if (e && e.errno === 34) { 
+        fs.mkdir('./data', function () {
+          Data = level(opts.path_data+'env') 
+          running()
+        })
+      }
+      if (!e) {
+        Data = level(opts.path_data+'env') 
+        running()
+      }
+    })
   })
 
   // WEBSOCKET CONNECTIONS
