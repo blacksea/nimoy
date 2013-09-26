@@ -3,7 +3,7 @@
 var websocketStream = require('websocket-stream')
 var ws = require('ws').Server
 
-var readdir = require('fs').readdir
+var fs = require('fs')
 var http = require('http')
 var filed = require('filed')
 var fern = require('fern')
@@ -27,6 +27,18 @@ function Environment (opts, running) {
   var Data
 
   var _ = {} // brico scope container // replace with com core --
+
+  fs.readdir('./', function (e,d) {
+    var mkdir = true
+    if (e) console.error(e)
+    for(var i=0;i<d.length;i++) {
+      if (d[i]==='data') {
+        mkdir = false
+        break
+      }
+    }
+    if (mkdir===true) fs.mkdir('data')
+  })
 
   // CONFIGURATION 
   
@@ -57,7 +69,7 @@ function Environment (opts, running) {
  
   // HTTP SERVER FOR STATIC FILES
   
-  readdir(opts.path_static, function GetStaticFiles (e, files) {
+  fs.readdir(opts.path_static, function GetStaticFiles (e, files) {
     if (e) console.error(e)
     files.forEach(function findStaticFiles (file) {
       StaticFiles[file] = opts.path_static+file
