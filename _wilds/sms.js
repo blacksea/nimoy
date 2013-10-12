@@ -11,12 +11,6 @@ function SMS (opts) {
   if (!opts.pollRate) opts.pollRate = 5000
   var baseURL = '/Accounts/'+opts.sid+'/'
 
-  // twiml response is at http://pandaclock.com/twil/res.xml (just an empty response tag)
-  // forward google voice to twilio number
-  // record some kind of crazy message and include randomized options - AI
-  // options for different things... > images & etc
-  // use gps lat long to get timezone with tz-lookup module
-
   function check (res) {
     var d = new Date()
     var today = d.toISOString().split('T')[0]
