@@ -6,6 +6,9 @@ var uglifyJS = require('uglify-js')
 var stylus = require('stylus') 
 var fs = require('fs')
 
+// USE WATCHIFY TO UPDATE JS 
+// build with paperjs & ignore styles + html
+
 var browserify = require('browserify')
 
 module.exports = Compiler

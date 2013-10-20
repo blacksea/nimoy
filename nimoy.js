@@ -19,6 +19,12 @@ var EnvOpts = {
   port:80,
 }
 
+// port in watchify
+
+// build ui in paperjs
+
+// implement modes & auth
+
 var Env= new Environment(EnvOpts, function serverRunning () {
   console.log('nimoy running on port '+EnvOpts.port)
   Env.api.write(['load',null])
