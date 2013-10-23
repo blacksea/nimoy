@@ -1,5 +1,5 @@
 // NIMOY 
-//
+
 var Environment = require('./_env_N')
 
 var DefaultUser = {
@@ -19,15 +19,20 @@ var EnvOpts = {
   port:80,
 }
 
+// implement level namespacing w. bookmarked modules
+
 // port in watchify
 
 // build ui in paperjs
 
 // implement modes & auth
 
+// build in module storage
+
+// socket switch / router -- webRTC datachannel support?
+
 var Env= new Environment(EnvOpts, function serverRunning () {
   console.log('nimoy running on port '+EnvOpts.port)
   Env.api.write(['load',null])
   Env.api.write(['createBrico',DefaultUser])
 })
-
