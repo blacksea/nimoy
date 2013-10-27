@@ -1,5 +1,5 @@
 /*{
   "id":"leap",
-	"scope":["client,server"],
+	"scope":["browser,server"],
 	"desc":"leap motion interface"
 }*/
