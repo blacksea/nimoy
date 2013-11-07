@@ -1,5 +1,9 @@
 // NIMOY 
 
+// -----------------------------------------------|
+// trigger. build the system with specific options
+// -----------------------------------------------|
+
 var Environment = require('./_env_N')
 
 var DefaultUser = {
@@ -19,7 +23,7 @@ var EnvOpts = {
   port:80,
 }
 
-// | -------------------------------------------------
+// | ------------------------------------------------------------------
 // | match process to scope in mod/desc ex. browser, pi, joyent, debian
 // | provide process capabilities
 // | -------------------------------------------------

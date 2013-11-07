@@ -1,5 +1,7 @@
 // NODE ENVIRONMENT
 
+// BASE SYSTEM WITH PLUGIN SOCKETS
+
 var websocketStream = require('websocket-stream')
 var ws = require('ws').Server
 
