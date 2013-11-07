@@ -77,7 +77,6 @@ function Gps (opts) {
       })
     }
     if (!parser[type]) self.emit('error', 'NMEA sentence unknown')
-
   }, function end () {
     this.emit('end')
   })
