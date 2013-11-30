@@ -25,6 +25,8 @@ var EnvOpts = {
 
 }
 
+// new text input object
+
 Server.listen(opts.port, function () {
   var uid = parseInt(process.env.SUDO_UID) 
   if (uid) process.setuid(uid) // switch to user permissions
@@ -32,18 +34,19 @@ Server.listen(opts.port, function () {
 })
 
 var API = {
-  load: function (u, cb) {
-    var streamBricos = Data.createValueStream()
-    streamBricos.on('data', function (d) {
-      var brico = JSON.parse(d)
-      _[brico.host] = new Bricoleur()
-      _[brico.host].data = level(opts.path_data+brico.host)
-    })
-    streamBricos.on('end', function () {
-      cb('done!')
-    })
+  makeMap: function () {
+    // update the map and put a cache in leveldb
   },
-  createBrico: function (brico, next) {
+  dbInit: function () {
+    // enable db / data -- setup storage
+  },
+  addUser: function () {
+  },
+  getUser: function () {
+  },
+  delUser: function () {
+  },
+  newBrico: function (brico, next) {
     Data.put(brico.key, JSON.stringify(brico), function () {
       next(brico)
     }) 

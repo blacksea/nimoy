@@ -2,7 +2,6 @@
 
 // this should work with standard module format + 
 // package.json files
-
 // how to nicely extend / hack the package.json
 
 var Readable = require('stream').Readable
