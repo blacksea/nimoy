@@ -1,14 +1,21 @@
 // WILDS MAPPER
 
+// this should work with standard module format + 
+// package.json files
+
+// how to nicely extend / hack the package.json
+
 var Readable = require('stream').Readable
 var asyncMap = require('slide').asyncMap
 var fs = require('fs')
+
+// read through dir + look for specified package.json property
+// use property to set behaviour + module scope
 
 module.exports = Map
 
 function Map (opts, mapStream) {
   if (opts.path_wilds[opts.path_wilds.length-1] !== '/') opts.path_wilds += '/'
-  var Fresh = false
   var FileStat 
 
   var s = new Readable({end:false})
@@ -40,7 +47,7 @@ function Map (opts, mapStream) {
       var f = fs.createReadStream(opts.path_wilds+file)
       f.on('data', function (chunk) {
         var buf = chunk.toString()
-        var m = buf.match(/\/\*\{([\S\s]*)\}\*\//) // fix up this regex
+        var m = buf.match(/\/\*\{([\S\s]*)\}\*\//)
         var modJSON = m[0].replace('/*','').replace('*/','')
         if (Fresh === true) {
           var mod = JSON.parse(modJSON)

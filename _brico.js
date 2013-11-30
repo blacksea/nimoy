@@ -1,6 +1,6 @@
 // BRICO
-
 var through = require('through')
+
 var fern = require('fern')
 
 module.exports = Bricoleur
@@ -8,9 +8,8 @@ module.exports = Bricoleur
 function Bricoleur (opts) { 
   if (!opts) opts = {}
   var self = this
-  var MAP
   
-  this.addSocket = function (id, socketAdded) { // direct communication layer
+  this.handleSoc = function (id, socketAdded) {
     self[id] = through(SocWrite, SocEnd, {autoDestroy:false})
     self[id].key = id
 
@@ -22,20 +21,13 @@ function Bricoleur (opts) {
     socketAdded()
   }
 
-  this.removeSocket = function (id) {
-    self[id].destroy()
-    delete self[id]
-  }
-
   function SocWrite (chunk) {
-    // route to function ?!?
     this.queue(chunk)
   }
 
   function SocEnd () {
     var k = this.key
     this.emit('end')
-    console.log('closed socket: '+k)
   }
 
   var API = {
@@ -55,16 +47,13 @@ function Bricoleur (opts) {
       var lib = require(libName)
       _[mod.id] = new lib() 
       if (process.browser && mod.html) _[mod.id].render(html)
-      // verify module creation somehow
     },
     unmake: function (mod,cb) {
       _[mod.id].destroy()
     },
-    conn: function (conss,cb) { // fix ugliness
+    conn: function (conss,cb) {      
       conns.forEach(function handleConnection (conn) {
-        if (conn.match(/\+/) !== null) {
-          var modA = conn.split('+')[0]
-          , modB = conn.split('+')[1]
+        if (conn.match(/\+/) !== null) { var modA = conn.split('+')[0] , modB = conn.split('+')[1]
           _[modA].pipe(_[modB])
         }
         if (conn.match(/\-/) !== null) {
