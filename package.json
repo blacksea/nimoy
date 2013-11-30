@@ -13,7 +13,8 @@
   },
   "scripts": {
     "start": "node nimoy.js",
-    "test": "tap test/*.js"
+    "test": "tap test/*.js",
+    "compile": "watchify -v ./_wilds/" // use watchify to compile for browser
   },
   "dependencies": {
     "browserify": ">2.29.0",
@@ -24,9 +25,8 @@
     "through": ">2.3.3",
     "fern": ">0.0.5",
     "serialport": ">1.1.0",
-    "uglify-js": ">2.1.10",
+    "uglify-js": ">2.1.10", // nicer compress options?
     "websocket-stream": ">0.3.1",
-    "stylus": ">0.36.0",
     "ws": ">0.4.2"
   },
   "license": "MIT"
