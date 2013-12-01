@@ -54,6 +54,7 @@ function netWS (server,soc) {
   }
 }
 
+
 function netHTTP (opts,running) {
 
   if (opts.path_data[(opts.path_data.length-1)] !== '/') opts.path_data += '/'
@@ -72,6 +73,12 @@ function netHTTP (opts,running) {
   })
 
   var Server = http.createServer(HandleRequests)
+
+  Server.listen(opts.port, function () { 
+    var uid = parseInt(process.env.SUDO_UID) 
+    if (uid) process.setuid(uid) // switch to user permissions
+    // load level now so it doesn't run as sudo
+  })
 
   function HandleRequests (req, res) {
     var url = req.url
