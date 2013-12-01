@@ -23,15 +23,11 @@ var EnvOpts = {
   path_bundle:'./_static/bundle.js', 
   path_js:'./_env_B.js',
   path_data:'./data',
-  port:80,
-
+  port:80
 }
 
-Server.listen(opts.port, function () {
-  var uid = parseInt(process.env.SUDO_UID) 
-  if (uid) process.setuid(uid) // switch to user permissions
-  // load level now so it doesn't run as sudo
-})
+// support a config.json
+
 
 var API = {
   makeMap: function () {
