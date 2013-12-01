@@ -1,0 +1,7 @@
+{
+  "brico": {
+    "id":"gsms",
+    "process":["node"],
+    "desc":"google voice sms interface"
+  }
+}

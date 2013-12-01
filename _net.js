@@ -8,7 +8,7 @@ var through = require('through')
 
 var websocketStream = require('websocket-stream')
 var ws = require('ws').Server
-
+// maybe use engine.io cause it has fallback for older browsers?
 var fs = require('fs')
 var http = require('http')
 var fern = require('fern')

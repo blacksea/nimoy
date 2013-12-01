@@ -1,10 +1,5 @@
-/*{
-  "id":"gsms",
-	"process":["node"],
-	"desc":"google voice sms interface"
-}*/
+// GSMS
 
-//, gsms = require('gsms')
 var through = require('through')
 
 module.exports = Gsms

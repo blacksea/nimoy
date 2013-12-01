@@ -1,0 +1,8 @@
+{
+  "brico": {
+    "id":"gps",
+    "scope":["server"],
+    "desc":"interface for gps serial data"
+  }
+}
+

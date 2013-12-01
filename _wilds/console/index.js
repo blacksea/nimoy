@@ -1,9 +1,5 @@
-/*{
-  "id":"console",
-	"process":["browser"],
-	"desc":"cli",
-  "deps":["console.html","console.styl"]
-}*/
+// CONSOLE
+
 var through = require('through')
 
 module.exports = Console

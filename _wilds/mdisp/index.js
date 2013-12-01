@@ -1,10 +1,3 @@
-/*{
-  "id":"mdisp",
-	"process":["browser"],
-	"desc":"micro display",
-  "deps":["mdisp.html","mdisp.styl"]
-}*/
-
 var through = require('through')
 
 module.exports = Mdisp

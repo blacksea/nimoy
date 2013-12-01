@@ -1,8 +1,4 @@
-/*{
-  "id":"gps",
-	"scope":["server"],
-	"desc":"interface for gps serial data"
-}*/
+// GPS
 
 var serial = require('serialport')
 var through = require('through')
