@@ -11,7 +11,9 @@ var DefaultUser = {
   modules:''
 }
 
-// use config option to set js output location + use with http
+// expose a global db object to bricos - interface is the same on both server and client
+
+// use config option to set js output location & use with http
 
 var EnvOpts = {
   path_wilds:'./_wilds',
@@ -24,8 +26,6 @@ var EnvOpts = {
   port:80,
 
 }
-
-// new text input object
 
 Server.listen(opts.port, function () {
   var uid = parseInt(process.env.SUDO_UID) 
