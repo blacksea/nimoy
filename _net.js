@@ -1,32 +1,17 @@
 // BROWSER NET 
 
-//kindle jalopy doesn't have bind
-if(!Function.prototype.bind) require('bindshim') 
-  var host = window.document.location.host.replace(/:.*/, '');
-
 var through = require('through')
-
 var websocketStream = require('websocket-stream')
 var ws = require('ws').Server
+
 // maybe use engine.io cause it has fallback for older browsers?
+
 var fs = require('fs')
 var http = require('http')
 var fern = require('fern')
 
 // CONFIGURATION 
 
-var CompileOpts = {
-  path_wilds:opts.path_wilds,
-  path_styl:opts.path_styl,
-  path_css:opts.path_css,
-  path_bundle:opts.path_bundle,
-  path_env:opts.path_js,
-  compress:false
-}
-
-var MapOpts = {
-  path_wilds:opts.path_wilds
-}
 
 // might need muxdemux too
 
@@ -54,6 +39,10 @@ function netWS (server,soc) {
   }
 }
 
+function browserStuff () {
+  if(!Function.prototype.bind) require('bindshim') 
+    var host = window.document.location.host.replace(/:.*/, '');
+}
 
 function netHTTP (opts,running) {
 
@@ -74,17 +63,17 @@ function netHTTP (opts,running) {
 
   var Server = http.createServer(HandleRequests)
 
-  Server.listen(opts.port, function () { 
-    var uid = parseInt(process.env.SUDO_UID) 
-    if (uid) process.setuid(uid) // switch to user permissions
-    // load level now so it doesn't run as sudo
-  })
+  // Server.listen(opts.port, function () { 
+  //   var uid = parseInt(process.env.SUDO_UID) 
+  //   if (uid) process.setuid(uid) // switch to user permissions
+  //   // load level now so it doesn't run as sudo
+  // })
 
   function HandleRequests (req, res) {
     var url = req.url
     if (url === '/') url = '/index.html'
     var file = url.replace('/','') 
-    if (StaticFiles[file]) fs.createReadStream(StaticFiles[file])).pipe(res)
+    if (StaticFiles[file]) fs.createReadStream(StaticFiles[file]).pipe(res)
     if (!StaticFiles[file]) res.end('nobody') // todo: somekindof 404
   }
 }
