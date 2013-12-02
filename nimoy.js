@@ -12,16 +12,22 @@ fs.readFile('./config.json', function handleConfig (e, buf) {
 })
 
 var nimoy = {
+  init: function () {
+  },
   map: function (res) {
     var self = this
     var map = require('./_map')
     map(config.wilds, function (m) {
       self.M = m
-      res(clc.yellowBright('mapped '+config.wilds))
+      res()
     })
   },
   start: function (res) {
-    res(clc.yellowBright(this.M))
+    var netHTTP = require('./_net').HTTP
+    netHTTP({port:8000,
+            host:'localhost',
+            dir_static:'./public'
+    }, res)
   },
   stop: function () {
   }, 
