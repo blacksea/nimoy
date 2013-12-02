@@ -1,5 +1,4 @@
 // WILDS MAPPER
-// grab nimoy module data from a dir of node modules with package.json's
 
 var asyncMap = require('slide').asyncMap
 var fs = require('fs')
@@ -7,8 +6,6 @@ var fs = require('fs')
 module.exports = Map
 
 function Map (path, ready) {
-  if (path[path.length-1] !== '/') path += '/'
-
   var MAP = {}
 
   function readPKG (fileName, next) {
@@ -21,6 +18,8 @@ function Map (path, ready) {
       }
     })
   }
+
+  if (path[path.length-1] !== '/') path += '/'
 
   fs.readdir(path, function moduleList(e, modules) {
     asyncMap(modules, readPKG, function () {
