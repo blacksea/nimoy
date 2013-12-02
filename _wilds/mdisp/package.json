@@ -2,7 +2,6 @@
   "brico": {
     "id":"mdisp",
     "process":["browser"],
-    "desc":"micro display",
-    "deps":["mdisp.html","mdisp.styl"]
+    "desc":"micro display"
   }
 }

@@ -1,5 +1,7 @@
-{ 
-  "brico" : {
-
+{
+  "brico": {
+    "id":"sms",
+    "process":["server"],
+    "desc":"twilio interface"
   }
 }
