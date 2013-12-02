@@ -4,7 +4,7 @@ var Brico = require('./_brico')
 var Data = require('./_data')
 var Map = require('./_map')
 var Net = require('./_net')
-
+var read = require('read')
 
 var config
 
