@@ -1,4 +1,5 @@
 // WILDS MAPPER
+// grab nimoy module data from a dir of node modules with package.json's
 
 var asyncMap = require('slide').asyncMap
 var fs = require('fs')
@@ -12,9 +13,7 @@ function Map (path, ready) {
 
   function readPKG (fileName, next) {
     fs.readFile(path+fileName+'/package.json', function (e, buf) {
-      if (e) {
-        console.error(e)
-      }
+      if (e) console.error(e)
       if (!e) {
         var jsn = JSON.parse(buf)
         MAP[fileName] = jsn
