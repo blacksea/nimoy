@@ -5,31 +5,19 @@ var Data = require('./_data')
 var Map = require('./_map')
 var Net = require('./_net')
 
-var DefaultUser = {
-  host:'blacksea',
-  connections:'',
-  modules:''
-}
 
-// expose a global db object to bricos - interface is the same on both server and client
+var config
 
-// use config option to set js output location & use with http
-
-var EnvOpts = {
-  path_wilds:'./_wilds',
-  path_static:'./_static',
-  path_styl:'./_static/default.styl',
-  path_css:'./_static/styles.css', 
-  path_bundle:'./_static/bundle.js', 
-  path_js:'./_env_B.js',
-  path_data:'./data',
-  port:80
-}
-
-// support a config.json
+fs.readFile('./config.json', function handleConfig (e, buf) {
+  if (!e) {
+    config = JSON.parse(buf)    
+    console.log(config)
+  } 
+  if (e) console.error(e)
+})
 
 
-var API = {
+var NIMOY = {
   makeMap: function () {
     // update the map and put a cache in leveldb
   },
@@ -48,4 +36,6 @@ var API = {
     }) 
   }
 }
-this.api = new fern({tree:API})
+
+// pipe this into a cli
+nimoy = new fern({tree:NIMOY})
