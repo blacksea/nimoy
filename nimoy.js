@@ -1,12 +1,7 @@
 // NIMOY 
 
-var Brico = require('./_brico')
-var Data = require('./_data')
-var Map = require('./_map')
-var Net = require('./_net')
 var read = require('read')
 var clc = require('cli-color')
-var fern = require('fern')
 var fs = require('fs')
 
 var config
@@ -18,21 +13,22 @@ fs.readFile('./config.json', function handleConfig (e, buf) {
 
 var nimoy = {
   map: function (res) {
-    Map(config.wilds, function (m) {
+    var self = this
+    var map = require('./_map')
+    map(config.wilds, function (m) {
+      self.M = m
       res(clc.yellowBright('mapped '+config.wilds))
     })
   },
-  dbInit: function () {
-    // enable db / data -- setup storage
+  start: function (res) {
+    res(clc.yellowBright(this.M))
   },
-  addUser: function () {
-  },
-  getUser: function () {
-  },
-  delUser: function () {
-  },
+  stop: function () {
+  }, 
   newBrico: function (brico, next) {
-    Data.put(brico.key, JSON.stringify(brico), function () {
+    var brico = require('./_brico')
+    var data = require('./_data')
+    data.put(brico.key, JSON.stringify(brico), function () {
       next(brico)
     }) 
   }
