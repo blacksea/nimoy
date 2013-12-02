@@ -1,14 +1,5 @@
 {
   "port": 80,
-  "host": "localhost",
-  "host":"blacksea",
-  "connections":"",
-  "modules":"",
-  "path_wilds":"./_wilds",
-  "path_static":"./_static",
-  "path_styl":"./_static/default.styl",
-  "path_css":"./_static/styles.css", 
-  "path_bundle":"./_static/bundle.js", 
-  "path_js":"./_env_B.js",
-  "path_data":"./data",
+  "host":"localhost",
+  "wilds":"./_wilds"
 }
