@@ -17,6 +17,7 @@
     "compile": "watchify -v ./_wilds/"
   },
   "dependencies": {
+    "watchify": ">0.4.0",
     "inherits": ">2.0.0",
     "slide": ">1.1.4",
     "level": ">0.15.0",
