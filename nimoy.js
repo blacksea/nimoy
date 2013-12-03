@@ -29,6 +29,14 @@ var nimoy = {
             dir_static:'./public'
     }, res)
   },
+  watchify: function (res) {
+    var w = require('watchify')
+    w.add(opts.bundle)
+    w.on('update', function (ids) {
+      w.bundle()
+      res()
+    })
+  },
   stop: function () {
   }, 
   newBrico: function (brico, next) {
@@ -56,4 +64,4 @@ function REPL (msg) {
   })
 }
 
-REPL(clc.cyanBright('welcome to nimoy! \n please enter command:'))
+REPL(clc.black.bgCyanBright('/nimoy:0.0.1/'))
