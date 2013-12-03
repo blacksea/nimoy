@@ -6,6 +6,10 @@ module.exports.HTTP = function (opts,ready) {
   var http = require('http')
   var StaticFiles = {}
 
+  var index = '<doctype!><html><head><title></title></head><body>'
+  + '<script src="'+opts.bundle+'"></script>'
+  +'</body></html>'
+
   if (opts.dir_static[opts.dir_static.length-1] !== '/') opts.dir_static += '/'
 
   fs.readdir(opts.dir_static, function GetStaticFiles (e, files) {
@@ -18,7 +22,7 @@ module.exports.HTTP = function (opts,ready) {
 
   function HandleRequests (req, res) {
     var url = req.url
-    if (url === '/') url = '/index.html'
+    if (url === '/') res.end(index)
     var file = url.replace('/','') 
     if (StaticFiles[file]) fs.createReadStream(StaticFiles[file]).pipe(res)
     if (!StaticFiles[file]) res.end('nobody')
