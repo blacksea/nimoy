@@ -12,9 +12,13 @@ function Map (path, ready) {
     fs.readFile(path+fileName+'/package.json', function (e, buf) {
       if (e) console.error(e)
       if (!e) {
-        var jsn = JSON.parse(buf)
-        MAP[fileName] = jsn
-        next() 
+        var pkg = JSON.parse(buf)
+        if (pkg.brico) {
+          MAP[fileName] = pkg
+          next() 
+        } else {
+          next()
+        }
       }
     })
   }
