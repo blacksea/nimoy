@@ -64,4 +64,4 @@ function REPL (msg) {
   })
 }
 
-REPL(clc.black.bgCyanBright('/nimoy:0.0.1/'))
+REPL(clc.black.bgCyanBright(' nimoy:0.0.1'))
