@@ -24,10 +24,14 @@ var nimoy = {
   },
   start: function (res) {
     var netHTTP = require('./_net').HTTP
-    netHTTP({port:8000,
-            host:'localhost',
-            dir_static:'./public'
-    }, res)
+    var netConfig = {
+      port:8000,
+      host:'localhost',
+      dir_static:'./public'
+    }
+    netHTTP(netConfig, function listening () {
+      res('server running on '+netConfig.port)
+    })
   },
   watchify: function (res) {
     var w = require('watchify')
