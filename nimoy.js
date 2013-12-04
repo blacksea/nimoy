@@ -64,4 +64,12 @@ function REPL (msg) {
   })
 }
 
-REPL(clc.black.bgCyanBright(' nimoy:0.0.1'))
+var colors = [
+  {f:0,b:11},
+  {f:0,b:14},
+  {f:0,b:15}
+]
+
+var clr = colors[Math.floor(Math.random() * ((colors.length-1) - 0 + 1) + 0)]
+
+REPL(clc.xterm(clr.f).bgXterm(clr.b)(' nimoy:0.0.1'))
