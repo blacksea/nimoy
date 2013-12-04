@@ -19,7 +19,7 @@ var nimoy = {
     var map = require('./_map')
     map(config.wilds, function (m) {
       self.M = m
-      res()
+      res('map complete!')
     })
   },
   start: function (res) {
@@ -49,7 +49,7 @@ var nimoy = {
 }
 
 function REPL (msg) {
-  if (msg) console.log(msg)
+  if (msg) console.log(clc.xterm(clr.b)(msg))
   read({}, function handleInput (e,c,d) {
     if (e) console.error(e)
     if (!e) {
