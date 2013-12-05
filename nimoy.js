@@ -12,8 +12,6 @@ fs.readFile('./config.json', function handleConfig (e, buf) {
 })
 
 var nimoy = {
-  init: function () {
-  },
   map: function (res) {
     var self = this
     var map = require('./_map')
@@ -40,15 +38,6 @@ var nimoy = {
       w.bundle()
       res()
     })
-  },
-  stop: function () {
-  }, 
-  newBrico: function (brico, next) {
-    var brico = require('./_brico')
-    var data = require('./_data')
-    data.put(brico.key, JSON.stringify(brico), function () {
-      next(brico)
-    }) 
   }
 }
 
