@@ -30,10 +30,15 @@ function HTTP (opts, ready) {
 
   var server = http.createServer(HandleRequests)
   server.listen(opts.port,opts.host,ready)
+
+  WS(server, function handleSoc (soc) {
+  })
 }
 
-function WS (con, soc) {
-  var WebSocket = new ws({server:Server})
+function WS (server, soc) {
+  var ws = require('ws')
+  var websocketStream = require('websocket-stream')
+  var WebSocket = new ws({server:server})
 
   WebSocket.on('connection', HandleSoc)
 
