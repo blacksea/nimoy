@@ -1,13 +1,12 @@
 // NET
 
-// HTTP
-module.exports.HTTP = function (opts,ready) {
+function HTTP (opts, ready) {
   var fs = require('fs')
   var http = require('http')
   var StaticFiles = {}
 
-  var index = '<doctype!><html><head><title></title></head><body>'
-  + '<script src="'+opts.bundle+'"></script>'
+  var index = '<html><head><title></title></head><body>'
+  +'<script src="'+opts.bundle+'"></script>'
   +'</body></html>'
 
   if (opts.dir_static[opts.dir_static.length-1] !== '/') opts.dir_static += '/'
@@ -22,6 +21,7 @@ module.exports.HTTP = function (opts,ready) {
 
   function HandleRequests (req, res) {
     var url = req.url
+    res.setHeader('Content-Type','text/html')
     if (url === '/') res.end(index)
     var file = url.replace('/','') 
     if (StaticFiles[file]) fs.createReadStream(StaticFiles[file]).pipe(res)
@@ -32,8 +32,7 @@ module.exports.HTTP = function (opts,ready) {
   server.listen(opts.port,opts.host,ready)
 }
 
-// WEBSOCKETS
-module.exports.WS = function (con) {
+function WS (con, soc) {
   var WebSocket = new ws({server:Server})
 
   WebSocket.on('connection', HandleSoc)
@@ -51,3 +50,7 @@ function browserStuff () {
   if(!Function.prototype.bind) require('bindshim') 
   var host = window.document.location.host.replace(/:.*/, '');
 }
+
+module.exports.HTTP = HTTP
+
+module.exports.WS = WS
