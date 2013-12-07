@@ -1,5 +1,7 @@
 {
-  "port": 80,
+  "port":80,
   "host":"localhost",
-  "wilds":"./_wilds"
+  "path_wilds":"./_wilds",
+  "path_static":"./_static",
+  "path_bundle":"./_static/bundle.js"
 }
