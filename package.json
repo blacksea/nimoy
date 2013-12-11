@@ -14,7 +14,7 @@
   "scripts": {
     "start": "node nimoy.js",
     "test": "tap test/*.js",
-    "compile": "watchify -v ./_wilds/"
+    "build": "watchify -v ./_wilds/"
   },
   "dependencies": {
     "watchify": ">0.4.0",
