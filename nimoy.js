@@ -1,16 +1,24 @@
 // NIMOY 
 
+var argv = require('optimist').argv
 var read = require('read')
 var clc = require('cli-color')
 var pw = require('credential')
 var fs = require('fs')
 
-var config
+var config 
+var port 
+var host
+var wsport
 
 fs.readFile('./config.json', function handleConfig (e, buf) {
   if (e) console.error(e)
   if (!e) config = JSON.parse(buf)    
 })
+
+if (argv.port) port = argv.port
+if (argv.host) host = argv.host
+if (argv.wsport) wsport = argv.wsport
 
 var nimoy = {
 
