@@ -36,7 +36,6 @@ function HTTP (opts, ready) {
 
 // allow logins with google app ids
 
-
 function WS (server, soc) {
   var ws = require('ws')
   var websocketStream = require('websocket-stream')
@@ -55,7 +54,7 @@ function WS (server, soc) {
 
 function browserStuff () {
   if(!Function.prototype.bind) require('bindshim') 
-  var host = window.document.location.host.replace(/:.*/, '');
+  var host = window.document.location.host.replace(/:.*/, '')
 }
 
 module.exports.HTTP = HTTP
