@@ -4,7 +4,6 @@ var through = require('through')
 var cvs
 
 window.addEventListener('resize', sizeCanvas, false)
-
 function sizeCanvas (e) {
   cvs.height = window.innerHeight
   cvs.width = window.innerWidth
@@ -43,6 +42,3 @@ paperJS.setAttribute('src','/paper-core.min.js')
 body.appendChild(paperJS)
 paperJS.addEventListener('load',,false)
 
-function init () {
-
-}
