@@ -23,22 +23,19 @@ function fade (mode, item, cb) {
   }
 }
 
-// SETUP BODY
-var body = document.body
-body.style.margin = 0
-body.style.padding = 0
+module.exports = function (loaded) {
+  cvs = document.createElement('canvas')
+  document.body.appendChild(cvs)
+  sizeCanvas()
+  var paperJS = document.createElement('script')
+  paperJS.setAttribute('src','/paper-core.min.js')
+  paperJS.setAttribute('type','text/javascript')
+  document.body.appendChild(paperJS)
+  paperJS.addEventListener('load', function () {
+    paper.setup(cvs)
+    loaded()
+  }, false)
+  return module.exports
+}
 
-// INSTALL CANVAS & MAKE IT FULLSCREEN WITH AUTO RESIZE
-var cvs = document.createElement('canvas')
-cvs.setAttribute('resize','')
-cvs.style.backgroundColor = '#f1f1f1'
-cvs.width = winWidth
-cvs.height = winHeight
-body.appendChild(cvs)
-
-// INSTALL PAPER
-var paperJS = document.createElement('script')
-paperJS.setAttribute('src','/paper-core.min.js')
-body.appendChild(paperJS)
-paperJS.addEventListener('load',,false)
 
