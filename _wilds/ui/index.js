@@ -1,19 +1,27 @@
 // UI ELEMENTS with PAPERJS
 
 var through = require('through')
+var cvs
 
-var winHeight = document.body.clientHeight
-var winWidth = document.body.clientWidth
-var winCenterX = winWidth / 2
-var winCenterY = winHeight / 2
+window.addEventListener('resize', sizeCanvas, false)
 
-window.onresize = function () {
-  winHeight = document.body.clientHeight
-  winWidth = document.body.clientWidth
-  winCenterX = winWidth / 2
-  winCenterY = winHeight / 2
-  cvs.width = winWidth
-  cvs.height = winHeight
+function sizeCanvas (e) {
+  cvs.height = window.innerHeight
+  cvs.width = window.innerWidth
+}
+
+function fade (mode, item, cb) {
+  var i = 0
+  paper.view.onFrame = function (e) {
+    var dec = i*0.06
+    if (dec <= 1) {
+      if (mode == 'out') item.opacity = 1-dec
+      if (mode == 'in') item.opacity = dec
+      paper.view.draw()
+    } 
+    if (i == 16) cb()
+    i++
+  }
 }
 
 // SETUP BODY
@@ -33,7 +41,7 @@ body.appendChild(cvs)
 var paperJS = document.createElement('script')
 paperJS.setAttribute('src','/paper-core.min.js')
 body.appendChild(paperJS)
-paperJS.addEventListener('load',init,false)
+paperJS.addEventListener('load',,false)
 
 function init () {
 
