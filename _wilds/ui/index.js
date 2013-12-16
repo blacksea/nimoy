@@ -38,4 +38,36 @@ module.exports = function (loaded) {
   return module.exports
 }
 
+module.exports.notify = function (opts) {
+  var count = 0
+  var s = through(function write (d) {
+    count++
+    if (d.mood == 0) var color = 'blue'
+    if (d.mood == 1) var color = 'red'
+    var text = new paper.PointText({point:[50,((30/2)+(24/3))+25]})
+    text.content = d.c
+    text.fillColor = color
+    text.fontSize = 24
+    text.font = 'monospace'
+    text.fontWeight = 'bold'
+    var bg = new paper.Path.Rectangle({radius:5,from:[0,25],to:[text.bounds.width+60,55]})
+    bg.strokeColor = color
+    bg.fillColor = 'white'
+    bg.strokeWidth = 2
+    var msg = new paper.Group({children:[bg,text]})
+    msg.position.x = paper.view.center.x
+    if (count>1) msg.position.y = count*38
+    fade('in',msg,function () {
+      setTimeout(function () {
+        fade('out',msg,function () {
+          count--
+          msg.remove()
+        })
+      }, opts.length)
+    })
+  }, function end() {
+    this.end()
+  }, {autoDestroy:false})
+  return s
+}
 
