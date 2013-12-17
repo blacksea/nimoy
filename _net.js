@@ -3,6 +3,7 @@
 function HTTP (opts, ready) {
   var fs = require('fs')
   var http = require('http')
+  var gzip = require('zlib').createGzip()
   var StaticFiles = {}
 
   var index = '<html><head><title></title></head><body>'
