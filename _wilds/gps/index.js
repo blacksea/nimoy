@@ -18,7 +18,6 @@ var Parser = function () {
       degrees = parseInt(parts[0].substr(0, 2), 10);
       minutes = parseInt(parts[0].substr(2, 2), 10);
       seconds = parseFloat('0.' + parts[1]) * 60.0;
-
       if (direction.toLowerCase() === 's') {
         sign = -1;
       }
@@ -26,7 +25,6 @@ var Parser = function () {
       degrees = parseInt(parts[0].substr(0, 3), 10);
       minutes = parseInt(parts[0].substr(3, 2), 10);
       seconds = parseFloat('0.' + parts[1]) * 60.0;
-
       if (direction.toLowerCase() === 'w') {
         sign = -1;
       }

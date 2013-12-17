@@ -4,7 +4,6 @@ var fern = require('fern')
 
 var brico = {
   test: function (msg,cb) {
-    console.log(msg)
     if (process.browser) window.document.title = msg
     cb(msg)
   },
@@ -25,12 +24,14 @@ var brico = {
   },
   conn: function (conss,cb) {      
     conns.forEach(function handleConnection (conn) {
-      if (conn.match(/\+/) !== null) { var modA = conn.split('+')[0] , modB = conn.split('+')[1]
+      if (conn.match(/\+/) !== null) { 
+        var modA = conn.split('+')[0] 
+        var modB = conn.split('+')[1]
         _[modA].pipe(_[modB])
       }
       if (conn.match(/\-/) !== null) {
         var modA = conn.split('-')[0]
-        , modB = conn.split('-')[1]
+        var modB = conn.split('-')[1]
         modA.unpipe(modB)
       }
     })

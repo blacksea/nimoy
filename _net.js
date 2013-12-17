@@ -3,7 +3,6 @@
 function HTTP (opts, ready) {
   var fs = require('fs')
   var http = require('http')
-  var gzip = require('zlib').createGzip()
   var StaticFiles = {}
 
   var index = '<html><head><title></title></head><body>'
@@ -11,22 +10,25 @@ function HTTP (opts, ready) {
   +'</body></html>'
 
   if (opts.dir_static[opts.dir_static.length-1] !== '/') opts.dir_static += '/'
-
-  fs.readdir(opts.dir_static, function GetStaticFiles (e, files) {
-    if (e) console.error(e)
-    if (!e) { files.forEach(function findStaticFiles (file) {
-        StaticFiles[file] = opts.path_static+file
-      })
-    }
-  })
+  var static = opts.dir_static
 
   function HandleRequests (req, res) {
-    var url = req.url
-    res.setHeader('Content-Type','text/html')
-    if (url === '/') res.end(index)
-    var file = url.replace('/','') 
-    if (StaticFiles[file]) fs.createReadStream(StaticFiles[file]).pipe(res)
-    if (!StaticFiles[file]) res.end('nobody')
+    var index = '<html><head><title></title></head><body>'
+    +'<script src="'+opts.bundle+'"></script>'
+    +'</body></html>'
+
+    if (req.url === '/') {
+      res.end(index)
+      res.setHeader('Content-Type','text/html')
+    } else if (req.url !== '/') {
+      var file = fs.createReadStream(static+req.url.replace('/',''))
+      res.writeHead(200, {'content-encoding': 'gzip'})
+      file.pipe(zlib.createGzip()).pipe(res)
+      file.on('error', function(e) {
+        console.error(e)
+        res.end('404')
+      })
+    }
   }
 
   var server = http.createServer(HandleRequests)
@@ -35,6 +37,8 @@ function HTTP (opts, ready) {
   WS(server, function handleSoc (soc) {
   })
 }
+
+// allow logins with google app ids
 
 function WS (server, soc) {
   var ws = require('ws')
@@ -54,9 +58,8 @@ function WS (server, soc) {
 
 function browserStuff () {
   if(!Function.prototype.bind) require('bindshim') 
-  var host = window.document.location.host.replace(/:.*/, '');
+  var host = window.document.location.host.replace(/:.*/, '')
 }
 
 module.exports.HTTP = HTTP
-
 module.exports.WS = WS
