@@ -4,6 +4,7 @@ function HTTP (opts, ready) {
   var fs = require('fs')
   var http = require('http')
   var StaticFiles = {}
+  var zlib = require('zlib')
 
   var index = '<html><head><title></title></head><body>'
   +'<script src="'+opts.bundle+'"></script>'
