@@ -3,7 +3,12 @@
 function HTTP (opts, ready) {
   var fs = require('fs')
   var http = require('http')
-  var zlib = require('zlib')
+  var StaticFiles = {}
+  var gzip = require('zlib')createGzip
+
+  var index = '<html><head><title></title></head><body>'
+  +'<script src="'+opts.bundle+'"></script>'
+  +'</body></html>'
 
   if (opts.dir_static[opts.dir_static.length-1] !== '/') opts.dir_static += '/'
   var static = opts.dir_static
@@ -19,7 +24,7 @@ function HTTP (opts, ready) {
     } else if (req.url !== '/') {
       var file = fs.createReadStream(static+req.url.replace('/',''))
       res.writeHead(200, {'content-encoding': 'gzip'})
-      file.pipe(zlib.createGzip()).pipe(res)
+      file.pipe(gzip()).pipe(res)
       file.on('error', function(e) {
         console.error(e)
         res.end('404')
