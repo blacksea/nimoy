@@ -1,6 +1,7 @@
 // WILDS MAPPER
 
 var asyncMap = require('slide').asyncMap
+var through = require('through')
 var fs = require('fs')
 
 module.exports = Map
@@ -14,6 +15,7 @@ function Map (path, ready) {
       if (!e) {
         var pkg = JSON.parse(buf)
         if (pkg.brico) {
+          s.write(buf)
           MAP[fileName] = pkg
           next() 
         } else {
@@ -30,4 +32,12 @@ function Map (path, ready) {
       ready(JSON.stringify(MAP,null,2))
     })
   })
+
+  var s = through(function write (chunk) {
+    self.emit('data', chunk)
+  }, function end () {
+    this.end()
+  },{autoDestroy:false})
+
+  return s
 }
