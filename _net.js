@@ -34,17 +34,14 @@ function HTTP (opts, ready) {
 
   var server = http.createServer(HandleRequests)
   server.listen(opts.port,opts.host,ready)
-
-  WS(server, function handleSoc (soc) {
-  })
 }
 
 // allow logins with google app ids
 
-function WS (server, soc) {
+function WS (port) {
   var ws = require('ws')
   var websocketStream = require('websocket-stream')
-  var WebSocket = new ws({server:server})
+  var WebSocket = new ws({port:port})
 
   WebSocket.on('connection', HandleSoc)
 
