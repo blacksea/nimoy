@@ -22,6 +22,7 @@
     "level-sublevel": ">=5.2.0",
     "optimist":">=0.6.0",
     "slide": ">=1.1.4",
+    "tape": ">=2.3.2",
     "through": ">=2.3.4",
     "websocket-stream": ">=0.3.2",
     "ws": ">=0.4.30"
