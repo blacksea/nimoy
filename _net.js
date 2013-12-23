@@ -3,7 +3,6 @@
 function HTTP (opts, ready) {
   var fs = require('fs')
   var http = require('http')
-  var StaticFiles = {}
   var gzip = require('zlib')createGzip
 
   var index = '<html><head><title></title></head><body>'
@@ -13,7 +12,7 @@ function HTTP (opts, ready) {
   if (opts.dir_static[opts.dir_static.length-1] !== '/') opts.dir_static += '/'
   var static = opts.dir_static
 
-  function HandleRequests (req, res) {
+  var server = http.createServer(function handleRequests (req, res) {
     var index = '<html><head><title></title></head><body>'
     +'<script src="'+opts.bundle+'"></script>'
     +'</body></html>'
@@ -30,28 +29,22 @@ function HTTP (opts, ready) {
         res.end('404')
       })
     }
-  }
-
-  var server = http.createServer(HandleRequests)
+  })
   server.listen(opts.port,opts.host,ready)
 }
 
-// allow logins with google app ids
-
-function WS (port) {
+function WS (port, cb) {
   var ws = require('ws')
   var websocketStream = require('websocket-stream')
   var WebSocket = new ws({port:port})
-
-  WebSocket.on('connection', HandleSoc)
-
-  function HandleSoc (soc) { // fix this thing!
+  WebSocket.on('connection', function handleSoc (soc) {
     var wss = websocketStream(soc)
     var headers = soc.upgradeReq.headers
-    var key = headers['sec-websocket-key']
     var host = headers.host
+    var key = headers['sec-websocket-key']
     if (headers['sec-websocket-key1']) key = headers['sec-websocket-key1'].replace(/\s/g,'-')
-  }
+    cb(soc)
+  })
 }
 
 function browserStuff () {
