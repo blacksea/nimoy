@@ -13,7 +13,7 @@
   },
   "scripts": {
     "start": "node nimoy",
-    "test": "tap test/*.js",
+    "test": "tape test/*.js",
     "watch": "watchify -v ./_wilds/",
     "minify": "uglifyjs bundle.js bundle.min.js"
   },
