@@ -1,6 +1,5 @@
 // NIMOY 
 var argv = require('optimist').argv
-var read = require('read')
 var clc = require('cli-color')
 var pw = require('credential')
 var fs = require('fs')
@@ -78,27 +77,6 @@ function HTTPS (opts, ready) {
   })
   server.listen(port, host, ready)
 }
-
-// websocket server : is it possible to use TLS ?
-var socs = []
-var ws = new wsServer({port:wsport})
-ws.on('connection', function (soc) {
-  var wss = websocStream(soc)
-  var headers = soc.upgradeReq.headers
-  if (headers.origin === 'https;//app.basilranch.com') {
-    if (headers['sec-websocket-key']) var key = headers['sec-websocket-key']
-    if (!headers['sec-websocket-key']) var key = headers['sec-websocket-key1'].replace(' ','_')
-    wss.ident = key //!this is probly not secure?
-    socs.push(wss)
-    wss.on('close', function () {
-      for(var i = 0;i<socs.length;i++) {
-        if (socs[i].ident == key) socs.splice(i,1); break;
-      }
-    })
-    wss.pipe(fern(API)).pipe(wss)
-  }
-})
-
 function HTTP (opts, ready) {
   var fs = require('fs')
   var http = require('http')
@@ -132,16 +110,25 @@ function HTTP (opts, ready) {
   server.listen(opts.port,opts.host,ready)
 }
 
+// websocket server : is it possible to use TLS ?
 function WS (port, cb) {
-  var ws = require('ws')
-  var websocketStream = require('websocket-stream')
-  var WebSocket = new ws({port:port})
-  WebSocket.on('connection', function handleSoc (soc) {
-    var wss = websocketStream(soc)
+  var socs = []
+  var ws = new wsServer({port:wsport})
+  ws.on('connection', function (soc) {
+    var wss = websocStream(soc)
     var headers = soc.upgradeReq.headers
-    var host = headers.host
-    var key = headers['sec-websocket-key']
-    if (headers['sec-websocket-key1']) key = headers['sec-websocket-key1'].replace(/\s/g,'-')
-    cb(soc)
+    if (headers.origin === 'https;//app.basilranch.com') {
+      if (headers['sec-websocket-key']) var key = headers['sec-websocket-key']
+      if (!headers['sec-websocket-key']) var key = headers['sec-websocket-key1'].replace(' ','_')
+      wss.ident = key //!this is probly not secure?
+      socs.push(wss)
+      wss.on('close', function () {
+        for(var i = 0;i<socs.length;i++) {
+          if (socs[i].ident == key) socs.splice(i,1); break;
+        }
+      })
+      wss.pipe(fern(API)).pipe(wss)
+    }
   })
 }
+
