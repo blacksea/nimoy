@@ -1,26 +1,21 @@
 // NIMOY 
-
 var argv = require('optimist').argv
 var read = require('read')
 var clc = require('cli-color')
 var pw = require('credential')
 var fs = require('fs')
 
-var config 
 var port 
 var host
 var wsport
 
-fs.readFile('./config.json', function handleConfig (e, buf) {
-  if (e) console.error(e)
-  if (!e) config = JSON.parse(buf)    
-})
+var config = fs.readFileSync('./config.json')
 
 if (argv.port) port = argv.port
 if (argv.host) host = argv.host
 if (argv.wsport) wsport = argv.wsport
 
-var nimoy = {
+var nimoy = { // change this thing ... 
 
   map: function (res) {
     var self = this
@@ -30,9 +25,7 @@ var nimoy = {
       res('map complete!')
     })
   },
-
   start: function (res) {
-    var netHTTP = require('./_net').HTTP
     var netConfig = {
       port:8000,
       host:'localhost',
@@ -42,7 +35,6 @@ var nimoy = {
       res('server running on '+netConfig.port)
     })
   },
-
   watchify: function (res) {
     var w = require('watchify')
     w.add() // browser side!
@@ -54,6 +46,8 @@ var nimoy = {
   }
 }
 
+
+// make REPL a module
 function REPL (msg) {
   if (msg) console.log(clc.xterm(clr.b)(msg))
   read({}, function handleInput (e,c,d) {
@@ -79,6 +73,8 @@ var colors = [
 var clr = colors[Math.floor(Math.random() * ((colors.length-1) - 0 + 1) + 0)]
 
 REPL(clc.xterm(clr.f).bgXterm(clr.b)(' nimoy:0.0.1'))
+
+// impelement better server things
 // NET
 
 function HTTP (opts, ready) {
