@@ -10,19 +10,15 @@ function Map (path, ready) {
   var MAP = {}
 
   function readPKG (fileName, next) {
-    fs.readFile(path+fileName+'/package.json', function (e, buf) {
-      if (e) console.error(e)
-      if (!e) {
-        var pkg = JSON.parse(buf)
-        if (pkg.brico) {
-          s.write(buf)
-          MAP[fileName] = pkg
-          next() 
-        } else {
-          next()
-        }
-      }
-    })
+    var pkgFile = fs.readFileSync(path+fileName+'/package.json')
+    var pkg = JSON.parse(pkgFile)
+    if (pkg.brico) {
+      s.write(buf)
+      MAP[fileName] = pkg
+      next() 
+    } else {
+      next()
+    }
   }
 
   if (path[path.length-1] !== '/') path += '/'
