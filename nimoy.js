@@ -77,6 +77,56 @@ REPL(clc.xterm(clr.f).bgXterm(clr.b)(' nimoy:0.0.1'))
 // impelement better server things
 // NET
 
+function HTTPS (opts, ready) {
+  // https server
+  var port = 443
+  var wsport = 8080
+  var host = 'basilranch.com'
+  if (argv.port) port = argv.port
+  if (argv.wsport) wsport = argv.wsport
+  if (argv.host) host = argv.host
+
+  var certs = {key: fs.readFileSync('key.pem'),cert: fs.readFileSync('cert.pem')}
+  var server = https.createServer(certs, function HandleReqs (req, res) {
+    if (req.headers.host === 'app.'+host) { // manage subdomains
+      if (req.url === '/') {
+        res.setHeader('Content-Type', 'text/html')
+        res.end(HTML)
+      } else if (req.url !== '/') {
+        var file = fs.createReadStream('./static/'+req.url.replace('/',''))
+        file.on('error', function(e) {
+          console.error(e)
+          res.statusCode = 404
+          res.end()
+        })
+        res.setHeader('Content-Encoding', 'gzip')
+        file.pipe(zlib.createGzip()).pipe(res)
+      }
+    }
+  })
+  server.listen(port, host, ready)
+}
+
+// websocket server : is it possible to use TLS ?
+var socs = []
+var ws = new wsServer({port:wsport})
+ws.on('connection', function (soc) {
+  var wss = websocStream(soc)
+  var headers = soc.upgradeReq.headers
+  if (headers.origin === 'https;//app.basilranch.com') {
+    if (headers['sec-websocket-key']) var key = headers['sec-websocket-key']
+    if (!headers['sec-websocket-key']) var key = headers['sec-websocket-key1'].replace(' ','_')
+    wss.ident = key //!this is probly not secure?
+    socs.push(wss)
+    wss.on('close', function () {
+      for(var i = 0;i<socs.length;i++) {
+        if (socs[i].ident == key) socs.splice(i,1); break;
+      }
+    })
+    wss.pipe(fern(API)).pipe(wss)
+  }
+})
+
 function HTTP (opts, ready) {
   var fs = require('fs')
   var http = require('http')
@@ -123,11 +173,3 @@ function WS (port, cb) {
     cb(soc)
   })
 }
-
-function browserStuff () {
-  if(!Function.prototype.bind) require('bindshim') 
-  var host = window.document.location.host.replace(/:.*/, '')
-}
-
-module.exports.HTTP = HTTP
-module.exports.WS = WS
