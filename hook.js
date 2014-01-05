@@ -4,6 +4,7 @@ var host = 'theblacksea.cc'
 
 var server = http.createServer(function  (req,res) {
   if (req.method === 'post' && req.headers.host === 'git.'+host) {
+    console.log(req.headers)
     req.on('data', function (d) {
       console.log(d)
     })
