@@ -24,9 +24,7 @@ var server = http.createServer(function  (req,res) {
   }
 })
 server.listen(port,host, function () {
-  console.log('Old User ID: ' + process.getuid() + ', Old Group ID: ' + process.getgid());
   process.setgid('users');
   process.setuid('agasca');
-  console.log('new User ID: ' + process.getuid() + ', new Group ID: ' + process.getgid());
   console.log('listening on port: '+port+' and host: '+host)
 })
