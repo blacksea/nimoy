@@ -3,6 +3,10 @@ var port = 80
 var host = 'theblacksea.cc'
 
 var server = http.createServer(function  (req,res) {
+  if (req.headers.host === 'git'.+host) {
+    console.log('git service req')
+    res.end('git service req')
+  }
   if (req.method === 'post' && req.headers.host === 'git.'+host) {
     console.log(req.headers)
     req.on('data', function (d) {
