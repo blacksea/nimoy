@@ -8,7 +8,7 @@ var server = http.createServer(function  (req,res) {
     console.log(req.method)
     res.end('git service req')
   }
-  if (req.method === 'post') {
+  if (req.method === 'POST') {
     console.log(req.headers)
     req.on('data', function (d) {
       console.log(d)
