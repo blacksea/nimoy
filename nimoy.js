@@ -77,6 +77,7 @@ function HTTPS (opts, ready) {
   })
   server.listen(port, host, ready)
 }
+
 function HTTP (opts, ready) {
   var fs = require('fs')
   var http = require('http')
@@ -131,4 +132,3 @@ function WS (port, cb) {
     }
   })
 }
-
