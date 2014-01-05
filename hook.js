@@ -11,7 +11,6 @@ var server = http.createServer(function  (req,res) {
     })
     req.on('end', function () {
       console.log(data)
-      console.log(req.headers)
       res.end()
     })
   } else {
