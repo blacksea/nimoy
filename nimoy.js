@@ -46,10 +46,8 @@ var nimoy = { // change this thing ...
 }
 
 // impelement better server things
-// NET
 
 function HTTPS (opts, ready) {
-  // https server
   var port = 443
   var wsport = 8080
   var host = 'basilranch.com'
