@@ -12,6 +12,7 @@ var server = http.createServer(function  (req,res) {
     console.log(req.headers)
     req.on('data', function (d) {
       console.log(d)
+      console.log(d.toString())
     })
     req.on('end', function () {
       console.log(req.headers)
