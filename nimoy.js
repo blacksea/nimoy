@@ -45,8 +45,6 @@ var nimoy = { // change this thing ...
   }
 }
 
-// impelement better server things
-
 function HTTPS (opts, ready) {
   var port = 443
   var wsport = 8080
@@ -109,7 +107,6 @@ function HTTP (opts, ready) {
   server.listen(opts.port,opts.host,ready)
 }
 
-// websocket server : is it possible to use TLS ?
 function WS (port, cb) {
   var socs = []
   var ws = new wsServer({port:wsport})
