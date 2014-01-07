@@ -80,7 +80,7 @@ function HTTPS (opts, ready) {
 function HTTP (opts, ready) {
   var fs = require('fs')
   var http = require('http')
-  var gzip = require('zlib')createGzip
+  var gzip = require('zlib').createGzip
 
   var index = '<html><head><title></title></head><body>'
   +'<script src="'+opts.bundle+'"></script>'
