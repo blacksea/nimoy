@@ -6,41 +6,38 @@ var https = require('https')
 var gzip = require('zlib').createGzip
 var wsserver = require('ws').Server
 var wsstream = require('websocket-stream')
-var read = require('read')
 var argv = require('optimist').argv
-var clc = require('cli-color')
 var fs = require('fs')
 
 // handle config
-var config = fs.readFileSync('./config.json')
+var config = JSON.parse(fs.readFileSync('./config.json'))
+if (!config) { config = {port : 8000,host : localhost,encrypt : false,dirStatic : './_static/',dirWilds : './_wilds/'} } 
 
-// globals
-var port 
-var host
-var wsport
-
-if (argv.port) port = argv.port
-if (argv.host) host = argv.host
-if (argv.wsport) wsport = argv.wsport
+if (argv) { // allow commandline args to override config
+  for (arg in argv) {
+    if (config[arg]) config[arg] = argv[arg]
+  }
+}
 
 function fileServer (opts, up) {
-  var port = 443
-  var wsport = 8080
-  var host = 'basilranch.com'
-  if (argv.port) port = argv.port
-  if (argv.wsport) wsport = argv.wsport
-  if (argv.host) host = argv.host
+  var server
+  var static = opts.dir_static
 
   var index = '<html><head><title></title></head><body>'
   +'<script src="'+opts.bundle+'"></script>'
   +'</body></html>'
 
   if (opts.dir_static[opts.dir_static.length-1] !== '/') opts.dir_static += '/'
-  var static = opts.dir_static
 
-  var certs = {key: fs.readFileSync('key.pem'),cert: fs.readFileSync('cert.pem')}
+  if (opts.encrypt === true) {
+    var certs = {key: fs.readFileSync('key.pem'),cert: fs.readFileSync('cert.pem')}
+    server = https.createServer(certs, HandleReqs)
+  } else {
+    server = http.createServer(HandleReqs)
+  }
 
-  var server = https.createServer(certs, function HandleReqs (req, res) {
+  function HandleReqs (req, res) {
+    // option for subdomains?
     if (req.headers.host === 'app.'+host) { // manage subdomains
       if (req.url === '/') {
         res.setHeader('Content-Type', 'text/html')
@@ -56,11 +53,12 @@ function fileServer (opts, up) {
         file.pipe(zlib.createGzip()).pipe(res)
       }
     }
-  })
-  server.listen(port, host, ready)
+  }
+
+  server.listen(opts.port, opts.host, up)
 }
 
-function wsServer (port, cb) {
+function wsServer (opts)  {
   var socs = []
   var ws = new wsserver({port:wsport})
   ws.on('connection', function (soc) {
@@ -76,19 +74,19 @@ function wsServer (port, cb) {
           if (socs[i].ident == key) socs.splice(i,1); break;
         }
       })
-      wss.pipe(fern(API)).pipe(wss)
     }
   })
 }
 
 function REPL (msg) {
-  var colors = [
-    {f:0,b:11},
-    {f:0,b:14},
-    {f:0,b:15}
-  ]
+  var clc = require('cli-color')
+  var read = require('read')
+
+  var colors = [{f:0,b:11},{f:0,b:14},{f:0,b:15}]
   var clr = colors[Math.floor(Math.random() * ((colors.length-1) - 0 + 1) + 0)]
+
   if (msg) console.log(clc.xterm(clr.b)(msg))
+
   read({}, function handleInput (e,c,d) {
     if (e) console.error(e)
     if (!e) {
@@ -103,10 +101,12 @@ function REPL (msg) {
       }
     }
   })
+
   var s = through(function write (d) {
     this.emit('data',d) 
   }, function end () {
     this.emit('end')
   })
+
   return s
 }

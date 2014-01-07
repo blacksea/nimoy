@@ -1,7 +1,11 @@
 {
-  "port":80,
+  "portHttp":80,
+  "portHttps":443,
+  "portWs":8080,
+  "encrypt":false,
   "host":"localhost",
-  "path_wilds":"./_wilds",
-  "path_static":"./_static",
-  "path_bundle":"./_static/bundle.js"
+  "dirWilds":"./_wilds",
+  "dirStatic":"./_static",
+  "bundle":"boot.js",
+  "index":"index.html"
 }
