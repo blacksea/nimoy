@@ -1,5 +1,4 @@
 // REPL
-
 var clc = require('cli-color')
 var read = require('read')
 
@@ -26,7 +25,5 @@ var colors = [
 ]
 
 var clr = colors[Math.floor(Math.random() * ((colors.length-1) - 0 + 1) + 0)]
-
 REPL(clc.xterm(clr.f).bgXterm(clr.b)(' nimoy:0.0.1'))
-
 module.exports = REPL
