@@ -1,53 +1,28 @@
 // NIMOY 
+
+// deps
+var http = require('http')
+var https = require('https')
+var gzip = require('zlib').createGzip
+var wsserver = require('ws').Server
+var wsstream = require('websocket-stream')
+var read = require('read')
 var argv = require('optimist').argv
+var clc = require('cli-color')
 var fs = require('fs')
 
+// handle config
+var config = fs.readFileSync('./config.json')
+
+// globals
 var port 
 var host
 var wsport
-
-var config = fs.readFileSync('./config.json')
 
 if (argv.port) port = argv.port
 if (argv.host) host = argv.host
 if (argv.wsport) wsport = argv.wsport
 
-function ready () {
-  // start repl
-  repl('nimoy v.0.0.1')
-}
-
-repl('nimoy v.0.0.1')
-
-var nimoy = {
-  map: function (res) {
-    var self = this
-    var map = require('./_map')
-    map(config.wilds, function (m) {
-      self.M = m
-      res('map complete!')
-    })
-  },
-  start: function (res) {
-    var netConfig = {
-      port:8000,
-      host:'localhost',
-      dir_static:'./public'
-    }
-    netHTTP(netConfig, function listening () {
-      res('server running on '+netConfig.port)
-    })
-  },
-  watchify: function (res) {
-    var w = require('watchify')
-    w.add() // browser side!
-    w.on('update', function (ids) {
-      var bundleJS = fs.createWriteStream(opts.path_bundle)
-      w.bundle().pipe(bundleJS)
-      bundleJS.on('end', res)
-    })
-  }
-}
 function HTTPS (opts, ready) {
   var port = 443
   var wsport = 8080
@@ -76,10 +51,8 @@ function HTTPS (opts, ready) {
   })
   server.listen(port, host, ready)
 }
+
 function HTTP (opts, ready) {
-  var fs = require('fs')
-  var http = require('http')
-  var gzip = require('zlib').createGzip
 
   var index = '<html><head><title></title></head><body>'
   +'<script src="'+opts.bundle+'"></script>'
@@ -110,9 +83,9 @@ function HTTP (opts, ready) {
 }
 function WS (port, cb) {
   var socs = []
-  var ws = new wsServer({port:wsport})
+  var ws = new wsserver({port:wsport})
   ws.on('connection', function (soc) {
-    var wss = websocStream(soc)
+    var wss = wsstream(soc)
     var headers = soc.upgradeReq.headers
     if (headers.origin === 'https;//app.basilranch.com') {
       if (headers['sec-websocket-key']) var key = headers['sec-websocket-key']
@@ -130,8 +103,6 @@ function WS (port, cb) {
 }
 
 // REPL
-var clc = require('cli-color')
-var read = require('read')
 
 function REPL (msg) {
   var colors = [
@@ -166,5 +137,3 @@ function REPL (msg) {
 
   return s
 }
-
-module.exports = REPL
