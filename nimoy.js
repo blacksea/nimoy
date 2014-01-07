@@ -19,6 +19,43 @@ if (argv) { // allow commandline args to override config
   }
 }
 
+// WILDS MAPPER
+var asyncMap = require('slide').asyncMap
+var through = require('through')
+var fs = require('fs')
+
+module.exports = function (path, ready) {
+  var MAP = {}
+
+  function readPKG (fileName, next) {
+    var pkgFile = fs.readFileSync(path+fileName+'/package.json')
+    var pkg = JSON.parse(pkgFile)
+    if (pkg.brico) {
+      s.write(buf)
+      MAP[fileName] = pkg
+      next() 
+    } else {
+      next()
+    }
+  }
+
+  if (path[path.length-1] !== '/') path += '/'
+
+  fs.readdir(path, function moduleList(e, modules) {
+    asyncMap(modules, readPKG, function () {
+      ready(JSON.stringify(MAP,null,2))
+    })
+  })
+
+  var s = through(function write (chunk) {
+    self.emit('data', chunk)
+  }, function end () {
+    this.end()
+  },{autoDestroy:false})
+
+  return s
+}
+
 function fileServer (opts, up) {
 
   // how to handle subdomains?
@@ -77,37 +114,4 @@ function wsServer (opts)  {
       })
     }
   })
-}
-
-function REPL (msg) {
-  var clc = require('cli-color')
-  var read = require('read')
-
-  var colors = [{f:0,b:11},{f:0,b:14},{f:0,b:15}]
-  var clr = colors[Math.floor(Math.random() * ((colors.length-1) - 0 + 1) + 0)]
-
-  if (msg) console.log(clc.xterm(clr.b)(msg))
-
-  read({}, function handleInput (e,c,d) {
-    if (e) console.error(e)
-    if (!e) {
-      var args = c.match(' ')
-      if (args !== null) { 
-        c = c.split(' ')
-        s.write(c)
-        REPL()
-      } else {
-        s.write(c)
-        REPL()
-      }
-    }
-  })
-
-  var s = through(function write (d) {
-    this.emit('data',d) 
-  }, function end () {
-    this.emit('end')
-  })
-
-  return s
 }
