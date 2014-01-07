@@ -1,7 +1,5 @@
 // NIMOY 
 var argv = require('optimist').argv
-var clc = require('cli-color')
-var repl = require('./_repl')
 var fs = require('fs')
 
 var port 
@@ -133,7 +131,6 @@ function WS (port, cb) {
 
 // REPL
 var clc = require('cli-color')
-var through = require('through')
 var read = require('read')
 
 function REPL (msg) {
