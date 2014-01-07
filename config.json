@@ -6,6 +6,5 @@
   "host":"localhost",
   "dirWilds":"./_wilds",
   "dirStatic":"./_static",
-  "bundle":"boot.js",
-  "index":"index.html"
+  "bundle":"boot.js"
 }
