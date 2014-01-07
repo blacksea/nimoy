@@ -4,9 +4,7 @@ var asyncMap = require('slide').asyncMap
 var through = require('through')
 var fs = require('fs')
 
-module.exports = Map
-
-function Map (path, ready) {
+module.exports = function (path, ready) {
   var MAP = {}
 
   function readPKG (fileName, next) {

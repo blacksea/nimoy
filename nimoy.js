@@ -14,7 +14,7 @@ if (argv.port) port = argv.port
 if (argv.host) host = argv.host
 if (argv.wsport) wsport = argv.wsport
 
-var nimoy = { // change this thing
+var nimoy = {
   map: function (res) {
     var self = this
     var map = require('./_map')
