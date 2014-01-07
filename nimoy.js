@@ -39,6 +39,7 @@ function fileServer (opts, up) {
   var static = opts.dir_static
 
   var certs = {key: fs.readFileSync('key.pem'),cert: fs.readFileSync('cert.pem')}
+
   var server = https.createServer(certs, function HandleReqs (req, res) {
     if (req.headers.host === 'app.'+host) { // manage subdomains
       if (req.url === '/') {
