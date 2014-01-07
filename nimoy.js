@@ -19,6 +19,8 @@ function ready () {
   repl('nimoy v.0.0.1')
 }
 
+repl('nimoy v.0.0.1')
+
 var nimoy = {
   map: function (res) {
     var self = this
