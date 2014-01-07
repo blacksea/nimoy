@@ -23,13 +23,20 @@ if (argv.port) port = argv.port
 if (argv.host) host = argv.host
 if (argv.wsport) wsport = argv.wsport
 
-function HTTPS (opts, ready) {
+function fileServer (opts, up) {
   var port = 443
   var wsport = 8080
   var host = 'basilranch.com'
   if (argv.port) port = argv.port
   if (argv.wsport) wsport = argv.wsport
   if (argv.host) host = argv.host
+
+  var index = '<html><head><title></title></head><body>'
+  +'<script src="'+opts.bundle+'"></script>'
+  +'</body></html>'
+
+  if (opts.dir_static[opts.dir_static.length-1] !== '/') opts.dir_static += '/'
+  var static = opts.dir_static
 
   var certs = {key: fs.readFileSync('key.pem'),cert: fs.readFileSync('cert.pem')}
   var server = https.createServer(certs, function HandleReqs (req, res) {
@@ -52,36 +59,7 @@ function HTTPS (opts, ready) {
   server.listen(port, host, ready)
 }
 
-function HTTP (opts, ready) {
-
-  var index = '<html><head><title></title></head><body>'
-  +'<script src="'+opts.bundle+'"></script>'
-  +'</body></html>'
-
-  if (opts.dir_static[opts.dir_static.length-1] !== '/') opts.dir_static += '/'
-  var static = opts.dir_static
-
-  var server = http.createServer(function handleRequests (req, res) {
-    var index = '<html><head><title></title></head><body>'
-    +'<script src="'+opts.bundle+'"></script>'
-    +'</body></html>'
-
-    if (req.url === '/') {
-      res.end(index)
-      res.setHeader('Content-Type','text/html')
-    } else if (req.url !== '/') {
-      var file = fs.createReadStream(static+req.url.replace('/',''))
-      res.writeHead(200, {'content-encoding': 'gzip'})
-      file.pipe(gzip()).pipe(res)
-      file.on('error', function(e) {
-        console.error(e)
-        res.end('404')
-      })
-    }
-  })
-  server.listen(opts.port,opts.host,ready)
-}
-function WS (port, cb) {
+function wsServer (port, cb) {
   var socs = []
   var ws = new wsserver({port:wsport})
   ws.on('connection', function (soc) {
@@ -102,17 +80,13 @@ function WS (port, cb) {
   })
 }
 
-// REPL
-
 function REPL (msg) {
   var colors = [
     {f:0,b:11},
     {f:0,b:14},
     {f:0,b:15}
   ]
-
   var clr = colors[Math.floor(Math.random() * ((colors.length-1) - 0 + 1) + 0)]
-
   if (msg) console.log(clc.xterm(clr.b)(msg))
   read({}, function handleInput (e,c,d) {
     if (e) console.error(e)
@@ -128,12 +102,10 @@ function REPL (msg) {
       }
     }
   })
-
   var s = through(function write (d) {
     this.emit('data',d) 
   }, function end () {
     this.emit('end')
   })
-
   return s
 }
