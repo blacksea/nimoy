@@ -15,6 +15,11 @@ if (argv.port) port = argv.port
 if (argv.host) host = argv.host
 if (argv.wsport) wsport = argv.wsport
 
+function ready () {
+  // start repl
+  repl('nimoy v.0.0.1')
+}
+
 var nimoy = {
   map: function (res) {
     var self = this
