@@ -55,7 +55,7 @@ module.exports = function (path, ready) {
   return s
 }
 
-function fileServer (opts, up) {
+function startFileServer (opts, up) {
 
   // how to handle subdomains?
 
@@ -116,3 +116,9 @@ function wsServer (opts)  {
     }
   })
 }
+
+function boot () {
+
+}
+
+startFileServer(config, boot)
