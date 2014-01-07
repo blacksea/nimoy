@@ -14,8 +14,7 @@ if (argv.port) port = argv.port
 if (argv.host) host = argv.host
 if (argv.wsport) wsport = argv.wsport
 
-var nimoy = { // change this thing ... 
-
+var nimoy = { // change this thing
   map: function (res) {
     var self = this
     var map = require('./_map')
@@ -44,7 +43,6 @@ var nimoy = { // change this thing ...
     })
   }
 }
-
 function HTTPS (opts, ready) {
   var port = 443
   var wsport = 8080
@@ -73,7 +71,6 @@ function HTTPS (opts, ready) {
   })
   server.listen(port, host, ready)
 }
-
 function HTTP (opts, ready) {
   var fs = require('fs')
   var http = require('http')
@@ -106,7 +103,6 @@ function HTTP (opts, ready) {
   })
   server.listen(opts.port,opts.host,ready)
 }
-
 function WS (port, cb) {
   var socs = []
   var ws = new wsServer({port:wsport})
