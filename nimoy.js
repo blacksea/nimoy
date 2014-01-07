@@ -20,10 +20,8 @@ if (argv) { // allow commandline args to override config
   }
 }
 
-// WILDS MAPPER
-var asyncMap = require('slide').asyncMap
-
-module.exports = function (path, ready) {
+function makeBricoMap (wilds) {
+  var asyncMap = require('slide').asyncMap
   var MAP = {}
 
   function readPKG (fileName, next) {
