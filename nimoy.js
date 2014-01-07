@@ -12,7 +12,7 @@ var fs = require('fs')
 
 // handle config
 var config = JSON.parse(fs.readFileSync('./config.json'))
-if (!config) { config = {port : 8000,host : localhost,encrypt : false,dirStatic : './_static/',dirWilds : './_wilds/'} } 
+if (!config) { config = {port:8000,host:localhost,encrypt:false,dirStatic:'./_static/',dirWilds:'./_wilds/'} } 
 
 if (argv) { // allow commandline args to override config
   for (arg in argv) {
@@ -53,7 +53,7 @@ function makeBricoMap (wilds) {
   return s
 }
 
-function startFileServer (opts, up) {
+function startFileServer (opts, boot) {
 
   // how to handle subdomains?
 
@@ -92,7 +92,7 @@ function startFileServer (opts, up) {
       file.pipe(gzip()).pipe(res)
     }
   }
-  server.listen(opts.port, opts.host, up)
+  server.listen(opts.port, opts.host, boot)
 }
 
 function wsServer (opts)  {
