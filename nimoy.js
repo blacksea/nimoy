@@ -20,37 +20,21 @@ if (argv) { // allow commandline args to override config
   }
 }
 
-function makeBricoMap (wilds) {
+function makeBricoMap (wilds, fin) {
   var asyncMap = require('slide').asyncMap
   var MAP = {}
 
-  function readPKG (fileName, next) {
-    var pkgFile = fs.readFileSync(path+fileName+'/package.json')
-    var pkg = JSON.parse(pkgFile)
-    if (pkg.brico) {
-      s.write(buf)
-      MAP[fileName] = pkg
+  function readPkg (modDir, next) {
+    var pkg = JSON.parse(fs.readFileSync(wilds+modDir+'/package.json'))
+    if (pkg.brico) { 
+      MAP[pkg.name] = pkg 
       next() 
-    } else {
-      next()
-    }
+    } else next()
   }
 
-  if (path[path.length-1] !== '/') path += '/'
-
-  fs.readdir(path, function moduleList(e, modules) {
-    asyncMap(modules, readPKG, function () {
-      ready(JSON.stringify(MAP,null,2))
-    })
+  fs.readdir(wilds, function moduleList  (e, modules) {
+    if (!e) asyncMap(modules, readPkg, fin)
   })
-
-  var s = through(function write (chunk) {
-    self.emit('data', chunk)
-  }, function end () {
-    this.end()
-  },{autoDestroy:false})
-
-  return s
 }
 
 function startFileServer (opts, boot) {
@@ -113,6 +97,11 @@ function wsServer (opts)  {
       })
     }
   })
+}
+
+function constructBrico () {
+  // assemble brico
+
 }
 
 function boot () {
