@@ -2,6 +2,7 @@
 var argv = require('optimist').argv
 var clc = require('cli-color')
 var pw = require('credential')
+var repl = require('./_repl')
 var fs = require('fs')
 
 var port 
