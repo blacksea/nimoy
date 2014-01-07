@@ -7,6 +7,7 @@ var gzip = require('zlib').createGzip
 var wsserver = require('ws').Server
 var wsstream = require('websocket-stream')
 var argv = require('optimist').argv
+var through = require('through')
 var fs = require('fs')
 
 // handle config
@@ -21,8 +22,6 @@ if (argv) { // allow commandline args to override config
 
 // WILDS MAPPER
 var asyncMap = require('slide').asyncMap
-var through = require('through')
-var fs = require('fs')
 
 module.exports = function (path, ready) {
   var MAP = {}
@@ -63,9 +62,11 @@ function fileServer (opts, up) {
   var server
   var static = opts.dir_static
 
-  var indexHtml = '<html><head><title></title></head><body>' 
-  +'<script src="'+opts.bundle+'"></script>'
-  +'</body></html>'
+  var indexHtml = '<html><head></head><body><script src="/'+ config.bundle +'"></script></body></html>'
+
+  if (config.bundle) {
+    config.bundle = fs.readFileSync
+  }
 
   if (config.dirStatic[config.dirStatic.length-1] !== '/') config.dirStatic += '/'
   if (config.dirWilds[config.dirWilds.length-1] !== '/') config.dirWilds += '/'
