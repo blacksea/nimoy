@@ -1,5 +1,4 @@
 // WILDS MAPPER
-
 var asyncMap = require('slide').asyncMap
 var through = require('through')
 var fs = require('fs')

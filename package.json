@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "level": ">=0.15.0",
+    "bindshim": ">=0.0.1",
     "optimist":">=0.6.0",
     "slide": ">=1.1.4",
     "tape": ">=2.3.2",
