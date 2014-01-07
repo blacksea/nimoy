@@ -20,41 +20,42 @@ if (argv) { // allow commandline args to override config
 }
 
 function fileServer (opts, up) {
+
+  // how to handle subdomains?
+
   var server
   var static = opts.dir_static
 
-  var index = '<html><head><title></title></head><body>'
+  var indexHtml = '<html><head><title></title></head><body>' 
   +'<script src="'+opts.bundle+'"></script>'
   +'</body></html>'
 
-  if (opts.dir_static[opts.dir_static.length-1] !== '/') opts.dir_static += '/'
+  if (config.dirStatic[config.dirStatic.length-1] !== '/') config.dirStatic += '/'
+  if (config.dirWilds[config.dirWilds.length-1] !== '/') config.dirWilds += '/'
 
-  if (opts.encrypt === true) {
-    var certs = {key: fs.readFileSync('key.pem'),cert: fs.readFileSync('cert.pem')}
+  if (config.encrypt === true) {
+    var certs = {key: fs.readFileSync(config.certs.key),cert: fs.readFileSync(config.certs.cert)}
     server = https.createServer(certs, HandleReqs)
   } else {
     server = http.createServer(HandleReqs)
   }
 
   function HandleReqs (req, res) {
-    // option for subdomains?
-    if (req.headers.host === 'app.'+host) { // manage subdomains
-      if (req.url === '/') {
-        res.setHeader('Content-Type', 'text/html')
-        res.end(HTML)
-      } else if (req.url !== '/') {
-        var file = fs.createReadStream('./static/'+req.url.replace('/',''))
-        file.on('error', function(e) {
-          console.error(e)
-          res.statusCode = 404
-          res.end()
-        })
-        res.setHeader('Content-Encoding', 'gzip')
-        file.pipe(zlib.createGzip()).pipe(res)
-      }
+    req.url.substr(1,1) // remove backslash
+    if (req.url === '') {
+      res.setHeader('Content-Type', 'text/html')
+      res.end(indexHtml)
+    } else if (req.url !== '') {
+      var file = fs.createReadStream(config.dirStatic + req.url)
+      file.on('error', function(e) {
+        console.error(e)
+        res.statusCode = 404
+        res.end('error 404')
+      })
+      res.setHeader('Content-Encoding', 'gzip')
+      file.pipe(gzip()).pipe(res)
     }
   }
-
   server.listen(opts.port, opts.host, up)
 }
 
