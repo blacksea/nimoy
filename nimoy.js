@@ -53,9 +53,7 @@ function startFileServer (opts, boot) {
   if (config.encrypt === true) {
     var certs = {key: fs.readFileSync(config.certs.key),cert: fs.readFileSync(config.certs.cert)}
     server = https.createServer(certs, HandleReqs)
-  } else {
-    server = http.createServer(HandleReqs)
-  }
+  } else server = http.createServer(HandleReqs)
 
   function HandleReqs (req, res) {
     req.url.substr(1,1) // remove backslash
@@ -98,11 +96,9 @@ function wsServer (opts)  {
 
 function constructBrico () {
   // assemble brico
-
+  
 }
 
 function boot () {
 
 }
-
-startFileServer(config, boot)
