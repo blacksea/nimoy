@@ -40,15 +40,12 @@ function makeBricoMap (wilds, fin) {
 function startFileServer (opts, boot) {
 
   // how to handle subdomains?
-
   var server
   var static = opts.dir_static
 
   var indexHtml = '<html><head></head><body><script src="/'+ config.bundle +'"></script></body></html>'
 
-  if (config.bundle) {
-    config.bundle = fs.readFileSync
-  }
+  if (config.bundle) var bundleFile = config.bundle; config.bundle = fs.readFileSync(config.dirStatic + config.bundle);
 
   if (config.dirStatic[config.dirStatic.length-1] !== '/') config.dirStatic += '/'
   if (config.dirWilds[config.dirWilds.length-1] !== '/') config.dirWilds += '/'
