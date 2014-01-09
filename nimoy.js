@@ -81,12 +81,12 @@ function wsServer (opts)  {
   if (config.ssl === true) {
     var cfg = {
       ssl:true,
-      port: wsPort,
+      port: config.wsport,
       ssl_key:sslKey,
       ssl_cert:sslCert
     }
   } else {
-    var cfg = {port:wsport}
+    var cfg = {port:config.wsport}
   }
   var ws = new wsserver(cfg)
   ws.on('connection', function (soc) {
