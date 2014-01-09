@@ -14,6 +14,9 @@ var fs = require('fs')
 var config = JSON.parse(fs.readFileSync('./config.json'))
 if (!config) { config = {port:8000,host:localhost,encrypt:false,dirStatic:'./_static/',dirWilds:'./_wilds/'} } 
 
+if (config.certs.key) var sslKey = fs.readFileSync(config.certs.key)
+if (config.certs.cert) var sslCert = fs.readFileSync(config.certs.cert)
+
 if (argv) { // allow commandline args to override config
   for (arg in argv) {
     if (config[arg]) config[arg] = argv[arg]
@@ -38,7 +41,6 @@ function makeBricoMap (wilds, fin) {
 }
 
 function startFileServer (opts, boot) {
-
   // how to handle subdomains?
   var server
   var static = opts.dir_static
@@ -50,13 +52,13 @@ function startFileServer (opts, boot) {
   if (config.dirStatic[config.dirStatic.length-1] !== '/') config.dirStatic += '/'
   if (config.dirWilds[config.dirWilds.length-1] !== '/') config.dirWilds += '/'
 
-  if (config.encrypt === true) {
-    var certs = {key: fs.readFileSync(config.certs.key),cert: fs.readFileSync(config.certs.cert)}
+  if (config.ssl === true) {
+    var certs = {key: sslKey, cert: sslCert}
     server = https.createServer(certs, HandleReqs)
   } else server = http.createServer(HandleReqs)
 
   function HandleReqs (req, res) {
-    req.url.substr(1,1) // remove backslash
+    req.url.substr(1,1)
     if (req.url === '') {
       res.setHeader('Content-Type', 'text/html')
       res.end(indexHtml)
@@ -76,7 +78,17 @@ function startFileServer (opts, boot) {
 
 function wsServer (opts)  {
   var socs = []
-  var ws = new wsserver({port:wsport})
+  if (config.ssl === true) {
+    var cfg = {
+      ssl:true,
+      port: wsPort,
+      ssl_key:sslKey,
+      ssl_cert:sslCert
+    }
+  } else {
+    var cfg = {port:wsport}
+  }
+  var ws = new wsserver(cfg)
   ws.on('connection', function (soc) {
     var wss = wsstream(soc)
     var headers = soc.upgradeReq.headers
