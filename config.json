@@ -1,12 +1,12 @@
 {
   "portHttp":80,
   "portHttps":443,
+  "ssl":false,
   "certs": {
     "key" : "./key.pem",
     "cert" : "./cert.pem"
   },
   "portWs":8080,
-  "encrypt":false,
   "host":"localhost",
   "dirWilds":"./_wilds",
   "dirStatic":"./_static",

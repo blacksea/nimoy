@@ -43,6 +43,7 @@ function makeBricoMap (wilds, fin) {
 function startFileServer (opts, boot) {
   // how to handle subdomains?
   var server
+  var port
   var static = opts.dir_static
 
   var indexHtml = '<html><head></head><body><script src="/'+ config.bundle +'"></script></body></html>'
@@ -53,9 +54,13 @@ function startFileServer (opts, boot) {
   if (config.dirWilds[config.dirWilds.length-1] !== '/') config.dirWilds += '/'
 
   if (config.ssl === true) {
+    port = config.portHttp
     var certs = {key: sslKey, cert: sslCert}
     server = https.createServer(certs, HandleReqs)
-  } else server = http.createServer(HandleReqs)
+  } else {
+    port = config.portHttps
+    server = http.createServer(HandleReqs)
+  }
 
   function HandleReqs (req, res) {
     req.url.substr(1,1)
@@ -73,7 +78,7 @@ function startFileServer (opts, boot) {
       file.pipe(gzip()).pipe(res)
     }
   }
-  server.listen(opts.port, opts.host, boot)
+  server.listen(port, config.host, boot)
 }
 
 function wsServer (opts)  {
@@ -81,12 +86,12 @@ function wsServer (opts)  {
   if (config.ssl === true) {
     var cfg = {
       ssl:true,
-      port: config.wsport,
+      port: config.portWs,
       ssl_key:sslKey,
       ssl_cert:sslCert
     }
   } else {
-    var cfg = {port:config.wsport}
+    var cfg = {port:config.portWs}
   }
   var ws = new wsserver(cfg)
   ws.on('connection', function (soc) {
