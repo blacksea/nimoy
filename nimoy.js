@@ -1,6 +1,5 @@
 // NIMOY 
 
-// deps
 var http = require('http')
 var https = require('https')
 var gzip = require('zlib').createGzip
@@ -10,13 +9,13 @@ var argv = require('optimist').argv
 var through = require('through')
 var fs = require('fs')
 
-// handle config
+// CONFIGS
 var config = JSON.parse(fs.readFileSync('./config.json'))
 if (!config) { config = {port:8000,host:localhost,encrypt:false,dirStatic:'./_static/',dirWilds:'./_wilds/'} } 
-
 if (config.certs.key) var sslKey = fs.readFileSync(config.certs.key)
 if (config.certs.cert) var sslCert = fs.readFileSync(config.certs.cert)
 
+// BOOT FLAGS
 if (argv) { // allow commandline args to override config
   for (arg in argv) {
     if (config[arg]) config[arg] = argv[arg]
@@ -41,7 +40,6 @@ function makeBricoMap (wilds, fin) {
 }
 
 function startFileServer (opts, boot) {
-  // how to handle subdomains?
   var server
   var port
   var static = opts.dir_static
