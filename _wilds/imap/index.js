@@ -1,10 +1,106 @@
 // BRICO
+// 
+var nodemailer = require('nodemailer')
+var inbox = require('inbox')
+var mailparser = require('mailparser').MailParser
+var asyncMap = require('slide').asyncMap
+
+// hack togethert a simpler imap & smtp lib
+
+var user
+var pass
+var host
+
+var transport = nodemailer.createTransport("SMTP", {
+    host: host,
+    secureConnection: true, // use SSL
+    port: 465, // port for secure SMTP
+    auth: {
+        user:user,
+        pass:pass
+    }
+})
+
+var msg = {
+  from:'',
+  to: '',
+  subject:'',
+  text:''
+}
+
+transport.sendMail(msg, function (e,res) {
+  if (e) console.error(e)
+  if (!e) console.log(res)
+})
+
+
+var client = inbox.createConnection(false, "imap.gmail.com", {
+  secureConnection: true,
+  auth:{
+    user: user,
+    pass: pass
+  }
+})
+client.connect()
+
+client.on('connect', function () {
+  console.log('connected')
+  client.openMailbox('INBOX', {readOnly:true}, function (e, info) {
+    if (e) console.error(e)
+
+    var count = info.count
+    var done = false
+
+    start = 3000
+    end = 4674
+    done = true
+
+    function getBundle () {
+      client.listMessages(start, end, function handlemssgs (e ,mssgs) {
+        if (e) console.error (e)
+        asyncMap(mssgs, parse, function () {
+          if (end == count ) {
+            console.log('done bundle')
+            done = true
+          }
+          if (done == false) {
+            start += bundleSize
+            end += bundleSize
+            if (end > count) end = count
+            console.log('getting next bundle')
+            getBundle()
+          }
+          if (done == true) console.log('all messages saved!')
+        })
+      })
+    }
+
+    function parse (env, next) {
+      var mp = new mailparser()
+      client.createMessageStream(env.UID).pipe(mp)
+      mp.on('end', function rtrnMssgData (msg) {
+        msg.date = new Date(env.date)
+        msg.id = env.UID
+        msg = format(msg)
+        var key = user+':'+msg.from+':'+msg.date+':'+msg.id
+        var val = JSON.stringify(msg)
+
+        // emit msg
+
+      })
+    }
+
+    getBundle()
+  })
+})
 
 function format (d) {
+  if (!d.to) d.to = 'null'
+  if (!d.from) d.from = 'null'
   var m = {
     id: d.id,
-    from:d.from[0].address, 
-    fromName:d.from[0].name, 
+    from:d.from[0].address,
+    fromName:d.from[0].name,
     date:d.date.getDate()+'/'+d.date.getMonth()+'/'+d.date.getFullYear(),
     time:d.date.getHours()+':'+d.date.getMinutes(),
     to:d.to[0].address,
@@ -14,71 +110,3 @@ function format (d) {
   }
   return m
 }
-
-var mailparser = require('mailparser').MailParser
-var inbox = require('inbox')
-var async = require('slide').asyncMap
-var ev = require('events')
-var mp = new mailparser()
-
-var imap = new ev.EventEmitter()
-var client = null
-var FORMAT = 'filtered'
-var UID = null
-
-imap.connect = function (opts) {
-  if (opts.format) FORMAT = opts.format
-
-  client = inbox.createConnection(false, "imap.gmail.com", {
-    secureConnection: true,
-    auth:{
-      user: opts.user,
-      pass: opts.pass
-    }
-  })
-
-  client.connect()
-
-  client.on('connect', function(){
-    imap.emit('connection', null) // notify!
-    var uid = null
-    client.openMailbox('INBOX',{readOnly:true},function(error, info){
-      if(error) throw error 
-    })
-    client.on('new', function(env) {
-      var mp = new mailparser()
-      uid = env.UID
-      client.createMessageStream(env.UID).pipe(mp)
-      mp.on('end', function handleMsg (msg) {
-        msg.date = new Date(env.date)
-        msg.id = env.UID
-        if (FORMAT==='filtered') msg = format(msg)
-        imap.emit('msg', msg)
-      })
-    })
-  })
-}   
-
-imap.getAll = function (cb) {
-  client.openMailbox('INBOX', {readOnly:true}, function (e,info) {
-    if (e) cb(e)
-    client.listMessages(0,0,function handleMssgs (e,mssgs) {
-      if (e) cb(e)
-      async(mssgs, function getMssg (env,callback) {
-        mp = new mailparser()
-        client.createMessageStream(env.UID).pipe(mp)
-        mp.on('end', function rtrnMssgData (msg) {
-          msg.date = new Date(env.date)
-          msg.id = env.UID
-          if (FORMAT==='filtered') msg = format(msg)
-          imap.emit('msg', msg)
-          callback()
-        })
-      }, function () {
-        cb(null)
-      })
-    })
-  })
-}
-
-module.exports = imap
