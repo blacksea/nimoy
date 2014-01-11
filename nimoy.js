@@ -22,23 +22,6 @@ if (argv) { // allow commandline args to override config
   }
 }
 
-function makeBricoMap (wilds, fin) {
-  var asyncMap = require('slide').asyncMap
-  var MAP = {}
-
-  function readPkg (modDir, next) {
-    var pkg = JSON.parse(fs.readFileSync(wilds+modDir+'/package.json'))
-    if (pkg.brico) { 
-      MAP[pkg.name] = pkg 
-      next() 
-    } else next()
-  }
-
-  fs.readdir(wilds, function moduleList  (e, modules) {
-    if (!e) asyncMap(modules, readPkg, fin)
-  })
-}
-
 function startFileServer (opts, boot) {
   var server
   var port
