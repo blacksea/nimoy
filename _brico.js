@@ -1,9 +1,10 @@
 // BRICO
-
 var level = require('level')
-var through = require('through')
+var db = level('./data') // username?
 
+// this should only run server side
 function mapWilds (wilds, fin) {
+  var fs = require('fs')
   var asyncMap = require('slide').asyncMap
   var MAP = {}
 
@@ -20,17 +21,44 @@ function mapWilds (wilds, fin) {
   })
 }
 
-var s = through(function write (chunk) {
+module.exports = function bricoleur (opts) {
+  var self = this
 
-}, function end () {
-  this.end()
-})
+  this.find = function (string, cb) { // search map for module
 
-var bricoleur = function (opts) {
+  }
 
+  this.put = function (mod, cb) { // put module
+    // put 'module' opt=string opt=string
+
+
+  }
+
+  this.rm = function (mod, cb) { // rm module
+    // rm module
+
+  }
+
+  this.conn = function (mods, cb) { // connect modules
+    // conn module module module
+
+  }
+
+  this.disConn = function (mods, cb) { // disconnect modules
+    // disconn module /single /chain
+
+  }
+
+  this.status = function (cb) {
+    // view env & conns
+
+  }
+  // map / survey / library -- transforms?
+  // search
+  // put / rm
+  // conn / disconn
+  // env / status
+  // events
+  
+  // object/transport/stream protocol
 }
-
-module.exports = bricoleur
-
-// var fern = require('fern')
-// bricoleur = new fern({key:'api',tree:brico})

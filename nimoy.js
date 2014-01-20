@@ -9,14 +9,12 @@ var argv = require('optimist').argv
 var through = require('through')
 var fs = require('fs')
 
-// CONFIGS
 var config = JSON.parse(fs.readFileSync('./config.json'))
 if (!config) { config = {port:8000,host:localhost,encrypt:false,dirStatic:'./_static/',dirWilds:'./_wilds/'} } 
 if (config.certs.key) var sslKey = fs.readFileSync(config.certs.key)
 if (config.certs.cert) var sslCert = fs.readFileSync(config.certs.cert)
 
-// BOOT FLAGS
-if (argv) { // allow commandline args to override config
+if (argv) { // BOOT FLAGS: allow commandline args to override config
   for (arg in argv) {
     if (config[arg]) config[arg] = argv[arg]
   }
@@ -42,7 +40,6 @@ function startFileServer (opts, boot) {
     port = config.portHttps
     server = http.createServer(HandleReqs)
   }
-
   function HandleReqs (req, res) {
     req.url.substr(1,1)
     if (req.url === '') {
@@ -94,9 +91,13 @@ function wsServer (opts)  {
 
 function constructBrico () {
   // assemble brico
-  
 }
 
 function boot () {
-
 }
+
+// new brico
+// list bricos
+// load/unload brico
+// start/stop server
+// secure mode
