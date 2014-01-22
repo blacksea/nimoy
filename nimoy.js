@@ -8,15 +8,15 @@ var argv = require('optimist').argv
 var through = require('through')
 var fs = require('fs')
 
+// use multilevel
+var level = require('multilevel')
+
 var defaultConfig = {
   port:8000,host:localhost,
   encrypt:false,
   dir_static:'./_static/',
   dir_wilds:'./_wilds/'
 }
-
-// use multilevel
-var level = require('multilevel')
 
 var config = JSON.parse(fs.readFileSync('./config.json'))
 if (!config) config = defaultConfig
@@ -26,8 +26,7 @@ if (argv) { // BOOT FLAGS: allow commandline args to override config
   }
 }
 
-
-function mapWilds (wilds, fin) {
+function mapWilds (wilds, fin) { // create a map and cache in database
   var MAP = {}
   var fs = require('fs')
   var asyncMap = require('slide').asyncMap
@@ -94,25 +93,17 @@ function netStart (opts, ready) {
 }
 
 function constructBrico () {
-  // new brico
-  // list bricos
-  // load/unload brico
-  // start/stop server
-  // secure mode
-  // assemble brico
 }
+
+// new brico
+// list bricos
+// load/unload brico
+// start/stop server
+// secure mode
+// assemble brico
 
 // a simple function to set map
 
 // brico replicates to client nodes --- client node can have different access priveleges
 // dual bricos--symbiotic--one on client --- one on server -- share same abilities 
 // span/bridge from client to server 
-
-
-
-
-
-
-
-
-

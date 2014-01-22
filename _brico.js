@@ -1,6 +1,6 @@
 // BRICO
 
-// db connection -- shared protocl / client / server
+// db is a multilevel client stream
 
 // UNIVERSAL
 var data // level rpc?!?
@@ -38,4 +38,8 @@ module.exports = function bricoleur (opts) {
   // env / status
   // events
   // object/transport/stream protocol
+}
+
+module.exports.db = function () { // plug into multilevel
+
 }
