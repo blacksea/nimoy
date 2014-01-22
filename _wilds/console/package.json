@@ -1,9 +1,0 @@
-{
-  "brico": {
-    "id":"console",
-    "process":["browser"],
-    "desc":"cli",
-    "deps":["console.html","console.styl"]
-  }
-}
-

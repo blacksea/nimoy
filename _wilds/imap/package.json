@@ -1,7 +1,0 @@
-{
-  "brico": {
-    "id":"imap",
-    "scope":["server"],
-    "desc":"gmail interface"
-  }
-}
