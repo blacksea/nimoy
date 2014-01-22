@@ -7,7 +7,6 @@ function mapWilds (wilds, fin) {
   var fs = require('fs')
   var asyncMap = require('slide').asyncMap
   var MAP = {}
-
   function readPkg (modDir, next) {
     var pkg = JSON.parse(fs.readFileSync(wilds+modDir+'/package.json'))
     if (pkg.brico) { 
@@ -15,7 +14,6 @@ function mapWilds (wilds, fin) {
       next() 
     } else next()
   }
-
   fs.readdir(wilds, function moduleList  (e, modules) {
     if (!e) asyncMap(modules, readPkg, fin)
   })
@@ -30,7 +28,6 @@ module.exports = function bricoleur (opts) {
 
   this.put = function (mod, cb) { // put module
     // put 'module' opt=string opt=string
-
 
   }
 
@@ -51,8 +48,8 @@ module.exports = function bricoleur (opts) {
 
   this.status = function (cb) {
     // view env & conns
-
   }
+
   // map / survey / library -- transforms?
   // search
   // put / rm

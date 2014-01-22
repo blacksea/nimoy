@@ -1,5 +1,4 @@
 // NIMOY 
-
 var http = require('http')
 var https = require('https')
 var gzip = require('zlib').createGzip
@@ -9,36 +8,31 @@ var argv = require('optimist').argv
 var through = require('through')
 var fs = require('fs')
 
-var config = JSON.parse(fs.readFileSync('./config.json'))
-if (!config) { config = {port:8000,host:localhost,encrypt:false,dirStatic:'./_static/',dirWilds:'./_wilds/'} } 
-if (config.certs.key) var sslKey = fs.readFileSync(config.certs.key)
-if (config.certs.cert) var sslCert = fs.readFileSync(config.certs.cert)
+var defaultConfig = {
+  port:8000,host:localhost,
+  encrypt:false,
+  dir_static:'./_static/',
+  dir_wilds:'./_wilds/'
+}
 
+var config = JSON.parse(fs.readFileSync('./config.json'))
+if (!config) config = defaultConfig
 if (argv) { // BOOT FLAGS: allow commandline args to override config
   for (arg in argv) {
     if (config[arg]) config[arg] = argv[arg]
   }
 }
-
-function startFileServer (opts, boot) {
+function netStart (opts, ready) {
   var server
-  var port
   var static = opts.dir_static
-
   var indexHtml = '<html><head></head><body><script src="/'+ config.bundle +'"></script></body></html>'
-
-  if (config.bundle) var bundleFile = config.bundle; config.bundle = fs.readFileSync(config.dirStatic + config.bundle);
-
-  if (config.dirStatic[config.dirStatic.length-1] !== '/') config.dirStatic += '/'
-  if (config.dirWilds[config.dirWilds.length-1] !== '/') config.dirWilds += '/'
-
-  if (config.ssl === true) {
-    port = config.portHttp
-    var certs = {key: sslKey, cert: sslCert}
-    server = https.createServer(certs, HandleReqs)
-  } else {
-    port = config.portHttps
-    server = http.createServer(HandleReqs)
+  if (!config.crypto) http.createServer(HandleReqs)
+  if (config.crypto) {
+    if (!config.crypo.port) config.crypto.port = 443
+    config.port = config.crypto.port
+    var key = fs.readFileSync(config.crypto.key)
+    var cert = fs.readFileSync(config.crypto.cert)
+    server = https.createServer({key:key,cert:cert}, HandleReqs)
   }
   function HandleReqs (req, res) {
     req.url.substr(1,1)
@@ -46,7 +40,8 @@ function startFileServer (opts, boot) {
       res.setHeader('Content-Type', 'text/html')
       res.end(indexHtml)
     } else if (req.url !== '') {
-      var file = fs.createReadStream(config.dirStatic + req.url)
+      // pipe file
+      var file = fs.createReadStream(config.dir_static + req.url)
       file.on('error', function(e) {
         console.error(e)
         res.statusCode = 404
@@ -55,23 +50,11 @@ function startFileServer (opts, boot) {
       res.setHeader('Content-Encoding', 'gzip')
       file.pipe(gzip()).pipe(res)
     }
+    // pass off requests -- somekind of dynamic thing
   }
-  server.listen(port, config.host, boot)
-}
-
-function wsServer (opts)  {
+  server.listen(config.port, config.host, ready)
   var socs = []
-  if (config.ssl === true) {
-    var cfg = {
-      ssl:true,
-      port: config.portWs,
-      ssl_key:sslKey,
-      ssl_cert:sslCert
-    }
-  } else {
-    var cfg = {port:config.portWs}
-  }
-  var ws = new wsserver(cfg)
+  var ws = new wsserver({server:server})
   ws.on('connection', function (soc) {
     var wss = wsstream(soc)
     var headers = soc.upgradeReq.headers
@@ -88,16 +71,12 @@ function wsServer (opts)  {
     }
   })
 }
-
 function constructBrico () {
+  // new brico
+  // list bricos
+  // load/unload brico
+  // start/stop server
+  // secure mode
   // assemble brico
 }
 
-function boot () {
-}
-
-// new brico
-// list bricos
-// load/unload brico
-// start/stop server
-// secure mode
