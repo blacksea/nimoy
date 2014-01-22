@@ -13,8 +13,11 @@ var brico = require('./_brico')
 
 // use multilevel
 var level = require('level')
+var liveStream = require('level-live-stream')
 var ml = require('multilevel')
-var db = level('./data')
+var db = level('./data') // db should use brico user name
+var ls = liveStream(db)
+liveStream.install(db)
 
 var defaultConfig = {
   port:8000,
