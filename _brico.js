@@ -1,23 +1,6 @@
 // BRICO
 
-// SERVER SIDE CODE 
-var level = require('level')
-
-function mapWilds (wilds, fin) {
-  var MAP = {}
-  var fs = require('fs')
-  var asyncMap = require('slide').asyncMap
-  function readPkg (modDir, next) {
-    var pkg = JSON.parse(fs.readFileSync(wilds+modDir+'/package.json'))
-    if (pkg.brico) { 
-      MAP[pkg.name] = pkg 
-      next() 
-    } else next()
-  }
-  fs.readdir(wilds, function moduleList  (e, modules) {
-    if (!e) asyncMap(modules, readPkg, fin)
-  })
-}
+// db connection -- shared protocl / client / server
 
 // UNIVERSAL
 module.exports = function bricoleur (opts) {

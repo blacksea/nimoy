@@ -22,6 +22,25 @@ if (argv) { // BOOT FLAGS: allow commandline args to override config
     if (config[arg]) config[arg] = argv[arg]
   }
 }
+
+var level = require('level')
+
+function mapWilds (wilds, fin) {
+  var MAP = {}
+  var fs = require('fs')
+  var asyncMap = require('slide').asyncMap
+  function readPkg (modDir, next) {
+    var pkg = JSON.parse(fs.readFileSync(wilds+modDir+'/package.json'))
+    if (pkg.brico) { 
+      MAP[pkg.name] = pkg 
+      next() 
+    } else next()
+  }
+  fs.readdir(wilds, function moduleList  (e, modules) {
+    if (!e) asyncMap(modules, readPkg, fin)
+  })
+}
+
 function netStart (opts, ready) {
   var server
   var static = opts.dir_static
@@ -71,6 +90,7 @@ function netStart (opts, ready) {
     }
   })
 }
+
 function constructBrico () {
   // new brico
   // list bricos
@@ -79,4 +99,18 @@ function constructBrico () {
   // secure mode
   // assemble brico
 }
+
+// a simple function to set map
+
+// brico replicates to client nodes --- client node can have different access priveleges
+// dual bricos--symbiotic--one on client --- one on server -- share same abilities 
+// span/bridge from client to server 
+
+
+
+
+
+
+
+
 
