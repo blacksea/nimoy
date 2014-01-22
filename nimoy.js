@@ -15,6 +15,9 @@ var defaultConfig = {
   dir_wilds:'./_wilds/'
 }
 
+// use multilevel
+var level = require('multilevel')
+
 var config = JSON.parse(fs.readFileSync('./config.json'))
 if (!config) config = defaultConfig
 if (argv) { // BOOT FLAGS: allow commandline args to override config
@@ -23,7 +26,6 @@ if (argv) { // BOOT FLAGS: allow commandline args to override config
   }
 }
 
-var level = require('level')
 
 function mapWilds (wilds, fin) {
   var MAP = {}

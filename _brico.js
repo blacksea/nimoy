@@ -3,6 +3,8 @@
 // db connection -- shared protocl / client / server
 
 // UNIVERSAL
+var data // level rpc?!?
+
 module.exports = function bricoleur (opts) {
   var db = level('./'+opts.name)
   var self = this
