@@ -12,7 +12,9 @@ var map = require('./_map')
 var brico = require('./_brico')
 
 // use multilevel
-var level = require('multilevel')
+var level = require('level')
+var ml = require('multilevel')
+var db = level('./data')
 
 var defaultConfig = {
   port:8000,
@@ -78,6 +80,7 @@ function netStart (opts, ready) {
           if (socs[i].ident == key) socs.splice(i,1); break;
         }
       })
+      wss.pipe(ml.server(db)).pipe(wss)
     }
   })
 }
