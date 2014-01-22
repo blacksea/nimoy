@@ -18,7 +18,7 @@
     "minify": "uglifyjs bundle.js bundle.min.js"
   },
   "dependencies": {
-    "level": ">=0.15.0",
+    "multilevel": ">=5.5.0",
     "bindshim": ">=0.0.1",
     "optimist":">=0.6.0",
     "slide": ">=1.1.4",
