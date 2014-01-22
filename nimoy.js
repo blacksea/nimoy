@@ -26,7 +26,7 @@ if (argv) { // BOOT FLAGS: allow commandline args to override config
   }
 }
 
-function mapWilds (wilds, fin) { // create a map and cache in database
+function mapWilds (wilds, fin) { // create a map and store in database : also set a bundle for browserify/watchify
   var MAP = {}
   var fs = require('fs')
   var asyncMap = require('slide').asyncMap
@@ -46,7 +46,9 @@ function netStart (opts, ready) {
   var server
   var static = opts.dir_static
   var indexHtml = '<html><head></head><body><script src="/'+ config.bundle +'"></script></body></html>'
+
   if (!config.crypto) http.createServer(HandleReqs)
+
   if (config.crypto) {
     if (!config.crypo.port) config.crypto.port = 443
     config.port = config.crypto.port
@@ -54,6 +56,7 @@ function netStart (opts, ready) {
     var cert = fs.readFileSync(config.crypto.cert)
     server = https.createServer({key:key,cert:cert}, HandleReqs)
   }
+
   function HandleReqs (req, res) {
     req.url.substr(1,1)
     if (req.url === '') {
@@ -70,9 +73,9 @@ function netStart (opts, ready) {
       res.setHeader('Content-Encoding', 'gzip')
       file.pipe(gzip()).pipe(res)
     }
-    // pass off requests -- somekind of dynamic thing
   }
   server.listen(config.port, config.host, ready)
+
   var socs = []
   var ws = new wsserver({server:server})
   ws.on('connection', function (soc) {
@@ -93,6 +96,7 @@ function netStart (opts, ready) {
 }
 
 function constructBrico () {
+
 }
 
 // new brico
@@ -102,8 +106,5 @@ function constructBrico () {
 // secure mode
 // assemble brico
 
-// a simple function to set map
-
 // brico replicates to client nodes --- client node can have different access priveleges
-// dual bricos--symbiotic--one on client --- one on server -- share same abilities 
 // span/bridge from client to server 
