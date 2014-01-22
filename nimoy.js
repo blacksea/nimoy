@@ -12,8 +12,8 @@ var fs = require('fs')
 var level = require('multilevel')
 
 var defaultConfig = {
-  port:8000,host:localhost,
-  encrypt:false,
+  port:8000,
+  host:localhost,
   dir_static:'./_static/',
   dir_wilds:'./_wilds/'
 }
