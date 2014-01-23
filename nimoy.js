@@ -31,8 +31,9 @@ if (argv) { // BOOT FLAGS: allow commandline args to override config
 }
 
 // NETWORK  
-function bootNet (ready) {
+function bootnet (ready) {
   var socs = []
+  var server
 
   var indexHtml = '<html><head></head><body><script src="/'+ config.bundle +'"></script></body></html>'
 
