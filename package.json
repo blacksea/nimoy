@@ -29,6 +29,6 @@
   },
   "devDependancies": {
     "tape": ">=2.3.2"
-  }
+  },
   "license": "MIT"
 }

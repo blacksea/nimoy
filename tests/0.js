@@ -1,7 +1,9 @@
 // test brico
 
 // run live with nimoy + cli
+var map = require('../_map')
+var test = require('tape')
 
-var brico = require('../_brico.js')
-
-brico = new brico()
+map('../_wilds/', function (m) {
+  console.log(m)
+})
