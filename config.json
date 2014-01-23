@@ -1,14 +1,10 @@
 {
-  "portHttp":80,
-  "portHttps":443,
-  "ssl":false,
-  "certs": {
+  "port":8000,
+  "host":"localhost",
+  "crypto": {
     "key" : "./key.pem",
     "cert" : "./cert.pem"
   },
-  "portWs":8080,
-  "host":"localhost",
-  "dirWilds":"./_wilds",
-  "dirStatic":"./_static",
-  "bundle":"boot.js"
+  "dir_wilds":"./_wilds",
+  "dir_static":"./_static"
 }

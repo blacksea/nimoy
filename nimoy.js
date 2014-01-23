@@ -46,11 +46,11 @@ function bootNet (ready) {
     config.port = config.crypto.port
     var key = fs.readFileSync(config.crypto.key)
     var cert = fs.readFileSync(config.crypto.cert)
-    server = https.createServer({key:key,cert:cert}, HandleReqs)
+    server = https.createServer({key:key,cert:cert}, handleRequests)
   }
-  if (!config.crypto) http.createServer(HandleReqs)
+  if (!config.crypto) http.createServer(handleRequests)
 
-  function HandleReqs (req, res) {
+  function handleRequests (req, res) {
     req.url.substr(1,1)
     if (req.url === '') {
       res.setHeader('Content-Type', 'text/html')
@@ -113,4 +113,3 @@ map(config.wilds, function (m) {
 //   })
 //   wss.pipe(ml.server(db)).pipe(wss)
 // }
-
