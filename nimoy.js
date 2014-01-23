@@ -9,11 +9,19 @@ var argv = require('optimist').argv
 var through = require('through')
 var fs = require('fs')
 
-var map = require('./_map')
+// brico
 var brico = require('./_brico')
 
-// CONFIG 
+// setup db
+var level = require('level')
+var ml = require('multilevel')
+var db = level('./data') // db should use brico user name
 
+// configure | load brico | start net
+// brico replicates to client nodes --- client node can have different access priveleges
+
+
+// CONFIG 
 var config = JSON.parse(fs.readFileSync('./config.json'))
 if (!config) console.error('please provide config.json')
 if (argv) { // BOOT FLAGS: allow commandline args to override config
@@ -23,15 +31,9 @@ if (argv) { // BOOT FLAGS: allow commandline args to override config
 }
 
 // NETWORK  
-
-var socs = []
-var wss
-
-function bootBrico (ready) {
-
-}
-
 function bootNet (ready) {
+  var socs = []
+
   var indexHtml = '<html><head></head><body><script src="/'+ config.bundle +'"></script></body></html>'
 
   if (config.crypto) {
@@ -61,48 +63,22 @@ function bootNet (ready) {
     }
   }
 
-  server.listen(config.port, config.host, function serverReady () {
+  function installWS () {
     var ws = new wsserver({server:server})
     ws.on('connection', function (soc) {
-      wss = wsserver(soc) 
+      var headers = soc.upgradeReq.headers
+      var origin = headers.origin // conn origin
+      if (headers['sec-websocket-key']) var key = headers['sec-websocket-key']
+      if (!headers['sec-websocket-key']) var key = headers['sec-websocket-key1'].replace(' ','_')
+      var wss = wsserver(soc) 
       wss.pipe(db.createRpcStream()).pipe(wss)// pipe into db
+      wss.on('close', function () {
+        for(var i = 0;i<socs.length;i++) {
+          if (socs[i].ident == key) socs.splice(i,1); break;
+        }
+      })
     })
-  })
+  }
+
+  server.listen(config.port, config.host, installWS)
 }
-
-// brico
-
-// setup db
-var level = require('level')
-var liveStream = require('level-live-stream')
-var ml = require('multilevel')
-var db = level('./data') // db should use brico user name
-var ls = liveStream(db)
-liveStream.install(db)
-
-// MAP  
-map(config.wilds, function (m) {
-
-})
-
-// list bricos
-// load/unload brico
-// start/stop server
-// secure mode
-// assemble brico
-// brico replicates to client nodes --- client node can have different access priveleges
-// span/bridge from client to server 
-
-// var headers = soc.upgradeReq.headers
-//   if (headers.origin === 'https;//app.basilranch.com') {
-//   if (headers['sec-websocket-key']) var key = headers['sec-websocket-key']
-//   if (!headers['sec-websocket-key']) var key = headers['sec-websocket-key1'].replace(' ','_')
-//   wss.ident = key //!this is probly not secure?
-//   socs.push(wss)
-//   wss.on('close', function () {
-//     for(var i = 0;i<socs.length;i++) {
-//       if (socs[i].ident == key) socs.splice(i,1); break;
-//     }
-//   })
-//   wss.pipe(ml.server(db)).pipe(wss)
-// }

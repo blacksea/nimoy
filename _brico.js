@@ -1,11 +1,16 @@
 // BRICO
 
+var env = process.title // node or browser
 var through = require('through')
+var livefeed = require('level-livefeed')
 
-module.exports = function bricoleur (opts) {
+
+
+module.exports = function bricoleur (db) {
   var self = this
 
-  // connect to multilevel
+  if (env === 'node') var map = require('./_map')(opts.dir)
+
   this.find = function (string, cb) { // search map for module
 
   }
@@ -29,6 +34,12 @@ module.exports = function bricoleur (opts) {
     // view env & conns
     
   }
+
+  var level = livefeed(db)
+
+  level.on('data', function (d) {
+    console.log(d)
+  })
   // map / survey / library -- transforms?
   // search
   // put / rm

@@ -9,10 +9,6 @@ if (window.location.protocol === 'http:') var ws = websocStream('ws://'+host)
 var ml = require('multilevel')
 var db = ml.client()
 ws.pipe(db.createRpcStream()).pipe(ws)
-// pass db into brico
-
-db.liveStream().on('data', function update (d) {
-  console.log(d)
-})
 
 var brico = require('./brico')
+var b = new brico(db)
