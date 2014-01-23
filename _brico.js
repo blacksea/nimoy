@@ -1,13 +1,11 @@
 // BRICO
 
-// db is a multilevel client stream
-
-// UNIVERSAL
-var data // level rpc?!?
+var through = require('through')
 
 module.exports = function bricoleur (opts) {
-  var db = level('./'+opts.name)
   var self = this
+
+  // connect to multilevel
   this.find = function (string, cb) { // search map for module
 
   }
@@ -38,8 +36,4 @@ module.exports = function bricoleur (opts) {
   // env / status
   // events
   // object/transport/stream protocol
-}
-
-module.exports.db = function () { // plug into multilevel
-
 }
