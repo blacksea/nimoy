@@ -14,15 +14,8 @@ var brico = require('./_brico')
 
 // CONFIG 
 
-var defaultConfig = {
-  port:8000,
-  host:localhost,
-  dir_static:'./_static/',
-  dir_wilds:'./_wilds/'
-}
-
 var config = JSON.parse(fs.readFileSync('./config.json'))
-if (!config) config = defaultConfig
+if (!config) console.error('please provide config.json')
 if (argv) { // BOOT FLAGS: allow commandline args to override config
   for (arg in argv) {
     if (config[arg]) config[arg] = argv[arg]
