@@ -20,7 +20,6 @@ var db = level('./data') // db should use brico user name
 // configure | load brico | start net
 // brico replicates to client nodes --- client node can have different access priveleges
 
-
 // CONFIG 
 var config = JSON.parse(fs.readFileSync('./config.json'))
 if (!config) console.error('please provide config.json')
@@ -51,8 +50,7 @@ function bootnet (ready) {
     if (req.url === '') {
       res.setHeader('Content-Type', 'text/html')
       res.end(indexHtml)
-    } else if (req.url !== '') {
-      // pipe file
+    } else if (req.url !== '') { // pipe file into req
       var file = fs.createReadStream(config.dir_static + req.url)
       file.on('error', function(e) {
         console.error(e)
@@ -72,7 +70,7 @@ function bootnet (ready) {
       if (headers['sec-websocket-key']) var key = headers['sec-websocket-key']
       if (!headers['sec-websocket-key']) var key = headers['sec-websocket-key1'].replace(' ','_')
       var wss = wsserver(soc) 
-      wss.pipe(db.createRpcStream()).pipe(wss)// pipe into db
+      wss.pipe(db.createRpcStream()).pipe(wss) // pipe into db
       wss.on('close', function () {
         for(var i = 0;i<socs.length;i++) {
           if (socs[i].ident == key) socs.splice(i,1); break;

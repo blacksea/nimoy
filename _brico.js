@@ -4,8 +4,6 @@ var env = process.title // node or browser
 var through = require('through')
 var livefeed = require('level-livefeed')
 
-
-
 module.exports = function bricoleur (db) {
   var self = this
 
