@@ -41,7 +41,7 @@ function bootnet (ready) {
   if (!config.crypto) http.createServer(handleRequests)
 
   function handleRequests (req, res) {
-    req.url.substr(1,1)
+    req.url.substr(0,1)
     if (req.url === '') {
       res.setHeader('Content-Type', 'text/html')
       res.end(indexHtml)
