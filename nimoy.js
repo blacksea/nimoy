@@ -8,6 +8,7 @@ var gzip = require('zlib').createGzip
 var wsserver = require('ws').Server
 var wsstream = require('websocket-stream')
 var argv = require('optimist').argv
+var browserify = require('browserify')
 var through = require('through')
 var fs = require('fs')
 
@@ -23,8 +24,11 @@ var level = require('level')
 var multilevel = require('multilevel')
 var db = level('./'+conf.host) // db saved under host name
 
+// RUN MAP / BUILD BUNDLE
+var map = require('./_map')
+
 // RUN BRICO  
-var brico = require('./_brico')(config, db, bootnet)
+var brico = require('./_brico')(db, bootnet)
 
 // NETWORK  
 function bootnet (ready) {
