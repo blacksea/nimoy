@@ -1,10 +1,6 @@
 {
   "port":8000,
   "host":"localhost",
-  "crypto": {
-    "key" : "./key.pem",
-    "cert" : "./cert.pem"
-  },
   "dir_wilds":"./_wilds",
   "dir_static":"./_static"
 }
