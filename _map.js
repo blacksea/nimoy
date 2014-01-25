@@ -1,5 +1,4 @@
-// MAP
-// looks for package.json with nimoy property
+// MAP : looks for package.json with nimoy property
 
 var fs = require('fs')
 var asyncMap = require('slide').asyncMap
@@ -19,7 +18,7 @@ module.exports = function Map (dir, cb) {
 
   function readPkg (modDir, next) {
     var jsn = fs.readFileSync(dir+modDir+'/package.json').toString()
-    if (jsn) {
+    if (jsn !== 'undefined' && jsn !== '' && jsn[0] === '{') { // do better json validation
       var pkg = JSON.parse(jsn)
       if (pkg.nimoy) { 
         MAP[pkg.name] = pkg 

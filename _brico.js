@@ -42,7 +42,6 @@ module.exports = function bricoleur (db, ready) {
     // view env & conns
     
   }
-
   // map / survey / library -- transforms?
   // search
   // put / rm

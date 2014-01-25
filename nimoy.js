@@ -18,6 +18,7 @@ if (!argv._[0]) var confJSON = './__conf.json'
 var conf = fs.readFileSync(confJSON)
 config = JSON.parse(conf)
 if (config.dir_static[config.dir_static.length-1] !=='/') config.dir_static += '/'
+if (config.dir_wilds[config.dir_wilds.length-1] !=='/') config.dir_wilds += '/'
 
 // SETUP DB
 var level = require('level')
@@ -25,7 +26,18 @@ var multilevel = require('multilevel')
 var db = level('./'+conf.host) // db saved under host name
 
 // RUN MAP / BUILD BUNDLE
-var map = require('./_map')
+var map = require('./_map')(config.dir_wilds, function (m) {
+  var b = browserify('./_client.js')
+  var bundle = fs.createWriteStream(config.dir_static+'bundle.js')
+  for (mod in m) {
+    // check if server/client scope
+    b.require(config.dir_wilds+mod, {expose:mod})
+  }
+  b.bundle().pipe(bundle)
+  bundle.on('end', function () {
+    console.log('bundle generated')
+  })
+})
 
 // RUN BRICO  
 var brico = require('./_brico')(db, bootnet)
@@ -45,9 +57,7 @@ function bootnet (ready) {
   if (!config.crypto) server = http.createServer(handleRequests)
 
   function handleRequests (req, res) {
-    console.log(req.url)
     var url = req.url.substr(1)
-    console.log(url)
     if (url === '') {
       res.setHeader('Content-Type', 'text/html')
       res.end(indexHtml)
