@@ -4,7 +4,7 @@ var env = process.title // node or browser
 var through = require('through')
 var livefeed = require('level-livefeed')
 
-module.exports = function bricoleur (db) {
+module.exports = function bricoleur (conf, db, ready) {
   var self = this
 
   if (env === 'node') var map = require('./_map')(opts.dir)

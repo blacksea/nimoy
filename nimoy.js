@@ -1,4 +1,6 @@
 // NIMOY 
+// configure | load brico | start net
+// brico replicates to client nodes --- client node can have different access priveleges
 
 var http = require('http')
 var https = require('https')
@@ -9,23 +11,19 @@ var argv = require('optimist').argv
 var through = require('through')
 var fs = require('fs')
 
-// brico
-var brico = require('./_brico')
+// CONFIG 
+if (argv) var confJSON = argv._[0]
+if (!argv) var confJSON = './__conf.json'
+var conf = fs.readFileSync(confJSON)
+config = JSON.parse(conf)
 
-// setup db
+// SETUP DB
 var level = require('level')
 var ml = require('multilevel')
-var db = level('./data') // db should use brico user name
+var db = level('./'+conf.host) // db saved under host name
 
-// configure | load brico | start net
-// brico replicates to client nodes --- client node can have different access priveleges
-
-// CONFIG 
-var config = JSON.parse(fs.readFileSync('./config.json'))
-if (!config) console.error('please provide config.json')
-if (argv) { // argv is a config.json
-  console.log(argv)
-}
+// RUN BRICO  
+var brico = require('./_brico')(conf, db, bootnet)
 
 // NETWORK  
 function bootnet (ready) {
