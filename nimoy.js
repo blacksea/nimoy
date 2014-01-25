@@ -16,6 +16,7 @@ if (argv) var confJSON = argv._[0]
 if (!argv) var confJSON = './__conf.json'
 var conf = fs.readFileSync(confJSON)
 config = JSON.parse(conf)
+if (config.dir_static[config.dir_static.length-1] !=='/') config.dir_static += '/'
 
 // SETUP DB
 var level = require('level')
