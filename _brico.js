@@ -11,12 +11,7 @@ module.exports = function bricoleur (db, ready) {
     console.log(d)
   })
 
-  db.get('map', function (e,m) {
-    if (e) console.error(e)
-    console.log(m)
-    ready()
-  })
-  db.put('env:'+env, env)
+  ready()
 
   this.find = function (string, cb) { // search map for module
 
