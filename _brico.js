@@ -16,6 +16,7 @@ module.exports = function bricoleur (conf, db, ready) {
     var mapdir = conf.dir_wilds
     var map = require('./_map')(mapdir, function gotMap (m) {
       // put in db
+      ready()
     })
   }
 

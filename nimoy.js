@@ -33,8 +33,6 @@ function bootnet (ready) {
   var indexHtml = '<html><head></head><body><script src="/'+ config.bundle +'"></script></body></html>'
 
   if (config.crypto) { 
-    if (!config.crypo.port) config.crypto.port = 443
-    config.port = config.crypto.port
     var key = fs.readFileSync(config.crypto.key)
     var cert = fs.readFileSync(config.crypto.cert)
     server = https.createServer({key:key,cert:cert}, handleRequests)
