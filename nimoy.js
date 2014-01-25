@@ -47,6 +47,7 @@ function bootnet (ready) {
       res.end(indexHtml)
     } else if (req.url !== '') { // pipe file into req
       var file = fs.createReadStream(config.dir_static + req.url)
+      console.log(file)
       file.on('error', function(e) {
         console.error(e)
         res.statusCode = 404
