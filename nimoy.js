@@ -23,10 +23,8 @@ var db = level('./data') // db should use brico user name
 // CONFIG 
 var config = JSON.parse(fs.readFileSync('./config.json'))
 if (!config) console.error('please provide config.json')
-if (argv) { // BOOT FLAGS: allow commandline args to override config
-  for (arg in argv) {
-    if (config[arg]) config[arg] = argv[arg]
-  }
+if (argv) { // argv is a config.json
+  console.log(argv)
 }
 
 // NETWORK  
