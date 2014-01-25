@@ -68,7 +68,7 @@ function bootnet (ready) {
       var origin = headers.origin // conn origin
       if (headers['sec-websocket-key']) var key = headers['sec-websocket-key']
       if (!headers['sec-websocket-key']) var key = headers['sec-websocket-key1'].replace(' ','_')
-      var wss = wsserver(soc) 
+      var wss = wsstream(soc) 
       wss.pipe(multilevel.server(db)).pipe(wss) // pipe into db
       wss.on('close', function () {
         for(var i = 0;i<socs.length;i++) {
