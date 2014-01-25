@@ -42,6 +42,7 @@ function bootnet (ready) {
 
   function handleRequests (req, res) {
     req.url.substr(0,1)
+    console.log(req.url)
     if (req.url === '') {
       res.setHeader('Content-Type', 'text/html')
       res.end(indexHtml)
