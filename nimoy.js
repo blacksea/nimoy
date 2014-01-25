@@ -23,7 +23,7 @@ var ml = require('multilevel')
 var db = level('./'+conf.host) // db saved under host name
 
 // RUN BRICO  
-var brico = require('./_brico')(conf, db, bootnet)
+var brico = require('./_brico')(config, db, bootnet)
 
 // NETWORK  
 function bootnet (ready) {

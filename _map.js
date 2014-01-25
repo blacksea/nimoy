@@ -7,6 +7,16 @@ var asyncMap = require('slide').asyncMap
 module.exports = function Map (dir, cb) {
   var MAP = {}
 
+  if (dir[dir.length-1] !=='/') dir += '/'
+  fs.readdir(dir, function moduleList (e, modules) {
+    if (e) console.error(e)
+    if (!e) {
+      asyncMap(modules, readPkg, function end () {
+        cb(MAP)
+      })
+    }
+  })
+
   function readPkg (modDir, next) {
     var jsn = fs.readFileSync(dir+modDir+'/package.json').toString()
     if (jsn) {
@@ -17,14 +27,4 @@ module.exports = function Map (dir, cb) {
       } else next()
     } else next()
   }
-
-  if (dir[dir.length-1] !=='/') dir += '/'
-  fs.readdir(dir, function moduleList (e, modules) {
-    if (e) console.error(e)
-    if (!e) {
-      asyncMap(modules, readPkg, function end () {
-        cb(MAP)
-      })
-    }
-  })
 }
