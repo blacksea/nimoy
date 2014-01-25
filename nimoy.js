@@ -41,13 +41,12 @@ function bootnet (ready) {
   if (!config.crypto) http.createServer(handleRequests)
 
   function handleRequests (req, res) {
-    req.url = req.url.substr(1)
-    console.log(req.url)
-    if (req.url === '') {
+    var url = req.url.substr(1)
+    if (url === '') {
       res.setHeader('Content-Type', 'text/html')
       res.end(indexHtml)
-    } else if (req.url !== '') { // pipe file into req
-      var filePath = config.dir_static + req.url
+    } else if (url !== '') { // pipe file into req
+      var filePath = config.dir_static + url
       console.log(filePath)
       var file = fs.createReadStream(filePath)
       file.on('error', function(e) {
