@@ -20,7 +20,7 @@ if (config.dir_static[config.dir_static.length-1] !=='/') config.dir_static += '
 
 // SETUP DB
 var level = require('level')
-var ml = require('multilevel')
+var multilevel = require('multilevel')
 var db = level('./'+conf.host) // db saved under host name
 
 // RUN BRICO  
