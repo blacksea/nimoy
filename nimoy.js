@@ -13,7 +13,7 @@ var fs = require('fs')
 
 // CONFIG 
 if (argv) var confJSON = argv._[0]
-if (!argv) var confJSON = './__conf.json'
+if (!argv._[0]) var confJSON = './__conf.json'
 var conf = fs.readFileSync(confJSON)
 config = JSON.parse(conf)
 if (config.dir_static[config.dir_static.length-1] !=='/') config.dir_static += '/'
@@ -38,7 +38,7 @@ function bootnet (ready) {
     var cert = fs.readFileSync(config.crypto.cert)
     server = https.createServer({key:key,cert:cert}, handleRequests)
   }
-  if (!config.crypto) http.createServer(handleRequests)
+  if (!config.crypto) server = http.createServer(handleRequests)
 
   function handleRequests (req, res) {
     var url = req.url.substr(1)
