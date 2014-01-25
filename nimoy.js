@@ -32,7 +32,7 @@ function bootnet (ready) {
 
   var indexHtml = '<html><head></head><body><script src="/'+ config.bundle +'"></script></body></html>'
 
-  if (config.crypto) { // still needs http running on 80 to redirect to 443
+  if (config.crypto) { 
     if (!config.crypo.port) config.crypto.port = 443
     config.port = config.crypto.port
     var key = fs.readFileSync(config.crypto.key)
