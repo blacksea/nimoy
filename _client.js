@@ -9,6 +9,6 @@ var ml = require('multilevel')
 var db = ml.client()
 ws.pipe(db.createRpcStream()).pipe(ws)
 
-var brico = require('./brico')(null,db,function () {
+var brico = require('./_brico.js')(null,db,function () {
   console.log('brico running')
 })

@@ -31,7 +31,7 @@ function bootnet (ready) {
   var socs = []
   var server
 
-  var indexHtml = '<html><head></head><body><script src="/'+ config.bundle +'"></script></body></html>'
+  var indexHtml = '<html><head></head><body><script src="/bundle.js"></script></body></html>'
 
   if (config.crypto) { 
     var key = fs.readFileSync(config.crypto.key)
@@ -41,7 +41,9 @@ function bootnet (ready) {
   if (!config.crypto) server = http.createServer(handleRequests)
 
   function handleRequests (req, res) {
+    console.log(req.url)
     var url = req.url.substr(1)
+    console.log(url)
     if (url === '') {
       res.setHeader('Content-Type', 'text/html')
       res.end(indexHtml)
