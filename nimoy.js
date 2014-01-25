@@ -7,6 +7,7 @@ var https = require('https')
 var gzip = require('zlib').createGzip
 var wsserver = require('ws').Server
 var wsstream = require('websocket-stream')
+var liveStream = require('level-live-stream')
 var argv = require('optimist').argv
 var browserify = require('browserify')
 var through = require('through')
@@ -24,6 +25,7 @@ if (config.dir_wilds[config.dir_wilds.length-1] !=='/') config.dir_wilds += '/'
 var level = require('level')
 var multilevel = require('multilevel')
 var db = level('./'+conf.host) // db saved under host name
+liveStream.install(db)
 
 // RUN MAP / BUILD BUNDLE
 var map = require('./_map')(config.dir_wilds, function (m) {
@@ -39,7 +41,13 @@ var map = require('./_map')(config.dir_wilds, function (m) {
     console.log('map complete')
     db.put('map', JSON.stringify(m))
     // RUN BRICO  
-    var brico = require('./_brico')(db, bootnet)
+    var brico = require('./_brico')(db, function () {
+      bootnet(function () {
+        setTimeout(function () {
+          db.put('test','test')
+        },9000)
+      })
+    })
   })
 })
 
@@ -91,6 +99,7 @@ function bootnet (ready) {
         }
       })
     })
+    ready()
   }
 
   server.listen(config.port, config.host, installWS)
