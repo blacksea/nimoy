@@ -4,7 +4,7 @@ var env = process.title // node or browser
 var through = require('through')
 var livefeed = require('level-livefeed')
 
-module.exports = function bricoleur (conf, db, ready) {
+module.exports = function bricoleur (db, ready) {
   var self = this
 
   var dbs = livefeed(db)
@@ -12,13 +12,7 @@ module.exports = function bricoleur (conf, db, ready) {
     console.log(d)
   })
 
-  if (env === 'node') {
-    var mapdir = conf.dir_wilds
-    var map = require('./_map')(mapdir, function gotMap (m) {
-      // put in db
-      ready()
-    })
-  }
+  ready()
 
   this.find = function (string, cb) { // search map for module
 
