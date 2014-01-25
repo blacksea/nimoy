@@ -7,37 +7,47 @@ var livefeed = require('level-livefeed')
 module.exports = function bricoleur (conf, db, ready) {
   var self = this
 
-  if (env === 'node') var map = require('./_map')(opts.dir)
+  var dbs = livefeed(db)
+  dbs.on('data', function (d) {
+    console.log(d)
+  })
+
+  if (env === 'node') {
+    var mapdir = conf.dir_wilds
+    var map = require('./_map')(mapdir, function gotMap (m) {
+      // put in db
+    })
+  }
 
   this.find = function (string, cb) { // search map for module
 
   }
+
   this.put = function (mod, cb) { // put module
     // put 'module' opt=string opt=string
 
   }
+
   this.rm = function (mod, cb) { // rm module
     // rm module
 
   }
+      
   this.conn = function (mods, cb) { // connect modules
     // conn module module module
 
   }
+
   this.disconn = function (mods, cb) { // disconnect modules
     // disconn module /single /chain
 
   }
+
   this.status = function (cb) {
     // view env & conns
     
   }
 
-  var level = livefeed(db)
-
-  level.on('data', function (d) {
-    console.log(d)
-  })
   // map / survey / library -- transforms?
   // search
   // put / rm

@@ -32,7 +32,7 @@ function bootnet (ready) {
 
   var indexHtml = '<html><head></head><body><script src="/'+ config.bundle +'"></script></body></html>'
 
-  if (config.crypto) {
+  if (config.crypto) { // still needs http running on 80 to redirect to 443
     if (!config.crypo.port) config.crypto.port = 443
     config.port = config.crypto.port
     var key = fs.readFileSync(config.crypto.key)
@@ -66,7 +66,7 @@ function bootnet (ready) {
       if (headers['sec-websocket-key']) var key = headers['sec-websocket-key']
       if (!headers['sec-websocket-key']) var key = headers['sec-websocket-key1'].replace(' ','_')
       var wss = wsserver(soc) 
-      wss.pipe(db.createRpcStream()).pipe(wss) // pipe into db
+      wss.pipe(multilevel.server(db)).pipe(wss) // pipe into db
       wss.on('close', function () {
         for(var i = 0;i<socs.length;i++) {
           if (socs[i].ident == key) socs.splice(i,1); break;
