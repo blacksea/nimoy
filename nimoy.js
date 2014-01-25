@@ -28,19 +28,20 @@ var db = level('./'+conf.host) // db saved under host name
 // RUN MAP / BUILD BUNDLE
 var map = require('./_map')(config.dir_wilds, function (m) {
   var b = browserify('./_client.js')
-  var bundle = fs.createWriteStream(config.dir_static+'bundle.js')
   for (mod in m) {
     // check if server/client scope
     b.require(config.dir_wilds+mod, {expose:mod})
   }
-  b.bundle().pipe(bundle)
-  bundle.on('end', function () {
-    console.log('bundle generated')
+  var bundle = fs.createWriteStream(config.dir_static+'bundle.js')
+  var s = b.bundle()
+  s.pipe(bundle)
+  s.on('end', function () {
+    console.log('map complete')
+    db.put('map', JSON.stringify(m))
+    // RUN BRICO  
+    var brico = require('./_brico')(db, bootnet)
   })
 })
-
-// RUN BRICO  
-var brico = require('./_brico')(db, bootnet)
 
 // NETWORK  
 function bootnet (ready) {
