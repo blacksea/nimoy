@@ -17,8 +17,6 @@ module.exports = function bricoleur (data) {
     if (!e) console.log(val)
   })
 
-  ready()
-
   this.put = function (mod, cb) { // put module
     // put 'module' opt=string opt=string
 
