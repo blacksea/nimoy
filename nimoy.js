@@ -43,9 +43,6 @@ var map = require('./_map')(config.dir_wilds, function (m) {
     // RUN BRICO  
     var brico = require('./_brico')(db, function () {
       bootnet(function () {
-        setTimeout(function () {
-          db.put('test','test')
-        },9000)
       })
     })
   })
@@ -94,9 +91,13 @@ function bootnet (ready) {
       var wss = wsstream(soc) 
       wss.pipe(multilevel.server(db)).pipe(wss) // pipe into db
       wss.on('close', function () {
+        wss.end()
         for(var i = 0;i<socs.length;i++) {
           if (socs[i].ident == key) socs.splice(i,1); break;
         }
+      })
+      wss.on('error', function (e) {
+        console.error(e)
       })
     })
     ready()
