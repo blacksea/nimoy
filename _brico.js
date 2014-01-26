@@ -3,15 +3,16 @@
 var env = process.title // node or browser
 var through = require('through')
 
-module.exports = function bricoleur (db, ready) {
+module.exports = function bricoleur (data, ready) {
   var self = this
 
-  var dbs = db.liveStream({old:false}) 
-  dbs.on('data', function (d) {
+  var liveStream = data.liveStream({old:false}) 
+
+  liveStream.on('data', function (d) {
     console.log(d)
   })
-
-  db.get('map', function (e, val) {
+      
+  data.get('map', function (e, val) {
     if (e) console.error(e)
     if (!e) console.log(val)
   })
