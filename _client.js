@@ -11,6 +11,5 @@ var db = ml.client()
 liveStream.install(db)
 ws.pipe(db.createRpcStream()).pipe(ws)
 
-var brico = require('./_brico.js')(db,function () {
-  console.log('brico running')
-})
+var bricoleur = require('./_brico')
+var brico = new bricoleur(db)

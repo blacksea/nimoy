@@ -28,6 +28,7 @@ var db = level('./'+conf.host) // db saved under host name
 liveStream.install(db)
 
 // RUN MAP / BUILD BUNDLE
+var bricoleur = require('./_brico')
 var map = require('./_map')(config.dir_wilds, function (m) {
   var b = browserify('./_client.js')
   for (mod in m) {
@@ -41,7 +42,9 @@ var map = require('./_map')(config.dir_wilds, function (m) {
     console.log('map complete')
     db.put('map', JSON.stringify(m))
     // RUN BRICO  
-    var brico = require('./_brico')(db, function () {
+    var brico = new bricoleur(db)
+    bootnet(function () {
+      console.log('net up')
     })
   })
 })
