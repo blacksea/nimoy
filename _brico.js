@@ -3,7 +3,7 @@
 var env = process.title // node or browser
 var through = require('through')
 
-module.exports = function bricoleur (data, ready) {
+module.exports = function bricoleur (data) {
   var self = this
 
   var liveStream = data.liveStream({old:false}) 

@@ -42,8 +42,6 @@ var map = require('./_map')(config.dir_wilds, function (m) {
     db.put('map', JSON.stringify(m))
     // RUN BRICO  
     var brico = require('./_brico')(db, function () {
-      bootnet(function () {
-      })
     })
   })
 })
