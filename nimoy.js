@@ -33,7 +33,7 @@ var map = require('./_map')({
 
 // BOOT 
 bootnet(function () {
-  console.log('net up')
+  console.log('network running on port: '+config.port+' and host: '+config.host)
 })
 
 function bootnet (booted) {
