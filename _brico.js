@@ -17,22 +17,15 @@ var proc = process.title // node or browser
 module.exports = function bricoleur (data) {
   var self = this
 
-  var liveStream = data.liveStream({tail:true, old:false}) 
-
-  liveStream.pipe(through(function handleData (d) {
-    var val = d.value
-    var key = d.key
-
-    if (typeof d.value === 'string' && d.value[0] === '{') val = JSON.parse(d.value)
-
-    if (d.type === 'put' && filter[key]) filter[key](val)
-
-  }, function end () {
-    this.end()
-  }))
-
-  var timeStamp = new Date().getTime()
-  console.log(timeStamp)
+  var api = { // expose as input to modules
+    put : function (d) {
+      var timeStamp = new Date().getTime()
+      db.put(d.key, d.val)
+    },
+    get : function (d, cb) {
+      console.log(d)
+    }
+  }
 
   var filter = {
     map : function (m) { // index?!
@@ -43,21 +36,26 @@ module.exports = function bricoleur (data) {
     }
   }
 
-  this.api = {
-    put : function (cmd) {
+  var liveStream = data.liveStream({tail:true, old:false}) 
 
-    }, 
-    rm : function (mod) {
+  liveStream.pipe(through(function handleData (d) {
+    if (d.type === 'put') io.emit('data', d) 
 
-    },
-    list : function () {
+  }, function end () {
+    this.end()
+  }))
 
-    }
-  }
-
-  // > pipe modules in to data and filter data in streams based on key or id
-
-  // module representation!?
+  var io = through(function write (d) {
+    if (typeof d.value === 'string' && d.value[0] === '{') val = JSON.parse(d.value)
+  }, function end () {
+    this.end()
+  })
   
-  // env {mod -- id: // set id using unix timestamp
+  return io
 }
+
+// > pipe modules in to data and filter data in streams based on key or id
+
+// module representation!?
+
+// env {mod -- id: // set id using unix timestamp
