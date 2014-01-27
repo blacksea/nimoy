@@ -1,19 +1,10 @@
 // NIMOY 
-// configure | load brico | start net
 // brico replicates to client nodes --- client node can have different access priveleges
 
-var http = require('http')
-var https = require('https')
-var gzip = require('zlib').createGzip
-var webSocketServer = require('ws').Server
-var webSocketStream = require('websocket-stream')
-var liveStream = require('level-live-stream')
-var argv = require('optimist').argv
-var browserify = require('browserify')
-var through = require('through')
 var fs = require('fs')
 
-// CONFIG 
+// DO CONFIG 
+var argv = require('optimist').argv
 if (argv) var confJSON = argv._[0]
 if (!argv._[0]) var confJSON = './__conf.json'
 var conf = fs.readFileSync(confJSON)
@@ -24,18 +15,17 @@ if (config.dir_wilds[config.dir_wilds.length-1] !=='/') config.dir_wilds += '/'
 // SETUP DB
 var level = require('level')
 var multilevel = require('multilevel')
+var liveStream = require('level-live-stream')
 var db = level('./'+conf.host) // db saved under host name
 liveStream.install(db)
 
 // RUN BRICO  
 var bricoleur = require('./_brico')
 var brico = new bricoleur(db)
-bootnet(function () {
-  console.log('net up')
-})
 
 // RUN MAP / BUILD BUNDLE
-// should be smarter -- only map when needed
+// rebuild the module
+var browserify = require('browserify')
 var map = require('./_map')(config.dir_wilds, function (m) {
   var b = browserify('./_client.js')
   for (mod in m) {
@@ -52,9 +42,18 @@ var map = require('./_map')(config.dir_wilds, function (m) {
   })
 })
 
-// RUN NETWORK  
+// BOOT 
+bootnet(function () {
+  console.log('net up')
+})
+
 function bootnet (booted) {
   var server
+  var http = require('http')
+  var https = require('https')
+  var gzip = require('zlib').createGzip
+  var webSocketServer = require('ws').Server
+  var webSocketStream = require('websocket-stream')
   var indexHtml = '<html><head></head><body><script src="/bundle.js"></script></body></html>'
 
   if (config.crypto) { 
@@ -63,6 +62,8 @@ function bootnet (booted) {
     server = https.createServer({key:key,cert:cert}, handleRequests)
   } else if (!config.crypto) 
     server = http.createServer(handleRequests)
+
+  server.listen(config.port, config.host, installWS)
 
   function handleRequests (req, res) { // more robust: needs paths as well as files
     var url = req.url.substr(1)
@@ -85,7 +86,7 @@ function bootnet (booted) {
   function installWS () {
     var ws = new webSocketServer({server:server})
     ws.on('connection', handleSoc)
-    booted()
+    booted() // NETWORK IS READY
   }
 
   function handleSoc (soc) {
@@ -98,6 +99,4 @@ function bootnet (booted) {
       console.error(e)
     })
   }
-
-  server.listen(config.port, config.host, installWS)
 }

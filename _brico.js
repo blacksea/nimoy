@@ -12,7 +12,7 @@ module.exports = function bricoleur (data) {
 
   function handleData (d) {
     // old
-    if (!d.type) { // events in history
+    if (!d.type) { 
 
     }
     // fresh
