@@ -17,6 +17,7 @@ var multilevel = require('multilevel')
 var liveStream = require('level-live-stream')
 var db = level('./'+config.host) 
 liveStream.install(db)
+multilevel.writeManifest(db, __dirname + '/manifest.json')
 
 // RUN BRICO  
 var bricoleur = require('./_brico')

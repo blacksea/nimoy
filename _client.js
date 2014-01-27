@@ -9,10 +9,10 @@ if (window.location.protocol === 'http:') var ws = websocStream('ws://' + host)
 
 // SETUP DB
 var ml = require('multilevel')
-var liveStream = require('level-live-stream')
-var db = ml.client()
-liveStream.install(db)
+var manifest = require('./manifest.json')
+var db = ml.client(manifest)
 ws.pipe(db.createRpcStream()).pipe(ws)
+
 
 // RUN BRICO
 var bricoleur = require('./_brico')
