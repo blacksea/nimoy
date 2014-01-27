@@ -5,8 +5,8 @@
 var http = require('http')
 var https = require('https')
 var gzip = require('zlib').createGzip
-var wsserver = require('ws').Server
-var wsstream = require('websocket-stream')
+var webSocketServer = require('ws').Server
+var webSocketStream = require('websocket-stream')
 var liveStream = require('level-live-stream')
 var argv = require('optimist').argv
 var browserify = require('browserify')
@@ -52,7 +52,7 @@ var map = require('./_map')(config.dir_wilds, function (m) {
   })
 })
 
-// NETWORK  
+// RUN NETWORK  
 function bootnet (booted) {
   var server
   var indexHtml = '<html><head></head><body><script src="/bundle.js"></script></body></html>'
@@ -61,17 +61,16 @@ function bootnet (booted) {
     var key = fs.readFileSync(config.crypto.key)
     var cert = fs.readFileSync(config.crypto.cert)
     server = https.createServer({key:key,cert:cert}, handleRequests)
-  }
-  if (!config.crypto) server = http.createServer(handleRequests)
+  } else if (!config.crypto) 
+    server = http.createServer(handleRequests)
 
-  function handleRequests (req, res) {
+  function handleRequests (req, res) { // more robust: needs paths as well as files
     var url = req.url.substr(1)
     if (url === '') {
       res.setHeader('Content-Type', 'text/html')
       res.end(indexHtml)
     } else if (url !== '') { // pipe file into req
       var filePath = config.dir_static + url
-      console.log(filePath)
       var file = fs.createReadStream(filePath)
       file.on('error', function(e) {
         console.error(e)
@@ -84,7 +83,7 @@ function bootnet (booted) {
   }
 
   function installWS () {
-    var ws = new wsserver({server:server})
+    var ws = new webSocketServer({server:server})
     ws.on('connection', handleSoc)
     booted()
   }
@@ -92,7 +91,7 @@ function bootnet (booted) {
   function handleSoc (soc) {
     var headers = soc.upgradeReq.headers
     var origin = headers.origin // conn origin
-    var wss = wsstream(soc) 
+    var wss = webSocketStream(soc) 
     wss.pipe(multilevel.server(db)).pipe(wss) // pipe into db
     wss.on('close', wss.end)
     wss.on('error', function (e) {
