@@ -1,7 +1,7 @@
 {
   "port" : 9999,
   "host" : "localhost",
-  "minify" : false,
+  "minify" : true,
   "dir_wilds" : "./_wilds",
   "dir_static" : "./_static"
 }
