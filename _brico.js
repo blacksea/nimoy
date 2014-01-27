@@ -17,7 +17,7 @@ var env = process.title // node or browser
 module.exports = function bricoleur (data) {
   var self = this
 
-  var liveStream = data.liveStream() 
+  var liveStream = data.liveStream({old:false}) 
 
   liveStream.on('data', handleData)
 
@@ -31,6 +31,7 @@ module.exports = function bricoleur (data) {
     // fresh
     if (d.type === 'put') {
       // {type: key: val: }
+      
     } 
 
   }
