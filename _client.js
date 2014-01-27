@@ -13,7 +13,6 @@ var manifest = require('./manifest.json')
 var db = ml.client(manifest)
 ws.pipe(db.createRpcStream()).pipe(ws)
 
-
 // RUN BRICO
 var bricoleur = require('./_brico')
 var brico = new bricoleur(db)

@@ -4,11 +4,11 @@
 // modules need an interface/spec --- pass in opts and return stream for now
 // some modules may need time to load / init
 // map / survey / library -- transforms?
-// search
-// put / rm
+// object/transport/stream protocol
 // conn / disconn
 // env / status
-// object/transport/stream protocol
+// put / rm
+// search
 
 var through = require('through')
 
@@ -31,6 +31,9 @@ module.exports = function bricoleur (data) {
     this.end()
   }))
 
+  var timeStamp = new Date().getTime()
+  console.log(timeStamp)
+
   var filter = {
     map : function (m) { // index?!
       console.log(m)
@@ -39,4 +42,22 @@ module.exports = function bricoleur (data) {
       console.log(env)
     }
   }
+
+  this.api = {
+    put : function (cmd) {
+
+    }, 
+    rm : function (mod) {
+
+    },
+    list : function () {
+
+    }
+  }
+
+  // > pipe modules in to data and filter data in streams based on key or id
+
+  // module representation!?
+  
+  // env {mod -- id: // set id using unix timestamp
 }

@@ -58,6 +58,7 @@ function bootnet (booted) {
   server.listen(config.port, config.host, installWS)
 
   function handleRequests (req, res) { // more robust: needs paths as well as files
+    // should set headers for better security
     var url = req.url.substr(1)
     if (url === '') {
       res.setHeader('Content-Type', 'text/html')
