@@ -26,7 +26,8 @@ module.exports = function Map (opts, cb) {
     s.pipe(bundle)
     s.on('end', function wroteBundle () {
       // check bundle file size
-      console.log('wrote '+opts.bundle)
+      var stat = fs.statSync(opts.bundle)
+      console.log('wrote bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+opts.bundle)
     })
     s.on('error', function (e) {
       console.error(e)
