@@ -13,7 +13,7 @@ module.exports = function Map (opts, cb) {
     if (e) console.error(e)
     if (!e) {
       asyncMap(modules, readPkg, function end () {
-        cb(MAP)
+        cb(JSON.stringify(MAP))
         bundleMap()
       })
     }
