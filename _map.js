@@ -3,6 +3,7 @@
 var fs = require('fs')
 var asyncMap = require('slide').asyncMap
 var browserify = require('browserify')
+var uglify = require('uglify-js')
 
 module.exports = function Map (opts, cb) {
   var MAP = {}
@@ -28,6 +29,11 @@ module.exports = function Map (opts, cb) {
       // check bundle file size
       var stat = fs.statSync(opts.bundle)
       console.log('wrote bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+opts.bundle)
+      if (opts.min === true) {
+        var min = uglify.minify([opts.bundle], {outSourceMap:opts.bundle+'.source'})
+        fs.writeFileSync(opts.bundle,min.code)
+        fs.writeFileSync(opts.bundle+'.source',min.map)
+      }
     })
     s.on('error', function (e) {
       console.error(e)

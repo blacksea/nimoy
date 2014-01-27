@@ -25,7 +25,8 @@ var brico = new bricoleur(db)
 // RUN MAP / BROWSERIFY
 var map = require('./_map')({
   wilds : config.dir_wilds,
-  bundle : config.dir_static+'bundle.js'
+  bundle : config.dir_static+'bundle.js',
+  min : true
 }, function putMap (m) {
   db.put('map', m)
 })
