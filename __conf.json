@@ -1,6 +1,7 @@
 {
-  "port":80,
-  "host":"localhost",
-  "dir_wilds":"./_wilds",
-  "dir_static":"./_static"
+  "port" : 80,
+  "host" : "localhost",
+  "minify" : true,
+  "dir_wilds" : "./_wilds",
+  "dir_static" : "./_static"
 }
