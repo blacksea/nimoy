@@ -1,4 +1,4 @@
-// MAP : looks for package.json with nimoy property
+// MAP 
 
 var fs = require('fs')
 var asyncMap = require('slide').asyncMap
