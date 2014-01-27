@@ -7,19 +7,23 @@ module.exports = function bricoleur (data) {
   var self = this
 
   // leveldb live events
-  var liveStream = data.liveStream({old:false}) 
+  var liveStream = data.liveStream() 
   liveStream.on('data', handleData)
 
   function handleData (d) {
     console.log('LIVE!')  
     console.log(d)
-
+    if (d.type === 'put') {
+      switch (d.key) {
+        case 'map' : handleMap(d.value); break;
+      }
+    }
   }
-     
-  data.get('map', function (e, val) { // load map
-    if (e) console.error(e)
-    if (!e) console.log(val)
-  })
+
+  function handleMap (m) {
+    var map = JSON.parse(m)
+    console.log(map)
+  }
 
   this.put = function (mod, cb) { // put module
     // put 'module' opt=string opt=string
