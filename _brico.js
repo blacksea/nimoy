@@ -1,6 +1,10 @@
 // BRICO
 
 // * brico replicates to client nodes --- client node can have different access priveleges
+// modules need an interface/spec --- pass in opts and return stream for now
+
+// some modules may need time to load / init
+// expose module data streams
 
 var env = process.title // node or browser
 

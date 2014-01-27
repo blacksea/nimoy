@@ -8,6 +8,7 @@ var uglify = require('uglify-js')
 module.exports = function Map (opts, cb) {
   var MAP = {}
   var dir = opts.wilds
+  var b = browserify('./_client.js')
 
   if (dir[dir.length-1] !=='/') dir += '/'
   fs.readdir(dir, function moduleList (e, modules) {
@@ -21,7 +22,6 @@ module.exports = function Map (opts, cb) {
   })
 
   function bundleMap () {
-    var b = browserify('./_client.js')
     var bundle = fs.createWriteStream(opts.bundle)
     b.bundle().pipe(bundle)
     bundle.on('finish', function () {
