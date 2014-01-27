@@ -27,25 +27,27 @@ var multilevel = require('multilevel')
 var db = level('./'+conf.host) // db saved under host name
 liveStream.install(db)
 
+// RUN BRICO  
+var brico = new bricoleur(db)
+bootnet(function () {
+  console.log('net up')
+})
+
 // RUN MAP / BUILD BUNDLE
 var bricoleur = require('./_brico')
 var map = require('./_map')(config.dir_wilds, function (m) {
   var b = browserify('./_client.js')
   for (mod in m) {
-    // check if server/client scope
+
+    // *only browserify browser modules
+
     b.require(config.dir_wilds+mod, {expose:mod})
   }
   var bundle = fs.createWriteStream(config.dir_static+'bundle.js')
   var s = b.bundle()
   s.pipe(bundle)
-  s.on('end', function () {
-    console.log('map complete')
+  s.on('end', function putMap () {
     db.put('map', JSON.stringify(m))
-    // RUN BRICO  
-    var brico = new bricoleur(db)
-    bootnet(function () {
-      console.log('net up')
-    })
   })
 })
 
