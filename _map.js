@@ -28,6 +28,9 @@ module.exports = function Map (opts, cb) {
       // check bundle file size
       console.log('wrote '+opts.bundle)
     })
+    s.on('error', function (e) {
+      console.error(e)
+    })
   }
 
   function readPkg (modDir, next) {
