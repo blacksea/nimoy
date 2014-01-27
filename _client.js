@@ -1,4 +1,4 @@
-// CLIENT
+// NIMOY/browser
 
 // SETUP WEBSOCKET
 var websocStream = require('websocket-stream')

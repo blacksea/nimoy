@@ -1,5 +1,7 @@
 // BRICO
 
+// * brico replicates to client nodes --- client node can have different access priveleges
+
 var env = process.title // node or browser
 var through = require('through')
 

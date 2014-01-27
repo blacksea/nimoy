@@ -1,45 +1,33 @@
 // NIMOY 
-// brico replicates to client nodes --- client node can have different access priveleges
 
 var fs = require('fs')
 
-// DO CONFIG 
+// CONFIG 
 var argv = require('optimist').argv
 if (argv) var confJSON = argv._[0]
 if (!argv._[0]) var confJSON = './__conf.json'
 var conf = fs.readFileSync(confJSON)
 config = JSON.parse(conf)
-if (config.dir_static[config.dir_static.length-1] !=='/') config.dir_static += '/'
-if (config.dir_wilds[config.dir_wilds.length-1] !=='/') config.dir_wilds += '/'
+if (config.dir_static[config.dir_static.length-1] !== '/') config.dir_static += '/'
+if (config.dir_wilds[config.dir_wilds.length-1] !== '/') config.dir_wilds += '/'
 
 // SETUP DB
 var level = require('level')
 var multilevel = require('multilevel')
 var liveStream = require('level-live-stream')
-var db = level('./'+conf.host) // db saved under host name
+var db = level('./'+config.host) 
 liveStream.install(db)
 
 // RUN BRICO  
 var bricoleur = require('./_brico')
 var brico = new bricoleur(db)
 
-// RUN MAP / BUILD BUNDLE
-// rebuild the module
-var browserify = require('browserify')
-var map = require('./_map')(config.dir_wilds, function (m) {
-  var b = browserify('./_client.js')
-  for (mod in m) {
-
-    // *only browserify browser modules
-
-    b.require(config.dir_wilds+mod, {expose:mod})
-  }
-  var bundle = fs.createWriteStream(config.dir_static+'bundle.js')
-  var s = b.bundle()
-  s.pipe(bundle)
-  s.on('end', function putMap () {
-    db.put('map', JSON.stringify(m))
-  })
+// RUN MAP / BROWSERIFY
+var map = require('./_map')({
+  wilds : config.dir_wilds,
+  bundle : config.dir_static+'bundle.js'
+}, function putMap (m) {
+  db.put('map', m)
 })
 
 // BOOT 
@@ -48,13 +36,15 @@ bootnet(function () {
 })
 
 function bootnet (booted) {
-  var server
   var http = require('http')
   var https = require('https')
   var gzip = require('zlib').createGzip
   var webSocketServer = require('ws').Server
   var webSocketStream = require('websocket-stream')
+
   var indexHtml = '<html><head></head><body><script src="/bundle.js"></script></body></html>'
+
+  var server
 
   if (config.crypto) { 
     var key = fs.readFileSync(config.crypto.key)
@@ -91,9 +81,12 @@ function bootnet (booted) {
 
   function handleSoc (soc) {
     var headers = soc.upgradeReq.headers
-    var origin = headers.origin // conn origin
+    var origin = headers.origin
     var wss = webSocketStream(soc) 
-    wss.pipe(multilevel.server(db)).pipe(wss) // pipe into db
+
+    // CONNECT MULTILEVEL
+    wss.pipe(multilevel.server(db)).pipe(wss) 
+
     wss.on('close', wss.end)
     wss.on('error', function (e) {
       console.error(e)
