@@ -11,14 +11,16 @@ module.exports = function bricoleur (data) {
   liveStream.on('data', handleData)
 
   function handleData (d) {
+    // old
     if (!d.type) { // events in history
-      console.log('old \n'+d)
+
     }
+    // fresh
     if (d.type === 'put') {
       switch (d.key) {
         case 'map' : handleMap(d.value); break;
       }
-    }
+    } 
   }
 
   function handleMap (m) {

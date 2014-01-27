@@ -35,6 +35,7 @@ bootnet(function () {
 })
 
 // RUN MAP / BUILD BUNDLE
+// should be smarter -- only map when needed
 var map = require('./_map')(config.dir_wilds, function (m) {
   var b = browserify('./_client.js')
   for (mod in m) {
@@ -52,10 +53,8 @@ var map = require('./_map')(config.dir_wilds, function (m) {
 })
 
 // NETWORK  
-function bootnet (ready) {
-  var socs = []
+function bootnet (booted) {
   var server
-
   var indexHtml = '<html><head></head><body><script src="/bundle.js"></script></body></html>'
 
   if (config.crypto) { 
@@ -86,24 +85,19 @@ function bootnet (ready) {
 
   function installWS () {
     var ws = new wsserver({server:server})
-    ws.on('connection', function (soc) {
-      var headers = soc.upgradeReq.headers
-      var origin = headers.origin // conn origin
-      if (headers['sec-websocket-key']) var key = headers['sec-websocket-key']
-      if (!headers['sec-websocket-key']) var key = headers['sec-websocket-key1'].replace(' ','_')
-      var wss = wsstream(soc) 
-      wss.pipe(multilevel.server(db)).pipe(wss) // pipe into db
-      wss.on('close', function () {
-        wss.end()
-        for(var i = 0;i<socs.length;i++) {
-          if (socs[i].ident == key) socs.splice(i,1); break;
-        }
-      })
-      wss.on('error', function (e) {
-        console.error(e)
-      })
+    ws.on('connection', handleSoc)
+    booted()
+  }
+
+  function handleSoc (soc) {
+    var headers = soc.upgradeReq.headers
+    var origin = headers.origin // conn origin
+    var wss = wsstream(soc) 
+    wss.pipe(multilevel.server(db)).pipe(wss) // pipe into db
+    wss.on('close', wss.end)
+    wss.on('error', function (e) {
+      console.error(e)
     })
-    ready()
   }
 
   server.listen(config.port, config.host, installWS)
