@@ -23,19 +23,18 @@ module.exports = function Map (opts, cb) {
   function bundleMap () {
     var b = browserify('./_client.js')
     var bundle = fs.createWriteStream(opts.bundle)
-    var s = b.bundle()
-    s.pipe(bundle)
-    s.on('end', function wroteBundle () {
-      // check bundle file size
+    b.bundle().pipe(bundle)
+    bundle.on('finish', function () {
       var stat = fs.statSync(opts.bundle)
       console.log('wrote bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+opts.bundle)
-      if (opts.min === true) {
-        var min = uglify.minify([opts.bundle], {outSourceMap:opts.bundle+'.source'})
-        fs.writeFileSync(opts.bundle,min.code)
-        fs.writeFileSync(opts.bundle+'.source',min.map)
+      if (opts.min === true ) {
+        var min = uglify.minify(opts.bundle)
+        fs.writeFileSync(opts.bundle, min.code)
+        stat = fs.statSync(opts.bundle)
+        console.log('wrote minified bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+opts.bundle)
       }
     })
-    s.on('error', function (e) {
+    b.on('error', function (e) {
       console.error(e)
     })
   }
