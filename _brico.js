@@ -11,8 +11,9 @@ module.exports = function bricoleur (data) {
   liveStream.on('data', handleData)
 
   function handleData (d) {
-    console.log('LIVE!')  
-    console.log(d)
+    if (!d.type) { // events in history
+      console.log('old \n'+d)
+    }
     if (d.type === 'put') {
       switch (d.key) {
         case 'map' : handleMap(d.value); break;
