@@ -6,13 +6,17 @@ var through = require('through')
 module.exports = function bricoleur (data) {
   var self = this
 
+  // leveldb live events
   var liveStream = data.liveStream({old:false}) 
+  liveStream.on('data', handleData)
 
-  liveStream.on('data', function (d) {
+  function handleData (d) {
+    console.log('LIVE!')  
     console.log(d)
-  })
-      
-  data.get('map', function (e, val) {
+
+  }
+     
+  data.get('map', function (e, val) { // load map
     if (e) console.error(e)
     if (!e) console.log(val)
   })
@@ -21,18 +25,22 @@ module.exports = function bricoleur (data) {
     // put 'module' opt=string opt=string
 
   }
+
   this.rm = function (mod, cb) { // rm module
     // rm module
 
   }
+
   this.conn = function (mods, cb) { // connect modules
     // conn module module module
 
   }
+
   this.disconn = function (mods, cb) { // disconnect modules
     // disconn module /single /chain
 
   }
+
   this.status = function (cb) {
     // view env & conns
     

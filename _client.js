@@ -13,3 +13,7 @@ ws.pipe(db.createRpcStream()).pipe(ws)
 
 var bricoleur = require('./_brico')
 var brico = new bricoleur(db)
+
+setTimeout(function () {
+  db.put('test','test')
+}, 900)
