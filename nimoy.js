@@ -49,17 +49,12 @@ var map = require('./_map')({
   var read = require('read')
   var through = require('through')
   function repl (opts) {
-    read(opts, function (e, res, empty) {
+    read(opts, function (e, cmd, empty) {
       if (e && e.message == 'canceled') process.exit(0)
-      if (!e && res) replstream.write(cmd)
+      if (!e && cmd) brico.write(cmd)
       repl(prompt)
     })
   }
-  var replStream = through(function write (cmd) {
-  }, function end () {
-    this.end()
-  })
-  replStream.pipe(brico)  // pipe repl to brico api
 })
 
 function bootnet (booted) {
