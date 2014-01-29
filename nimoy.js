@@ -1,6 +1,10 @@
 // NIMOY 
 
 var fs = require('fs')
+var clc = require('cli-color')
+var log = clc.cyanBright
+var err = clc.red
+var prompt = {prompt:'nimoy:'}
 
 // CONFIG 
 var argv = require('optimist').argv
@@ -24,17 +28,21 @@ var bricoleur = require('./_brico')
 var brico = new bricoleur(db)
 
 // RUN MAP & BROWSERIFY
+var bundle = config.dir_static+'bundle.js' 
 var map = require('./_map')({
   wilds : config.dir_wilds,
-  bundle : config.dir_static+'bundle.js',
+  bundle : bundle,
   min : config.minify
 }, function putMap (m) {
   db.put('map', m)
 
+  var stat = fs.statSync(bundle)
+  console.log(log('wrote bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+bundle))
+
   // BOOT 
   bootnet(function () {
-    console.log('network running on port: '+config.port+' and host: '+config.host)
-    if (config.repl === true) repl({prompt: '>'})
+    console.log(log('network running on port: '+config.port+' host: '+config.host))
+    if (config.repl === true) repl(prompt)
   })
 })
 
@@ -104,8 +112,6 @@ var read = require('read')
 function repl (opts) {
   read(opts, function (e, res, empty) {
     if (e && e.message == 'canceled') process.exit(0)
-    console.log(res)
-    var p = {prompt:'>'}
-    repl(p)
+    repl(prompt)
   })
 }

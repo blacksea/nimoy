@@ -15,7 +15,6 @@ module.exports = function Map (opts, cb) {
     if (e) console.error(e)
     if (!e) {
       asyncMap(modules, readPkg, function end () {
-        cb(JSON.stringify(MAP))
         bundleMap()
       })
     }
@@ -25,14 +24,11 @@ module.exports = function Map (opts, cb) {
     var bundle = fs.createWriteStream(opts.bundle)
     b.bundle().pipe(bundle)
     bundle.on('finish', function () {
-      var stat = fs.statSync(opts.bundle)
-      console.log('wrote bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+opts.bundle)
       if (opts.min === true ) {
         var min = uglify.minify(opts.bundle)
         fs.writeFileSync(opts.bundle, min.code)
-        stat = fs.statSync(opts.bundle)
-        console.log('wrote minified bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+opts.bundle)
-      }
+        cb(JSON.stringify(MAP))
+      } else cb(JSON.stringify(MAP))
     })
     b.on('error', function (e) {
       console.error(e)
