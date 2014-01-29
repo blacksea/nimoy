@@ -22,6 +22,7 @@ module.exports = function bricoleur (data) {
 
   var api = { // expose as input to modules
     search : function (arg) {
+      if (!arg) console.log(map)
       if (map[arg]) console.log(map[arg])
     },
     put : function (mod) {
