@@ -36,7 +36,7 @@ module.exports = function bricoleur (data) {
     },
     put : function (mod) {
       var timeStamp = new Date().getTime()
-      if (map[mod]) _[mod] = require('./_wilds/'+mod);console.log(_)
+      if (map[mod]) _[mod] = require('./_wilds/'+mod)();console.log(_)
     },
     conn : function (con) {
       var mods = con.split('-')
@@ -44,8 +44,9 @@ module.exports = function bricoleur (data) {
       console.log('mod A: '+mods[1])
       _[mods[0]].pipe(_[mods[1]])
     },
-    get : function (arg, cb) {
-      console.log(d)
+    rm : function (mod) {
+      _[mod].end()
+      delete _[mod]
     }
   }
 
