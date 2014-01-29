@@ -1,6 +1,6 @@
 // BRICO
 
-// * brico replicates to client nodes --- client node can have different access priveleges
+// *brico replicates to client nodes --- client node can have different access priveleges
 // modules need an interface/spec --- pass in opts and return stream for now
 // some modules may need time to load / init
 // map / survey / library -- transforms?
@@ -9,6 +9,20 @@
 // env / status
 // put / rm
 // search
+
+// > pipe modules in to data and filter data in streams based on key or id
+
+// > module representation!?
+
+// > env {mod -- id: // set id using unix timestamp
+
+// create a data model
+
+// everything lives in the db
+// env { 
+//   modules:
+//   connections:
+// }
 
 var through = require('through')
 
@@ -40,7 +54,6 @@ module.exports = function bricoleur (data) {
 
   liveStream.pipe(through(function handleData (d) {
     if (d.type === 'put') io.emit('data', d) 
-
   }, function end () {
     this.end()
   }))
@@ -54,8 +67,3 @@ module.exports = function bricoleur (data) {
   return io
 }
 
-// > pipe modules in to data and filter data in streams based on key or id
-
-// module representation!?
-
-// env {mod -- id: // set id using unix timestamp

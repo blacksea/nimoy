@@ -28,6 +28,7 @@
     "through": ">=2.3.4",
     "optimist":">=0.6.0",
     "slide": ">=1.1.4",
+    "read": ">=1.0.0",
     "ws": ">=0.4.30"
   },
   "devDependancies": {

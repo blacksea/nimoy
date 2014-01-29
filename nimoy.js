@@ -35,6 +35,7 @@ var map = require('./_map')({
 // BOOT 
 bootnet(function () {
   console.log('network running on port: '+config.port+' and host: '+config.host)
+  if (config.repl === 'true') repl()
 })
 
 function bootnet (booted) {
@@ -95,4 +96,13 @@ function bootnet (booted) {
       console.error(e)
     })
   }
+}
+
+// REPL
+var read = require('read')
+
+function repl () {
+  read(opts, function (e,o) {
+    
+  })
 }
