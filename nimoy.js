@@ -102,7 +102,9 @@ function bootnet (booted) {
 var read = require('read')
 
 function repl () {
-  read(opts, function (e,o) {
-    
+  var opts = {}
+  read(opts, function (e, result, default) {
+    if (e) console.error(e) 
+    repl()
   })
 }
