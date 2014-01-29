@@ -1,7 +1,6 @@
 // BRICO
 
 var through = require('through')
-
 var proc = process.title // node or browser
 
 module.exports = function bricoleur (data) {
@@ -17,7 +16,8 @@ module.exports = function bricoleur (data) {
   }
 
   function put (mod) {
-    if (map[mod]) _[mod] = require('./_wilds/'+mod)()
+    if (map[mod] && map[mod].nimoy.process === proc) 
+      _[mod] = require('./_wilds/'+mod)()
   }
 
   function conn (mods) {
@@ -53,7 +53,7 @@ module.exports = function bricoleur (data) {
   }
 
   // INTERFACE / API
-  var io = through(function write (cmd) {
+  var interface = through(function write (cmd) {
     var arg = cmd.split(' ')
     api[arg[0]](arg[1])
     // if (typeof d.value === 'string' && d.value[0] === '{') val = JSON.parse(d.value)
@@ -61,5 +61,5 @@ module.exports = function bricoleur (data) {
     this.end()
   })
   
-  return io
+  return interface
 }
