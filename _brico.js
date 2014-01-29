@@ -33,6 +33,7 @@ module.exports = function bricoleur (data) {
 
   var api = {
 
+
   }
 
   // DATA HANDLING
@@ -40,8 +41,11 @@ module.exports = function bricoleur (data) {
   liveStream.on('data', filterData)
 
   function filterData (d) {
-    if filter[d]
-
+    if (d.type && d.type === 'put') {
+      var val = d.value
+      if (typeof d.value === 'string' && d.value[0] === '{') val = JSON.parse(d.value)
+      if (filter[d.key]) filter[d.key](val)
+    }
   }
   var filter = { 
     map : function (m) {
@@ -56,7 +60,6 @@ module.exports = function bricoleur (data) {
   var interface = through(function write (cmd) {
     var arg = cmd.split(' ')
     api[arg[0]](arg[1])
-    // if (typeof d.value === 'string' && d.value[0] === '{') val = JSON.parse(d.value)
   }, function end () {
     this.end()
   })
