@@ -16,13 +16,9 @@
 
 // > env {mod -- id: // set id using unix timestamp
 
-// create a data model
-
-// everything lives in the db
-// env { 
-//   modules:
-//   connections:
-// }
+// stream for action
+// stream for data
+// merge data / actions
 
 var through = require('through')
 
@@ -40,7 +36,7 @@ module.exports = function bricoleur (data) {
       console.log(d)
     }
   }
-
+    
   var filter = {
     map : function (m) { // index?!
       console.log(m)
@@ -66,3 +62,5 @@ module.exports = function bricoleur (data) {
   
   return io
 }
+
+
