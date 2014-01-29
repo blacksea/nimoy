@@ -34,7 +34,7 @@ var map = require('./_map')({
   bundle : bundle,
   min : config.minify
 }, function putMap (m) {
-  db.put('map', m)
+  db.put('map', m) 
 
   var stat = fs.statSync(bundle)
   console.log(log('wrote bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+bundle))
@@ -42,8 +42,17 @@ var map = require('./_map')({
   // BOOT 
   bootnet(function () {
     console.log(log('network running on port: '+config.port+' host: '+config.host))
-    if (config.repl === true) repl(prompt)
+    if (config.repl === true) repl(prompt) // connect repl to brico
   })
+
+  // REPL
+  var read = require('read')
+  function repl (opts) {
+    read(opts, function (e, res, empty) {
+      if (e && e.message == 'canceled') process.exit(0)
+      repl(prompt)
+    })
+  }
 })
 
 function bootnet (booted) {
@@ -96,7 +105,6 @@ function bootnet (booted) {
     var origin = headers.origin
     var wss = webSocketStream(soc) 
 
-    // CONNECT MULTILEVEL
     wss.pipe(multilevel.server(db)).pipe(wss) 
 
     wss.on('close', wss.end)
@@ -104,14 +112,4 @@ function bootnet (booted) {
       console.error(e)
     })
   }
-}
-
-// REPL
-var read = require('read')
-
-function repl (opts) {
-  read(opts, function (e, res, empty) {
-    if (e && e.message == 'canceled') process.exit(0)
-    repl(prompt)
-  })
 }
