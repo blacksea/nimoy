@@ -1,15 +1,5 @@
 // BRICO
 
-// brico replicates to client nodes --- client node can have different access priveleges
-// modules need an interface/spec --- pass in opts and return stream for now
-// some modules may need time to load / init
-// map / survey / library -- transforms?
-// object/transport/stream protocol
-// conn / disconn
-// env / status
-// put / rm
-// search
-
 // > pipe modules in to data and filter data in streams based on key or id
 // > module representation!?
 // > env mod -- id: // set id using unix timestamp
@@ -47,6 +37,7 @@ module.exports = function bricoleur (data) {
     rm : function (mod) {
       _[mod].end()
       delete _[mod]
+      console.log(_)
     }
   }
 
@@ -64,7 +55,6 @@ module.exports = function bricoleur (data) {
   liveStream.pipe(through(function handleData (d) {
     if (d.type === 'put') io.emit('data', d) 
     // filter here!
-
   }, function end () {
     this.end()
   }))
