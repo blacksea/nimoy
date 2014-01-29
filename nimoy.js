@@ -30,12 +30,12 @@ var map = require('./_map')({
   min : config.minify
 }, function putMap (m) {
   db.put('map', m)
-})
 
-// BOOT 
-bootnet(function () {
-  console.log('network running on port: '+config.port+' and host: '+config.host)
-  if (config.repl === 'true') repl()
+  // BOOT 
+  bootnet(function () {
+    console.log('network running on port: '+config.port+' and host: '+config.host)
+    if (config.repl === true) repl({prompt: '>'})
+  })
 })
 
 function bootnet (booted) {
@@ -101,10 +101,11 @@ function bootnet (booted) {
 // REPL
 var read = require('read')
 
-function repl () {
-  var opts = {}
-  read(opts, function (e, result, default) {
-    if (e) console.error(e) 
-    repl()
+function repl (opts) {
+  read(opts, function (e, res, empty) {
+    if (e && e.message == 'canceled') process.exit(0)
+    console.log(res)
+    var p = {prompt:'>'}
+    repl(p)
   })
 }
