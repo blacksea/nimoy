@@ -9,8 +9,8 @@ module.exports = function bricoleur (data) {
   // DATA 
   var dataFilter = through(function write(d) {
     if (d.key) {
-      var cat = d.key.split(':')
-      console.log(cat)
+      var cat = d.key.split(':')[0]
+      if (cat === 'wilds') index(d.value)
     }
 
     // should be somekind of filter/register/lookup
@@ -28,6 +28,9 @@ module.exports = function bricoleur (data) {
     this.emit('end')
   })
 
+  function index (pkg) { // build an index!
+
+  }
 
   // BOOT 
   var liveStream = data.liveStream() 
