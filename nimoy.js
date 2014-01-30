@@ -33,15 +33,21 @@ var brico = new bricoleur(db)
 
 
 // RUN MAP / BROWSERIFY / BOOT / REPL 
-var dbWriteStream = db.createWriteStream({valueEncoding:'json'})
 var bundle = config.dir_static+'bundle.js' 
+
 var map = require('./_map')({
   wilds : config.dir_wilds,
   bundle : bundle,
   min : config.minify
 })
+
+var dbWriteStream = db.createWriteStream({type:'put'})
 map.pipe(dbWriteStream)
-dbWriteStream.on('close', BOOT)
+
+dbWriteStream.on('close', function bundleAndBoot () {
+  console.log('map done')
+  BOOT()
+})
              
 function BOOT () {
   var stat = fs.statSync(bundle)
@@ -113,12 +119,11 @@ function bootnet (booted) {
     var headers = soc.upgradeReq.headers
     var origin = headers.origin
     var wss = webSocketStream(soc) 
-
-    wss.pipe(multilevel.server(db)).pipe(wss) 
-
-    wss.on('close', wss.end)
     wss.on('error', function (e) {
-      console.error(e)
+      // *note: multiServer sends close after wss is closed / temp ignore
+      if (soc.readyState !== 3) console.error(e)
     })
+    var multiServer = multilevel.server(db)
+    wss.pipe(multiServer).pipe(wss)
   }
 }

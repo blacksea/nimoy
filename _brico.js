@@ -4,28 +4,34 @@ var through = require('through')
 var proc = process.title // node or browser
 
 module.exports = function bricoleur (data) {
-  var self = this
-  var map
 
 
   // DATA 
-  data.get('map', function (e, val) {
-    if (e) console.error(e)
-    if (!e) map = JSON.parse(val)
+  var dataFilter = through(function write(d) {
+    console.log(d)
+    // should be somekind of filter/register/lookup
+    // just use level encoding info to get encoding
+    
+    // use keystructure & encoding!
+
+    if (d.type && d.type === 'put') {
+      typeof d.value === 'string' && d.value[0] === '{' 
+        ? var val = JSON.parse(d.value)
+        : var val = d.value
+    }
+  }, function end () {
+    this.emit('end')
   })
 
   var liveStream = data.liveStream({old:false}) 
-  liveStream.on('data', filterData)
-
-  function filterData (d) { // should be somekind of filter/register/lookup
-    if (d.type && d.type === 'put') {
-      var val = d.value
-      if (typeof d.value === 'string' && d.value[0] === '{') val = JSON.parse(d.value)
-      // if (filter[d.key]) filter[d.key](val)
-    }
-  }
+  liveStream.pipe(dataFilter)
 
 
+  // BOOT 
+  var ks = data.createKeyStream()
+  ks.pipe(dataFilter)
+
+  
   // WILDS / RUNNING MODULES
   var _ = {}
 
@@ -45,29 +51,19 @@ module.exports = function bricoleur (data) {
   }
 
 
-  // METHODS / API
+  // METHODS / API / get data into db
   return through(function interface (input) {
 
     // lookup existing from map & infill
-    
     // provide feedback
-
-    if (typeof cmd === 'string') { // use ternary?
-
-      // check for json
-      
-      if (cmd[0] === '{') var val = JSON.parse(cmd)
-      var arg = cmd.split(' ')
-      api[arg[0]](arg[1])
+    
      
       // if not json must be simple text command
-      
       // maybe an array
-      
       //if (cmd instanceof Array)  
-    }
-
   }, function end () {
     this.end()
   })
 }
+
+// MODE? / AUTH?  
