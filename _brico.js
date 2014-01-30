@@ -8,16 +8,19 @@ module.exports = function bricoleur (data) {
 
   // DATA 
   var dataFilter = through(function write(d) {
+
     console.log(d)
+
     // should be somekind of filter/register/lookup
     // just use level encoding info to get encoding
     
     // use keystructure & encoding!
 
     if (d.type && d.type === 'put') {
+      var val
       typeof d.value === 'string' && d.value[0] === '{' 
-        ? var val = JSON.parse(d.value)
-        : var val = d.value
+        ? val = JSON.parse(d.value)
+        : val = d.value
     }
   }, function end () {
     this.emit('end')
@@ -51,16 +54,11 @@ module.exports = function bricoleur (data) {
   }
 
 
-  // METHODS / API / get data into db
+  // METHODS / API
   return through(function interface (input) {
+    // GET DATA IN!
 
-    // lookup existing from map & infill
-    // provide feedback
     
-     
-      // if not json must be simple text command
-      // maybe an array
-      //if (cmd instanceof Array)  
   }, function end () {
     this.end()
   })
