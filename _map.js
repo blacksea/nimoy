@@ -16,7 +16,6 @@ module.exports = function Map (opts, cb) {
     if (e) console.error(e)
     if (!e) asyncMap(modules, readPkg, function () {
       bundleJS()
-      s.end()
     })
   })
 

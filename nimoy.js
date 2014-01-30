@@ -45,7 +45,6 @@ var dbWriteStream = db.createWriteStream({type:'put'})
 map.pipe(dbWriteStream)
 
 dbWriteStream.on('close', function bundleAndBoot () {
-  console.log('map done')
   BOOT()
 })
              
