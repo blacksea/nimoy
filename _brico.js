@@ -8,8 +8,10 @@ module.exports = function bricoleur (data) {
 
   // DATA 
   var dataFilter = through(function write(d) {
-
-    console.log(d)
+    if (d.key) {
+      var cat = d.key.split(':')
+      console.log(cat)
+    }
 
     // should be somekind of filter/register/lookup
     // just use level encoding info to get encoding
@@ -26,15 +28,12 @@ module.exports = function bricoleur (data) {
     this.emit('end')
   })
 
-  var liveStream = data.liveStream({old:false}) 
-  liveStream.pipe(dataFilter)
-
 
   // BOOT 
-  var ks = data.createKeyStream()
-  ks.pipe(dataFilter)
-
+  var liveStream = data.liveStream() 
+  liveStream.pipe(dataFilter)
   
+
   // WILDS / RUNNING MODULES
   var _ = {}
 
