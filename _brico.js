@@ -7,7 +7,26 @@ module.exports = function bricoleur (data) {
   var self = this
   var map
 
-  // WILDS  
+
+  // DATA 
+  data.get('map', function (e, val) {
+    if (e) console.error(e)
+    if (!e) map = JSON.parse(val)
+  })
+
+  var liveStream = data.liveStream({old:false}) 
+  liveStream.on('data', filterData)
+
+  function filterData (d) { // should be somekind of filter/register/lookup
+    if (d.type && d.type === 'put') {
+      var val = d.value
+      if (typeof d.value === 'string' && d.value[0] === '{') val = JSON.parse(d.value)
+      // if (filter[d.key]) filter[d.key](val)
+    }
+  }
+
+
+  // WILDS / RUNNING MODULES
   var _ = {}
 
   function rm (mod) {
@@ -25,44 +44,30 @@ module.exports = function bricoleur (data) {
     _[mods[0]].pipe(_[mods[1]])
   }
 
-  // DATA MANIP
-  data.get('map', function (e, val) {
-    if (e) console.error(e)
-    if (!e) map = JSON.parse(val)
-  })
 
-  var api = {
+  // METHODS / API
+  return through(function interface (input) {
 
+    // lookup existing from map & infill
+    
+    // provide feedback
 
-  }
+    if (typeof cmd === 'string') { // use ternary?
 
-  // DATA HANDLING
-  var liveStream = data.liveStream({old:false}) 
-  liveStream.on('data', filterData)
-
-  function filterData (d) {
-    if (d.type && d.type === 'put') {
-      var val = d.value
-      if (typeof d.value === 'string' && d.value[0] === '{') val = JSON.parse(d.value)
-      if (filter[d.key]) filter[d.key](val)
+      // check for json
+      
+      if (cmd[0] === '{') var val = JSON.parse(cmd)
+      var arg = cmd.split(' ')
+      api[arg[0]](arg[1])
+     
+      // if not json must be simple text command
+      
+      // maybe an array
+      
+      //if (cmd instanceof Array)  
     }
-  }
-  var filter = { 
-    map : function (m) {
 
-    },
-    env : function (env) {
-
-    }
-  }
-
-  // INTERFACE / API
-  var interface = through(function write (cmd) {
-    var arg = cmd.split(' ')
-    api[arg[0]](arg[1])
   }, function end () {
     this.end()
   })
-  
-  return interface
 }

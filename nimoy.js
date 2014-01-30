@@ -1,10 +1,12 @@
 // NIMOY 
 
+
 var fs = require('fs')
 var clc = require('cli-color')
 var log = clc.cyanBright
 var err = clc.red
 var prompt = {prompt:'nimoy:'}
+
 
 // CONFIG 
 var argv = require('optimist').argv
@@ -15,6 +17,7 @@ config = JSON.parse(conf)
 if (config.dir_static[config.dir_static.length-1] !== '/') config.dir_static += '/'
 if (config.dir_wilds[config.dir_wilds.length-1] !== '/') config.dir_wilds += '/'
 
+
 // SETUP DB
 var level = require('level')
 var multilevel = require('multilevel')
@@ -23,23 +26,27 @@ var db = level('./'+config.host)
 liveStream.install(db)
 multilevel.writeManifest(db, __dirname + '/manifest.json')
 
+
 // RUN BRICO  
 var bricoleur = require('./_brico')
 var brico = new bricoleur(db)
 
-// RUN MAP & BROWSERIFY
+
+// RUN MAP / BROWSERIFY / BOOT / REPL 
+var dbWriteStream = db.createWriteStream({valueEncoding:'json'})
 var bundle = config.dir_static+'bundle.js' 
 var map = require('./_map')({
   wilds : config.dir_wilds,
   bundle : bundle,
   min : config.minify
-}, function putMap (m) {
-  db.put('map', m) 
-
+})
+map.pipe(dbWriteStream)
+dbWriteStream.on('close', BOOT)
+             
+function BOOT () {
   var stat = fs.statSync(bundle)
   console.log(log('wrote bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+bundle))
 
-  // BOOT 
   bootnet(function () {
     console.log(log('network running on port: '+config.port+' host: '+config.host))
     if (config.repl === true) repl(prompt) // connect repl to brico
@@ -52,10 +59,10 @@ var map = require('./_map')({
     read(opts, function (e, cmd, empty) {
       if (e && e.message == 'canceled') process.exit(0)
       if (!e && cmd) brico.write(cmd)
-      repl(prompt)
+      repl(prompt) // should be able to prompt with feedback/cb
     })
   }
-})
+}
 
 function bootnet (booted) {
   var http = require('http')
@@ -99,7 +106,7 @@ function bootnet (booted) {
   function installWS () {
     var ws = new webSocketServer({server:server})
     ws.on('connection', handleSoc)
-    booted() // NETWORK IS READY
+    booted() // NETWORK READY
   }
 
   function handleSoc (soc) {
