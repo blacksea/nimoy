@@ -9,28 +9,19 @@ module.exports = function bricoleur (data) {
   // DATA 
   var dataFilter = through(function write(d) {
     var path = d.key.split(':')
-    console.log(path)
+    index(path) // maybe this shouldn't be called all the time
 
-    if (d.key) {
-      var cat = d.key.split(':')[0]
-      if (cat === 'wilds') index(d.value)
-    }
+    console.log(d)
 
     // should be somekind of filter/register/lookup
     // just use level encoding info to get encoding
     // use keystructure & encoding!
 
-    if (d.type && d.type === 'put') {
-      var val
-      typeof d.value === 'string' && d.value[0] === '{' 
-        ? val = JSON.parse(d.value)
-        : val = d.value
-    }
   }, function end () {
     this.emit('end')
   })
 
-  function index (pkg) { // build an index!
+  function index (path) { // build an index!
 
   }
 
@@ -47,6 +38,7 @@ module.exports = function bricoleur (data) {
   }
 
   function put (mod) {
+
     if (map[mod] && map[mod].nimoy.process === proc) 
       _[mod] = require('./_wilds/'+mod)()
   }

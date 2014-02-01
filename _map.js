@@ -25,7 +25,7 @@ module.exports = function Map (opts, cb) {
       var pkg = JSON.parse(jsn)
       if (pkg.nimoy) { 
         if (pkg.nimoy.process === 'browser') b.require(dir+pkg.name, {expose:pkg.name})
-        s.write({key:'wilds:'+pkg.name, value:jsn})
+        s.write({key:opts.prefix+':'+pkg.name, value:jsn, valueEncoding:'json'})
         next() 
       } else next()
     } else next()
