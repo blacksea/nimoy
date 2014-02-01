@@ -36,6 +36,7 @@ var brico = new bricoleur(db)
 var bundle = config.dir_static+'bundle.js' 
 
 var map = require('./_map')({
+  prefix: 'wilds',
   wilds : config.dir_wilds,
   bundle : bundle,
   min : config.minify

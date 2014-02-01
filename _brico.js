@@ -8,6 +8,9 @@ module.exports = function bricoleur (data) {
 
   // DATA 
   var dataFilter = through(function write(d) {
+    var path = d.key.split(':')
+    console.log(path)
+
     if (d.key) {
       var cat = d.key.split(':')[0]
       if (cat === 'wilds') index(d.value)
@@ -15,7 +18,6 @@ module.exports = function bricoleur (data) {
 
     // should be somekind of filter/register/lookup
     // just use level encoding info to get encoding
-    
     // use keystructure & encoding!
 
     if (d.type && d.type === 'put') {
@@ -32,10 +34,9 @@ module.exports = function bricoleur (data) {
 
   }
 
-  // BOOT 
   var liveStream = data.liveStream() 
   liveStream.pipe(dataFilter)
-  
+
 
   // WILDS / RUNNING MODULES
   var _ = {}
@@ -58,12 +59,10 @@ module.exports = function bricoleur (data) {
 
   // METHODS / API
   return through(function interface (input) {
-    // GET DATA IN!
-
+  // GET DATA IN!
     
+
   }, function end () {
     this.end()
   })
 }
-
-// MODE? / AUTH?  
