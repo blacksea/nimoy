@@ -55,7 +55,7 @@ function BOOT () {
 
   bootnet(function () {
     console.log(log('network running on port: '+config.port+' host: '+config.host))
-    if (config.repl === true) repl(prompt) // connect repl to brico
+    if (config.repl === true) repl(prompt)
   })
 
   // REPL

@@ -8,21 +8,33 @@ module.exports = function bricoleur (data) {
 
   // DATA 
   var dataFilter = through(function write(d) {
-    var path = d.key.split(':')
-    index(path) // maybe this shouldn't be called all the time
 
-    console.log(d)
+    var path = d.key.split(':') // filter with path
+    var action = path[0]
+    var loc = path[1]
+    var id = path[2]
+    
+    if (d.type) switch (d.type) {
+      case 'put' : put[action](d); break;
+      case 'del' : rm[action](d); break;
+      default : console.log(d.type);
+    }
 
-    // should be somekind of filter/register/lookup
-    // just use level encoding info to get encoding
-    // use keystructure & encoding!
+    // CRAZINESS!? BUILD DYNAMIC API FROM CONFIG?
+    // LINKING / TRANSFORMING
 
   }, function end () {
     this.emit('end')
   })
 
-  function index (path) { // build an index!
+  var put = {
+  }
+  var rm = {
+  }
 
+  function put (d) {
+    // a way to insert options?
+    _[mod.name] = require(mod.name)(mod.opts)
   }
 
   var liveStream = data.liveStream() 
@@ -32,17 +44,6 @@ module.exports = function bricoleur (data) {
   // WILDS / RUNNING MODULES
   var _ = {}
 
-  function rm (mod) {
-    _[mod].end()
-    delete _[mod]
-  }
-
-  function put (mod) {
-
-    if (map[mod] && map[mod].nimoy.process === proc) 
-      _[mod] = require('./_wilds/'+mod)()
-  }
-
   function conn (mods) {
     var mods = con.split('-')
     _[mods[0]].pipe(_[mods[1]])
@@ -51,10 +52,23 @@ module.exports = function bricoleur (data) {
 
   // METHODS / API
   return through(function interface (input) {
-  // GET DATA IN!
-    
+    var args = input.spit(' ')
+    var cmd = args[0]
 
+    if (cmd === 'put') { // do module lookup
+
+    }
+
+    // build options
+    var opts = {}
+    for (var i=2; i<args.length;i++) {
+      var pair = args[i].split('=')
+      var key = pair[0]
+      var val = pair[1]
+      opts[key] = val
+    }
+    console.log(opts)
   }, function end () {
-    this.end()
+    this.emit('end')
   })
 }
