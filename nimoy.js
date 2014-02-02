@@ -27,10 +27,6 @@ liveStream.install(db)
 multilevel.writeManifest(db, __dirname + '/manifest.json')
 
 
-// save conf
-db.put('config', conf)
-
-
 // RUN BRICO  
 var bricoleur = require('./_brico')
 var brico = new bricoleur(db)
@@ -63,6 +59,10 @@ function BOOT () {
 
   bootnet(function () {
     console.log(log('network running on port: '+config.port+' host: '+config.host))
+
+    // save conf / clean up before storing
+    db.put('config', JSON.stringify(config))
+
     if (config.repl === true) repl(prompt)
   })
 
@@ -89,12 +89,14 @@ function bootnet (booted) {
 
   var server
 
-  if (config.crypto) { 
+  if (!config.crypto) 
+    server = http.createServer(handleRequests)
+  else if (config.crypto) { 
     var key = fs.readFileSync(config.crypto.key)
     var cert = fs.readFileSync(config.crypto.cert)
     server = https.createServer({key:key,cert:cert}, handleRequests)
-  } else if (!config.crypto) 
-    server = http.createServer(handleRequests)
+    delete config.crypto
+  } 
 
   server.listen(config.port, config.host, installWS)
 
