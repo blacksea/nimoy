@@ -4,5 +4,6 @@
   "minify" : false,
   "repl" : true,
   "dir_wilds" : "./_wilds",
-  "dir_static" : "./_static"
+  "dir_static" : "./_static",
+  "rsa" : false
 }
