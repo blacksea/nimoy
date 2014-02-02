@@ -15,9 +15,7 @@ module.exports = function bricoleur (data) {
     var id = path[2]
 
     // set config
-    if (d.key === 'config') conf = JSON.parse(d.value.toString());console.log(conf)
-    
-    // if (!d.type)
+    if (d.key === 'config') conf = JSON.parse(d.value.toString())    // if (!d.type)
     // if (d.type) switch (d.type) {
     //   case 'put' : put[action](d); break;
     //   case 'del' : rm[action](d); break;
@@ -35,7 +33,7 @@ module.exports = function bricoleur (data) {
     _[mod.name] = require(mod.name)(mod.opts)
   }
 
-  var liveStream = data.liveStream() 
+  var liveStream = data.liveStream({old:false}) 
   liveStream.pipe(dataFilter)
 
 
@@ -62,7 +60,7 @@ module.exports = function bricoleur (data) {
           opts[key] = val
         }
       }
-      console.log(opts)
+
       // what spec to use?!
       var key = null
       var val = null
