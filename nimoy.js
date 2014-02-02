@@ -2,7 +2,6 @@
 
 
 var fs = require('fs')
-var rsa = require('rsa-stream')
 var clc = require('cli-color')
 var log = clc.cyanBright
 var err = clc.red
