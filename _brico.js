@@ -5,15 +5,17 @@ var through = require('through')
 var proc = process.title // node or browser
 
 module.exports = function bricoleur (data) {
-
+  var conf
 
   // DATA 
   var dataFilter = through(function write(d) {
-
     var path = d.key.split(':') // filter with path
     var action = path[0]
     var loc = path[1]
     var id = path[2]
+
+    // set config
+    if (d.key === 'config') conf = JSON.parse(d.value.toString())
     
     // if (!d.type)
     // if (d.type) switch (d.type) {
