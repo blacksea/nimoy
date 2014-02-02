@@ -1,5 +1,6 @@
 // BRICO
 
+
 var through = require('through')
 var proc = process.title // node or browser
 
@@ -14,23 +15,17 @@ module.exports = function bricoleur (data) {
     var loc = path[1]
     var id = path[2]
     
-    if (d.type) switch (d.type) {
-      case 'put' : put[action](d); break;
-      case 'del' : rm[action](d); break;
-      default : console.log(d.type);
-    }
+    // if (d.type) switch (d.type) {
+    //   case 'put' : put[action](d); break;
+    //   case 'del' : rm[action](d); break;
+    //   default : console.log(d.type);
+    // }
 
-    // CRAZINESS!? BUILD DYNAMIC API FROM CONFIG?
-    // LINKING / TRANSFORMING
+    // LINKING / TRANSFORMING / mutable api
 
   }, function end () {
     this.emit('end')
   })
-
-  var put = {
-  }
-  var rm = {
-  }
 
   function put (d) {
     // a way to insert options?
@@ -52,20 +47,18 @@ module.exports = function bricoleur (data) {
 
   // METHODS / API
   return through(function interface (input) {
-    var args = input.spit(' ')
+    var args = input.split(' ')
     var cmd = args[0]
 
-    if (cmd === 'put') { // do module lookup
-
-    }
-
     // build options
-    var opts = {}
-    for (var i=2; i<args.length;i++) {
-      var pair = args[i].split('=')
-      var key = pair[0]
-      var val = pair[1]
-      opts[key] = val
+    if (cmd==='put' && args.length > 2) {
+      var opts = {}
+      for (var i=2; i<args.length;i++) {
+        var pair = args[i].split('=')
+        var key = pair[0]
+        var val = pair[1]
+        opts[key] = val
+      }
     }
     console.log(opts)
   }, function end () {
