@@ -9,15 +9,15 @@ var prompt = {prompt:'nimoy:'}
 
 
 // CONFIG 
-var argv = require('optimist').argv
-if (argv) var confJSON = argv._[0]
-if (!argv._[0]) var confJSON = './__conf.json'
+if (process.argv[2]) var confJSON = process.argv[2]
+console.log(confJSON)
+if (!process.argv[2]) var confJSON = './__conf.json'
 var conf = fs.readFileSync(confJSON)
 config = JSON.parse(conf)
 if (config.dir_static[config.dir_static.length-1] !== '/') config.dir_static += '/'
 if (config.dir_wilds[config.dir_wilds.length-1] !== '/') config.dir_wilds += '/'
 
-
+    
 // SETUP DB
 var level = require('level')
 var multilevel = require('multilevel')
@@ -25,6 +25,10 @@ var liveStream = require('level-live-stream')
 var db = level('./'+config.host) 
 liveStream.install(db)
 multilevel.writeManifest(db, __dirname + '/manifest.json')
+
+
+// save conf
+db.put('config', conf)
 
 
 // RUN BRICO  

@@ -15,6 +15,7 @@ module.exports = function bricoleur (data) {
     var loc = path[1]
     var id = path[2]
     
+    // if (!d.type)
     // if (d.type) switch (d.type) {
     //   case 'put' : put[action](d); break;
     //   case 'del' : rm[action](d); break;
