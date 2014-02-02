@@ -60,10 +60,11 @@ module.exports = function bricoleur (data) {
         }
       }
       console.log(opts)
-      // write to db!
+      // what spec to use?!
       var key = null
       var val = null
-      data.put(key, val)
+      // data.put(key, val)
+      // add ability to encrypt db values!
     }
   }
 
