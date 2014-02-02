@@ -9,21 +9,16 @@ module.exports = function bricoleur (data) {
 
   // DATA 
   var dataFilter = through(function write(d) {
-    var path = d.key.split(':') // filter with path
+    var path = d.key.split(':')
     var action = path[0]
     var loc = path[1]
     var id = path[2]
 
     // set config
     if (d.key === 'config') conf = JSON.parse(d.value.toString())    // if (!d.type)
-    // if (d.type) switch (d.type) {
-    //   case 'put' : put[action](d); break;
-    //   case 'del' : rm[action](d); break;
-    //   default : console.log(d.type);
-    // }
 
     // LINKING / TRANSFORMING / mutable api
-
+      
   }, function end () {
     this.emit('end')
   })
@@ -47,7 +42,6 @@ module.exports = function bricoleur (data) {
 
   var api = {
     put: function (args) {
-
       // check module exists
       
       // build options
@@ -64,6 +58,7 @@ module.exports = function bricoleur (data) {
       // what spec to use?!
       var key = null
       var val = null
+
       // data.put(key, val)
       // add ability to encrypt db values!
     }
