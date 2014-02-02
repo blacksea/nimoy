@@ -31,6 +31,10 @@ multilevel.writeManifest(db, __dirname + '/manifest.json')
 var bricoleur = require('./_brico')
 var brico = new bricoleur(db)
 
+brico.on('error', function (e) {
+  console.error(e)
+})
+
 
 // RUN MAP / BROWSERIFY / BOOT / REPL 
 var bundle = config.dir_static+'bundle.js' 

@@ -19,3 +19,6 @@ ws.pipe(db.createRpcStream()).pipe(ws)
 // RUN BRICO
 var bricoleur = require('./_brico')
 var brico = new bricoleur(db)
+brico.on('error', function (e) {
+  console.error(e)
+})

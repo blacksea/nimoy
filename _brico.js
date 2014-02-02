@@ -44,23 +44,34 @@ module.exports = function bricoleur (data) {
     _[mods[0]].pipe(_[mods[1]])
   }
 
+  var api = {
+    put: function (args) {
+
+      // check module exists
+      
+      // build options
+      if (args.length > 2) {
+        var opts = {}
+        for (var i=2; i<args.length;i++) {
+          var pair = args[i].split('=')
+          var key = pair[0]
+          var val = pair[1]
+          opts[key] = val
+        }
+      }
+      console.log(opts)
+      // write to db!
+      var key = null
+      var val = null
+      data.put(key, val)
+    }
+  }
 
   // METHODS / API
   return through(function interface (input) {
     var args = input.split(' ')
     var cmd = args[0]
-
-    // build options
-    if (cmd==='put' && args.length > 2) {
-      var opts = {}
-      for (var i=2; i<args.length;i++) {
-        var pair = args[i].split('=')
-        var key = pair[0]
-        var val = pair[1]
-        opts[key] = val
-      }
-    }
-    console.log(opts)
+    api[cmd] ? api[cmd](args) : this.emit('error', new Error('no such command'))
   }, function end () {
     this.emit('end')
   })
