@@ -7,6 +7,7 @@ var proc = process.title // node or browser
 module.exports = function bricoleur (data) {
   var conf
 
+
   // DATA 
   var dataFilter = through(function write(d) {
     var path = d.key.split(':')
@@ -63,6 +64,7 @@ module.exports = function bricoleur (data) {
       // add ability to encrypt db values!
     }
   }
+
 
   // METHODS / API
   return through(function interface (input) {

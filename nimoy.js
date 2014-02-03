@@ -10,7 +10,6 @@ var prompt = {prompt:'nimoy:'}
 
 // CONFIG 
 if (process.argv[2]) var confJSON = process.argv[2]
-console.log(confJSON)
 if (!process.argv[2]) var confJSON = './__conf.json'
 var conf = fs.readFileSync(confJSON)
 config = JSON.parse(conf)
