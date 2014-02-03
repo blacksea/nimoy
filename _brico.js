@@ -15,17 +15,20 @@ module.exports = function bricoleur (data) {
 
   // DATA 
   var dataFilter = through(function write(d) {
-    var path = d.key.split(':')
-    var action = path[0]
-    var loc = path[1]
-    var id = path[2]
-    if (typeof d.value === 'string' && d.value[0] === '{') d.value = JSON.parse(d.value)
+    if (d.type == 'del') fil.rm(d)
 
-    switch (action) {
-      case config.spaces.active : fil.put(d); break;
-      default : interface.emit('error', new Error('unable to handle action: '+action))
+    if (d.type === 'put') {
+      var path = d.key.split(':')
+      var action = path[0]
+      var loc = path[1]
+      var id = path[2]
+      if (typeof d.value === 'string' && d.value[0] === '{') d.value = JSON.parse(d.value)
+
+      switch (action) {
+        case config.spaces.active : fil.put(d); break;
+        default : interface.emit('error', new Error('unable to handle action: '+action))
+      }
     }
-
   }, function end () {
     this.emit('end')
   })
@@ -40,8 +43,8 @@ module.exports = function bricoleur (data) {
     },
     rm: function (mod) {
       // unpipe? close stream!?
-      _[mod.name].emit('close')
-      delete _[mod.name]
+      _[mod.key].emit('close')
+      delete _[mod.key]
       console.log(_)
     },
     conn: function (mods) {
@@ -83,6 +86,11 @@ module.exports = function bricoleur (data) {
       })
       ks.on('end', function () {
         if (match!==true) interface.emit('error', new Error('could not find module'))
+      })
+    },
+    rm: function (mod) {
+      data.del(mod[1], function (e) {
+        if (e) interface.emit('error',e)
       })
     }
   }
