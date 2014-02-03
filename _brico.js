@@ -20,8 +20,6 @@ module.exports = function bricoleur (data) {
     var loc = path[1]
     var id = path[2]
 
-
-    if (d.key === 'config') conf = JSON.parse(d.value.toString())
     switch (action) {
       default : interface.emit('error', new Error('unable to handle action: '+action))
     }
@@ -75,7 +73,7 @@ module.exports = function bricoleur (data) {
             opts[key] = val
           }
           if (opts === {}) opts = null
-          data.put(args[1],JSON.stringify(opts))
+          data.put(config.spaces.active+args[1],JSON.stringify(opts))
         }
         // what prefix?
       })

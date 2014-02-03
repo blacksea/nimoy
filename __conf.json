@@ -6,6 +6,7 @@
   "dir_wilds" : "./_wilds",
   "dir_static" : "./_static",
   "spaces" : {
-    "wilds" : "wilds"
+    "wilds" : "wilds",
+    "active" : "live"
   }
 }
