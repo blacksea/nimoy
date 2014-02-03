@@ -21,14 +21,11 @@ module.exports = function bricoleur (data) {
     var id = path[2]
 
 
-    // set config
     if (d.key === 'config') conf = JSON.parse(d.value.toString())
     switch (action) {
       default : interface.emit('error', new Error('unable to handle action: '+action))
     }
 
-    // prefix & path patterns
-    // LINKING / TRANSFORMING / mutable api
   }, function end () {
     this.emit('end')
   })
@@ -84,12 +81,9 @@ module.exports = function bricoleur (data) {
       })
       ks.on('end', function () {
         if (match!==true) interface.emit('error', new Error('could not find module'))
-        console.log('done')
       })
     }
   }
-
-  // a fast key search function
 
   // METHODS / API
   var interface = through(function (input) {
