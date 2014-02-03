@@ -6,6 +6,7 @@ var clc = require('cli-color')
 var log = clc.cyanBright
 var err = clc.red
 var prompt = {prompt:'nimoy:'}
+var brico
 
 
 // CONFIG 
@@ -57,7 +58,7 @@ function BOOT () {
 
     // RUN BRICO  
     var bricoleur = require('./_brico')
-    var brico = new bricoleur(db)
+    brico = new bricoleur(db)
 
     brico.on('error', function (e) {
       console.error(e)

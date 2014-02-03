@@ -9,9 +9,8 @@ module.exports = function bricoleur (data) {
   var _ = {}
 
   // get config!
-  data.get('config', function (e, d) {
+  data.get('config', function handleConfig (e, d) {
     e ? interface.emit('error', e) : conf = JSON.parse(d) 
-    console.log(conf)
   })
 
   // DATA 
@@ -21,14 +20,14 @@ module.exports = function bricoleur (data) {
     var loc = path[1]
     var id = path[2]
 
-    // prefix & path patterns
 
     // set config
     if (d.key === 'config') conf = JSON.parse(d.value.toString())
     switch (action) {
-      case 'wilds' : break;
       default : interface.emit('error', new Error('unable to handle action: '+action))
     }
+
+    // prefix & path patterns
     // LINKING / TRANSFORMING / mutable api
   }, function end () {
     this.emit('end')
@@ -63,28 +62,34 @@ module.exports = function bricoleur (data) {
   // WILDS / RUNNING MODULES
   var api = { // use prefixes from config
     put: function (args) {
+      var match = false
+      var opts = {}
+
       // check module exists
-      
-      // build options
-      if (args.length > 2) {
-        var opts = {}
-        for (var i=2; i<args.length;i++) {
-          var pair = args[i].split('=')
-          var key = pair[0]
-          var val = pair[1]
-          opts[key] = val
+      var ks = data.createKeyStream()
+      ks.on('data', function (d) {
+        var path = d.split(':')
+        if (args[1]===path[1]) {
+          match = true
+          for (var i=2; i<args.length;i++) {
+            var pair = args[i].split('=')
+            var key = pair[0]
+            var val = pair[1]
+            opts[key] = val
+          }
+          if (opts === {}) opts = null
+          data.put(args[1],JSON.stringify(opts))
         }
-      }
-
-      // what spec to use?!
-      var key = null
-      var val = null
-
-      // data.put(key, val)
-      // add ability to encrypt db values!
+        // what prefix?
+      })
+      ks.on('end', function () {
+        if (match!==true) interface.emit('error', new Error('could not find module'))
+        console.log('done')
+      })
     }
   }
 
+  // a fast key search function
 
   // METHODS / API
   var interface = through(function (input) {
