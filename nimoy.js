@@ -26,20 +26,11 @@ liveStream.install(db)
 multilevel.writeManifest(db, __dirname + '/manifest.json')
 
 
-// RUN BRICO  
-var bricoleur = require('./_brico')
-var brico = new bricoleur(db)
-
-brico.on('error', function (e) {
-  console.error(e)
-})
-
-
 // RUN MAP / BROWSERIFY / BOOT / REPL 
 var bundle = config.dir_static+'bundle.js' 
 
 var map = require('./_map')({
-  prefix: 'wilds',
+  prefix: config.spaces.wilds,
   wilds : config.dir_wilds,
   bundle : bundle,
   min : config.minify
@@ -63,6 +54,14 @@ function BOOT () {
     db.put('config', JSON.stringify(config))
 
     if (config.repl === true) repl(prompt)
+
+    // RUN BRICO  
+    var bricoleur = require('./_brico')
+    var brico = new bricoleur(db)
+
+    brico.on('error', function (e) {
+      console.error(e)
+    })
   })
 
   // REPL
