@@ -19,8 +19,10 @@ module.exports = function bricoleur (data) {
     var action = path[0]
     var loc = path[1]
     var id = path[2]
+    if (typeof d.value === 'string' && d.value[0] === '{') d.value = JSON.parse(d.value)
 
     switch (action) {
+      case config.spaces.active : fil.put(d); break;
       default : interface.emit('error', new Error('unable to handle action: '+action))
     }
 
@@ -31,7 +33,8 @@ module.exports = function bricoleur (data) {
   var fil = {
     put: function (mod) {
       // a way to insert options?
-      _[mod.name] = require(mod.name)(mod.opts)
+      var m = mod.key.split(':')[1]
+      _[m] = require(m)(m.value)
       console.log(_)
     },
     rm: function (mod) {
@@ -73,7 +76,7 @@ module.exports = function bricoleur (data) {
             opts[key] = val
           }
           if (opts === {}) opts = null
-          data.put(config.spaces.active+args[1],JSON.stringify(opts))
+          data.put(config.spaces.active+':'+args[1],JSON.stringify(opts))
         }
         // what prefix?
       })
