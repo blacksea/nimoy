@@ -34,7 +34,8 @@ module.exports = function bricoleur (data) {
     put: function (mod) {
       // a way to insert options?
       var m = mod.key.split(':')[1]
-      _[m] = require(m)(m.value)
+      var mPath = config.dir_wilds+m
+      _[m] = require(mPath)(m.value)
       console.log(_)
     },
     rm: function (mod) {
