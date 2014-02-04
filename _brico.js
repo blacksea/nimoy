@@ -14,8 +14,14 @@ module.exports = function bricoleur (data) {
   })
 
   // DATA 
-  var dataFilter = through(function write(d) {
+  var liveStream = data.liveStream({old:false}) 
+
+  liveStream.pipe(through(function filterData(d) { // filter livestream events
     if (d.type == 'del') fil.rm(d)
+
+    // use keypath!
+    // load / create a linkmap & use with keypath
+    // use proc to decide how to handle data
 
     if (d.type === 'put') {
       var path = d.key.split(':')
@@ -31,8 +37,10 @@ module.exports = function bricoleur (data) {
     }
   }, function end () {
     this.emit('end')
-  })
+  }))
 
+
+  // WILDS / RUNNING MODULES
   var fil = {
     put: function (mod) {
       // a way to insert options?
@@ -56,12 +64,6 @@ module.exports = function bricoleur (data) {
       _[mods[0]].unpipe(_[mods[1]])
     }
   }
-
-  var liveStream = data.liveStream({old:false}) 
-  liveStream.pipe(dataFilter)
-
-
-  // WILDS / RUNNING MODULES
   var api = { // use prefixes from config
     put: function (args) {
       var opts = {}
@@ -76,9 +78,20 @@ module.exports = function bricoleur (data) {
     }
   }
 
+
+  // METHODS / API
+  // handle incoming data / put outgoing data
+  var interface = through(function (input) { // interface handles both api / data ls
+    // incoming can be repl commands or data.liveStream objects
+    var args = input.split(' ')
+    var cmd = args[0]
+    api[cmd] ? api[cmd](args) : this.emit('error', new Error('no such command'))
+  }, function end () {
+    this.emit('end')
+  })
+
   function search (args, cb) {
     var match = false
-    // check module exists // move this to a search function
     var ks = data.createKeyStream()
     ks.on('data', function (d) {
       var path = d.split(':')
@@ -98,15 +111,6 @@ module.exports = function bricoleur (data) {
       if (match!==true) interface.emit('error', new Error('could not find module'))
     })
   }
-
-  // METHODS / API
-  var interface = through(function (input) {
-    var args = input.split(' ')
-    var cmd = args[0]
-    api[cmd] ? api[cmd](args) : this.emit('error', new Error('no such command'))
-  }, function end () {
-    this.emit('end')
-  })
 
   return interface
 }
