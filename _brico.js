@@ -64,28 +64,9 @@ module.exports = function bricoleur (data) {
   // WILDS / RUNNING MODULES
   var api = { // use prefixes from config
     put: function (args) {
-      var match = false
       var opts = {}
-
-      // check module exists
-      var ks = data.createKeyStream()
-      ks.on('data', function (d) {
-        var path = d.split(':')
-        if (args[1]===path[1]) {
-          match = true
-          for (var i=2; i<args.length;i++) {
-            var pair = args[i].split('=')
-            var key = pair[0]
-            var val = pair[1]
-            opts[key] = val
-          }
-          if (opts === {}) opts = null
-          data.put(config.spaces.active+':'+args[1],JSON.stringify(opts))
-        }
-        // what prefix?
-      })
-      ks.on('end', function () {
-        if (match!==true) interface.emit('error', new Error('could not find module'))
+      search(args, function () {
+        // data.put(
       })
     },
     rm: function (mod) {
@@ -93,6 +74,29 @@ module.exports = function bricoleur (data) {
         if (e) interface.emit('error',e)
       })
     }
+  }
+
+  function search (args, cb) {
+    var match = false
+    // check module exists // move this to a search function
+    var ks = data.createKeyStream()
+    ks.on('data', function (d) {
+      var path = d.split(':')
+      if (args[1]===path[1]) {
+        match = true
+        for (var i=2; i<args.length;i++) {
+          var pair = args[i].split('=')
+          var key = pair[0]
+          var val = pair[1]
+          opts[key] = val
+        }
+        if (opts === {}) opts = null
+        data.put(config.spaces.active+':'+args[1],JSON.stringify(opts))
+      }
+    }) // what prefix?
+    ks.on('end', function () {
+      if (match!==true) interface.emit('error', new Error('could not find module'))
+    })
   }
 
   // METHODS / API
