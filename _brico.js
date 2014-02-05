@@ -13,16 +13,15 @@ module.exports = function bricoleur (data) {
     e ? interface.emit('error', e) : conf = JSON.parse(d) 
   })
 
+
   // DATA 
   var liveStream = data.liveStream({old:false}) 
 
   liveStream.pipe(through(function filterData(d) { // filter livestream events
     if (d.type == 'del') fil.rm(d)
-
     // use keypath!
     // load / create a linkmap & use with keypath
     // use proc to decide how to handle data
-
     if (d.type === 'put') {
       var path = d.key.split(':')
       var action = path[0]
@@ -41,6 +40,8 @@ module.exports = function bricoleur (data) {
 
 
   // WILDS / RUNNING MODULES
+  // condense these into a single tree  
+  // make a linkage / transform thing using fern
   var fil = {
     put: function (mod) {
       // a way to insert options?
@@ -64,25 +65,11 @@ module.exports = function bricoleur (data) {
       _[mods[0]].unpipe(_[mods[1]])
     }
   }
-  var api = { // use prefixes from config
-    put: function (args) {
-      var opts = {}
-      search(args, function () {
-        // data.put(
-      })
-    },
-    rm: function (mod) {
-      data.del(mod[1], function (e) {
-        if (e) interface.emit('error',e)
-      })
-    }
-  }
-
 
   // METHODS / API
   // handle incoming data / put outgoing data
+  // incoming can be repl commands or data.liveStream objects
   var interface = through(function (input) { // interface handles both api / data ls
-    // incoming can be repl commands or data.liveStream objects
     var args = input.split(' ')
     var cmd = args[0]
     api[cmd] ? api[cmd](args) : this.emit('error', new Error('no such command'))
@@ -90,12 +77,13 @@ module.exports = function bricoleur (data) {
     this.emit('end')
   })
 
+
   function search (args, cb) {
     var match = false
     var ks = data.createKeyStream()
     ks.on('data', function (d) {
       var path = d.split(':')
-      if (args[1]===path[1]) {
+      if (args[1] === path[1]) {
         match = true
         for (var i=2; i<args.length;i++) {
           var pair = args[i].split('=')
@@ -108,7 +96,7 @@ module.exports = function bricoleur (data) {
       }
     }) // what prefix?
     ks.on('end', function () {
-      if (match!==true) interface.emit('error', new Error('could not find module'))
+      if (match !== true) interface.emit('error', new Error('could not find module'))
     })
   }
 

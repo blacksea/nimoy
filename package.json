@@ -28,8 +28,6 @@
     "through": ">=2.3.4",
     "cli-color": ">=0.2.3",
     "slide": ">=1.1.4",
-    "rsa-stream": ">=0.0.2",
-    "read": ">=1.0.0",
     "ws": ">=0.4.30"
   },
   "devDependancies": {
