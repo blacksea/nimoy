@@ -10,32 +10,33 @@ module.exports = function bricoleur (data) {
   var _ = {}
 
   // CONFIG
-  data.get('config', function handleConfig (e, d) {
-    e ? interface.emit('error', e) : conf = JSON.parse(d) 
-  })
+  if (!conf) {
+    data.get('config', function handleConfig (e, d) {
+      e ? interface.emit('error', e) : conf = JSON.parse(d);
+    })
+  }
 
 
-  // DATA 
-  // use keypath!
-  // load / create a linkmap & use with keypath
-  // use proc to decide how to handle data
-  // don't use a switch statement / solve it with fern & a map
+  // DATA
   var liveStream = data.liveStream({old:false}) 
 
   var filter = fern({
     put: {
-       live: function (mod) {
-         var m = mod.key.split(':')[1]
+       live: function (d) {
+         var m = d.key.split(':')[1]
          var mPath = config.dir_wilds+m
-         _[m] = require(mPath)(m.value)
+         _[m] = require(mPath)(d.value)
        },
-       conn: function (con) {
+       conn: function (d) {
 
+       },
+       config: function (d) {
+         conf = JSON.parse(d.value.config)
        }
     },
     rm: {
-      live: function (mod) { // unpipe? close stream!?
-        var m = mod.key.split(':')[1]
+      live: function (d) { // unpipe? close stream!?
+        var m = d.key.split(':')[1]
         _[m].emit('close')
         delete _[m]
       },
@@ -49,26 +50,18 @@ module.exports = function bricoleur (data) {
     console.log(d)
   }, function end () {
     this.emit('end')
-  })
+  }))
 
-  // WILDS / RUNNING MODULES
-  // condense these into a single tree  
-  // make a linkage / transform thing using fern
- 
-
-  // METHODS / API
-  // handle incoming data / put outgoing data
-  // incoming can be repl commands or data.liveStream objects
-  var interface = through(function (input) { // interface handles both api / data ls
-    // all this input stream should do is write to db
-
-    var args = input.split(' ')
+  var interface = through(function input (d) { // REPL INPUT  
+    var args = d.split(' ')
     var cmd = args[0]
     api[cmd] ? api[cmd](args) : this.emit('error', new Error('no such command'))
   }, function end () {
     this.emit('end')
   })
 
+
+  // UTIL
   function search (args, cb) {
     var match = false
     var ks = data.createKeyStream()
@@ -93,3 +86,4 @@ module.exports = function bricoleur (data) {
 
   return interface
 }
+
