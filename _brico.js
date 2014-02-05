@@ -31,7 +31,7 @@ module.exports = function bricoleur (data) {
 
        },
        config: function (d) {
-         conf = JSON.parse(d.value.config)
+         conf = JSON.parse(d.value)
        }
     },
     rm: {
