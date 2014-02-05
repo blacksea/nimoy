@@ -19,20 +19,19 @@ module.exports = function bricoleur (data) {
 
   liveStream.pipe(through(function filterData(d) { // filter livestream events
     if (d.type == 'del') fil.rm(d)
+
     // use keypath!
     // load / create a linkmap & use with keypath
     // use proc to decide how to handle data
+     
+    // don't use a switch statement / solve it with fern & a map
+     
     if (d.type === 'put') {
       var path = d.key.split(':')
       var action = path[0]
       var loc = path[1]
       var id = path[2]
       if (typeof d.value === 'string' && d.value[0] === '{') d.value = JSON.parse(d.value)
-
-      switch (action) {
-        case config.spaces.active : fil.put(d); break;
-        default : interface.emit('error', new Error('unable to handle action: '+action))
-      }
     }
   }, function end () {
     this.emit('end')
@@ -42,9 +41,9 @@ module.exports = function bricoleur (data) {
   // WILDS / RUNNING MODULES
   // condense these into a single tree  
   // make a linkage / transform thing using fern
+ 
   var fil = {
     put: function (mod) {
-      // a way to insert options?
       var m = mod.key.split(':')[1]
       var mPath = config.dir_wilds+m
       _[m] = require(mPath)(m.value)
@@ -69,6 +68,7 @@ module.exports = function bricoleur (data) {
   // METHODS / API
   // handle incoming data / put outgoing data
   // incoming can be repl commands or data.liveStream objects
+ 
   var interface = through(function (input) { // interface handles both api / data ls
     var args = input.split(' ')
     var cmd = args[0]
@@ -94,7 +94,7 @@ module.exports = function bricoleur (data) {
         if (opts === {}) opts = null
         data.put(config.spaces.active+':'+args[1],JSON.stringify(opts))
       }
-    }) // what prefix?
+    })
     ks.on('end', function () {
       if (match !== true) interface.emit('error', new Error('could not find module'))
     })
