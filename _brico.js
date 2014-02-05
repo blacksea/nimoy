@@ -2,81 +2,72 @@
 
 
 var through = require('through')
+var fern = require('fern')
 var proc = process.title // node or browser
 
 module.exports = function bricoleur (data) {
   var conf
   var _ = {}
 
-  // get config!
+  // CONFIG
   data.get('config', function handleConfig (e, d) {
     e ? interface.emit('error', e) : conf = JSON.parse(d) 
   })
 
 
   // DATA 
+  // use keypath!
+  // load / create a linkmap & use with keypath
+  // use proc to decide how to handle data
+  // don't use a switch statement / solve it with fern & a map
   var liveStream = data.liveStream({old:false}) 
 
-  liveStream.pipe(through(function filterData(d) { // filter livestream events
-    if (d.type == 'del') fil.rm(d)
+  var filter = fern({
+    put: {
+       live: function (mod) {
+         var m = mod.key.split(':')[1]
+         var mPath = config.dir_wilds+m
+         _[m] = require(mPath)(m.value)
+       },
+       conn: function (con) {
 
-    // use keypath!
-    // load / create a linkmap & use with keypath
-    // use proc to decide how to handle data
-     
-    // don't use a switch statement / solve it with fern & a map
-     
-    if (d.type === 'put') {
-      var path = d.key.split(':')
-      var action = path[0]
-      var loc = path[1]
-      var id = path[2]
-      if (typeof d.value === 'string' && d.value[0] === '{') d.value = JSON.parse(d.value)
+       }
+    },
+    rm: {
+      live: function (mod) { // unpipe? close stream!?
+        var m = mod.key.split(':')[1]
+        _[m].emit('close')
+        delete _[m]
+      },
+      conn: function (con) {
+
+      }
     }
+  })
+
+  liveStream.pipe(filter).pipe(through(function write (d) {
+    console.log(d)
   }, function end () {
     this.emit('end')
-  }))
-
+  })
 
   // WILDS / RUNNING MODULES
   // condense these into a single tree  
   // make a linkage / transform thing using fern
  
-  var fil = {
-    put: function (mod) {
-      var m = mod.key.split(':')[1]
-      var mPath = config.dir_wilds+m
-      _[m] = require(mPath)(m.value)
-      console.log(_)
-    },
-    rm: function (mod) {
-      // unpipe? close stream!?
-      _[mod.key].emit('close')
-      delete _[mod.key]
-      console.log(_)
-    },
-    conn: function (mods) {
-      var mods = con.split('-')
-      _[mods[0]].pipe(_[mods[1]])
-    },
-    disconn: function (mods) {
-      var mods = con.split('-')
-      _[mods[0]].unpipe(_[mods[1]])
-    }
-  }
 
   // METHODS / API
   // handle incoming data / put outgoing data
   // incoming can be repl commands or data.liveStream objects
- 
   var interface = through(function (input) { // interface handles both api / data ls
+    // all this input stream should do is write to db
+
     var args = input.split(' ')
     var cmd = args[0]
     api[cmd] ? api[cmd](args) : this.emit('error', new Error('no such command'))
   }, function end () {
     this.emit('end')
   })
-
 
   function search (args, cb) {
     var match = false
