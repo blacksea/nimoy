@@ -25,17 +25,17 @@ module.exports = function bricoleur (data) { // YES! only use db
 
   var filter = fern({
     put: {
-       config: function (d) {
-         conf = JSON.parse(d.value)
-       },
-       live: function (d) {
-         var m = d.key.split(':')[1]
-         var mPath = config.dir_wilds+m
-         _[m] = require(mPath)(d.value)
-       },
-       conn: function (d) {
+      config: function (d) {
+        conf = JSON.parse(d.value)
+      },
+      live: function (d) {
+        var m = d.key.split(':')[1]
+        var mPath = config.dir_wilds+m
+        _[m] = require(mPath)(d.value)
+      },
+      conn: function (d) {
 
-       }
+      }
     },
     rm: {
       live: function (d) { // unpipe? close stream!?
