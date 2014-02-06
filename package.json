@@ -29,6 +29,7 @@
     "bindshim": "^0.0.1",
     "cli-color": "^0.2.3",
     "fern": "^0.0.8",
+    "read": "^1.0.5",
     "slide": "^1.1.4"
   },
   "devDependancies": {

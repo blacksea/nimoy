@@ -5,11 +5,13 @@ var through = require('through')
 var fern = require('fern')
 var proc = process.title // node or browser
 
-module.exports = function bricoleur (data) {
+module.exports = function bricoleur (data) { // YES! only use db
   var conf
   var _ = {}
 
+
   // CONFIG
+
   if (!conf) {
     data.get('config', function handleConfig (e, d) {
       e ? interface.emit('error', e) : conf = JSON.parse(d);
@@ -18,10 +20,13 @@ module.exports = function bricoleur (data) {
 
 
   // DATA
+  
   var liveStream = data.liveStream({old:false}) 
-
   var filter = fern({
     put: {
+       config: function (d) {
+         conf = JSON.parse(d.value)
+       },
        live: function (d) {
          var m = d.key.split(':')[1]
          var mPath = config.dir_wilds+m
@@ -29,9 +34,6 @@ module.exports = function bricoleur (data) {
        },
        conn: function (d) {
 
-       },
-       config: function (d) {
-         conf = JSON.parse(d.value)
        }
     },
     rm: {
@@ -45,23 +47,15 @@ module.exports = function bricoleur (data) {
       }
     }
   })
-
   liveStream.pipe(filter).pipe(through(function write (d) {
     console.log(d)
   }, function end () {
     this.emit('end')
   }))
 
-  var interface = through(function input (d) { // REPL INPUT  
-    var args = d.split(' ')
-    var cmd = args[0]
-    api[cmd] ? api[cmd](args) : this.emit('error', new Error('no such command'))
-  }, function end () {
-    this.emit('end')
-  })
-
 
   // UTIL
+  
   function search (args, cb) {
     var match = false
     var ks = data.createKeyStream()
@@ -83,7 +77,4 @@ module.exports = function bricoleur (data) {
       if (match !== true) interface.emit('error', new Error('could not find module'))
     })
   }
-
-  return interface
 }
-
