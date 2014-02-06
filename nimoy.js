@@ -6,7 +6,6 @@ var clc = require('cli-color')
 var log = clc.cyanBright
 var err = clc.red
 var prompt = {prompt:'nimoy:'}
-var brico
 
 
 // CONFIG 
@@ -37,10 +36,11 @@ var map = require('./_map')({
   min : config.minify
 })
 
-var dbWriteStream = db.createWriteStream({type:'put'})
-map.pipe(dbWriteStream)
+var dbMapStream = db.createWriteStream({type:'put'})
 
-dbWriteStream.on('close', function bundleAndBoot () {
+map.pipe(dbMapStream)
+
+dbMapStream.on('close', function bundleAndBoot () {
   BOOT()
 })
              
@@ -63,11 +63,9 @@ function BOOT () {
     brico.on('error', function (e) {
       console.error(e)
     })
-  })
 
-  // REPL : pipes into db.writeStream
-  var repl = require('repl')
-  
+    var repl = require('repl') // REPL : pipes into db.writeStream
+  })
 }
 
 function bootnet (booted) {
