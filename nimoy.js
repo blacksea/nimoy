@@ -65,7 +65,7 @@ function BOOT () {
     })
   })
 
-  // REPL
+  // REPL * this should probably split out into its own thing
   var read = require('read')
   var through = require('through')
   function repl (opts) {

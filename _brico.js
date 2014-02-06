@@ -22,6 +22,7 @@ module.exports = function bricoleur (data) { // YES! only use db
   // DATA
   
   var liveStream = data.liveStream({old:false}) 
+
   var filter = fern({
     put: {
        config: function (d) {
@@ -47,12 +48,8 @@ module.exports = function bricoleur (data) { // YES! only use db
       }
     }
   })
-  liveStream.pipe(filter).pipe(through(function write (d) {
-    console.log(d)
-  }, function end () {
-    this.emit('end')
-  }))
 
+  liveStream.pipe(filter).pipe(s)
 
   // UTIL
   
@@ -77,4 +74,14 @@ module.exports = function bricoleur (data) { // YES! only use db
       if (match !== true) interface.emit('error', new Error('could not find module'))
     })
   }
+
+  // EVENT STREAM
+
+  var s = through(function write (d) {
+    this.emit('data', d)
+  }, function end () {
+    this.emit('end')
+  })
+
+  return s
 }
