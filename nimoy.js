@@ -54,8 +54,6 @@ function BOOT () {
     // save conf / clean up before storing
     db.put('config', JSON.stringify(config))
 
-    if (config.repl === true) repl(prompt)
-
     // RUN BRICO  
     var bricoleur = require('./_brico')
     brico = new bricoleur(db) // maybe don't construct with new?
@@ -64,8 +62,10 @@ function BOOT () {
       console.error(e)
     })
 
-    var repl = require('repl') // REPL : pipes into db.writeStream
-    process.stdin.pipe(repl(db)).pipe(process.stdout)
+    if (config.repl === true) {
+      var repl = require('repl') // REPL : pipes into db.writeStream
+      process.stdin.pipe(repl(db)).pipe(process.stdout)
+    }
   })
 }
 
