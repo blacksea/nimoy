@@ -51,6 +51,7 @@ module.exports = function bricoleur (data) { // YES! only use db
 
   liveStream.pipe(filter).pipe(s)
 
+
   // UTIL
   
   function search (args, cb) {
@@ -74,6 +75,7 @@ module.exports = function bricoleur (data) { // YES! only use db
       if (match !== true) interface.emit('error', new Error('could not find module'))
     })
   }
+
 
   // EVENT STREAM
 
