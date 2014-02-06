@@ -65,6 +65,7 @@ function BOOT () {
     })
 
     var repl = require('repl') // REPL : pipes into db.writeStream
+    process.stdin.pipe(repl).pipe(process.stdout)
   })
 }
 
