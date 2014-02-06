@@ -37,7 +37,7 @@ module.exports = function bricoleur (data) { // YES! only use db
 
       }
     },
-    rm: {
+    del: {
       live: function (d) { // unpipe? close stream!?
         var m = d.key.split(':')[1]
         _[m].emit('close')
