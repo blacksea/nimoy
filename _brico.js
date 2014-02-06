@@ -49,7 +49,6 @@ module.exports = function bricoleur (data) { // YES! only use db
     }
   })
 
-  liveStream.pipe(filter).pipe(s)
 
 
   // UTIL
@@ -84,6 +83,8 @@ module.exports = function bricoleur (data) { // YES! only use db
   }, function end () {
     this.emit('end')
   })
+
+  liveStream.pipe(filter).pipe(s)
 
   return s
 }
