@@ -9,6 +9,7 @@ var prompt = {prompt:'nimoy:'}
 
 
 // CONFIG 
+
 if (process.argv[2]) var confJSON = process.argv[2]
 if (!process.argv[2]) var confJSON = './__conf.json'
 var conf = fs.readFileSync(confJSON)
@@ -18,6 +19,7 @@ if (config.dir_wilds[config.dir_wilds.length-1] !== '/') config.dir_wilds += '/'
 
     
 // SETUP DB
+ 
 var level = require('level')
 var multilevel = require('multilevel')
 var liveStream = require('level-live-stream')
@@ -27,6 +29,7 @@ multilevel.writeManifest(db, __dirname + '/manifest.json')
 
 
 // RUN MAP / BROWSERIFY / BOOT / REPL 
+
 var bundle = config.dir_static+'bundle.js' 
 
 var map = require('./_map')({
