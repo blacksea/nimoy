@@ -11,12 +11,10 @@ module.exports = function bricoleur (data) { // YES! only use db
 
 
   // CONFIG
-
-  if (!conf) {
-    data.get('config', function handleConfig (e, d) {
-      e ? interface.emit('error', e) : conf = JSON.parse(d);
-    })
-  }
+  
+  data.get('config', function handleConfig (e, d) {
+    e ? interface.emit('error', e) : conf = JSON.parse(d);
+  })
 
 
   // DATA

@@ -3,8 +3,8 @@
   "host" : "localhost",
   "minify" : false,
   "repl" : true,
-  "dir_wilds" : "./_wilds",
-  "dir_static" : "./_static",
+  "dirModules" : "./_wilds",
+  "dirStatic" : "./_static",
   "spaces" : {
     "wilds" : "wilds",
     "active" : "live"

@@ -14,8 +14,8 @@ if (process.argv[2]) var confJSON = process.argv[2]
 if (!process.argv[2]) var confJSON = './__conf.json'
 var conf = fs.readFileSync(confJSON)
 config = JSON.parse(conf)
-if (config.dir_static[config.dir_static.length-1] !== '/') config.dir_static += '/'
-if (config.dir_wilds[config.dir_wilds.length-1] !== '/') config.dir_wilds += '/'
+if (config.dirStatic[config.dirStatic.length-1] !== '/') config.dir_static += '/'
+if (config.dirModules[config.dirModules.length-1] !== '/') config.dirModules += '/'
 
     
 // SETUP DB
@@ -30,11 +30,11 @@ multilevel.writeManifest(db, __dirname + '/manifest.json')
 
 // RUN MAP / BROWSERIFY / BOOT / REPL 
 
-var bundle = config.dir_static+'bundle.js' 
+var bundle = config.dirStatic+'bundle.js' 
 
 var map = require('./_map')({
   prefix: config.spaces.wilds,
-  wilds : config.dir_wilds,
+  wilds : config.dirModules,
   bundle : bundle,
   min : config.minify
 })
@@ -101,7 +101,7 @@ function bootnet (booted) {
       res.setHeader('Content-Type', 'text/html')
       res.end(indexHtml)
     } else if (url !== '') { // pipe file into req
-      var filePath = config.dir_static + url
+      var filePath = config.dirStatic + url
       var file = fs.createReadStream(filePath)
       file.on('error', function(e) {
         console.error(e)
