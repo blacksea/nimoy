@@ -5,7 +5,7 @@ var through = require('through')
 var fern = require('fern')
 var proc = process.title // node or browser
 
-var commands = {
+var filter = {
   put: {
     make: function (d) {
       var m = d.key.split(':')[1]
@@ -28,7 +28,7 @@ var commands = {
   }
 }
 
-module.exports.commands = commands
+module.exports.commands = filter
 
 module.exports = function bricoleur (data) { // YES! only use db
   var conf

@@ -65,7 +65,7 @@ function BOOT () {
       console.error(e)
     })
 
-    var cmds = require('./_brico').commands
+    var cmds = require('./_brico').filter
 
     if (config.repl === true) {
       var repl = require('./_cli')(db) // REPL : pipes into db.writeStream
