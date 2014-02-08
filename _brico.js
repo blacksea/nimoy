@@ -34,7 +34,6 @@ module.exports = function bricoleur (data) { // YES! only use db
   var conf
   var _ = {}
 
-
   // CONFIG : resolve brico filter with paths
   
   // 2 spaces : live modules : connections :: link with filters
@@ -78,13 +77,11 @@ module.exports = function bricoleur (data) { // YES! only use db
 
   // EVENT STREAM
 
-  var s = through(function write (d) {
+  var interface = through(function write (d) {
     this.emit('data', d)
   }, function end () {
     this.emit('end')
   })
 
-  liveStream.pipe(filter).pipe(s)
-
-  return s
+  return interface
 }
