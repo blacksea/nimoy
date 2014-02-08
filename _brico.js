@@ -6,29 +6,33 @@ var fern = require('fern')
 var proc = process.title // node or browser
 
 var filter = {
-  put: {
-    make: function (d) {
-      var m = d.key.split(':')[1]
-      var mPath = config.dir_wilds+m
-      _[m] = require(mPath)(d.value)
-    },
-    conn: function (d) {
+  input: {
+    put: {
+      make: function (d) {
+        var m = d.key.split(':')[1]
+        var mPath = config.dir_wilds+m
+        _[m] = require(mPath)(d.value)
+      },
+      conn: function (d) {
 
-    }
-  },
-  del: {
-    destroy: function (d) {
-      var m = d.key.split(':')[1]
-      _[m].emit('close')
-      delete _[m]
+      }
     },
-    disconn: function (d) {
+    del: {
+      destroy: function (d) {
+        var m = d.key.split(':')[1]
+        _[m].emit('close')
+        delete _[m]
+      },
+      disconn: function (d) {
 
+      }
     }
+  output: {
+
   }
 }
 
-module.exports.commands = filter
+module.exports.filter = filter
 
 module.exports = function bricoleur (data) { // YES! only use db
   var conf
@@ -75,7 +79,7 @@ module.exports = function bricoleur (data) { // YES! only use db
   }
 
 
-  // EVENT STREAM
+  // INTERFACE : control db writes here
 
   var interface = through(function write (d) {
     this.emit('data', d)
