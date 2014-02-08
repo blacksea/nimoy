@@ -2,7 +2,7 @@
   "port" : 9999,
   "host" : "localhost",
   "minify" : false,
-  "repl" : true,
+  "cli" : true,
   "dirModules" : "./_wilds",
   "dirStatic" : "./_static",
   "spaces" : {
