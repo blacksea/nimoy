@@ -4,9 +4,5 @@
   "minify" : false,
   "cli" : true,
   "dirModules" : "./_wilds",
-  "dirStatic" : "./_static",
-  "spaces" : {
-    "wilds" : "wilds",
-    "active" : "live"
-  }
+  "dirStatic" : "./_static"
 }

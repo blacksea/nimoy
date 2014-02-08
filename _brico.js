@@ -35,7 +35,9 @@ module.exports = function bricoleur (data) { // YES! only use db
   var _ = {}
 
 
-  // CONFIG
+  // CONFIG : resolve brico filter with paths
+  
+  // 2 spaces : live modules : connections :: link with filters
   
   data.get('config', function handleConfig (e, d) {
     e ? interface.emit('error', e) : conf = JSON.parse(d);
@@ -45,7 +47,7 @@ module.exports = function bricoleur (data) { // YES! only use db
   // DATA
   
   var liveStream = data.liveStream({old:false}) 
-  liveStream.pipe(fern(commands))
+  liveStream.pipe(fern(filter))
 
 
   // UTIL
@@ -64,7 +66,8 @@ module.exports = function bricoleur (data) { // YES! only use db
           opts[key] = val
         }
         if (opts === {}) opts = null
-        data.put(config.spaces.active+':'+args[1],JSON.stringify(opts))
+        // don't use spaces!
+        // data.put(config.spaces.active+':'+args[1],JSON.stringify(opts))
       }
     })
     ks.on('end', function () {

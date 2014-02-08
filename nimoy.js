@@ -32,8 +32,10 @@ multilevel.writeManifest(db, __dirname + '/manifest.json')
 
 var bundle = config.dirStatic+'bundle.js' 
 
+var filter = require('./_brico').filter
+
 var map = require('./_map')({
-  prefix: config.spaces.wilds,
+  prefix: 'wilds',
   wilds : config.dirModules,
   bundle : bundle,
   min : config.minify
@@ -65,7 +67,6 @@ function BOOT () {
       console.error(e)
     })
 
-    var cmds = require('./_brico').filter
 
     if (config.repl === true) {
       var repl = require('./_cli')(db) // REPL : pipes into db.writeStream
