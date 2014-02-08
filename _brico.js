@@ -5,6 +5,31 @@ var through = require('through')
 var fern = require('fern')
 var proc = process.title // node or browser
 
+var commands = {
+  put: {
+    make: function (d) {
+      var m = d.key.split(':')[1]
+      var mPath = config.dir_wilds+m
+      _[m] = require(mPath)(d.value)
+    },
+    conn: function (d) {
+
+    }
+  },
+  del: {
+    destroy: function (d) {
+      var m = d.key.split(':')[1]
+      _[m].emit('close')
+      delete _[m]
+    },
+    disconn: function (d) {
+
+    }
+  }
+}
+
+module.exports.commands = commands
+
 module.exports = function bricoleur (data) { // YES! only use db
   var conf
   var _ = {}
@@ -20,33 +45,7 @@ module.exports = function bricoleur (data) { // YES! only use db
   // DATA
   
   var liveStream = data.liveStream({old:false}) 
-
-  var filter = fern({
-    put: {
-      config: function (d) {
-        conf = JSON.parse(d.value)
-      },
-      live: function (d) {
-        var m = d.key.split(':')[1]
-        var mPath = config.dir_wilds+m
-        _[m] = require(mPath)(d.value)
-      },
-      conn: function (d) {
-
-      }
-    },
-    del: {
-      live: function (d) { // unpipe? close stream!?
-        var m = d.key.split(':')[1]
-        _[m].emit('close')
-        delete _[m]
-      },
-      conn: function (con) {
-
-      }
-    }
-  })
-
+  liveStream.pipe(fern(commands))
 
 
   // UTIL

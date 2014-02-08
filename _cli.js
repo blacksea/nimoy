@@ -1,4 +1,4 @@
-// REPL : pipes into leveldb writeStream
+// CLI : pipes into leveldb writeStream
 
 var through = require('through')
 var clc = require('cli-color')
