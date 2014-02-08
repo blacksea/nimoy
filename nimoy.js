@@ -124,7 +124,7 @@ function bootnet (booted) {
     var origin = headers.origin
     var wss = webSocketStream(soc) 
     wss.on('error', function (e) {
-      // *note: multiServer sends close after wss is closed / temp ignore
+      // * note: multiServer sends close after wss is closed / temp ignore
       if (soc.readyState !== 3) console.error(e)
     })
     var multiServer = multilevel.server(db)

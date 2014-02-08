@@ -13,9 +13,7 @@
   },
   "scripts": {
     "start": "node nimoy",
-    "test": "tape test/*.js",
-    "watch": "watchify -v ./_wilds/",
-    "minify": "uglifyjs bundle.js bundle.min.js"
+    "test": "tape test/*.js"
   },
   "dependencies": {
     "ws": "^0.4.30",
@@ -29,11 +27,10 @@
     "bindshim": "^0.0.1",
     "cli-color": "^0.2.3",
     "fern": "^0.0.8",
-    "read": "^1.0.5",
     "slide": "^1.1.4"
   },
   "devDependancies": {
-    "tape": ">=2.3.2"
+    "tape": "^2.3.2"
   },
   "license": "MIT"
 }
