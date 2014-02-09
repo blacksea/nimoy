@@ -32,18 +32,17 @@ var bundle = config.dirStatic+'bundle.js'
 
 var filter = require('./_brico').filter
 
+var dbMapStream = db.createWriteStream({type:'put'})
+
 var map = require('./_map')({
   prefix: 'wilds',
   wilds : config.dirModules,
   bundle : bundle,
   min : config.minify
 })
-
-var dbMapStream = db.createWriteStream({type:'put'})
 map.pipe(dbMapStream)
-dbMapStream.on('close', function bundleAndBoot () {
-  BOOT()
-})
+
+dbMapStream.on('close', BOOT)
              
 function BOOT () {
   var stat = fs.statSync(bundle)
