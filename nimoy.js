@@ -40,9 +40,7 @@ var map = require('./_map')({
 })
 
 var dbMapStream = db.createWriteStream({type:'put'})
-
 map.pipe(dbMapStream)
-
 dbMapStream.on('close', function bundleAndBoot () {
   BOOT()
 })
@@ -61,7 +59,6 @@ function BOOT () {
     brico.on('error', function (e) {
       console.error(e)
     })
-
 
     if (config.cli === true) {
       var cli = require('./_cli')(db) // REPL : pipes into db.writeStream

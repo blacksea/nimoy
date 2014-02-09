@@ -1,17 +1,15 @@
 // BRICO
 
+// abstraction ?
+// how to use paths
+// how to interface with db / commands !?
+// auth -- crypto [salted hash?! / encrypt data?!]
+// cli / ui 
 
 var through = require('through')
 var fern = require('fern')
 var proc = process.title // node or browser
 var conf = require('./__conf.json') // just require config
-
-
-// how to use paths
-// how to interface with db / commands !?
-// cli / ui 
-// auth -- crypto [salted hash?! / encrypt data?!]
-// abstraction ?
 
 var filter = {
   put: {
@@ -38,16 +36,11 @@ module.exports.filter = filter
 
 module.exports = function bricoleur (data) { // YES! only use db
   var _ = {}
-
-  // resolve brico filter with paths
-  // 2 spaces : live modules : connections :: link with filters
   
-
-
-  // DATA
-  
+  var fil = fern(filter)
+  fil.on('error', console.error)
   var liveStream = data.liveStream({old:false}) 
-  liveStream.pipe(fern(filter))
+  liveStream.pipe(fil)
 
 
   // UTIL
@@ -73,12 +66,11 @@ module.exports = function bricoleur (data) { // YES! only use db
     })
   }
 
-
-  // INTERFACE 
   var interface = through(function write (d) {
     this.emit('data', d)
   }, function end () {
     this.emit('end')
   })
+
   return interface
 }
