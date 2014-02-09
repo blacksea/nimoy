@@ -12,7 +12,7 @@ var prompt = {prompt:'nimoy:'}
 
 if (process.argv[2]) var config = require(process.argv[2])
 if (!process.argv[2]) var config = require('./__conf.json')
-if (config.dirStatic[config.dirStatic.length-1] !== '/') config.dir_static += '/'
+if (config.dirStatic[config.dirStatic.length-1] !== '/') config.dirStatic += '/'
 if (config.dirModules[config.dirModules.length-1] !== '/') config.dirModules += '/'
 
     

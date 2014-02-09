@@ -8,8 +8,9 @@
 
 var through = require('through')
 var fern = require('fern')
-var proc = process.title // node or browser
 var conf = require('./__conf.json') // just require config
+var proc = process.title // node or browser
+
 
 var filter = {
   put: {
@@ -31,7 +32,6 @@ var filter = {
     }
   }
 }
-
 module.exports.filter = filter
 
 module.exports = function bricoleur (data) { // YES! only use db
