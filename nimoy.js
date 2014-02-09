@@ -11,9 +11,7 @@ var prompt = {prompt:'nimoy:'}
 // CONFIG 
 
 if (process.argv[2]) var confJSON = process.argv[2]
-if (!process.argv[2]) var confJSON = './__conf.json'
-var conf = fs.readFileSync(confJSON)
-config = JSON.parse(conf)
+if (!process.argv[2]) var confJSON = require('./__conf.json')
 if (config.dirStatic[config.dirStatic.length-1] !== '/') config.dir_static += '/'
 if (config.dirModules[config.dirModules.length-1] !== '/') config.dirModules += '/'
 

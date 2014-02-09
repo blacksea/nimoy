@@ -1,8 +1,8 @@
 {
-  "port" : 9999,
-  "host" : "localhost",
-  "minify" : false,
-  "cli" : true,
-  "dirModules" : "./_wilds",
-  "dirStatic" : "./_static"
+  "port": 9999,
+  "host": "localhost",
+  "minify": false,
+  "cli": true,
+  "dirModules": "./_wilds",
+  "dirStatic": "./_static"
 }
