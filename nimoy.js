@@ -5,7 +5,6 @@ var fs = require('fs')
 var clc = require('cli-color')
 var log = clc.cyanBright
 var err = clc.red
-var prompt = {prompt:'nimoy:'}
 
 
 // CONFIG 
@@ -26,7 +25,7 @@ liveStream.install(db)
 multilevel.writeManifest(db, __dirname + '/manifest.json')
 
 
-// RUN MAP / BROWSERIFY / BOOT / REPL 
+// RUN MAP / BROWSERIFY / BOOT / CLI
 
 var bundle = config.dirStatic+'bundle.js' 
 
