@@ -63,9 +63,9 @@ function BOOT () {
     })
 
 
-    if (config.repl === true) {
-      var repl = require('./_cli')(db) // REPL : pipes into db.writeStream
-      process.stdin.pipe(repl).pipe(process.stdout)
+    if (config.cli === true) {
+      var cli = require('./_cli')(db) // REPL : pipes into db.writeStream
+      process.stdin.pipe(cli).pipe(process.stdout)
     }
   })
 }
