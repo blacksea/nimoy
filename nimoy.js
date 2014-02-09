@@ -54,9 +54,6 @@ function BOOT () {
   bootnet(function () {
     console.log(log('network running on port: '+config.port+' host: '+config.host))
 
-    // save conf / clean up before storing
-    db.put('config', JSON.stringify(config))
-
     // RUN BRICO  
     var bricoleur = require('./_brico')
     brico = new bricoleur(db) // maybe don't construct with new?
