@@ -88,13 +88,10 @@ function bootnet (booted) {
   server.listen(config.port, config.host, installWS)
 
   function handleRequests (req, res) { // more robust: needs paths as well as files
-    
-    // set strict headers
-    res.writeHead(200, {'Content-Type':'text/plain','Strict-Transport-Security':'max-age=604800'})
-   
     var url = req.url.substr(1)
     if (url === '') {
-      res.setHeader('Content-Type', 'text/html')
+      if (!config.crypto) res.setHeader('Content-Type', 'text/html')
+      if (config.crypto) res.setHeader('Content-Type', 'text/html','Strict-Transport-Security','max-age=604800')
       res.end(indexHtml)
     } else if (url !== '') { // pipe file into req
       var filePath = config.dirStatic + url
@@ -104,7 +101,8 @@ function bootnet (booted) {
         res.statusCode = 404
         res.end('error 404')
       })
-      res.setHeader('Content-Encoding', 'gzip')
+      if (!config.crypto) res.setHeader('Content-Encoding', 'gzip')
+      if (config.crypto) res.setHeader('Content-Encoding', 'gzip','Strict-Transport-Security','max-age=604800')
       file.pipe(gzip()).pipe(res)
     }
   }
