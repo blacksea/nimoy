@@ -85,6 +85,7 @@ function bootnet (booted) {
       key:key,
       cert:cert,
       honorCipherOrder:true,
+      ecdhCurve: 'prime256v1',
       ciphers:'ECDHE-RSA-AES128-SHA256:AES128-GCM-SHA256:RC4:HIGH:!MD5:!aNULL:!EDH'
     }, handleRequests)
     delete config.crypto
