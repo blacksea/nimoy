@@ -81,13 +81,20 @@ function bootnet (booted) {
   else if (config.crypto) { 
     var key = fs.readFileSync(config.crypto.key)
     var cert = fs.readFileSync(config.crypto.cert)
-    server = https.createServer({key:key,cert:cert}, handleRequests)
+    server = https.createServer({
+      key:key,
+      cert:cert,
+      honorCipherOrder:true,
+      ciphers:'ECDHE-RSA-AES128-SHA256:AES128-GCM-SHA256:RC4:HIGH:!MD5:!aNULL:!EDH'
+    }, handleRequests)
     delete config.crypto
   } 
 
   server.listen(config.port, config.host, installWS)
 
   function handleRequests (req, res) { // more robust: needs paths as well as files
+    // if (req.secure || req.headers['x-forwarded-proto'] == 'https') {
+
     var url = req.url.substr(1)
     if (url === '') {
       if (config.port !== 443) res.setHeader('Content-Type', 'text/html')
