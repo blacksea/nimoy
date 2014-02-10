@@ -91,7 +91,7 @@ function bootnet (booted) {
     var url = req.url.substr(1)
     if (url === '') {
       if (config.port !== 443) res.setHeader('Content-Type', 'text/html')
-      if (config.port===443) res.writeHead(200,{'Content-Type': 'text/html','Strict-Transport-Security':'max-age=604800'})
+      if (config.port===443) res.writeHead(200,{'Content-Type': 'text/html','Strict-Transport-Security':'max-age=31536000'})
       res.end(indexHtml)
     } else if (url !== '') { // pipe file into req
       var filePath = config.dirStatic + url
@@ -102,7 +102,7 @@ function bootnet (booted) {
         res.end('error 404')
       })
       if (config.port !== 443) res.setHeader('Content-Type', 'text/html')
-      if (config.port===443) res.writeHead(200,{'Content-Encoding': 'gzip','Strict-Transport-Security':'max-age=604800'})
+      if (config.port===443) res.writeHead(200,{'Content-Encoding': 'gzip','Strict-Transport-Security':'max-age=31536000'})
       file.pipe(gzip()).pipe(res)
     }
   }
