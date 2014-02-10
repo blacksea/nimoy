@@ -90,8 +90,7 @@ function bootnet (booted) {
   function handleRequests (req, res) { // more robust: needs paths as well as files
     
     // set strict headers
-    if (req.secure || req.headers['x-forwarded-proto'] == 'https')
-      res.setHeader('Strict-Transport-Security', header);
+    res.writeHead(200, {'Content-Type':'text/plain','Strict-Transport-Security':'max-age=604800'})
    
     var url = req.url.substr(1)
     if (url === '') {
