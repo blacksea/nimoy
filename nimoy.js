@@ -75,10 +75,10 @@ function bootnet (booted) {
 
   var server
 
-  if (!config.crypto) 
+  if (!config.crypto) {
     server = http.createServer(handleRequests)
     protocol = 'http'
-  else if (config.crypto) { 
+  } else if (config.crypto) { 
     protocol = 'https'
     var key = fs.readFileSync(config.crypto.key)
     var cert = fs.readFileSync(config.crypto.cert)
