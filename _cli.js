@@ -5,7 +5,6 @@ var clc = require('cli-color')
 var err = clc.redBright
 var log = clc.cyanBright
 
-
 module.exports = function (db) {
 
  var s = through(function write (buf) {
@@ -44,7 +43,7 @@ module.exports = function (db) {
 
   setTimeout(function () {// fix this up somehow?
     s.emit('data', log('> '))
-  }, 25)
+  }, 250)
 
   return s
 }

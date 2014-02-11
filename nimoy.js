@@ -1,6 +1,5 @@
 // NIMOY 
 
-
 var fs = require('fs')
 var clc = require('cli-color')
 var log = clc.cyanBright
