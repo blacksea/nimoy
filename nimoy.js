@@ -93,15 +93,15 @@ function bootnet (booted) {
   server.listen(config.port, config.host, installWS)
 
   function handleRequests (req, res) { // more robust: needs paths as well as files
+    var header = {}
 
-    console.log(req.headers)
-    console.log(server instanceof https.Server)
-    // if (req.secure || req.headers['x-forwarded-proto'] == 'https') {
+    if (server instanceof https.Server) 
+      header['Strict-Transport-Security'] = 'max-age=31536000' 
 
     var url = req.url.substr(1)
     if (url === '') {
-      if (config.port !== 443) res.setHeader('Content-Type', 'text/html')
-      if (config.port===443) res.writeHead(200,{'Content-Type': 'text/html','Strict-Transport-Security':'max-age=31536000'})
+      header['Content-Type'] = 'text/html' 
+      res.writeHead(200,JSON.stringify(header))
       res.end(indexHtml)
     } else if (url !== '') { // pipe file into req
       var filePath = config.dirStatic + url
@@ -111,8 +111,8 @@ function bootnet (booted) {
         res.statusCode = 404
         res.end('error 404')
       })
-      if (config.port !== 443) res.setHeader('Content-Type', 'text/html')
-      if (config.port===443) res.writeHead(200,{'Content-Encoding': 'gzip','Strict-Transport-Security':'max-age=31536000'})
+      header['Content-Encoding'] = 'gzip' 
+      res.writeHead(200,JSON.stringify(header))
       file.pipe(gzip()).pipe(res)
     }
   }
