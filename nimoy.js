@@ -82,15 +82,13 @@ function bootnet (booted) {
     protocol = 'https'
     var key = fs.readFileSync(config.crypto.key)
     var cert = fs.readFileSync(config.crypto.cert)
-    // fix ciphers
     server = https.createServer({
-      key:key,
-      cert:cert,
-      honorCipherOrder:true,
+      key: key,
+      cert: cert,
+      honorCipherOrder: true,
       ecdhCurve: 'prime256v1',
-      ciphers:'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
+      ciphers: 'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
     }, handleRequests)
-    delete config.crypto
   } 
 
   server.listen(config.port, config.host, installWS)
