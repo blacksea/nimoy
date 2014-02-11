@@ -69,9 +69,6 @@ function bootnet (booted) {
   var webSocketServer = require('ws').Server
   var webSocketStream = require('websocket-stream')
   var protocol
-
-  var indexHtml = '<html><head></head><body><script src="/bundle.js"></script></body></html>'
-
   var server
 
   if (!config.crypto) {
@@ -79,11 +76,9 @@ function bootnet (booted) {
     protocol = 'http'
   } else if (config.crypto) { 
     protocol = 'https'
-    var key = fs.readFileSync(config.crypto.key)
-    var cert = fs.readFileSync(config.crypto.cert)
     server = https.createServer({
-      key: key,
-      cert: cert,
+      key: fs.readFileSync(config.crypto.key),
+      cert: fs.readFileSync(config.crypto.cert),
       honorCipherOrder: true,
       ecdhCurve: 'prime256v1',
       ciphers: 'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
@@ -94,22 +89,21 @@ function bootnet (booted) {
 
   function handleRequests (req, res) { // more robust: needs paths as well as files
     var header = {}
-
     var url = req.url.substr(1)
+
     if (url === '') {
       res.setHeader('content-type','text/html')
       if (protocol === 'https') res.setHeader('Strict-Transport-Security','max-age=31536000')
-      res.end(indexHtml)
+      res.end('<html><head></head><body><script src="/bundle.js"></script></body></html>')
     } else if (url !== '') { // pipe file into req
-      var filePath = config.dirStatic + url
-      var file = fs.createReadStream(filePath)
+      var file = fs.createReadStream(config.dirStatic+url)
+      res.setHeader('Content-Encoding', 'gzip')
+      file.pipe(gzip()).pipe(res)
       file.on('error', function(e) {
         console.error(e)
         res.statusCode = 404
         res.end('error 404')
       })
-      res.setHeader('Content-Encoding', 'gzip')
-      file.pipe(gzip()).pipe(res)
     }
   }
 
@@ -123,10 +117,10 @@ function bootnet (booted) {
     var headers = soc.upgradeReq.headers
     var origin = headers.origin
     var wss = webSocketStream(soc) 
+    var multiServer = multilevel.server(db)
+    wss.pipe(multiServer).pipe(wss)
     wss.on('error', function (e) {
       if (soc.readyState !== 3) console.error(e)
     })
-    var multiServer = multilevel.server(db)
-    wss.pipe(multiServer).pipe(wss)
   }
 }
