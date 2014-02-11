@@ -1,20 +1,14 @@
 // BRICO
 
-// abstraction ?
-// how to use paths
-// how to interface with db / commands !?
-// auth -- crypto [salted hash?! / encrypt data?!]
-// cli / ui 
-
 var through = require('through')
 var fern = require('fern')
-var conf = require('./__conf.json') // just require config
+var conf = require('./__conf.json') 
 var proc = process.title // node or browser
 
 
 var filter = {
   put: {
-    make: function (d) { // use path spaces : but implement correctly
+    make: function (d) { 
       var m = d.key.split(':')[1]
       var mPath = config.dir_wilds+m
       _[m] = require(mPath)(d.value)
@@ -35,7 +29,7 @@ var filter = {
 module.exports.filter = filter
 
 
-module.exports = function bricoleur (data) { // YES! only use db
+module.exports = function bricoleur (data) { 
   var _ = {}
   
   var fil = fern(filter)
@@ -45,7 +39,7 @@ module.exports = function bricoleur (data) { // YES! only use db
 
 
   // UTIL
-  function search (args, cb) { // FIX!
+  function search (args, cb) {
     var match = false
     var ks = data.createKeyStream()
     ks.on('data', function (d) {
