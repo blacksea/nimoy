@@ -81,12 +81,13 @@ function bootnet (booted) {
   else if (config.crypto) { 
     var key = fs.readFileSync(config.crypto.key)
     var cert = fs.readFileSync(config.crypto.cert)
+    // fix ciphers
     server = https.createServer({
       key:key,
       cert:cert,
       honorCipherOrder:true,
       ecdhCurve: 'prime256v1',
-      ciphers:'ECDHE-RSA-AES128-SHA256:AES128-GCM-SHA256:RC4:HIGH:!MD5:!aNULL:!EDH'
+      ciphers:'ECDHE-RSA-AES256-SHA384:AES256-SHA256:RC4-SHA:RC4:HIGH:!MD5:!aNULL:!EDH:!AESGCM'
     }, handleRequests)
     delete config.crypto
   } 

@@ -34,6 +34,7 @@ var filter = {
 }
 module.exports.filter = filter
 
+
 module.exports = function bricoleur (data) { // YES! only use db
   var _ = {}
   
@@ -44,7 +45,6 @@ module.exports = function bricoleur (data) { // YES! only use db
 
 
   // UTIL
-  
   function search (args, cb) { // FIX!
     var match = false
     var ks = data.createKeyStream()
