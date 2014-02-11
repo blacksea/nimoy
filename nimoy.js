@@ -93,10 +93,9 @@ function bootnet (booted) {
   server.listen(config.port, config.host, installWS)
 
   function handleRequests (req, res) { // more robust: needs paths as well as files
-    if (req.secure || req.headers['x-forwarded-proto'] == 'https') {
-      console.log(req.secure)
-      console.log(req.headers)
-    }
+
+    console.log(req.headers)
+    console.log(server instanceof https.Server)
     // if (req.secure || req.headers['x-forwarded-proto'] == 'https') {
 
     var url = req.url.substr(1)
