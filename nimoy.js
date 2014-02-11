@@ -69,6 +69,7 @@ function bootnet (booted) {
   var gzip = require('zlib').createGzip
   var webSocketServer = require('ws').Server
   var webSocketStream = require('websocket-stream')
+  var protocol
 
   var indexHtml = '<html><head></head><body><script src="/bundle.js"></script></body></html>'
 
@@ -76,7 +77,9 @@ function bootnet (booted) {
 
   if (!config.crypto) 
     server = http.createServer(handleRequests)
+    protocol = 'http'
   else if (config.crypto) { 
+    protocol = 'https'
     var key = fs.readFileSync(config.crypto.key)
     var cert = fs.readFileSync(config.crypto.cert)
     // fix ciphers
@@ -98,8 +101,7 @@ function bootnet (booted) {
     var url = req.url.substr(1)
     if (url === '') {
       res.setHeader('content-type','text/html')
-      if (server instanceof https.Server) 
-        res.setHeader('Strict-Transport-Security','max-age=31536000')
+      if (protocol === 'https') res.setHeader('Strict-Transport-Security','max-age=31536000')
       res.end(indexHtml)
     } else if (url !== '') { // pipe file into req
       var filePath = config.dirStatic + url
