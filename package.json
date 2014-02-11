@@ -12,7 +12,6 @@
     "url": "http://theblacksea.cc"
   },
   "scripts": {
-    "start": "node nimoy",
     "test": "tape test/*.js"
   },
   "dependencies": {
