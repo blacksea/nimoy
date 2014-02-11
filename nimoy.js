@@ -96,7 +96,6 @@ function bootnet (booted) {
     if (req.secure || req.headers['x-forwarded-proto'] == 'https') {
       console.log(req.secure)
       console.log(req.headers)
-      console.log(server instanceof)
     }
     // if (req.secure || req.headers['x-forwarded-proto'] == 'https') {
 
