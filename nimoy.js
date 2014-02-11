@@ -95,12 +95,13 @@ function bootnet (booted) {
   function handleRequests (req, res) { // more robust: needs paths as well as files
     var header = {}
 
-    if (server instanceof https.Server) 
-      header['Strict-Transport-Security'] = 'max-age=31536000' 
-
     var url = req.url.substr(1)
     if (url === '') {
-      header['Content-Type'] = 'text/html' 
+      header['content-type'] = 'text/html' 
+
+      if (server instanceof https.Server) 
+        header['Strict-Transport-Security'] = 'max-age=31536000' 
+
       res.writeHead(200,JSON.stringify(header))
       res.end(indexHtml)
     } else if (url !== '') { // pipe file into req
@@ -111,7 +112,7 @@ function bootnet (booted) {
         res.statusCode = 404
         res.end('error 404')
       })
-      header['Content-Encoding'] = 'gzip' 
+      header['content-encoding'] = 'gzip' 
       res.writeHead(200,JSON.stringify(header))
       file.pipe(gzip()).pipe(res)
     }
