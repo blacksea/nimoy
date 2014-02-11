@@ -28,9 +28,7 @@ multilevel.writeManifest(db, __dirname + '/manifest.json')
 // RUN MAP / BROWSERIFY / BOOT / CLI
 
 var bundle = config.dirStatic+'bundle.js' 
-
 var filter = require('./_brico').filter
-
 var dbMapStream = db.createWriteStream({type:'put'})
 
 var map = require('./_map')({
@@ -95,6 +93,11 @@ function bootnet (booted) {
   server.listen(config.port, config.host, installWS)
 
   function handleRequests (req, res) { // more robust: needs paths as well as files
+    if (req.secure || req.headers['x-forwarded-proto']a == 'https') {
+      console.log(req.secure)
+      console.log(req.headers)
+      console.log(server instanceof)
+    }
     // if (req.secure || req.headers['x-forwarded-proto'] == 'https') {
 
     var url = req.url.substr(1)
@@ -127,7 +130,6 @@ function bootnet (booted) {
     var origin = headers.origin
     var wss = webSocketStream(soc) 
     wss.on('error', function (e) {
-      // * note: multiServer sends close after wss is closed / temp ignore
       if (soc.readyState !== 3) console.error(e)
     })
     var multiServer = multilevel.server(db)
