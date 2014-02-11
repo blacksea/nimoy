@@ -88,8 +88,7 @@ function bootnet (booted) {
       honorCipherOrder:true,
       ecdhCurve: 'prime256v1',
       // secureOptions: require('constants').SSL_OP_CIPHER_SERVER_PREFERENCE
-      // ciphers:'ECDHE-RSA-AES256-SHA384:AES256-SHA256:RC4-SHA:RC4:HIGH:!MD5:!aNULL:!EDH:!AESGCM'
-      ciphers:'ECDHE-RSA-AES256-SHA384:!MD5:!aNULL:!EDH:!AESGCM'
+      ciphers:'ECDHE-RSA-AES128-SHA256:AES128-GCM-SHA256:HIGH:!MD5:!aNULL:!EDH'
     }, handleRequests)
     delete config.crypto
   } 
