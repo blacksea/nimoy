@@ -97,10 +97,9 @@ function bootnet (booted) {
 
     var url = req.url.substr(1)
     if (url === '') {
-      header['content-type'] = 'text/html' 
+      res.setHeader('content-type','text/html')
       if (server instanceof https.Server) 
-        header['Strict-Transport-Security'] = 'max-age=31536000' 
-      res.writeHead(200,JSON.stringify(header))
+        res.setHeader('Strict-Transport-Security','max-age=31536000')
       res.end(indexHtml)
     } else if (url !== '') { // pipe file into req
       var filePath = config.dirStatic + url
