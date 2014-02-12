@@ -5,6 +5,11 @@ var fern = require('fern')
 var conf = require('./__conf.json') 
 var proc = process.title // node or browser
 
+// SPACES
+// * = Module
+// ^ = Library
+// # = Connection
+// _ = Process
 
 var filter = {
   put: {
