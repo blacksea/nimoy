@@ -32,6 +32,19 @@ interface = through(function write (d) {
 module.exports = function bricoleur (data) { 
   
   var liveStream = data.liveStream({old:false}) 
+  liveStream.on('data', handleData)
+  function handleData (d) {
+    if(filter[d.type]) filter[d.type](d)  
+  }
+
+  var filter = {
+    put: function (d) {
+
+    },
+    del: function (d) {
+
+    }
+  }
 
   return interface
 }
