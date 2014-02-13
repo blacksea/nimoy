@@ -57,8 +57,6 @@ function bootnet (booted) {
   var http = require('http')
   var https = require('https')
   var gzip = require('zlib').createGzip
-  var webSocketServer = require('ws').Server
-  var webSocketStream = require('websocket-stream')
   var protocol
   var server
 
@@ -97,6 +95,7 @@ function bootnet (booted) {
   }
 
   function installWS () {
+    var webSocketServer = require('ws').Server
     var ws = new webSocketServer({server:server})
     ws.on('connection', handleSoc)
     booted() // NETWORK READY
@@ -105,9 +104,8 @@ function bootnet (booted) {
   function handleSoc (soc) {
     var headers = soc.upgradeReq.headers
     var origin = headers.origin
-    var wss = webSocketStream(soc) 
-    var multiServer = multilevel.server(db)
-    wss.pipe(multiServer).pipe(wss)
+    var wss = require('websocket-stream')(soc) 
+    wss.pipe(multilevel.server(db)).pipe(wss)
     wss.on('error', function (e) {
       if (soc.readyState !== 3) console.error(e)
     })
