@@ -25,7 +25,7 @@ multilevel.writeManifest(db, __dirname + '/manifest.json')
 
 
 // RUN MAP / BROWSERIFY / BOOT / CLI
-//
+
 var dbMapStream = db.createWriteStream({type:'put'})
 var map = require('./_map')({
   prefix: 'wilds',
@@ -36,6 +36,7 @@ var map = require('./_map')({
 map.pipe(dbMapStream)
 dbMapStream.on('close', BOOT)
              
+
 function BOOT () {
   var stat = fs.statSync(bundle)
   console.log(log('wrote bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+bundle))
@@ -78,9 +79,7 @@ function bootnet (booted) {
   server.listen(config.port, config.host, installWS)
 
   function handleRequests (req, res) { // more robust: needs paths as well as files
-    var header = {}
     var url = req.url.substr(1)
-
     if (url === '') {
       res.setHeader('content-type','text/html')
       if (protocol === 'https') res.setHeader('Strict-Transport-Security','max-age=31536000')
