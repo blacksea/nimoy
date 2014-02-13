@@ -25,19 +25,15 @@ multilevel.writeManifest(db, __dirname + '/manifest.json')
 
 
 // RUN MAP / BROWSERIFY / BOOT / CLI
-
-var bundle = config.dirStatic+'bundle.js' 
-var filter = require('./_brico').filter
+//
 var dbMapStream = db.createWriteStream({type:'put'})
-
 var map = require('./_map')({
   prefix: 'wilds',
   wilds : config.dirModules,
-  bundle : bundle,
+  bundle : config.dirStatic+'bundle.js',
   min : config.minify
 })
 map.pipe(dbMapStream)
-
 dbMapStream.on('close', BOOT)
              
 function BOOT () {
@@ -50,15 +46,9 @@ function BOOT () {
     // RUN BRICO  
     var bricoleur = require('./_brico')
     brico = new bricoleur(db) // maybe don't construct with new?
+    brico.on('error', console.error)
 
-    brico.on('error', function (e) {
-      console.error(e)
-    })
-
-    if (config.cli === true) {
-      var cli = require('./_cli')(db) 
-      process.stdin.pipe(cli).pipe(process.stdout)
-    }
+    if (config.cli === true) process.stdin.pipe(require('./_cli')(db)).pipe(process.stdout)
   })
 }
 

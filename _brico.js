@@ -6,42 +6,44 @@ var conf = require('./__conf.json')
 var proc = process.title // node or browser
 var interface
 
-var WILDS = {}
-
-WILDS['*'] = function (i,o) { // * MODULE
-
-}
-WILDS['^'] = function (i,o) { // ^ LIBRARY
-
-}
-WILDS['#'] = function (i,o) { // # CONNECT
-
-}
-WILDS['_'] = function (i,o} { // _ PROCESS
-
-}
-
-interface = through(function write (d) {
-  var path = key.split(':')
-  var space = path[0]
+// abstraction layer
+interface = through(function write (d) { 
 
 }, function end () {
   this.emit('end')
 }, {autoDestroy:false})
 
 module.exports = function bricoleur (data) { 
-  
+
+  var WILDS = {}
+
+  WILDS['*'] = function (i,o) { // * MODULE
+
+  }
+  WILDS['^'] = function (i,o) { // ^ LIBRARY
+
+  }
+  WILDS['#'] = function (i,o) { // # CONNECT
+
+  }
+  WILDS['_'] = function (i,o} { // _ PROCESS
+
+  }
+
   var liveStream = data.liveStream({old:false}) 
   liveStream.on('data', handleData)
+
   function handleData (d) {
     if(filter[d.type]) filter[d.type](d)  
   }
 
   var filter = {
     put: function (d) {
+      var path = d.key.split(':')
 
     },
     del: function (d) {
+      var path = d.key.split(':')
 
     }
   }

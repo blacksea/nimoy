@@ -7,5 +7,6 @@ liveStream.install(db)
 var bricoleur = require('../_brico.js')
 var brico = new bricoleur(db)
 
+brico.on('error', function (e) {
 
-
+})
