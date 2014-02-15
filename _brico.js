@@ -19,7 +19,7 @@ module.exports = function bricoleur (data) {
   WILDS['#'] = function (i,o) { // # CONNECT
 
   }
-  WILDS['_'] = function (i,o} { // _ PROCESS
+  WILDS['_'] = function (i,o) { // _ PROCESS
 
   }
 
@@ -52,7 +52,7 @@ module.exports = function bricoleur (data) {
 }
 
 
-// UTIL
+/////////////////////////////////////////////
 
 function search (args, cb) {
   var match = false
