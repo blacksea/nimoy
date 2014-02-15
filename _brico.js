@@ -6,15 +6,8 @@ var conf = require('./__conf.json')
 var proc = process.title // node or browser
 var interface
 
-// abstraction layer
-interface = through(function write (d) { 
-
-}, function end () {
-  this.emit('end')
-}, {autoDestroy:false})
 
 module.exports = function bricoleur (data) { 
-
   var WILDS = {}
 
   WILDS['*'] = function (i,o) { // * MODULE
@@ -47,6 +40,13 @@ module.exports = function bricoleur (data) {
 
     }
   }
+
+  // abstraction layer
+  interface = through(function write (d) { 
+    console.log(d)
+  }, function end () {
+    this.emit('end')
+  }, {autoDestroy:false})
 
   return interface
 }
