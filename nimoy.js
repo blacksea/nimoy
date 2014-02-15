@@ -38,8 +38,8 @@ dbMapStream.on('close', BOOT)
              
 
 function BOOT () {
-  var stat = fs.statSync(bundle)
-  console.log(log('wrote bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+bundle))
+  var stat = fs.statSync(config.dirStatic+'bundle.js')
+  console.log(log('wrote bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+config.dirStatic+'bundle.js'))
 
   bootnet(function () {
     console.log(log('network running on port: '+config.port+' host: '+config.host))
