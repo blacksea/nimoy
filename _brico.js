@@ -3,7 +3,7 @@
 var through = require('through')
 var conf = require('./__conf.json') 
 var proc = process.title // node or browser
-
+var interface = {}
 
 module.exports = function bricoleur (data) { 
 
@@ -21,7 +21,6 @@ module.exports = function bricoleur (data) {
   WILDS['_'] = function (i,o) { // _ PROCESS
 
   }
-
 
   var filter = {
     put: function (d) {
@@ -41,22 +40,18 @@ module.exports = function bricoleur (data) {
   var liveStream = data.liveStream({old:false}) 
   liveStream.on('data', dataFilter)
 
-
-  var interface = {}
-  interface.search = search
-
-  var api = through(function write (d) { // what input?
-    interface[d.cmd](d, function (res) {
-      self.emit('data', res)
-    })
-  }, function end () {
-    this.emit('end')
-  }, {autoDestroy:false})
-
-  return api
 }
 
-function search (pattern, result) {
+
+// API INTERFACE
+
+interface.ls = function (result) {
+  // show active modules and connections
+  for (module in WILDS['_']) {
+
+  }
+}
+interface.search = function (pattern, result) {
   var res = []
   var ks = data.createKeyStream()
   ks.on('data', function (d) {
@@ -67,3 +62,13 @@ function search (pattern, result) {
     result(res)
   })
 }
+
+module.exports.api = through(function input (d) { 
+
+  interface[d.cmd](d, function (res) {
+    self.emit('data', res)
+  })
+
+}, function end () {
+  this.emit('end')
+}, {autoDestroy:false})
