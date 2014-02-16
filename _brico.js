@@ -6,9 +6,8 @@ var proc = process.title // node or browser
 
 
 module.exports = function bricoleur (data) { 
-  var api
-  var WILDS = {}
 
+  var WILDS = {}
 
   WILDS['*'] = function (i,o) { // * MODULE
 
@@ -24,7 +23,7 @@ module.exports = function bricoleur (data) {
   }
 
 
-  var interface = {
+  var filter = {
     put: function (d) {
       var path = d.key.split(':')
 
@@ -32,12 +31,8 @@ module.exports = function bricoleur (data) {
     del: function (d) {
       var path = d.key.split(':')
 
-    },
-    utils: {}
+    }
   }
-
-  interface.utils.search = search
-
 
   function dataFilter (d) { 
     if (filter[d.type]) filter[d.type](d)
@@ -47,7 +42,13 @@ module.exports = function bricoleur (data) {
   liveStream.on('data', dataFilter)
 
 
-  api = through(function write (d) { // what input?
+  var interface = {}
+  interface.search = search
+
+  var api = through(function write (d) { // what input?
+    interface[d.cmd](d, function (res) {
+      self.emit('data', res)
+    })
   }, function end () {
     this.emit('end')
   }, {autoDestroy:false})
