@@ -1,14 +1,14 @@
 // BRICO
 
 var through = require('through')
-var fern = require('fern')
 var conf = require('./__conf.json') 
 var proc = process.title // node or browser
-var interface
 
 
 module.exports = function bricoleur (data) { 
+  var api
   var WILDS = {}
+
 
   WILDS['*'] = function (i,o) { // * MODULE
 
@@ -23,14 +23,8 @@ module.exports = function bricoleur (data) {
 
   }
 
-  var liveStream = data.liveStream({old:false}) 
-  liveStream.on('data', handleData)
 
-  function handleData (d) {
-    if(filter[d.type]) filter[d.type](d)  
-  }
-
-  var filter = {
+  var interface = {
     put: function (d) {
       var path = d.key.split(':')
 
@@ -38,23 +32,30 @@ module.exports = function bricoleur (data) {
     del: function (d) {
       var path = d.key.split(':')
 
-    }
+    },
+    utils: {}
   }
 
-  // abstraction layer
-  interface = through(function write (d) { 
-    console.log(d)
+  interface.utils.search = search
+
+
+  function dataFilter (d) { 
+    if (filter[d.type]) filter[d.type](d)
+  }
+
+  var liveStream = data.liveStream({old:false}) 
+  liveStream.on('data', dataFilter)
+
+
+  api = through(function write (d) { // what input?
   }, function end () {
     this.emit('end')
   }, {autoDestroy:false})
 
-  return interface
+  return api
 }
 
-
-/////////////////////////////////////////////
-
-function search (args, cb) {
+function search (i, o) {
   var match = false
   var ks = data.createKeyStream()
   ks.on('data', function (d) {
@@ -71,6 +72,7 @@ function search (args, cb) {
     }
   })
   ks.on('end', function () {
-    if (match !== true) interface.emit('error', new Error('could not find module'))
+    if (match !== true) 
+      interface.emit('error', new Error('could not find module'))
   })
 }
