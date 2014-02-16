@@ -4,21 +4,22 @@ var through = require('through')
 var conf = require('./__conf.json') 
 var proc = process.title // node or browser
 var interface = {}
+var api
 
 module.exports = function bricoleur (data) { 
 
   var WILDS = {}
 
-  WILDS['*'] = function (i,o) { // * MODULE
+  WILDS['_'] = function (i,o) { // _ PROCESS
 
   }
   WILDS['^'] = function (i,o) { // ^ LIBRARY
 
   }
-  WILDS['#'] = function (i,o) { // # CONNECT
+  WILDS['*'] = function (i,o) { // * MODULE
 
   }
-  WILDS['_'] = function (i,o) { // _ PROCESS
+  WILDS['#'] = function (i,o) { // # CONNECT
 
   }
 
@@ -33,17 +34,15 @@ module.exports = function bricoleur (data) {
     }
   }
 
-  function dataFilter (d) { 
-    if (filter[d.type]) filter[d.type](d)
-  }
-
   var liveStream = data.liveStream({old:false}) 
-  liveStream.on('data', dataFilter)
 
+  liveStream.on('data', function dataFilter {
+    if (filter[d.type]) filter[d.type](d)
+  })
+
+  return api
 }
 
-
-// API INTERFACE
 
 interface.ls = function (result) {
   // show active modules and connections
@@ -63,7 +62,8 @@ interface.search = function (pattern, result) {
   })
 }
 
-module.exports.api = through(function input (d) { 
+
+api = through(function input (d) { 
 
   interface[d.cmd](d, function (res) {
     self.emit('data', res)
