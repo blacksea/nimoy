@@ -56,24 +56,14 @@ module.exports = function bricoleur (data) {
   return api
 }
 
-function search (i, o) {
-  var match = false
+function search (pattern, result) {
+  var res = []
   var ks = data.createKeyStream()
   ks.on('data', function (d) {
     var path = d.split(':')
-    if (args[1] === path[1]) {
-      match = true
-      for (var i=2; i<args.length; i++) {
-        var pair = args[i].split('=')
-        var key = pair[0]
-        var val = pair[1]
-        opts[key] = val
-      }
-      if (opts === {}) opts = null
-    }
+    if (pattern[1] === path[1]) res.push(d) 
   })
   ks.on('end', function () {
-    if (match !== true) 
-      interface.emit('error', new Error('could not find module'))
+    result(res)
   })
 }
