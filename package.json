@@ -25,7 +25,6 @@
     "uglify-js": "^2.3.6",
     "bindshim": "^0.0.1",
     "cli-color": "^0.2.3",
-    "fern": "^0.0.8",
     "slide": "^1.1.4"
   },
   "devDependancies": {

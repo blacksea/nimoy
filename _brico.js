@@ -1,7 +1,7 @@
-// BRICO
+// BRICOLEUR
 
-var through = require('through')
 var conf = require('./__conf.json') 
+var through = require('through')
 var proc = process.title // node or browser
 var interface = {}
 var api
@@ -64,11 +64,9 @@ interface.search = function (pattern, result) {
 
 
 api = through(function input (d) { 
-
   interface[d.cmd](d, function (res) {
     self.emit('data', res)
   })
-
 }, function end () {
   this.emit('end')
 }, {autoDestroy:false})
