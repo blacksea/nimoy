@@ -87,7 +87,7 @@ function bootnet (booted) {
       res.setHeader('Content-Encoding', 'gzip')
       file.pipe(gzip()).pipe(res)
       file.on('error', function(e) {
-        console.error(e)
+        //console.error(e) // handle this properly
         res.statusCode = 404
         res.end('error 404')
       })
