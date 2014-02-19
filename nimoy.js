@@ -49,7 +49,11 @@ function BOOT () {
     brico = new bricoleur(db) // maybe don't construct with new?
     brico.on('error', console.error)
 
-    if (config.cli === true) process.stdin.pipe(require('./_cli')(db)).pipe(process.stdout)
+    if (config.cli === true) {
+      var cli = require('./_cli')()
+      cli.pipe(brico).pipe(cli)
+      process.stdin.pipe(cli).pipe(process.stdout)
+    }
   })
 }
 

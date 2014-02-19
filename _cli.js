@@ -5,7 +5,7 @@ var clc = require('cli-color')
 var err = clc.redBright
 var log = clc.cyanBright
 
-module.exports = function (db) {
+module.exports = function (opts) {
 
  var s = through(function write (buf) {
     var self = this

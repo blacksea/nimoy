@@ -63,9 +63,9 @@ module.exports = function bricoleur (data) {
  
   var api = through(function input (d) { 
     var self = this
-    interface[d.cmd](d, function (res) {
-      self.emit('data', res)
-    })
+    // interface[d.cmd](d, function (res) {
+    //   self.emit('data', res)
+    // })
   }, function end () {
     this.emit('end')
   }, {autoDestroy:false})
