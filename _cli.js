@@ -10,7 +10,6 @@ module.exports = function (db) {
  var s = through(function write (buf) {
     var self = this
     var args = buf.toString().replace('\n','').split(' ')
-
     var d = {
       type: args[0],
       key: args[1]
