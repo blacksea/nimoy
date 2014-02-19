@@ -6,7 +6,7 @@ var browserify = require('browserify')
 var uglify = require('uglify-js')
 var through = require('through')
 
-module.exports = function Map (opts, cb) {
+module.exports = function Map (opts) {
   var MAP = {}
   var dir = opts.wilds
   var b = browserify('./_client.js')
@@ -25,7 +25,7 @@ module.exports = function Map (opts, cb) {
       var pkg = JSON.parse(jsn)
       if (pkg.nimoy) { 
         if (pkg.nimoy.process === 'browser') b.require(dir+pkg.name, {expose:pkg.name})
-        s.write({key:opts.prefix+':'+pkg.name, value:jsn, valueEncoding:'json'})
+        s.write({key:opts.prefix+':'+pkg.name, value:pkg, valueEncoding:'json'})
         next() 
       } else next()
     } else next()

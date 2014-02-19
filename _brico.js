@@ -41,9 +41,7 @@ module.exports = function bricoleur (data) {
   }
 
 
-  // use an event emitter?
-  // interface = require('events').EventEmitter
-  interface.ls = function (result) {// show active modules and connections
+  interface.ls = function (result) { // show active modules and connections
     for (module in WILDS['_']) { 
 
     }
