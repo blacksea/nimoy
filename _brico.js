@@ -58,14 +58,10 @@ module.exports = function bricoleur (data) {
     })
   }
 
-
-  // STREAM --> EVENT EMITTER
  
   var api = through(function input (d) { 
-    var self = this
-    // interface[d.cmd](d, function (res) {
-    //   self.emit('data', res)
-    // })
+    if (d.type) interface[d.type](d)
+    if (!d.type) this.emit('error', new Error('please provide an object type'))
   }, function end () {
     this.emit('end')
   }, {autoDestroy:false})
