@@ -1,9 +1,9 @@
 // BRICOLEUR
 
+
 var conf = require('./__conf.json') 
 var fern = require('fern')
 var proc = process.title // node or browser
-var interface = {}
 
 module.exports = function bricoleur (data) { 
 
@@ -12,12 +12,15 @@ module.exports = function bricoleur (data) {
   WILDS['_'] = function (i,o) { // _ PROCESS
 
   }
+
   WILDS['^'] = function (i,o) { // ^ LIBRARY
 
   }
+
   WILDS['*'] = function (i,o) { // * MODULE
 
   }
+
   WILDS['#'] = function (i,o) { // # CONNECT
 
   }
@@ -50,6 +53,9 @@ module.exports = function bricoleur (data) {
       ks.on('end', function () {
         result(res)
       })
+    }, 
+    ls : {
+
     }
   })
 

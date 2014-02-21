@@ -5,7 +5,7 @@ var through = require('through')
 var clc = require('cli-color')
 var err = clc.redBright
 var log = clc.cyanBright
-var prefix = log('NIMOY: ')
+var prefix = log('nimoy: ')
 
 module.exports = function (opts) {
 
@@ -29,10 +29,6 @@ module.exports = function (opts) {
   }, function end () {
     this.emit('end')
   })
-
-  setTimeout(function () {// fix this up somehow?
-    s.emit('data', prefix)
-  }, 250)
 
   return s
 }

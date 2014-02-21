@@ -1,5 +1,6 @@
 // NIMOY 
 
+
 var fs = require('fs')
 var clc = require('cli-color')
 var log = clc.cyanBright
@@ -7,12 +8,9 @@ var err = clc.red
 
 
 // CONFIG 
-
-if (process.argv[2]) var config = require(process.argv[2])
-if (!process.argv[2]) var config = require('./__conf.json')
+!process.argv[2] ? var config = require('./__conf.json') : var config = require(process.argv[2])
 if (config.dirStatic[config.dirStatic.length-1] !== '/') config.dirStatic += '/'
 if (config.dirModules[config.dirModules.length-1] !== '/') config.dirModules += '/'
-
     
 // SETUP DB
  
