@@ -23,7 +23,7 @@ module.exports = function bricoleur (data) {
   }
 
 
-  var Filter = {
+  var Filter = fern({
     put: function (d) {
       var path = d.key.split(':')
 
@@ -32,12 +32,14 @@ module.exports = function bricoleur (data) {
       var path = d.key.split(':')
 
     }
-  }
+  })
+
   var LevelDataStream = data.liveStream({old:false}) 
-  LevelDataStream.pipe(fern(Filter))
+
+  LevelDataStream.pipe(Filter)
 
 
-  var Api = {
+  var Api = fern({
     search : function () {
       var res = []
       var ks = data.createKeyStream()
@@ -49,7 +51,7 @@ module.exports = function bricoleur (data) {
         result(res)
       })
     }
-  }
+  })
 
-  return fern(Api)
+  return Api
 }
