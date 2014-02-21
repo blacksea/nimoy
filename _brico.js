@@ -3,6 +3,7 @@
 var conf = require('./__conf.json') 
 var through = require('through')
 var proc = process.title // node or browser
+var fern = require('fern')
 var interface = {}
 
 module.exports = function bricoleur (data) { 
@@ -23,13 +24,7 @@ module.exports = function bricoleur (data) {
   }
 
 
-  var liveStream = data.liveStream({old:false}) 
-
-  liveStream.on('data', function dataFilter (d) {
-    if (filter[d.type]) filter[d.type](d)
-  })
-
-  var filter = {
+  var Filter = {
     put: function (d) {
       var path = d.key.split(':')
 
@@ -39,32 +34,23 @@ module.exports = function bricoleur (data) {
 
     }
   }
+  var LevelDataStream = data.liveStream({old:false}) 
+  LevelDataStream.pipe(fern(Filter))
 
 
-  interface.ls = function (result) { // show active modules and connections
-    for (module in WILDS['_']) { 
-
+  var Api = {
+    search : function () {
+      var res = []
+      var ks = data.createKeyStream()
+      ks.on('data', function (d) {
+        var path = d.split(':')
+        if (pattern[1] === path[1]) res.push(d) 
+      })
+      ks.on('end', function () {
+        result(res)
+      })
     }
   }
-  interface.search = function (pattern, result) {
-    var res = []
-    var ks = data.createKeyStream()
-    ks.on('data', function (d) {
-      var path = d.split(':')
-      if (pattern[1] === path[1]) res.push(d) 
-    })
-    ks.on('end', function () {
-      result(res)
-    })
-  }
 
- 
-  var api = through(function input (d) { 
-    if (d.type) interface[d.type](d)
-    if (!d.type) this.emit('error', new Error('please provide an object type'))
-  }, function end () {
-    this.emit('end')
-  }, {autoDestroy:false})
-
-  return api
+  return fern(Api)
 }
