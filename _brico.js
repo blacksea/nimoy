@@ -1,9 +1,8 @@
 // BRICOLEUR
 
 var conf = require('./__conf.json') 
-var through = require('through')
-var proc = process.title // node or browser
 var fern = require('fern')
+var proc = process.title // node or browser
 var interface = {}
 
 module.exports = function bricoleur (data) { 
