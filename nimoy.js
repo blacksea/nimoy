@@ -8,11 +8,13 @@ var err = clc.red
 
 
 // CONFIG 
+
 var config
 !process.argv[2] ? config = require('./__conf.json') : config = require(process.argv[2])
 if (config.dirStatic[config.dirStatic.length-1] !== '/') config.dirStatic += '/'
 if (config.dirModules[config.dirModules.length-1] !== '/') config.dirModules += '/'
     
+
 // SETUP DB
  
 var level = require('level')

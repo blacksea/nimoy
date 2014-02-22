@@ -30,5 +30,9 @@ module.exports = function (opts) {
     this.emit('end')
   })
 
+  setTimeout(function () {
+    s.emit('data', prefix)
+  }, 500)
+
   return s
 }
