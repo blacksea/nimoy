@@ -7,32 +7,51 @@ var err = clc.redBright
 var log = clc.cyanBright
 var prefix = log('nimoy: ')
 
-module.exports = function (opts) {
 
- var s = through(function write (buf) {
-   var self = this
+module.exports = function () {
 
-   if (buf instanceof Buffer) {
-     var args = buf.toString().replace('\n','').split(' ')
+  function makeOpts (inlineOpts) {
+    var opts = {}
+    for (var i=0;i<inlineOpts.length;i++) {
+      var key = inlineOpts[i].split(':')[0]
+      var val = inlineOpts[i].split(':')[1]
+      opts[key] = val
+    }
+    return opts
+  }
 
-     if (args[2]) {
-       var val = {}
-       var pairs = args[2].split(',')
+  var s = through(function write (buf) { // plaintext stream
+    var self = this
+    var d = {}
+    var badOpts
+    var args 
+    var cmd
 
-       for (var i=0;i<pairs.length;i++) {
-         var pair = pairs[i]
-         val[pair[0]] = pair[1]
-       }
-       d.value = JSON.stringify(val)
-     }
-   }
+    // check for string input
+    if (buf instanceof Buffer || typeof buf === 'string') {
+      if (buf instanceof Buffer) cmd = buf.toString()
+      if (typeof buf === 'string') cmd = buf
+      args = cmd.replace('\n','').split(' ') 
+      d.type = args[0]
+      if (args[1]) {
+        var inlineOpts = args[1].split(',')
+        for (var i=0;i<inlineOpts.length;i++) {
+          var sep = inlineOpts[i].match(':')
+          if (sep === null) badOpts = true
+        }
+        if (badOpts === true) {
+          self.emit('error', new Error('Cli: Opts arg "'+args[1]+'" missing colon/s\n should be in format: "a:one,b:two"'))
+        } else if (!badOpts) {
+          d.opts = makeOpts(inlineOpts)
+          self.emit('data', d)
+        }
+      }
+    } else {
+      self.emit('error', new Error('Cli: Input should be string'))
+    }
   }, function end () {
     this.emit('end')
   })
-
-  setTimeout(function () {
-    s.emit('data', prefix)
-  }, 500)
 
   return s
 }
