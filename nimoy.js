@@ -4,6 +4,7 @@ var fs = require('fs')
 var clc = require('cli-color')
 var log = clc.cyanBright
 var err = clc.red
+var levelServer
 
 
 // CONFIG 
@@ -46,7 +47,7 @@ function BOOT () {
 
     // RUN BRICO  
     var bricoleur = require('./_brico')
-    brico = new bricoleur(db) // maybe don't construct with new?
+    brico = bricoleur(db, levelServer) // maybe don't construct with new?
     brico.on('error', console.error)
 
     if (config.cli === true) {
@@ -108,7 +109,8 @@ function bootnet (booted) {
     var headers = soc.upgradeReq.headers
     var origin = headers.origin
     var wss = require('websocket-stream')(soc) 
-    wss.pipe(multilevel.server(db)).pipe(wss)
+    levelServer = multilevel.server(db)
+    wss.pipe(levelServer)pipe(wss)
     wss.on('error', function (e) {
       if (soc.readyState !== 3) console.error(e)
     })

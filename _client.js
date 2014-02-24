@@ -13,12 +13,12 @@ if (window.location.protocol === 'http:') var ws = websocStream('ws://' + host)
 var ml = require('multilevel')
 var manifest = require('./manifest.json')
 var db = ml.client(manifest)
-ws.pipe(db.createRpcStream()).pipe(ws)
-
+var rpc = db.createRpcStream()
+ws.pipe(rpc).pipe(ws)
 
 // RUN BRICO
 var bricoleur = require('./_brico')
-var brico = new bricoleur(db)
+var brico = new bricoleur(db, rpc)
 brico.on('error', function (e) {
   console.error(e)
 })

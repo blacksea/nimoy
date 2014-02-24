@@ -6,7 +6,7 @@ var fern = require('fern')
 var proc = process.title // node or browser
 
 
-module.exports = function bricoleur (data) { 
+module.exports = function bricoleur (data, muxDemux) { 
   var _ = {} // PROCESS SCOPE
 
   var WILDS = {}
@@ -15,29 +15,35 @@ module.exports = function bricoleur (data) {
     return key.split(':')
   }
 
-  WILDS['_'] = function (d,o) { // _ PROCESS
+  WILDS['_'] = function (d, emit) {// _ PROCESS/storage
     var name = getPath(d.key)[1]
     var uid = getPath(d.key)[2]
     var time = getPath(d.key)[3]
     
   }
-  WILDS['^'] = function (d,o) { // ^ LIBRARY
+
+  WILDS['^'] = function (d, emit) {// ^ LIBRARY
     var context = getPath(d.key)[1]
 
   }
-  WILDS['*'] = function (d,o) { // * MODULE
+
+  WILDS['*'] = function (d, emit) {// * MODULE
     var name = getPath(d.key)[1]
     var uid = getPath(d.key)[2]
     var time = getPath(d.key)[3]
-
-
+    var modName = name+':'+uid
+    d.opts ? _[modName] = require(name)(d.opts) : _[modName] = require(name)
   }
-  WILDS['#'] = function (d,o) { // # CONNECT
+
+  WILDS['#'] = function (d, emit) {// # CONNECT
     var mode = getPath(d.key)[1]
-    var uid = getPath(d.key)[2]
-    var time = getPath(d.key)[3]
-
-
+    var modA = d.conn.split('>')[0]
+    var modB = d.conn.split('>')[1]
+    if (d.mode == 'link') {
+      modA.pipe(modB)
+    } else if (d.mode == 'pipe') {
+      // make a link pipe
+    }
   }
 
 
