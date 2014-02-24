@@ -7,19 +7,24 @@ var proc = process.title // node or browser
 
 
 module.exports = function bricoleur (data) { 
+  var _ = {} // PROCESS SCOPE
 
   var WILDS = {}
 
   WILDS['_'] = function (d,o) { // _ PROCESS
+
     
   }
   WILDS['^'] = function (d,o) { // ^ LIBRARY
 
+
   }
   WILDS['*'] = function (d,o) { // * MODULE
 
+
   }
   WILDS['#'] = function (d,o) { // # CONNECT
+
 
   }
 
@@ -29,20 +34,29 @@ module.exports = function bricoleur (data) {
 
 
   var Api = {
+
     search : function () {
+
       var res = []
       var ks = data.createKeyStream()
+
       ks.on('data', function (d) {
         var path = d.split(':')
         if (pattern[1] === path[1]) res.push(d) 
       })
+
       ks.on('end', function () {
         result(res)
       })
+
     }, 
-    ls : {
+    ls : function (opts) {
+
+
+
 
     }
+
   }
 
   return fern(Api)

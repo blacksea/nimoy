@@ -1,6 +1,5 @@
 // NIMOY 
 
-
 var fs = require('fs')
 var clc = require('cli-color')
 var log = clc.cyanBright
@@ -52,8 +51,7 @@ function BOOT () {
 
     if (config.cli === true) {
       var cli = require('./_cli')()
-      cli.pipe(brico).pipe(cli)
-      process.stdin.pipe(cli).pipe(process.stdout)
+      process.stdin.pipe(cli).pipe(brico).pipe(process.stdout)
     }
   })
 }
