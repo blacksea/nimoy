@@ -5,8 +5,7 @@ var conf = require('./__conf.json')
 var fern = require('fern')
 var proc = process.title // node or browser
 
-
-module.exports = function bricoleur (data, muxDemux) { 
+module.exports = function Bricoluer (data) { 
   var _ = {} // PROCESS SCOPE
 
   var WILDS = {}
@@ -83,5 +82,30 @@ module.exports = function bricoleur (data, muxDemux) {
     }
   }
 
-  return fern(Api)
+  var s = fern(Api)
+
+  s.mux = function (mxdx) {
+
+    if (proc==='browser') {
+      console.log('running in browser')
+       mxdx.on('connection', function (s) {
+        console.log(s)
+        s.on('data', console.log)
+        s.on('error', console.error)
+
+        window.thru = s
+      }) 
+    }
+    if (proc==='node') {
+      console.log('running in node')
+      var t = mxdx.createStream('thru')
+      t.on('data', console.log)
+      t.on('error', console.error)
+        setTimeout(function () {
+          t.write('toe')
+        },300)
+    }
+  }
+
+  return s
 }

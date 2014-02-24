@@ -4,7 +4,6 @@ var fs = require('fs')
 var clc = require('cli-color')
 var log = clc.cyanBright
 var err = clc.red
-var levelServer
 
 
 // CONFIG 
@@ -42,14 +41,15 @@ function BOOT () {
   var stat = fs.statSync(config.dirStatic+'bundle.js')
   console.log(log('wrote bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+config.dirStatic+'bundle.js'))
 
+  // RUN BRICO  
+    var bricoleur = require('./_brico')
+    brico = bricoleur(db) 
+    brico.on('error', console.error)
+
   bootnet(function () {
     console.log(log('network running on port: '+config.port+' host: '+config.host))
 
-    // RUN BRICO  
-    var bricoleur = require('./_brico')
-    brico = bricoleur(db, levelServer) // maybe don't construct with new?
-    brico.on('error', console.error)
-
+  
     if (config.cli === true) {
       var cli = require('./_cli')()
       process.stdin.pipe(cli).pipe(brico).pipe(process.stdout)
@@ -107,10 +107,13 @@ function bootnet (booted) {
 
   function handleSoc (soc) {
     var headers = soc.upgradeReq.headers
+    var id = headers['sec-websocket-key']
+    if (!id) id = headers['sec-websocket-key1']
     var origin = headers.origin
     var wss = require('websocket-stream')(soc) 
-    levelServer = multilevel.server(db)
+    var levelServer = multilevel.server(db)
     wss.pipe(levelServer).pipe(wss)
+    brico.mux(levelServer)
     wss.on('error', function (e) {
       if (soc.readyState !== 3) console.error(e)
     })

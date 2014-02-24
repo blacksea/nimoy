@@ -18,7 +18,9 @@ ws.pipe(rpc).pipe(ws)
 
 // RUN BRICO
 var bricoleur = require('./_brico')
-var brico = new bricoleur(db, rpc)
+var brico = bricoleur(db)
+brico.mux(rpc)
 brico.on('error', function (e) {
   console.error(e)
 })
+
