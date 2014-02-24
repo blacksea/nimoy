@@ -110,7 +110,7 @@ function bootnet (booted) {
     var origin = headers.origin
     var wss = require('websocket-stream')(soc) 
     levelServer = multilevel.server(db)
-    wss.pipe(levelServer)pipe(wss)
+    wss.pipe(levelServer).pipe(wss)
     wss.on('error', function (e) {
       if (soc.readyState !== 3) console.error(e)
     })
