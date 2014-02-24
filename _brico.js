@@ -11,19 +11,31 @@ module.exports = function bricoleur (data) {
 
   var WILDS = {}
 
-  WILDS['_'] = function (d,o) { // _ PROCESS
+  function getPath (key) {
+    return key.split(':')
+  }
 
+  WILDS['_'] = function (d,o) { // _ PROCESS
+    var name = getPath(d.key)[1]
+    var uid = getPath(d.key)[2]
+    var time = getPath(d.key)[3]
     
   }
   WILDS['^'] = function (d,o) { // ^ LIBRARY
-
+    var context = getPath(d.key)[1]
 
   }
   WILDS['*'] = function (d,o) { // * MODULE
+    var name = getPath(d.key)[1]
+    var uid = getPath(d.key)[2]
+    var time = getPath(d.key)[3]
 
 
   }
   WILDS['#'] = function (d,o) { // # CONNECT
+    var mode = getPath(d.key)[1]
+    var uid = getPath(d.key)[2]
+    var time = getPath(d.key)[3]
 
 
   }
@@ -34,8 +46,18 @@ module.exports = function bricoleur (data) {
 
 
   var Api = {
+    put: function (opts, emit) {
+      // make key string & pass in opts
+      data.put(key, val, function (e) {
+          
+      })
+    },
+    del: function (opts, emit) {
+      data.del(key, function (e) {
 
-    search : function () {
+      })
+    },
+    search : function (opts, emit) {
 
       var res = []
       var ks = data.createKeyStream()
@@ -50,13 +72,9 @@ module.exports = function bricoleur (data) {
       })
 
     }, 
-    ls : function (opts) {
-
-
-
+    ls : function (opts, emit) {
 
     }
-
   }
 
   return fern(Api)
