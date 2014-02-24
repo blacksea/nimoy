@@ -19,7 +19,7 @@ ws.pipe(rpc).pipe(ws)
 // RUN BRICO
 var bricoleur = require('./_brico')
 var brico = bricoleur(db)
-brico.mux(rpc)
+brico.installMuxDemux(rpc)
 brico.on('error', function (e) {
   console.error(e)
 })

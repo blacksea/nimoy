@@ -6,6 +6,7 @@ var fern = require('fern')
 var proc = process.title // node or browser
 
 module.exports = function Bricoluer (data) { 
+  var muxDemux
   var _ = {} // PROCESS SCOPE
 
   var WILDS = {}
@@ -35,10 +36,11 @@ module.exports = function Bricoluer (data) {
   }
 
   WILDS['#'] = function (d, emit) {// # CONNECT
+    // check proc & handle
     var mode = getPath(d.key)[1]
     var modA = d.conn.split('>')[0]
     var modB = d.conn.split('>')[1]
-    if (d.mode == 'link') {
+    if (d.mode == 'pipe') {
       modA.pipe(modB)
     } else if (d.mode == 'pipe') {
       // make a link pipe
@@ -50,7 +52,7 @@ module.exports = function Bricoluer (data) {
   LevelDataStream.pipe(fern(WILDS, {type:'key', sep:':', pos:0}))
 
 
-  var Api = {
+  var Api = fern({
     put: function (opts, emit) {
       // make key string & pass in opts
       data.put(key, val, function (e) {
@@ -80,32 +82,29 @@ module.exports = function Bricoluer (data) {
     ls : function (opts, emit) {
 
     }
+  })
+
+  Api.installMuxDemux = function (mxdx) {
+    muxDemux = mxdx
   }
 
-  var s = fern(Api)
+  // if (proc==='browser') {
+  //   mxdx.on('connection', function (s) {
+  //     console.log(s)
+  //     s.on('data', console.log)
+  //     s.on('error', console.error)
+  //     window.thru = s
+  //   }) 
+  // }
+  //   if (proc==='node') {
+  //     var t = mxdx.createStream('thru')
+  //     t.on('data', console.log)
+  //     t.on('error', console.error)
+  //       setTimeout(function () {
+  //         t.write('toe')
+  //       },300)
+  //   }
+  // }
 
-  s.mux = function (mxdx) {
-
-    if (proc==='browser') {
-      console.log('running in browser')
-       mxdx.on('connection', function (s) {
-        console.log(s)
-        s.on('data', console.log)
-        s.on('error', console.error)
-
-        window.thru = s
-      }) 
-    }
-    if (proc==='node') {
-      console.log('running in node')
-      var t = mxdx.createStream('thru')
-      t.on('data', console.log)
-      t.on('error', console.error)
-        setTimeout(function () {
-          t.write('toe')
-        },300)
-    }
-  }
-
-  return s
+  return Api
 }

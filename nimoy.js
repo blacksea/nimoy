@@ -113,7 +113,7 @@ function bootnet (booted) {
     var wss = require('websocket-stream')(soc) 
     var levelServer = multilevel.server(db)
     wss.pipe(levelServer).pipe(wss)
-    brico.mux(levelServer)
+    brico.installMuxDemux(levelServer)
     wss.on('error', function (e) {
       if (soc.readyState !== 3) console.error(e)
     })
