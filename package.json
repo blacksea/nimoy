@@ -12,7 +12,7 @@
     "url": "http://theblacksea.cc"
   },
   "scripts": {
-    "test": "tape test/*.js"
+    "test": "tape test/*"
   },
   "dependencies": {
     "ws": ">=0.4.30",
