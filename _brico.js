@@ -17,14 +17,17 @@ module.exports = function Bricoluer (data) {
 
   WILDS['_'] = function (d, emit) {// _ PROCESS/storage keyspace, but how to access?
     var name = getPath(d.key)[1]
+
     // keyspace for ghost/data modules
     // manage like regular modules but with pipes into db
+   
   }
 
   WILDS['^'] = function (d, emit) {// ^ LIBRARY
     var context = getPath(d.key)[1]
 
     // create index for Api functions and other Wilds fns
+   
   }
 
   WILDS['*'] = function (d, emit) {// * MODULE
@@ -34,7 +37,7 @@ module.exports = function Bricoluer (data) {
     // check active proc
     // require & call fn with opts
     // if err emit err
-
+   
     var name = getPath(d.key)[1]
     var uid = getPath(d.key)[2]
     var time = getPath(d.key)[3]
@@ -64,6 +67,7 @@ module.exports = function Bricoluer (data) {
     //     window.thru = s
     //   }) 
     // }
+    
     // if (proc==='node') {
     //   var t = mxdx.createStream('thru')
     //   t.on('data', console.log)
@@ -83,10 +87,13 @@ module.exports = function Bricoluer (data) {
     }
   }
 
+  var wilds = fern(WILDS,{key:'key', sep:':', pos:0})
+  wilds.on('error', console.error)
+
+  data.createReadStream().pipe(wilds)
 
   var LevelDataStream = data.liveStream({ old:false }) 
-  LevelDataStream.pipe(fern(WILDS, {type:'key', sep:':', pos:0}))
-
+  LevelDataStream.pipe(wilds)
 
   var Api = fern({
     put: function (opts, emit) {
@@ -101,7 +108,6 @@ module.exports = function Bricoluer (data) {
       })
     },
     search : function (opts, emit) {
-
       var res = []
       var ks = data.createKeyStream()
 
@@ -113,7 +119,6 @@ module.exports = function Bricoluer (data) {
       ks.on('end', function () {
         result(res)
       })
-
     }, 
     ls : function (opts, emit) {
 
@@ -124,7 +129,5 @@ module.exports = function Bricoluer (data) {
     muxDemux = mxdx
   }
 
-
-
   return Api
-}
+} 

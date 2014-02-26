@@ -108,7 +108,6 @@ function bootnet (booted) {
     var headers = soc.upgradeReq.headers
     var id = headers['sec-websocket-key']
     var origin = headers.origin
-    console.log(headers)
     var wss = require('websocket-stream')(soc) 
     var levelServer = multilevel.server(db)
     wss.pipe(levelServer).pipe(wss)
