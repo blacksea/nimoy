@@ -7,7 +7,11 @@ var uglify = require('uglify-js')
 var through = require('through')
 
 module.exports = function Map (opts) {
-  var MAP = {}
+  var MAP = {
+    browser: {},
+    node: {}
+  }
+
   var dir = opts.wilds
   var b = browserify('./_client.js')
 
@@ -15,6 +19,9 @@ module.exports = function Map (opts) {
   fs.readdir(dir, function moduleList (e, modules) {
     if (e) console.error(e)
     if (!e) asyncMap(modules, readPkg, function () {
+
+      s.write({key:'^:', value:MAP, valueEncoding:'json'})
+      
       bundleJS()
     })
   })
@@ -25,7 +32,9 @@ module.exports = function Map (opts) {
       var pkg = JSON.parse(jsn)
       if (pkg.nimoy) { 
         if (pkg.nimoy.process === 'browser') b.require(dir+pkg.name, {expose:pkg.name})
-        s.write({key:opts.prefix+':'+pkg.name, value:pkg, valueEncoding:'json'})
+
+        MAP[pkg.nimoy.process][pkg.name] = pkg
+
         next() 
       } else next()
     } else next()
