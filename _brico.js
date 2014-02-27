@@ -15,19 +15,20 @@ module.exports = function Bricoluer (data) {
     return key.split(':')
   }
 
-  WILDS['_'] = function (d, emit) {// _ PROCESS/storage keyspace, but how to access?
+  WILDS['_'] = function (d, emit) {// _ GHOST SPACE 
     var name = getPath(d.key)[1]
 
     // keyspace for ghost/data modules
     // manage like regular modules but with pipes into db
+    // make a new stream to db and pipe into module
    
+    // sublevels?
   }
 
   WILDS['^'] = function (d, emit) {// ^ LIBRARY
     var context = getPath(d.key)[1]
 
     // create index for Api functions and other Wilds fns
-   
   }
 
   WILDS['*'] = function (d, emit) {// * MODULE
@@ -46,6 +47,11 @@ module.exports = function Bricoluer (data) {
   }
 
   WILDS['#'] = function (d, emit) {// # CONNECT
+    // get module pkgs from index
+
+    // should be pkgs
+    var modA = {}
+    var modB = {}
 
     // PUT
     // check mod proc      
@@ -59,23 +65,17 @@ module.exports = function Bricoluer (data) {
     // destroy streams
     // if err emit err
     
-    // if (proc==='browser') {
-    //   mxdx.on('connection', function (s) {
-    //     console.log(s)
-    //     s.on('data', console.log)
-    //     s.on('error', console.error)
-    //     window.thru = s
-    //   }) 
-    // }
-    
-    // if (proc==='node') {
-    //   var t = mxdx.createStream('thru')
-    //   t.on('data', console.log)
-    //   t.on('error', console.error)
-    //     setTimeout(function () {
-    //       t.write('toe')
-    //     },300)
-    // }
+    if (proc==='browser') {
+      mxdx.on('connection', function (s) {
+        s.on('data', console.log)
+        s.on('error', console.error)
+        window.thru = s
+      }) 
+    } else if (proc==='node') {
+      var t = mxdx.createStream('thru')
+      t.on('data', console.log)
+      t.on('error', console.error)
+    }
     
     var mode = getPath(d.key)[1]
     var modA = d.conn.split('>')[0]
@@ -86,6 +86,7 @@ module.exports = function Bricoluer (data) {
       // make a link pipe
     }
   }
+
 
   var wilds = fern(WILDS,{key:'key', sep:':', pos:0})
   wilds.on('error', console.error)

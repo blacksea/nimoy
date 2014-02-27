@@ -12,7 +12,7 @@
     "url": "http://theblacksea.cc"
   },
   "scripts": {
-    "test": "node test/*"
+    "test": "node tests/nimoy.js"
   },
   "dependencies": {
     "ws": ">=0.4.30",
@@ -29,7 +29,7 @@
     "fern": ">=0.0.18"
   },
   "devDependancies": {
-    "tape": "^2.3.2"
+    "tape": ">=2.3.2"
   },
   "license": "MIT"
 }
