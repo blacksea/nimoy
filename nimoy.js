@@ -28,7 +28,6 @@ multilevel.writeManifest(db, __dirname + '/manifest.json')
 
 var dbMapStream = db.createWriteStream({type:'put'})
 var map = require('./_map')({
-  prefix: 'wilds',
   wilds : config.dirModules,
   bundle : config.dirStatic+'bundle.js',
   min : config.minify
