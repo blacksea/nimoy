@@ -21,7 +21,7 @@ var multilevel = require('multilevel')
 var liveStream = require('level-live-stream')
 var db = level('./'+config.host) 
 liveStream.install(db)
-multilevel.writeManifest(db, __dirname + '/manifest.json')
+multilevel.writeManifest(db, config.dirStatic + '/manifest.json')
 
 
 // GENERATE BROWSER CODE
@@ -42,7 +42,7 @@ fs.writeFileSync(config.dirStatic+'boot.js', getBcode(function () { // this is k
   ws.pipe(rpc).pipe(ws)
 
   // RUN BRICO
-  var bricoleur = require('./_brico')
+  var bricoleur = require('../bricoleur')
   var brico = bricoleur(db)
   brico.installMuxDemux(rpc)
   brico.on('error', function (e) {
@@ -69,7 +69,7 @@ function BOOT () {
   console.log(log('wrote bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+config.dirStatic+'bundle.js'))
 
   // RUN BRICO  
-  var bricoleur = require('./_brico')
+  var bricoleur = require('./bricoleur')
   brico = bricoleur(db) 
   brico.on('error', console.error)
 
@@ -149,6 +149,6 @@ function bootnet (booted) {
 // UTILS
 
 function getBcode (fn) {
-  var s = fn.toString()
+  var s = fn.toString().replace(/  /g,'')
   return s.substring(0,s.lastIndexOf('\n')).substring(s.indexOf('\n'),s.length)
 }
