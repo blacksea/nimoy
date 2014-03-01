@@ -13,7 +13,7 @@ module.exports = function Map (opts) {
   }
 
   var dir = opts.wilds
-  var b = browserify('./_client.js')
+  var b = browserify(opts.browserify)
 
   if (dir[dir.length-1] !=='/') dir += '/'
   fs.readdir(dir, function moduleList (e, modules) {
