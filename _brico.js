@@ -1,6 +1,5 @@
 // BRICOLEUR
 
-
 var conf = require('./__conf.json') 
 var fern = require('fern')
 var proc = process.title // node or browser
