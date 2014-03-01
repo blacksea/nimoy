@@ -24,16 +24,15 @@ liveStream.install(db)
 multilevel.writeManifest(db, __dirname + '/manifest.json')
 
 
-// BROWSER CODE
+// GENERATE BROWSER CODE
 
-var browserCode = getBcode(function () {
+fs.writeFileSync(config.dirStatic+'boot.js', getBcode(function () { // this is kind of weird but...
   // SETUP WEBSOCKET
   var websocStream = require('websocket-stream')
   var host = window.document.location.host.replace(/:.*/, '')
   if (window.location.port) host += (':' + window.location.port)
   if (window.location.protocol === 'https:') var ws = websocStream('wss://' + host)
   if (window.location.protocol === 'http:') var ws = websocStream('ws://' + host)
-
 
   // SETUP DB
   var ml = require('multilevel')
@@ -49,7 +48,8 @@ var browserCode = getBcode(function () {
   brico.on('error', function (e) {
     console.error(e)
   })
-})
+}))
+
 
 // RUN MAP / BROWSERIFY / BOOT / CLI
 
@@ -57,6 +57,7 @@ var dbMapStream = db.createWriteStream({type:'put'})
 var map = require('./_map')({
   wilds : config.dirModules,
   bundle : config.dirStatic+'bundle.js',
+  browserify: config.dirStatic+'boot.js',
   min : config.minify
 })
 map.pipe(dbMapStream)
