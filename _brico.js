@@ -49,6 +49,8 @@ module.exports = function Bricoluer (data) {
   WILDS['#'] = function (d, emit) {// # CONNECT
     // get module pkgs from index
 
+    // t off streams?
+
     // should be pkgs
     var modA = {}
     var modB = {}
