@@ -10,12 +10,11 @@ module.exports = function Bricoluer (multiLevel) {
 
   var WILDS = {}
 
-  function getPath (key) {
-    return key.split(':')
-  }
-
   WILDS['_'] = function (d, emit) {// _ GHOST SPACE 
     var name = getPath(d.key)[1]
+
+    // val / opts ?
+
     // keyspace for ghost/data modules
     // manage like regular modules but with pipes into db
     // make a new stream to db and pipe into module
@@ -37,7 +36,11 @@ module.exports = function Bricoluer (multiLevel) {
     var uid = getPath(d.key)[2]
     var time = getPath(d.key)[3]
     var modName = name+':'+uid
-    d.opts ? _[modName] = require(name)(d.opts) : _[modName] = require(name)
+    if (d.type === 'put') {
+      d.opts ? _[modName] = require(name)(d.opts) : _[modName] = require(name)
+    } else if (d.type === 'del') {
+      delete _[modName] 
+    }
   }
 
   WILDS['#'] = function (d, emit) {// # CONNECT
@@ -123,4 +126,11 @@ module.exports = function Bricoluer (multiLevel) {
   }
 
   return Api
+
+  
+  // UTILS
+  
+  function getPath (key) {
+    return key.split(':')
+  }
 } 
