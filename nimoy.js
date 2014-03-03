@@ -24,8 +24,8 @@ liveStream.install(db)
 multilevel.writeManifest(db, config.dirStatic + '/manifest.json')
 
 
-// GENERATE BROWSER CODE ///////////////////////////////////////////////////////////////////
-fs.writeFileSync(config.dirStatic+'boot.js', functionToString(function () {// kind of lazy...
+// GENERATE BROWSER CODE 
+fs.writeFileSync(config.dirStatic+'boot.js', functionToString(function () {
 // Start Browser Boot
 var websocStream = require('websocket-stream')
 var host = windowBdocument.location.host.replace(/:.*/, '')
@@ -46,7 +46,7 @@ brico.on('error', function (e) {
   console.error(e)
 })
 // End Browser Boot
-})) ///////////////////////////////////////////////////////////////////////////////////////
+})) 
 
 
 // RUN MAP / BROWSERIFY 
