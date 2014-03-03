@@ -1,4 +1,4 @@
-// NIMOY 
+// NIMOY
 
 var fs = require('fs')
 var clc = require('cli-color')
@@ -24,34 +24,32 @@ liveStream.install(db)
 multilevel.writeManifest(db, config.dirStatic + '/manifest.json')
 
 
-// GENERATE BROWSER CODE
+// GENERATE BROWSER CODE ///////////////////////////////////////////////////////////////////
+fs.writeFileSync(config.dirStatic+'boot.js', functionToString(function () {// kind of lazy...
+// Start Browser Boot
+var websocStream = require('websocket-stream')
+var host = windowBdocument.location.host.replace(/:.*/, '')
+if (window.location.port) host += ':'+window.location.port
+if (window.location.protocol === 'https:') var ws = websocStream('wss://' + host)
+if (window.location.protocol === 'http:') var ws = websocStream('ws://' + host)
 
-fs.writeFileSync(config.dirStatic+'boot.js', getBcode(function () { // this is kind of weird but...
-  // SETUP WEBSOCKET
-  var websocStream = require('websocket-stream')
-  var host = window.document.location.host.replace(/:.*/, '')
-  if (window.location.port) host += (':' + window.location.port)
-  if (window.location.protocol === 'https:') var ws = websocStream('wss://' + host)
-  if (window.location.protocol === 'http:') var ws = websocStream('ws://' + host)
+var ml = require('multilevel')
+var manifest = require('./manifest.json')
+var multiLevel = ml.client(manifest)
+var rpc = db.createRpcStream()
+ws.pipe(rpc).pipe(ws)
 
-  // SETUP DB
-  var ml = require('multilevel')
-  var manifest = require('./manifest.json')
-  var db = ml.client(manifest)
-  var rpc = db.createRpcStream()
-  ws.pipe(rpc).pipe(ws)
-
-  // RUN BRICO
-  var bricoleur = require('../bricoleur')
-  var brico = bricoleur(db)
-  brico.installMuxDemux(rpc)
-  brico.on('error', function (e) {
-    console.error(e)
-  })
-}))
+var bricoleur = require('../bricoleur')
+var brico = bricoleur(multiLevel)
+brico.installMuxDemux(rpc)
+brico.on('error', function (e) {
+  console.error(e)
+})
+// End Browser Boot
+})) ///////////////////////////////////////////////////////////////////////////////////////
 
 
-// RUN MAP / BROWSERIFY / BOOT / CLI
+// RUN MAP / BROWSERIFY 
 
 var dbMapStream = db.createWriteStream({type:'put'})
 var map = require('./_map')({
@@ -63,6 +61,8 @@ var map = require('./_map')({
 map.pipe(dbMapStream)
 dbMapStream.on('close', BOOT)
              
+
+// BOOT SERVER
 
 function BOOT () {
   var stat = fs.statSync(config.dirStatic+'bundle.js')
@@ -147,8 +147,7 @@ function bootnet (booted) {
 
 
 // UTILS
-
-function getBcode (fn) {
-  var s = fn.toString().replace(/  /g,'')
+function functionToString (fn) {// takes fn as input, unwraps and returns string
+  var s = fn.toString()
   return s.substring(0,s.lastIndexOf('\n')).substring(s.indexOf('\n'),s.length)
 }
