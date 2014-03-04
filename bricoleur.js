@@ -19,19 +19,26 @@ module.exports = function Bricoluer (multiLevel) {
     // manage like regular modules but with pipes into db
     // make a new stream to db and pipe into module
     // sublevels?
+    
   }
 
   WILDS['^'] = function (d, emit) {// ^ LIBRARY
     var context = getPath(d.key)[1]
+
     // create index for Api functions and other Wilds fns
+   
   }
 
   WILDS['*'] = function (d, emit) {// * MODULE
+
     // PUT
     // check mod proc
     // check active proc
     // require & call fn with opts
     // if err emit err
+
+    // check pipe links
+    
     var name = getPath(d.key)[1]
     var uid = getPath(d.key)[2]
     var time = getPath(d.key)[3]
@@ -44,17 +51,21 @@ module.exports = function Bricoluer (multiLevel) {
   }
 
   WILDS['#'] = function (d, emit) {// # CONNECT
+
     // get module pkgs from index
     // t off streams?
     // should be pkgs
+    
     var modA = {}
     var modB = {}
+
     // PUT
     // check mod proc      
     // check active proc
     // make mxdx s & pipe
     // or just pipe
     // if errs emit err
+    
     // DEL
     // unpipe mode
     // destroy streams
