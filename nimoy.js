@@ -21,9 +21,11 @@ var db = level('./'+config.host)
 liveStream.install(db)
 multilevel.writeManifest(db, config.dirStatic+'/manifest.json')
 
-1// GENERATE BROWSER CODE 
+
+// GENERATE BROWSER CODE 
 fs.writeFileSync(config.dirStatic+'boot.js', functionToString(function () {
 // Start Browser Boot 
+  
 var websocStream = require('websocket-stream')
 var host = windowBdocument.location.host.replace(/:.*/, '')
 if (window.location.port) host += ':'+window.location.port
@@ -42,6 +44,7 @@ brico.installMuxDemux(rpc)
 brico.on('error', function (e) {
   console.error(e)
 })
+
 // End Browser Boot
 })) 
 
@@ -53,30 +56,29 @@ brico.on('error', console.error)
 
 
 // LOAD MAP
-var map = require('./_map')({ // 
+var map = require('./_map')({ 
   wilds : config.dirModules,
   bundle : config.dirStatic+'bundle.js',
   browserify: config.dirStatic+'boot.js',
   min : config.minify
 })
 map.on('map', db.put)
-map.on('end', BOOT)
+map.on('end', function () {
+ var stat = fs.statSync(config.dirStatic+'bundle.js')
+  console.log(log('wrote bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+config.dirStatic+'bundle.js'))
+})
 map.on('error', console.error)
 
 
 // BOOT SERVER
-function BOOT () {
-  var stat = fs.statSync(config.dirStatic+'bundle.js')
-  console.log(log('wrote bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+config.dirStatic+'bundle.js'))
-  // RUN BRICO  
-  bootnet(function () {
-    console.log(log('network running on port: '+config.port+' host: '+config.host))
-    if (config.cli === true) {
-      var cli = require('./_cli')()
-      process.stdin.pipe(cli).pipe(brico).pipe(process.stdout)
-    }
-  })
-}
+bootnet(function () {
+  console.log(log('network running on port: '+config.port+' host: '+config.host))
+  if (config.cli === true) {
+    var cli = require('./_cli')()
+    process.stdin.pipe(cli).pipe(brico).pipe(process.stdout)
+  }
+})
+
 function bootnet (booted) {
   var http = require('http')
   var https = require('https')
@@ -97,7 +99,9 @@ function bootnet (booted) {
       ciphers: 'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
     }, handleRequests)
   } 
+
   server.listen(config.port, config.host, installWS)
+
   function handleRequests (req, res) { // more robust: needs paths as well as files
     var url = req.url.substr(1)
     if (url === '') {
@@ -115,12 +119,14 @@ function bootnet (booted) {
       })
     }
   }
+
   function installWS () {
     var webSocketServer = require('ws').Server
     var ws = new webSocketServer({server:server})
     ws.on('connection', handleSoc)
     booted() // NETWORK READY
   }
+
   function handleSoc (soc) {
     var headers = soc.upgradeReq.headers
     var id = headers['sec-websocket-key']
