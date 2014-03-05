@@ -2,15 +2,21 @@
 
 var fs = require('fs')
 var asyncMap = require('slide').asyncMap
+var Emitter = require('events').EventEmitter
 var browserify = require('browserify')
 var uglify = require('uglify-js')
-var through = require('through')
 
 module.exports = function Map (opts) {
+
+  // add an option to watch dir and recompile
+
+  var emitter = new Emitter
+
   var MAP = {
     browser: {},
     node: {}
   }
+
 
   var dir = opts.wilds
   var b = browserify(opts.browserify)
@@ -20,7 +26,7 @@ module.exports = function Map (opts) {
     if (e) console.error(e)
     if (!e) asyncMap(modules, readPkg, function () {
 
-      s.write({key:'^:', value:MAP, valueEncoding:'json'})
+      emitter.emit('map', '^', JSON.stringify(MAP))
       
       bundleJS()
     })
@@ -47,19 +53,11 @@ module.exports = function Map (opts) {
       if (opts.min === true ) {
         var min = uglify.minify(opts.bundle)
         fs.writeFileSync(opts.bundle, min.code)
-        s.end()
-      } else s.end()
+        emitter.emit('end')
+      } else emitter.emit('end')
     })
-    b.on('error', function (e) {
-      console.error(e)
-    })
+    b.on('error', console.error)
   }
 
-  var s = through(function write (chunk) {
-    this.emit('data', chunk)
-  }, function end () {
-    this.emit('end')
-  })
-
-  return s
+  return emitter
 }
