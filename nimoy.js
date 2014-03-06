@@ -11,10 +11,9 @@ var static = require('node-static')
 
 
 // CONFIGURATION  
-var config
-!process.argv[2] ? config = require('./__conf.json') : config = require(process.argv[2])
-if (config.dirStatic[config.dirStatic.length-1] !== '/') config.dirStatic += '/'
-if (config.dirModules[config.dirModules.length-1] !== '/') config.dirModules += '/'
+var config = process.argv[2] ? config = require(process.argv[2]) : config = require('./__conf.json') 
+if (config.dirModules.slice(-1) !== '/') config.dirModules += '/'
+if (config.dirStatic.slice(-1) !== '/') config.dirStatic += '/'
 
 
 // SETUP MULTILEVEL
@@ -23,8 +22,7 @@ liveStream.install(db)
 multilevel.writeManifest(db, config.dirStatic+'/manifest.json')
 
 
-// GENERATE BROWSER CODE //////////////////////////////////////////////////
-// Write boot.js : an entry point for browserify bundle
+// WRITE BROWSER BOOT : an entry point for browserify bundle
 fs.writeFileSync(config.dirStatic+'boot.js', functionToString(function () {
 // Start Browser Boot 
   
@@ -49,14 +47,8 @@ brico.on('error', function (e) {
 
 // End Browser Boot
 })) 
-// Write index.html
+// WRITE INDEX.HTML
 fs.writeFileSync(config.dirStatic+'index.html','<html><head></head><body><script src="/bundle.js"></script></body></html>')
-
-
-// LOAD BRICOLEUR
-var bricoleur = require('./bricoleur')
-brico = bricoleur(db) 
-brico.on('error', console.error)
 
 
 // LOAD MAP
@@ -66,14 +58,20 @@ var map = require('./_map')({
   browserify: config.dirStatic+'boot.js',
   min : config.minify
 })
-map.on('map', function (key,val) {
+map.on('mapped', function (key,val) {
   db.put(key,val)
 })
-map.on('end', function () {
+map.on('bundled', function () {
  var stat = fs.statSync(config.dirStatic+'bundle.js')
   console.log(log('wrote bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+config.dirStatic+'bundle.js'))
 })
 map.on('error', console.error)
+
+
+// LOAD BRICOLEUR
+var bricoleur = require('./bricoleur')
+brico = bricoleur(db) 
+brico.on('error', console.error)
 
 
 // RUN CLI

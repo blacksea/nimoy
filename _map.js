@@ -17,7 +17,6 @@ module.exports = function Map (opts) {
     node: {}
   }
 
-
   var dir = opts.wilds
   var b = browserify(opts.browserify)
 
@@ -26,7 +25,7 @@ module.exports = function Map (opts) {
     if (e) console.error(e)
     if (!e) asyncMap(modules, readPkg, function () {
 
-      emitter.emit('map', '^', JSON.stringify(MAP))
+      emitter.emit('mapped', '^', JSON.stringify(MAP))
       
       bundleJS()
     })
@@ -53,7 +52,7 @@ module.exports = function Map (opts) {
       if (opts.min === true ) {
         var min = uglify.minify(opts.bundle)
         fs.writeFileSync(opts.bundle, min.code)
-        emitter.emit('end')
+        emitter.emit('bundled')
       } else emitter.emit('end')
     })
     b.on('error', console.error)
