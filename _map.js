@@ -53,7 +53,7 @@ module.exports = function Map (opts) {
         var min = uglify.minify(opts.bundle)
         fs.writeFileSync(opts.bundle, min.code)
         emitter.emit('bundled')
-      } else emitter.emit('end')
+      } else emitter.emit('bundled')
     })
     b.on('error', console.error)
   }
