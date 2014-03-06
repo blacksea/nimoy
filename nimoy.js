@@ -1,4 +1,4 @@
-// NIMOY  
+// NIMOY
 
 var fs = require('fs')
 var clc = require('cli-color')
@@ -7,6 +7,7 @@ var err = clc.red
 var level = require('level')
 var multilevel = require('multilevel')
 var liveStream = require('level-live-stream')
+var static = require('node-static')
 
 
 // CONFIGURATION  
@@ -23,11 +24,12 @@ multilevel.writeManifest(db, config.dirStatic+'/manifest.json')
 
 
 // GENERATE BROWSER CODE //////////////////////////////////////////////////
+// Write boot.js : an entry point for browserify bundle
 fs.writeFileSync(config.dirStatic+'boot.js', functionToString(function () {
 // Start Browser Boot 
   
 var websocStream = require('websocket-stream')
-var host = windowBdocument.location.host.replace(/:.*/, '')
+var host = window.document.location.host.replace(/:.*/, '')
 if (window.location.port) host += ':'+window.location.port
 if (window.location.protocol === 'https:') var ws = websocStream('wss://' + host)
 if (window.location.protocol === 'http:') var ws = websocStream('ws://' + host)
@@ -47,7 +49,8 @@ brico.on('error', function (e) {
 
 // End Browser Boot
 })) 
-///////////////////////////////////////
+// Write index.html
+fs.writeFileSync(config.dirStatic+'index.html','<html><head></head><body><script src="/bundle.js"></script></body></html>')
 
 
 // LOAD BRICOLEUR
@@ -71,29 +74,28 @@ map.on('end', function () {
 map.on('error', console.error)
 
 
+// RUN CLI
 if (config.cli === true) {
   var cli = require('./_cli')()
   process.stdin.pipe(cli).pipe(brico).pipe(process.stdout)
 }
 
 
-// NETWORK
+// NETWORK ///////////////////////////////////
+var file = new static.Server(config.dirStatic)
+
 function HandleRequests (req, res) { 
   var secure = req.connection.encrypted 
-  var gzip = require('zlib').createGzip
 
-  var url = req.url 
-
-
-  if (req.url === '/') {
-    res.setHeader('content-type','text/html')
+  req.addListener('end', function serveFile () {
     if (secure===true) res.setHeader('Strict-Transport-Security','max-age=31536000')
-    res.end('<html><head></head><body><script src="/bundle.js"></script></body></html>')
-  } else if (req.url !== '/') { 
-    fs.exists(url, function (exists) {
-      exists ? fs.createReadStream('./'+url).pipe(gzip).pipe(res) : res.end('404')
-    })
-    res.setHeader('Content-Encoding', 'gzip')
+    file.serve(req, res, handlePath)
+  })
+  function handlePath (e, result) {
+    if (e) res.end('404')
+    // res.setHeader('content-type','text/html')
+    // if (secure===true) res.setHeader('Strict-Transport-Security','max-age=31536000')
+    // res.end('<html><head></head><body><script src="/bundle.js"></script></body></html>')
   }
 }
 
@@ -109,7 +111,7 @@ function InstallWebsocket () {
   })
 }
 
-var server = require('http').createServer(handleRequests)
+var server = require('http').createServer(HandleRequests)
 
 var server = require('https').createServer({
   key: fs.readFileSync(config.crypto.key),
@@ -117,10 +119,10 @@ var server = require('https').createServer({
   honorCipherOrder: true,
   ecdhCurve: 'prime256v1',
   ciphers: 'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
-}, handleRequests)
+}, HandleRequests)
 
 server.listen(config.port, config.host, installWS)
-
+//////////////////////////////////////////////////
 
 // UTILS
 function functionToString (fn) {// takes fn as input, unwraps and returns string

@@ -15,7 +15,7 @@
     "test": "node tests/nimoy.js"
   },
   "dependencies": {
-    "ws": ">=0.4.30",
+    "ws": ">=0.4.31",
     "websocket-stream": ">=0.3.2",
     "level": ">=0.18.0",
     "multilevel": ">=5.5.0",
