@@ -22,7 +22,7 @@ liveStream.install(db)
 multilevel.writeManifest(db, config.dirStatic+'/manifest.json')
 
 
-// GENERATE BROWSER CODE 
+// GENERATE BROWSER CODE //////////////////////////////////////////////////
 fs.writeFileSync(config.dirStatic+'boot.js', functionToString(function () {
 // Start Browser Boot 
   
@@ -47,6 +47,7 @@ brico.on('error', function (e) {
 
 // End Browser Boot
 })) 
+///////////////////////////////////////
 
 
 // LOAD BRICOLEUR
@@ -70,76 +71,56 @@ map.on('end', function () {
 map.on('error', console.error)
 
 
-// BOOT SERVER
-bootnet(function () {
-  console.log(log('network running on port: '+config.port+' host: '+config.host))
-  if (config.cli === true) {
-    var cli = require('./_cli')()
-    process.stdin.pipe(cli).pipe(brico).pipe(process.stdout)
-  }
-})
+if (config.cli === true) {
+  var cli = require('./_cli')()
+  process.stdin.pipe(cli).pipe(brico).pipe(process.stdout)
+}
 
-function bootnet (booted) {
-  var http = require('http')
-  var https = require('https')
+
+// NETWORK
+function HandleRequests (req, res) { 
+  var secure = req.connection.encrypted 
   var gzip = require('zlib').createGzip
-  var protocol
-  var server
 
-  if (!config.crypto) {
-    server = http.createServer(handleRequests)
-    protocol = 'http'
-  } else if (config.crypto) { 
-    protocol = 'https'
-    server = https.createServer({
-      key: fs.readFileSync(config.crypto.key),
-      cert: fs.readFileSync(config.crypto.cert),
-      honorCipherOrder: true,
-      ecdhCurve: 'prime256v1',
-      ciphers: 'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
-    }, handleRequests)
-  } 
+  var url = req.url 
 
-  server.listen(config.port, config.host, installWS)
 
-  function handleRequests (req, res) { // more robust: needs paths as well as files
-    var url = req.url.substr(1)
-    if (url === '') {
-      res.setHeader('content-type','text/html')
-      if (protocol === 'https') res.setHeader('Strict-Transport-Security','max-age=31536000')
-      res.end('<html><head></head><body><script src="/bundle.js"></script></body></html>')
-    } else if (url !== '') { // pipe file into req
-      var file = fs.createReadStream(config.dirStatic+url)
-      res.setHeader('Content-Encoding', 'gzip')
-      file.pipe(gzip()).pipe(res)
-      file.on('error', function(e) {
-        //console.error(e) // handle this properly
-        res.statusCode = 404
-        res.end('error 404')
-      })
-    }
-  }
-
-  function installWS () {
-    var webSocketServer = require('ws').Server
-    var ws = new webSocketServer({server:server})
-    ws.on('connection', handleSoc)
-    booted() // NETWORK READY
-  }
-
-  function handleSoc (soc) {
-    var headers = soc.upgradeReq.headers
-    var id = headers['sec-websocket-key']
-    var origin = headers.origin
-    var wss = require('websocket-stream')(soc) 
-    var levelServer = multilevel.server(db)
-    wss.pipe(levelServer).pipe(wss)
-    brico.installMuxDemux(levelServer)
-    wss.on('error', function (e) {
-      if (soc.readyState !== 3) console.error(e)
+  if (req.url === '/') {
+    res.setHeader('content-type','text/html')
+    if (secure===true) res.setHeader('Strict-Transport-Security','max-age=31536000')
+    res.end('<html><head></head><body><script src="/bundle.js"></script></body></html>')
+  } else if (req.url !== '/') { 
+    fs.exists(url, function (exists) {
+      exists ? fs.createReadStream('./'+url).pipe(gzip).pipe(res) : res.end('404')
     })
+    res.setHeader('Content-Encoding', 'gzip')
   }
 }
+
+function InstallWebsocket () {
+  var webSocketServer = require('ws').Server
+  var ws = new webSocketServer({server:server})
+  ws.on('connection', function handleSoc (soc) {
+    var wss = require('websocket-stream')(soc) 
+    var levelServer = multilevel.server(db)
+    brico.installMuxDemux(levelServer)
+    wss.pipe(levelServer).pipe(wss)
+    wss.on('error', console.error)
+  })
+}
+
+var server = require('http').createServer(handleRequests)
+
+var server = require('https').createServer({
+  key: fs.readFileSync(config.crypto.key),
+  cert: fs.readFileSync(config.crypto.cert),
+  honorCipherOrder: true,
+  ecdhCurve: 'prime256v1',
+  ciphers: 'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
+}, handleRequests)
+
+server.listen(config.port, config.host, installWS)
+
 
 // UTILS
 function functionToString (fn) {// takes fn as input, unwraps and returns string
