@@ -37,7 +37,7 @@ if (window.location.protocol === 'http:') var ws = websocStream('ws://' + host)
 var ml = require('multilevel')
 var manifest = require('./manifest.json')
 var multiLevel = ml.client(manifest)
-var rpc = ml.createRpcStream()
+var rpc = multiLevel.createRpcStream()
 ws.pipe(rpc).pipe(ws)
 
 var bricoleur = require('../bricoleur')
@@ -124,7 +124,7 @@ var server
 }, HandleRequests)
 
 server.listen(config.port, config.host, InstallWebsocket)
-//////////////////////////////////////////////////
+/////////////////////////////////////////////////////////
 
 // UTILS
 function functionToString (fn) {// takes fn as input, unwraps and returns string
