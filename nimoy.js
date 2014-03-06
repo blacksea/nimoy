@@ -25,7 +25,6 @@ multilevel.writeManifest(db, config.dirStatic+'/manifest.json')
 // WRITE BROWSER BOOT : an entry point for browserify bundle
 fs.writeFileSync(config.dirStatic+'boot.js', functionToString(function () {
 // Start Browser Boot 
-  
 var websocStream = require('websocket-stream')
 var host = window.document.location.host.replace(/:.*/, '')
 if (window.location.port) host += (':'+window.location.port)
@@ -44,11 +43,10 @@ brico.installMuxDemux(rpc)
 brico.on('error', function (e) {
   console.error(e)
 })
-
 // End Browser Boot
 })) 
 // WRITE INDEX.HTML
-fs.writeFileSync(config.dirStatic+'index.html','<html><head></head><body><script src="/bundle.js"></script></body></html>')
+fs.writeFileSync(config.dirStatic+'index.html','<!doctype html><html lang="en"><head><meta charset="utf-8"></head><body><script src="/bundle.js"></script></body></html>')
 
 
 // LOAD MAP
@@ -63,7 +61,7 @@ map.on('mapped', function (key,val) {
 })
 map.on('bundled', function () {
  var stat = fs.statSync(config.dirStatic+'bundle.js')
-  console.log(log('wrote bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+config.dirStatic+'bundle.js'))
+ console.log(log('wrote bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+config.dirStatic+'bundle.js'))
 })
 map.on('error', console.error)
 
@@ -81,7 +79,7 @@ if (config.cli === true) {
 }
 
 
-// NETWORK ///////////////////////////////////
+// RUN SERVER
 var file = new static.Server(config.dirStatic)
 
 function HandleRequests (req, res) { 
@@ -92,7 +90,10 @@ function HandleRequests (req, res) {
 
   function handlePath (e, result) {
     if (e) res.end('404')
-    if (!e) console.log(result)
+    //if (!e) console.log(result)
+    
+    // somekind of pass-through should go here ... 
+    
     // res.setHeader('content-type','text/html')
     // if (secure===true) res.setHeader('Strict-Transport-Security','max-age=31536000')
     // res.end('<html><head></head><body><script src="/bundle.js"></script></body></html>')
@@ -111,9 +112,7 @@ function InstallWebsocket () {
   })
 }
 
-var server
-
-!config.crypto ? server = require('http').createServer(HandleRequests) : server = require('https').createServer({
+var server = !config.crypto ? require('http').createServer(HandleRequests) : require('https').createServer({
   key: fs.readFileSync(config.crypto.key),
   cert: fs.readFileSync(config.crypto.cert),
   honorCipherOrder: true,
