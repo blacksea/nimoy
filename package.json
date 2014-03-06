@@ -24,7 +24,7 @@
     "browserify": ">=3.23.1",
     "uglify-js": ">=2.3.6",
     "bindshim": ">=0.0.1",
-    "cli-color": ">=^0.2.3",
+    "cli-color": ">=0.2.3",
     "slide": ">=1.1.4",
     "node-static": ">=0.7.3",
     "fern": ">=0.0.18"
