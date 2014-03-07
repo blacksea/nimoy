@@ -80,11 +80,9 @@ if (config.cli === true) {
 
 
 // RUN SERVER
-var file = new static.Server(config.dirStatic)
+var file = !config.crypto new static.Server(config.dirStatic) : new static.Server(config.dirStatic, {'Strict-Transport-Security','max-age=31536000'})
 
 function HandleRequests (req, res) { 
-  var secure = req.connection.encrypted 
-  if (secure===true) res.setHeader('Strict-Transport-Security','max-age=31536000')
 
   file.serve(req, res, handlePath)
 
