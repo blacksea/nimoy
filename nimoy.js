@@ -89,14 +89,17 @@ function HandleRequests (req, res) {
   file.serve(req, res, handlePath)
 
   function handlePath (e, result) {
+
     if (e) res.end('404')
-    //if (!e) console.log(result)
+
+    if (!e) console.log(result)
     
     // somekind of pass-through should go here ... 
     
     // res.setHeader('content-type','text/html')
     // if (secure===true) res.setHeader('Strict-Transport-Security','max-age=31536000')
     // res.end('<html><head></head><body><script src="/bundle.js"></script></body></html>')
+      
   }
 }
 
