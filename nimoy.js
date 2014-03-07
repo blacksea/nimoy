@@ -5,7 +5,6 @@ var err = clc.red
 var level = require('level')
 var multilevel = require('multilevel')
 var liveStream = require('level-live-stream')
-var static = require('node-static')
 var asyncMap = require('slide').asyncMap
 
 
