@@ -3,7 +3,11 @@ var level = require('level')
 var multiLevel = require('multilevel')
 var liveStream = require('level-live-stream')
 var bricoleur = require('./bricoleur')
+var fileServer = require('node-static').Server
 
+var server
+var brico
+var file
 
 var config = process.argv[2] ? config = require(process.argv[2]) : config = require('./__conf.json') 
 
@@ -12,13 +16,21 @@ if (config.dirModules.slice(-1) !== '/') config.dirModules += '/'
 if (config.dirStatic.slice(-1) !== '/') config.dirStatic += '/'
 
 if (config.crypto) {
+  var cipher = 'ecdh+aesgcm:dh+aesgcm:ecdh+aes256:dh+aes256:'
+  + 'ecdh+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:'
+  + 'RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
+
   config.crypto.key = fs.readfilesync(config.crypto.key)
   config.crypto.cert = fs.readfilesync(config.crypto.cert)
   config.crypto.honorcipherorder = true
-  config.crypto.ecdhcurve = 'prime256v1'
-  config.crypto.ciphers = 'ecdh+aesgcm:dh+aesgcm:ecdh+aes256:'
-  + 'dh+aes256:ecdh+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:'
-  + 'RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
+  config.crypto.ciphers = cipher
+
+  server = require('https').createServer(config.crypto, HandleRequests)
+  file = fileServer(config.dirStatic, {'Strict-Transport-Security':'max-age=31536000'})
+
+} else {
+  server = require('http').createServer(HandleRequests)
+  file = new fileServer(config.dirStatic) 
 }
 
 var db = level('./'+config.host) 
@@ -30,7 +42,13 @@ brico.on('error', console.error)
 
 
 // Write boot.js
-  
+var indexHtml = '<!doctype html><html lang="en">'
+  + '<head><meta charset="utf-8"></head>'
+  + '<body><script src="/bundle.js"></script></body>'
+  + '</html>'
+
+fs.writeFileSync(config.dirStatic+'index.html', indexHtml)
+ 
 fs.writeFileSync(config.dirStatic+'boot.js', functionToString(function () {
 // Start Browser Boot 
 var websocStream = require('websocket-stream')
@@ -54,13 +72,6 @@ brico.on('error', function (e) {
 // End Browser Boot
 })) 
 
-fs.writeFileSync(config.dirStatic+'index.html', 
-  '<!doctype html><html lang="en">'
-  + '<head><meta charset="utf-8"></head>'
-  + '<body><script src="/bundle.js"></script></body>'
-  + '</html>'
-)
-
 
 var map = require('./_map')({  // make this a stream
   wilds : config.dirModules,
@@ -79,19 +90,12 @@ map.on('end', function () {
 })
 
 
-var fileServer = require('node-static').Server
-var file = !config.crypto ? new fileServer(config.dirStatic) : new fileServer(config.dirStatic, {'Strict-Transport-Security':'max-age=31536000'})
-
 function HandleRequests (req, res) { 
   file.serve(req, res, function ifNoFile (e, result) {
     if (!e) console.log(result)
     if (e) file.serveFile('/index.html',404,{},req,res)
   })
 }
-
-server = !config.crypto ? require('http').createServer(HandleRequests) : require('https').createServer(config.crypto
-
-, HandleRequests)
 
 function startWebsocket () {
   var webSocketServer = require('ws').Server
