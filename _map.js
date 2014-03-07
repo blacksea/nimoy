@@ -2,7 +2,7 @@
 
 var fs = require('fs')
 var asyncMap = require('slide').asyncMap
-var Emitter = require('events').EventEmitter
+var through = require('through')
 var browserify = require('browserify')
 var uglify = require('uglify-js')
 
@@ -10,7 +10,11 @@ module.exports = function Map (opts) {
 
   // add an option to watch dir and recompile
 
-  var emitter = new Emitter
+  var s = through(function write (d) {
+    this.queue('data')
+  }, function end () {
+    this.emit('end')
+  })
 
   var MAP = {
     browser: {},
@@ -21,11 +25,12 @@ module.exports = function Map (opts) {
   var b = browserify(opts.browserify)
 
   if (dir.slice(-1) !== '/') dir += '/'
+
   fs.readdir(dir, function moduleList (e, modules) {
     if (e) console.error(e)
     if (!e) asyncMap(modules, readPkg, function () {
 
-      emitter.emit('mapped', '^', JSON.stringify(MAP))
+      s.write(JSON.stringify(MAP))
       
       bundleJS()
     })
@@ -52,11 +57,11 @@ module.exports = function Map (opts) {
       if (opts.min === true ) {
         var min = uglify.minify(opts.bundle)
         fs.writeFileSync(opts.bundle, min.code)
-        emitter.emit('bundled')
-      } else emitter.emit('bundled')
+        s.end()
+      } else s.end()
     })
     b.on('error', console.error)
   }
 
-  return emitter
+  return s
 }
