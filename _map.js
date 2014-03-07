@@ -20,7 +20,7 @@ module.exports = function Map (opts) {
   var dir = opts.wilds
   var b = browserify(opts.browserify)
 
-  if (dir[dir.length-1] !=='/') dir += '/'
+  if (dir.slice(-1) !== '/') dir += '/'
   fs.readdir(dir, function moduleList (e, modules) {
     if (e) console.error(e)
     if (!e) asyncMap(modules, readPkg, function () {
