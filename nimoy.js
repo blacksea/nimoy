@@ -90,7 +90,7 @@ function HandleRequests (req, res) {
 
   function handlePath (e, result) {
     if (!e) console.log(result)
-    if (e) file.serveFile('/index.html',304,{},req,res)
+    if (e) file.serveFile('/index.html',404,{},req,res)
     // use a passthrough of somekind ? or serve specific file
   }
 }
