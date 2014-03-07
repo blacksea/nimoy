@@ -24,9 +24,9 @@ if (config.crypto) {
   + 'RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
 
   server = require('https').createServer({
-    key : fs.readfilesync(config.crypto.key)
-    cert : fs.readfilesync(config.crypto.cert)
-    honorcipherorder : true
+    key : fs.readfilesync(config.crypto.key),
+    cert : fs.readfilesync(config.crypto.cert),
+    honorcipherorder : true,
     ciphers : cipher
   }, doHttp)
 
@@ -90,7 +90,7 @@ writeBrowserFiles(function thenMappify () {
     console.log('nimoy running on host: "'+config.host+'" port: "'+config.port+'"')
     if (config.cli === true) process.stdin.pipe(require('./_cli')()).pipe(brico).pipe(process.stdout)
   })
-}
+})
 
 
 function writeBrowserFiles (written) {
