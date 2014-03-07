@@ -5,7 +5,9 @@ proc[process.title] = true // node or browser
 module.exports = function Bricoluer (multiLevel) { 
   var muxDemux
   var index
-  var _ = {} // PROCESS SCOPE
+
+  var _ = {} // scope for module streams
+
 
   var WILDS = {}
 
@@ -22,10 +24,6 @@ module.exports = function Bricoluer (multiLevel) {
 
   WILDS['*'] = function (d, emit) {// * MODULE
     // key = *:name:uid:time | val = {pkg}
-    var name = getPath(d.key)[1]
-    var uid = getPath(d.key)[2]
-    var time = getPath(d.key)[3]
-    var modName = name+':'+uid
     var pkg = JSON.parse(d.value).nimoy
 
     if (proc[pkg.process]) {
@@ -41,9 +39,6 @@ module.exports = function Bricoluer (multiLevel) {
     // key = #:name:uid:time | val = [A,B]
     var A = d.value[0]
     var B = d.value[1]
-    var mode = getPath(d.key)[1]
-    var modA = d.conn.split('>')[0]
-    var modB = d.conn.split('>')[1]
 
     if (proc.browser) {
       mxdx.on('connection', function (s) {
@@ -60,16 +55,14 @@ module.exports = function Bricoluer (multiLevel) {
     }
   }
 
-
   var wilds = fern(WILDS,{key:'key', sep:':', pos:0})
-  wilds.on('error', function (e) {
-    console.error(e)
-  })
+
+  wilds.on('error', console.error)
   
   multiLevel.createReadStream().pipe(wilds)
 
-  var LevelDataStream = multiLevel.liveStream({ old:false }) 
-  LevelDataStream.pipe(wilds)
+  multiLevel.liveStream({ old:false }).pipe(wilds)
+
 
   var Api = fern({
     put: function (opts, emit) {
@@ -106,5 +99,4 @@ module.exports = function Bricoluer (multiLevel) {
   }
 
   return Api
-  
 } 

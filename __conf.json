@@ -3,6 +3,6 @@
   "host": "localhost",
   "minify": false,
   "cli": true,
-  "dirModules": "./_wilds",
-  "dirStatic": "./_static"
+  "modules": "./_wilds",
+  "static": "./_static"
 }
