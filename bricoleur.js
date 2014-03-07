@@ -14,7 +14,6 @@ module.exports = function Bricoluer (multiLevel) {
     var name = getPath(d.key)[1]
 
     // val / opts ?
-
     // keyspace for ghost/data modules
     // manage like regular modules but with pipes into db
     // make a new stream to db and pipe into module
@@ -23,10 +22,10 @@ module.exports = function Bricoluer (multiLevel) {
   }
 
   WILDS['^'] = function (d, emit) {// ^ LIBRARY
-    var context = getPath(d.key)[1]
+    console.log(d)
 
     // create index for Api functions and other Wilds fns
-   
+    
   }
 
   WILDS['*'] = function (d, emit) {// * MODULE
@@ -43,11 +42,13 @@ module.exports = function Bricoluer (multiLevel) {
     var uid = getPath(d.key)[2]
     var time = getPath(d.key)[3]
     var modName = name+':'+uid
+
     if (d.type === 'put') {
       d.opts ? _[modName] = require(name)(d.opts) : _[modName] = require(name)
     } else if (d.type === 'del') {
       delete _[modName] 
     }
+
   }
 
   WILDS['#'] = function (d, emit) {// # CONNECT
@@ -86,6 +87,7 @@ module.exports = function Bricoluer (multiLevel) {
     var mode = getPath(d.key)[1]
     var modA = d.conn.split('>')[0]
     var modB = d.conn.split('>')[1]
+
     if (d.mode == 'pipe') {
       modA.pipe(modB)
     } else if (d.mode == 'pipe') {
@@ -95,7 +97,9 @@ module.exports = function Bricoluer (multiLevel) {
 
 
   var wilds = fern(WILDS,{key:'key', sep:':', pos:0})
-  wilds.on('error', console.error)
+  wilds.on('error', function (e) {
+    console.error(e)
+  })
 
   multiLevel.createReadStream().pipe(wilds)
 
@@ -140,7 +144,6 @@ module.exports = function Bricoluer (multiLevel) {
 
   
   // UTILS
-  
   function getPath (key) {
     return key.split(':')
   }
