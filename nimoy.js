@@ -83,9 +83,9 @@ writeBrowserFiles(function thenMappify () {
     min : config.minify
   }).pipe(dbWriteStream)
 
-  mappify.on('error', console.error)
+  dbWriteStream.on('error', console.error)
 
-  dbWriteStream.on('end', function () {
+  dbWriteStream.on('close', function () {
     // console.log(log('wrote bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+config.static+'bundle.js'))
     console.log('nimoy running on host: "'+config.host+'" port: "'+config.port+'"')
     if (config.cli === true) process.stdin.pipe(require('./_cli')()).pipe(brico).pipe(process.stdout)
