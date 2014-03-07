@@ -4,6 +4,7 @@ var multiLevel = require('multilevel')
 var liveStream = require('level-live-stream')
 var bricoleur = require('./bricoleur')
 var fileServer = require('node-static').Server
+var webSocketStream = require('websocket-stream')
 
 var server
 var brico
@@ -32,6 +33,28 @@ if (config.crypto) {
   server = require('http').createServer(HandleRequests)
   file = new fileServer(config.dirStatic) 
 }
+
+function HandleRequests (req, res) { 
+  file.serve(req, res, function ifThereIsNoFile (e, result) {
+    if (e) file.serveFile('/index.html',404,{},req,res)
+  })
+}
+
+function setupWebSocket () {
+  var webSocketServer = require('ws').Server
+  var ws = new webSocketServer({server:server})
+  ws.on('connection', function handleSoc (soc) {
+    var levelServer = multiLevel.server(db)
+    var wss = webSocketStream(soc) 
+    wss.pipe(levelServer).pipe(wss)
+    brico.installMuxDemux(levelServer)
+    wss.on('error', function (e) {
+      console.error('webSocStreamErr: '+e)
+    })
+  })
+}
+
+server.listen(config.port, config.host, setupWebSocket)
 
 var db = level('./'+config.host) 
 liveStream.install(db)
@@ -62,6 +85,9 @@ var manifest = require('./manifest.json')
 var multiLevel = ml.client(manifest)
 var rpc = multiLevel.createRpcStream()
 ws.pipe(rpc).pipe(ws)
+ws.on('error', function (e) {
+  console.error(e)
+})
 
 var bricoleur = require('../bricoleur')
 var brico = bricoleur(multiLevel)
@@ -90,28 +116,8 @@ map.on('end', function () {
 })
 
 
-function HandleRequests (req, res) { 
-  file.serve(req, res, function ifNoFile (e, result) {
-    if (!e) console.log(result)
-    if (e) file.serveFile('/index.html',404,{},req,res)
-  })
-}
 
-function startWebsocket () {
-  var webSocketServer = require('ws').Server
-  var ws = new webSocketServer({server:server})
-  ws.on('connection', function handleSoc (soc) {
-    var wss = require('websocket-stream')(soc) 
-    var levelServer = multilevel.server(db)
 
-    brico.installMuxDemux(levelServer)
-       
-    wss.pipe(levelServer).pipe(wss)
-    wss.on('error', console.error)
-  })
-}
-
-server.listen(config.port, config.host, startWebsocket)
 
 
 // Utils
