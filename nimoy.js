@@ -93,17 +93,13 @@ function HandleRequests (req, res) {
     if (e) res.end('404')
 
     if (!e) console.log(result)
-    
-    // somekind of pass-through should go here ... 
-    
-    // res.setHeader('content-type','text/html')
-    // if (secure===true) res.setHeader('Strict-Transport-Security','max-age=31536000')
-    // res.end('<html><head></head><body><script src="/bundle.js"></script></body></html>')
-      
+    file.serveFile('/index.html',304,{},req,res)
+    // use a passthrough of somekind ? or serve specific file
   }
 }
 
 function InstallWebsocket () {
+  // check origin
   var webSocketServer = require('ws').Server
   var ws = new webSocketServer({server:server})
   ws.on('connection', function handleSoc (soc) {
