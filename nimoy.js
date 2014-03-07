@@ -2,23 +2,23 @@ var fs = require('fs')
 var level = require('level')
 var multiLevel = require('multilevel')
 var liveStream = require('level-live-stream')
-var bricoleur = require('./bricoleur')
 var fileServer = require('node-static').Server
 var webSocketStream = require('websocket-stream')
 var webSocketServer = require('ws').Server
+var bricoleur = require('./bricoleur')
+var mappify = require('./_map')
 
 var server
 var brico
 var file
+var db
 
 var config = process.argv[2] ? config = require(process.argv[2]) : config = require('./__conf.json') 
 
-if (config.dirModules.slice(-1) !== '/') config.dirModules += '/' 
-
-if (config.dirStatic.slice(-1) !== '/') config.dirStatic += '/'
+if (config.modules.slice(-1) !== '/') config.modules += '/' 
+if (config.static.slice(-1) !== '/') config.static += '/'
 
 if (config.crypto) {
-
   var cipher = 'ecdh+aesgcm:dh+aesgcm:ecdh+aes256:dh+aes256:'
   + 'ecdh+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:'
   + 'RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
@@ -28,25 +28,27 @@ if (config.crypto) {
     cert : fs.readfilesync(config.crypto.cert)
     honorcipherorder : true
     ciphers : cipher
-  }, HandleRequests)
+  }, doHttp)
 
-  file = fileServer(config.dirStatic, {'Strict-Transport-Security':'max-age=31536000'})
-
-} else {
-  server = require('http').createServer(HandleRequests)
-  file = new fileServer(config.dirStatic) 
+  file = new fileServer(config.static, {'Strict-Transport-Security':'max-age=31536000'})
 }
 
-function HandleRequests (req, res) { 
-  file.serve(req, res, function ifThereIsNoFile (e, result) {
+if (!config.crypto) {
+  server = require('http').createServer(doHttp)
+  file = new fileServer(config.static) 
+}
+
+function doHttp (req, res) { 
+  file.serve(req, res, function thereIsNoFile (e, result) {
     if (e) file.serveFile('/index.html',404,{},req,res)
+    // also pass to brico
   })
 }
 
 server.listen(config.port, config.host, function setupWebSocket () {
   var ws = new webSocketServer({server:server})
 
-  ws.on('connection', function handleSoc (soc) {
+  ws.on('connection', function newSocketConnection (soc) {
     var levelServer = multiLevel.server(db)
     var wss = webSocketStream(soc) 
 
@@ -61,43 +63,46 @@ server.listen(config.port, config.host, function setupWebSocket () {
 })
 
 
-var db = level('./'+config.host) 
+db = level('./'+config.host) 
 liveStream.install(db)
-multiLevel.writeManifest(db, config.dirStatic+'manifest.json')
+multiLevel.writeManifest(db, config.static+'manifest.json')
 
 brico = bricoleur(db) 
 brico.on('error', console.error)
 
 
-generateStaticFiles (function mapAndBrowserify () {
-  var map = require('./_map')({
-    wilds : config.dirModules,
-    bundle : config.dirStatic+'bundle.js',
-    browserify: config.dirStatic+'boot.js',
+var browserBootScript = config.static+'boot.js'
+
+writeBrowserFiles(function thenMappify () {
+  var dbWriteStream = db.createWriteStream({valueEncoding:'json'})
+
+  mappify({
+    wilds : config.modules,
+    bundle : config.static+'bundle.js',
+    browserify : browserBootScript,
     min : config.minify
-  })
-  map.on('error', console.error)
-  map.on('data', function (d) {
-    db.put('^',d) 
-  })
-  map.on('end', function () {
-    // console.log(log('wrote bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+config.dirStatic+'bundle.js'))
+  }).pipe(dbWriteStream)
+
+  mappify.on('error', console.error)
+
+  dbWriteStream.on('end', function () {
+    // console.log(log('wrote bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+config.static+'bundle.js'))
     console.log('nimoy running on host: "'+config.host+'" port: "'+config.port+'"')
     if (config.cli === true) process.stdin.pipe(require('./_cli')()).pipe(brico).pipe(process.stdout)
   })
 }
 
 
-function generateStaticFiles (end) {
+function writeBrowserFiles (written) {
 
   var indexHtml = '<!doctype html><html lang="en">'
     + '<head><meta charset="utf-8"></head>'
     + '<body><script src="/bundle.js"></script></body>'
     + '</html>'
 
-  fs.writeFileSync(config.dirStatic+'index.html', indexHtml)
+  fs.writeFileSync(config.static+'index.html', indexHtml)
    
-  fs.writeFileSync(config.dirStatic+'boot.js', functionToString(function () {
+  fs.writeFileSync(browserBootScript, thisFnBodyToString(function () {
   // Start Browser Boot 
   var websocStream = require('websocket-stream')
   var host = window.document.location.host.replace(/:.*/, '')
@@ -123,12 +128,12 @@ function generateStaticFiles (end) {
   // End Browser Boot
   })) 
 
-  end()
+  written()
 }
 
 
 // Utils
-function functionToString (fn) {// takes fn as input, unwraps and returns string
+function thisFnBodyToString (fn) {// takes fn as input, unwraps and returns string
   var s = fn.toString()
   return s.substring(0,s.lastIndexOf('\n')).substring(s.indexOf('\n'),s.length)
 }
