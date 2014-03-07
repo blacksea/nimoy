@@ -1,5 +1,3 @@
-// MAP 
-
 var fs = require('fs')
 var asyncMap = require('slide').asyncMap
 var through = require('through')
