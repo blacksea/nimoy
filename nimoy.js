@@ -30,8 +30,8 @@ BOOT([
    var stat = fs.statSync(config.dirStatic+'bundle.js')
    console.log(log('wrote bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+config.dirStatic+'bundle.js'))
    console.log(log('nimoy running on host: "'+config.host+'" port: "'+config.port+'"'))
-  if (config.cli === true) 
-    process.stdin.pipe(require('./_cli')()).pipe(brico).pipe(process.stdout)
+   if (config.cli === true) 
+     process.stdin.pipe(require('./_cli')()).pipe(brico).pipe(process.stdout)
 })
 
 
@@ -71,7 +71,6 @@ function StartServer (next) {
     file.serve(req, res, function ifNoFile (e, result) {
       if (!e) console.log(result)
       if (e) file.serveFile('/index.html',404,{},req,res)
-      // write to stream
     })
   }
 
