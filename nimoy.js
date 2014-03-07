@@ -82,41 +82,40 @@ if (config.cli === true) {
 // RUN SERVER
 var file = !config.crypto ? new static.Server(config.dirStatic) : new static.Server(config.dirStatic, {'Strict-Transport-Security':'max-age=31536000'})
 
+var server = !config.crypto ? require('http').createserver(handlerequests) : require('https').createserver({
+  key: fs.readfilesync(config.crypto.key),
+  cert: fs.readfilesync(config.crypto.cert),
+  honorcipherorder: true,
+  ecdhcurve: 'prime256v1',
+  ciphers: 'ecdh+aesgcm:dh+aesgcm:ecdh+aes256:dh+aes256:ecdh+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
+}, HandleRequests)
+
 function HandleRequests (req, res) { 
-
-  file.serve(req, res, handlePath)
-
-  function handlePath (e, result) {
+  file.serve(req, res, function ifNoFile (e, result) {
     if (!e) console.log(result)
     if (e) file.serveFile('/index.html',404,{},req,res)
-    // use a passthrough of somekind ? or serve specific file
-  }
+    // write to stream
+  })
 }
 
 function InstallWebsocket () {
-  // check origin
+  // verify brico is behind connection somehow
   var webSocketServer = require('ws').Server
   var ws = new webSocketServer({server:server})
   ws.on('connection', function handleSoc (soc) {
     var wss = require('websocket-stream')(soc) 
     var levelServer = multilevel.server(db)
+
     brico.installMuxDemux(levelServer)
+       
     wss.pipe(levelServer).pipe(wss)
     wss.on('error', console.error)
   })
 }
 
-var server = !config.crypto ? require('http').createServer(HandleRequests) : require('https').createServer({
-  key: fs.readFileSync(config.crypto.key),
-  cert: fs.readFileSync(config.crypto.cert),
-  honorCipherOrder: true,
-  ecdhCurve: 'prime256v1',
-  ciphers: 'ECDH+AESGCM:DH+AESGCM:ECDH+AES256:DH+AES256:ECDH+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
-}, HandleRequests)
-
 server.listen(config.port, config.host, InstallWebsocket)
-/////////////////////////////////////////////////////////
 
+ 
 // UTILS
 function functionToString (fn) {// takes fn as input, unwraps and returns string
   var s = fn.toString()
