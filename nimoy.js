@@ -27,7 +27,9 @@ BOOT([
   StartServer,
   StartWebSocket
 ], function BOOTED (e) {
-  process.stdout.write(log('nimoy running on host: "'+config.host+'" port: "'+config.port+'"'))
+   var stat = fs.statSync(config.dirStatic+'bundle.js')
+   console.log(log('wrote bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+config.dirStatic+'bundle.js'))
+   console.log(log('nimoy running on host: "'+config.host+'" port: "'+config.port+'"'))
   if (config.cli === true) 
     process.stdin.pipe(require('./_cli')()).pipe(brico).pipe(process.stdout)
 })
@@ -54,19 +56,16 @@ function MapAndBrowserify (next) {
     browserify: config.dirStatic+'boot.js',
     min : config.minify
   })
+  map.on('error', console.error)
   map.on('mapped', function (key,val) {
     db.put(key,val) 
   })
-  map.on('bundled', function () {
-   var stat = fs.statSync(config.dirStatic+'bundle.js')
-   console.log(log('wrote bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+config.dirStatic+'bundle.js'))
-   next()
-  })
-  map.on('error', console.error)
+  map.on('bundled', next)
 }
 
 function StartServer (next) {
-  var file = !config.crypto ? new static.Server(config.dirStatic) : new static.Server(config.dirStatic, {'Strict-Transport-Security':'max-age=31536000'})
+  var fileServer = require('node-static').Server
+  var file = !config.crypto ? new fileServer(config.dirStatic) : new fileServer(config.dirStatic, {'Strict-Transport-Security':'max-age=31536000'})
 
   function HandleRequests (req, res) { 
     file.serve(req, res, function ifNoFile (e, result) {
