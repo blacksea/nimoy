@@ -80,7 +80,7 @@ if (config.cli === true) {
 
 
 // RUN SERVER
-var file = !config.crypto ? new static.Server(config.dirStatic) : new static.Server(config.dirStatic, {'Strict-Transport-Security','max-age=31536000'})
+var file = !config.crypto ? new static.Server(config.dirStatic) : new static.Server(config.dirStatic, {'Strict-Transport-Security':'max-age=31536000'})
 
 function HandleRequests (req, res) { 
 
