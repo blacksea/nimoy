@@ -11,7 +11,7 @@ module.exports = function Map (opts) {
   // add an option to watch dir and recompile
 
   var s = through(function write (d) {
-    this.queue('data')
+    this.queue(d)
   }, function end () {
     this.emit('end')
   })
