@@ -1,96 +1,62 @@
-// BRICOLEUR
-
 var fern = require('fern')
-var proc = process.title // node or browser
+var proc = {}
+proc[process.title] = true // node or browser
 
 module.exports = function Bricoluer (multiLevel) { 
   var muxDemux
+  var index
   var _ = {} // PROCESS SCOPE
 
   var WILDS = {}
 
-  WILDS['_'] = function (d, emit) {// _ GHOST SPACE 
-    var name = getPath(d.key)[1]
-
-    // val / opts ?
-    // keyspace for ghost/data modules
-    // manage like regular modules but with pipes into db
-    // make a new stream to db and pipe into module
-    // sublevels?
-    
+  WILDS['^'] = function (d, emit) {// ^ LIBRARY
+    index = d
   }
 
-  WILDS['^'] = function (d, emit) {// ^ LIBRARY
-    console.log(d)
+  WILDS['_'] = function (d, emit) {// _ GHOST SPACE 
+    // key = _:name
+    var name = getPath(d.key)[1]
 
-    // create index for Api functions and other Wilds fns
-    
+    // makes a duplex stream -- bridges to db or mxdx -- use a sublevel?
   }
 
   WILDS['*'] = function (d, emit) {// * MODULE
-
-    // PUT
-    // check mod proc
-    // check active proc
-    // require & call fn with opts
-    // if err emit err
-
-    // check pipe links
-    
+    // key = *:name:uid:time | val = {pkg}
     var name = getPath(d.key)[1]
     var uid = getPath(d.key)[2]
     var time = getPath(d.key)[3]
     var modName = name+':'+uid
+    var pkg = JSON.parse(d.value).nimoy
 
-    if (d.type === 'put') {
-      d.opts ? _[modName] = require(name)(d.opts) : _[modName] = require(name)
-    } else if (d.type === 'del') {
-      delete _[modName] 
+    if (proc[pkg.process]) {
+      if (d.type==='put') 
+        d.opts ? _[modName] = require(name)(d.opts) : _[modName] = require(name)
+      if (d.type==='del')
+        _[modName].destroy() // destroy stream
+        delete _[modName]
     }
-
   }
 
   WILDS['#'] = function (d, emit) {// # CONNECT
+    // key = #:name:uid:time | val = [A,B]
+    var A = d.value[0]
+    var B = d.value[1]
+    var mode = getPath(d.key)[1]
+    var modA = d.conn.split('>')[0]
+    var modB = d.conn.split('>')[1]
 
-    // get module pkgs from index
-    // t off streams?
-    // should be pkgs
-    
-    var modA = {}
-    var modB = {}
-
-    // PUT
-    // check mod proc      
-    // check active proc
-    // make mxdx s & pipe
-    // or just pipe
-    // if errs emit err
-    
-    // DEL
-    // unpipe mode
-    // destroy streams
-    // if err emit err
-    
-    if (proc==='browser') {
+    if (proc.browser) {
       mxdx.on('connection', function (s) {
         s.on('data', console.log)
         s.on('error', console.error)
         window.thru = s
       }) 
-    } else if (proc==='node') {
+    }
+
+    if (proc.node) {
       var t = mxdx.createStream('thru')
       t.on('data', console.log)
       t.on('error', console.error)
-    }
-    
-    var mode = getPath(d.key)[1]
-    var modA = d.conn.split('>')[0]
-    var modB = d.conn.split('>')[1]
-
-    if (d.mode == 'pipe') {
-      modA.pipe(modB)
-    } else if (d.mode == 'pipe') {
-      // make a link pipe
     }
   }
 
@@ -99,7 +65,7 @@ module.exports = function Bricoluer (multiLevel) {
   wilds.on('error', function (e) {
     console.error(e)
   })
-
+  
   multiLevel.createReadStream().pipe(wilds)
 
   var LevelDataStream = multiLevel.liveStream({ old:false }) 
@@ -140,10 +106,5 @@ module.exports = function Bricoluer (multiLevel) {
   }
 
   return Api
-
   
-  // UTILS
-  function getPath (key) {
-    return key.split(':')
-  }
 } 

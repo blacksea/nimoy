@@ -1,5 +1,3 @@
-// NIMOY
-
 var fs = require('fs')
 var clc = require('cli-color')
 var log = clc.cyanBright
@@ -18,7 +16,6 @@ var db
 
 
 config = process.argv[2] ? config = require(process.argv[2]) : config = require('./__conf.json') 
-// check for dirs, if they don't exist make them
 if (config.dirModules.slice(-1) !== '/') config.dirModules += '/' 
 if (config.dirStatic.slice(-1) !== '/') config.dirStatic += '/'
 
@@ -37,21 +34,21 @@ BOOT([
 })
 
 
-function SetupMultilevel (NEXT) {
+function SetupMultilevel (next) {
   db = level('./'+config.host) 
   liveStream.install(db)
   multilevel.writeManifest(db, config.dirStatic+'manifest.json')
-  NEXT()
+  next()
 }
 
-function LoadBricoleur (NEXT) {
+function LoadBricoleur (next) {
   var bricoleur = require('./bricoleur')
   brico = bricoleur(db) 
   brico.on('error', console.error)
-  NEXT()
+  next()
 }
   
-function MapAndBrowserify (NEXT) {
+function MapAndBrowserify (next) {
   var map = require('./_map')({ 
     wilds : config.dirModules,
     bundle : config.dirStatic+'bundle.js',
@@ -59,17 +56,17 @@ function MapAndBrowserify (NEXT) {
     min : config.minify
   })
   map.on('mapped', function (key,val) {
-    db.put(key,val)
+    db.put(key,val) 
   })
   map.on('bundled', function () {
    var stat = fs.statSync(config.dirStatic+'bundle.js')
    console.log(log('wrote bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+config.dirStatic+'bundle.js'))
-   NEXT()
+   next()
   })
   map.on('error', console.error)
 }
 
-function StartServer (NEXT) {
+function StartServer (next) {
   var file = !config.crypto ? new static.Server(config.dirStatic) : new static.Server(config.dirStatic, {'Strict-Transport-Security':'max-age=31536000'})
 
   function HandleRequests (req, res) { 
@@ -88,10 +85,10 @@ function StartServer (NEXT) {
     ciphers: 'ecdh+aesgcm:dh+aesgcm:ecdh+aes256:dh+aes256:ecdh+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
   }, HandleRequests)
 
-  server.listen(config.port, config.host, NEXT)
+  server.listen(config.port, config.host, next)
 }
 
-function StartWebSocket (NEXT) {
+function StartWebSocket (next) {
   var webSocketServer = require('ws').Server
   var ws = new webSocketServer({server:server})
   ws.on('connection', function handleSoc (soc) {
@@ -103,10 +100,11 @@ function StartWebSocket (NEXT) {
     wss.pipe(levelServer).pipe(wss)
     wss.on('error', console.error)
   })
-  NEXT()
+
+  next()
 }
  
-function WriteStaticFiles (NEXT) {
+function WriteStaticFiles (next) {
   // WRITE BROWSER BOOT : an entry point for browserify bundle
   fs.writeFileSync(config.dirStatic+'boot.js', functionToString(function () {
   // Start Browser Boot 
@@ -132,7 +130,8 @@ function WriteStaticFiles (NEXT) {
   })) 
   // WRITE INDEX.HTML
   fs.writeFileSync(config.dirStatic+'index.html','<!doctype html><html lang="en"><head><meta charset="utf-8"></head><body><script src="/bundle.js"></script></body></html>')
-  NEXT()
+
+  next()
 }
 
 // Utils
@@ -141,12 +140,12 @@ function functionToString (fn) {// takes fn as input, unwraps and returns string
   return s.substring(0,s.lastIndexOf('\n')).substring(s.indexOf('\n'),s.length)
 }
 
-function BOOT (functionArray, end) {
+function BOOT (functionArray, booted) {
   var count = 0
   functionArray.forEach(function (fn) {
     fn(function () {
       count++
-      if (count === functionArray.length) end(null)
+      if (count === functionArray.length) booted(null)
     })
   })
 }
