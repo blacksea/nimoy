@@ -28,7 +28,7 @@ module.exports = function Map (opts) {
     if (e) console.error(e)
     if (!e) asyncMap(modules, readPkg, function () {
 
-      s.write(JSON.stringify(MAP))
+      s.write({type:'put', key:'^', value:JSON.stringify(MAP)})
       
       bundleJS()
     })
