@@ -18,7 +18,6 @@ module.exports = function Bricoluer (multiLevel) {
   WILDS['_'] = function (d, emit) {// _ GHOST SPACE 
     // key = _:name
     var name = getPath(d.key)[1]
-
     // makes a duplex stream -- bridges to db or mxdx -- use a sublevel?
   }
 
@@ -27,9 +26,11 @@ module.exports = function Bricoluer (multiLevel) {
     var pkg = JSON.parse(d.value).nimoy
 
     if (proc[pkg.process]) {
-      if (d.type==='put') 
-        d.opts ? _[modName] = require(name)(d.opts) : _[modName] = require(name)
-      if (d.type==='del')
+      if (d.type === 'put') 
+        d.opts  
+          ? _[modName] = require(name)(d.opts) 
+          : _[modName] = require(name)
+      if (d.type === 'del')
         _[modName].destroy() // destroy stream
         delete _[modName]
     }
@@ -37,21 +38,41 @@ module.exports = function Bricoluer (multiLevel) {
 
   WILDS['#'] = function (d, emit) {// # CONNECT
     // key = #:name:uid:time | val = [A,B]
-    var A = d.value[0]
-    var B = d.value[1]
+    var nodeModule
+    var browserModule
+    var modules = []
 
-    if (proc.browser) {
-      mxdx.on('connection', function (s) {
-        s.on('data', console.log)
-        s.on('error', console.error)
-        window.thru = s
-      }) 
-    }
+    d.value.forEach(function (mod) {
+      var name = mod.split('parse name')
+      var pkg = index[mod]
+      modules.push(pkg)
+    })
 
-    if (proc.node) {
-      var t = mxdx.createStream('thru')
-      t.on('data', console.log)
-      t.on('error', console.error)
+    if (modules[0].process !== modules[1].process) {
+      for (var i=0;i<modules.length;i++) {
+        var m = modules[i]
+
+        if (proc.browser && m.process == 'browser') {
+          var mod = _[m.uid]
+          m.pos = i
+          mxdx.on('connection', function (s) {
+            if (stream.meta===uid) {
+              m.pos === 0
+                ? mod.pipe(s)
+                : s.pipe(mod)
+            }
+          }) 
+        }
+        if (proc.node && m.process === 'node') {
+          var mod = _[m.uid]
+          var s = mxdx.createStream(uid)
+          m.pos === '0'
+            ? mod.pipe(s)
+            : s.pipe(mod)
+        }
+      }
+    } else if (proc[modules[0].process]) {
+      _[d.value[0]].pipe(_[d.value[1]])
     }
   }
 

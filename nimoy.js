@@ -13,7 +13,9 @@ var brico
 var file
 var db
 
-var config = process.argv[2] ? config = require(process.argv[2]) : config = require('./__conf.json') 
+var config = (process.argv[2]) 
+  ? config = require(process.argv[2]) 
+  : config = require('./__conf.json') 
 
 if (config.modules.slice(-1) !== '/') config.modules += '/' 
 if (config.static.slice(-1) !== '/') config.static += '/'
