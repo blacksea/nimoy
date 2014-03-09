@@ -8,18 +8,19 @@ module.exports = function Bricoluer (multiLevel) {
   var muxDemux
   var index
 
-
   var _ = {} 
 
   var Wilds = fern({
+
     '^' : function (d, emit) { 
       index = d
     },
+
     '_' : function (d, emit) {
       var name = getPath(d.key)[1]
     },
-    '*' : function (d, emit) { 
-      // key = *:name:uid | val = {pkg}
+
+    '*' : function (d, emit) { // key= *:name:uid | val = {pkg}
       var pkg = JSON.parse(d.value).nimoy
 
       if (d.type === 'put' && proc[pkg.process]) {
@@ -32,8 +33,8 @@ module.exports = function Bricoluer (multiLevel) {
         delete _[modName]
       }
     },
-    '#' : function (d, emit) {
-      // key = #:name:uid | val = [A,B]
+
+    '#' : function (d, emit) { // key= #:name:uid | val = [A,B]
       var modules = []
 
       d.value.forEach(function (mod) {
@@ -57,6 +58,7 @@ module.exports = function Bricoluer (multiLevel) {
               }
             }) 
           }
+
           if (proc.node && m.process === 'node') {
             var mod = _[m.uid]
             var s = mxdx.createStream(uid)
@@ -64,6 +66,7 @@ module.exports = function Bricoluer (multiLevel) {
               ? mod.pipe(s)
               : s.pipe(mod)
           }
+
         }
       } else if (proc[modules[0].process]) {
         _[d.value[0]].pipe(_[d.value[1]])
@@ -79,15 +82,12 @@ module.exports = function Bricoluer (multiLevel) {
 
 
   var Api = fern({
-    put: function (opts, emit) {
-      // make key string & pass in opts
+    put: function (opts, emit) { // make key string & pass in opts
       multiLevel.put(key, val, function (e) {
-          
       })
     },
     del: function (opts, emit) {
       multiLevel.del(key, function (e) {
-
       })
     },
     search : function (opts, emit) {
@@ -98,13 +98,11 @@ module.exports = function Bricoluer (multiLevel) {
         var path = d.split(':')
         if (pattern[1] === path[1]) res.push(d) 
       })
-
       ks.on('end', function () {
         result(res)
       })
     }, 
     ls : function (opts, emit) {
-
     }
   })
 

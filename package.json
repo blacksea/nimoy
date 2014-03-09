@@ -27,7 +27,7 @@
     "cli-color": ">=0.2.3",
     "slide": ">=1.1.4",
     "node-static": ">=0.7.3",
-    "fern": ">=0.0.18"
+    "fern": ">=0.0.19"
   },
   "devDependancies": {
     "tape": ">=2.3.2"
