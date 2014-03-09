@@ -1,6 +1,7 @@
 var fern = require('fern')
+
 var proc = {}
-proc[process.title] = true // node or browser
+proc[process.title] = true 
 
 
 module.exports = function Bricoluer (multiLevel) { 
@@ -8,10 +9,10 @@ module.exports = function Bricoluer (multiLevel) {
   var index
 
 
-  var _ = {} // scope for module streams
+  var _ = {} 
 
   var Wilds = fern({
-    '^' : function (d, emit) {
+    '^' : function (d, emit) { 
       index = d
     },
     '_' : function (d, emit) {
@@ -69,8 +70,9 @@ module.exports = function Bricoluer (multiLevel) {
       }
     }
   }, 
-  {key:'key', sep:':', pos:0})
+  { key:'key', sep:':', pos:0 })
     .on('error', console.error)
+
 
   multiLevel.createReadStream().pipe(Wilds)
   multiLevel.liveStream({ old:false }).pipe(Wilds)
@@ -112,9 +114,3 @@ module.exports = function Bricoluer (multiLevel) {
 
   return Api
 } 
-
-
-// Utils 
-function stamp () {
-  return new Date().getTime()
-}

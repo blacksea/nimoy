@@ -32,7 +32,9 @@ if (config.crypto) {
     ciphers : cipher
   }, doHttp)
 
-  file = new fileServer(config.static, {'Strict-Transport-Security':'max-age=31536000'})
+  var header = {'Strict-Transport-Security':'max-age=31536000'}
+
+  file = new fileServer(config.static, header)
 }
 
 if (!config.crypto) {
@@ -88,9 +90,9 @@ writeBrowserFiles(function thenMappify () {
   dbWriteStream.on('error', console.error)
 
   dbWriteStream.on('close', function () {
-    // console.log(log('wrote bundle ('+(stat.size/1024).toFixed(2)+'/kb) to '+config.static+'bundle.js'))
     console.log('nimoy running on host: "'+config.host+'" port: "'+config.port+'"')
-    if (config.cli === true) process.stdin.pipe(require('./_cli')()).pipe(brico).pipe(process.stdout)
+    if (config.cli === true) 
+      process.stdin.pipe(require('./_cli')()).pipe(brico).pipe(process.stdout)
   })
 })
 
