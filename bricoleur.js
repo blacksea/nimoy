@@ -1,29 +1,33 @@
 var fern = require('fern')
 
-var proc = {}
-proc[process.title] = true 
-
 
 module.exports = function Bricoluer (multiLevel) { 
+  var proc = process.title
+  var hotModule
   var muxDemux
   var index
-
   var _ = {} 
+
 
   var Wilds = fern({
 
     '^' : function (d, emit) { 
+
       index = d
+
     },
 
     '_' : function (d, emit) {
+
       var name = getPath(d.key)[1]
+
     },
 
     '*' : function (d, emit) { // key= *:name:uid | val = {pkg}
+
       var pkg = JSON.parse(d.value).nimoy
 
-      if (d.type === 'put' && proc[pkg.process]) {
+      if (d.type === 'put' && proc === pkg.process) {
         d.opts  
           ? _[modName] = require(name)(d.opts) 
           : _[modName] = require(name)
@@ -32,48 +36,27 @@ module.exports = function Bricoluer (multiLevel) {
         _[modName].destroy()
         delete _[modName]
       }
+
     },
 
     '#' : function (d, emit) { // key= #:name:uid | val = [A,B]
+
       var modules = []
+      var useMuxDemux
 
-      d.value.forEach(function (mod) {
-        var name = mod.split('parse name')
-        var pkg = index[mod]
-        modules.push(pkg)
-      })
+      if (modA.process !== modB.process) useMuxDemux = true
 
-      if (modules[0].process !== modules[1].process) {
-        for (var i=0;i<modules.length;i++) {
-          var m = modules[i]
-
-          if (proc.browser && m.process == 'browser') {
-            var mod = _[m.uid]
-            m.pos = i
-            mxdx.on('connection', function (s) {
-              if (stream.meta===uid) {
-                m.pos === 0
-                  ? mod.pipe(s)
-                  : s.pipe(mod)
-              }
-            }) 
-          }
-
-          if (proc.node && m.process === 'node') {
-            var mod = _[m.uid]
-            var s = mxdx.createStream(uid)
-            m.pos === '0'
-              ? mod.pipe(s)
-              : s.pipe(mod)
-          }
-
-        }
-      } else if (proc[modules[0].process]) {
-        _[d.value[0]].pipe(_[d.value[1]])
+      if (useMuxDemux) {
+        if (proc === 'browser') hotModule = module
+        if (proc === 'node') muxDemux.createStream(uid).pipe(module)
+      } else {
+        _[modA.uid].pipe(_[modB.uid])
       }
+
     }
+
   }, 
-  { key:'key', sep:':', pos:0 })
+  { filter:'key', sep:':', pos:0 })
     .on('error', console.error)
 
 
@@ -81,15 +64,27 @@ module.exports = function Bricoluer (multiLevel) {
   multiLevel.liveStream({ old:false }).pipe(Wilds)
 
 
+  if (proc === 'browser') muxDemux.on('connection', newMuxConn)
+
+  function newMuxConn (s) {
+    (hotModule.pos === 0)
+      ? _[hotModule.uid].pipe(s)
+      : s.pipe(_[hotModule.uid])
+  }
+
+
   var Api = fern({
+
     put: function (opts, emit) { // make key string & pass in opts
       multiLevel.put(key, val, function (e) {
       })
     },
+
     del: function (opts, emit) {
       multiLevel.del(key, function (e) {
       })
     },
+
     search : function (opts, emit) {
       var res = []
       var ks = multiLevel.createKeyStream()
@@ -102,13 +97,16 @@ module.exports = function Bricoluer (multiLevel) {
         result(res)
       })
     }, 
+
     ls : function (opts, emit) {
     }
   })
 
+
   Api.installMuxDemux = function (mxdx) {
     muxDemux = mxdx
   }
+
 
   return Api
 } 
