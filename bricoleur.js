@@ -23,7 +23,7 @@ module.exports = function Bricoluer (multiLevel) {
 
     },
 
-    '*' : function (d, emit) { // key= *:name:uid | val = {pkg}
+    '*' : function (d, emit) {
 
       var pkg = JSON.parse(d.value).nimoy
 
@@ -39,7 +39,7 @@ module.exports = function Bricoluer (multiLevel) {
 
     },
 
-    '#' : function (d, emit) { // key= #:name:uid | val = [A,B]
+    '#' : function (d, emit) {
 
       var modules = []
       var useMuxDemux
@@ -75,17 +75,26 @@ module.exports = function Bricoluer (multiLevel) {
 
   var Api = fern({
 
-    put: function (opts, emit) { // make key string & pass in opts
-      multiLevel.put(key, val, function (e) {
+    put: function (d, emit) { // make key string & pass in opts
+      var key = d.key
+      var val = d.opts
+      var time = new Date().getTime()
+      var name = d.key.split(':')[1]
+      var uid = name+time
+      key += (':'+uid)
+
+      multiLevel.put(key, val, function makeKey(e) {
+        // emit somekind of object
+        if (!e) emit('created module '+uid)
       })
     },
 
-    del: function (opts, emit) {
+    del: function (d, emit) {
       multiLevel.del(key, function (e) {
       })
     },
 
-    search : function (opts, emit) {
+    search : function (d, emit) {
       var res = []
       var ks = multiLevel.createKeyStream()
 
@@ -98,7 +107,7 @@ module.exports = function Bricoluer (multiLevel) {
       })
     }, 
 
-    ls : function (opts, emit) {
+    ls : function (d, emit) {
     }
   })
 
