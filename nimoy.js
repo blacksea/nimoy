@@ -26,9 +26,9 @@ if (config.crypto) {
   + 'RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
 
   server = require('https').createServer({
-    key : fs.readfilesync(config.crypto.key),
-    cert : fs.readfilesync(config.crypto.cert),
-    honorcipherorder : true,
+    key : fs.readFileSync(config.crypto.key),
+    cert : fs.readFileSync(config.crypto.cert),
+    honorCipherOrder : true,
     ciphers : cipher
   }, doHttp)
 
