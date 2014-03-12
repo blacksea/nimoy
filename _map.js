@@ -14,10 +14,7 @@ module.exports = function Map (opts) {
     this.emit('end')
   })
 
-  var MAP = {
-    browser: {},
-    node: {}
-  }
+  var MAP = {}
 
   var dir = opts.wilds
   var b = browserify(opts.browserify)
@@ -41,7 +38,7 @@ module.exports = function Map (opts) {
       if (pkg.nimoy) { 
         if (pkg.nimoy.process === 'browser') b.require(dir+pkg.name, {expose:pkg.name})
 
-        MAP[pkg.nimoy.process][pkg.name] = pkg
+        MAP[pkg.name] = pkg
 
         next() 
       } else next()

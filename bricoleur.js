@@ -24,12 +24,16 @@ module.exports = function Bricoluer (multiLevel) {
     },
 
     '*' : function (d, emit) {
+      var name = d.key.split(':')[1]
+      var uid = d.key.split(':')[2]
+      var modName = name + uid
 
       var pkg = JSON.parse(d.value).nimoy
+      var opts = d.value
 
       if (d.type === 'put' && proc === pkg.process) {
-        d.opts  
-          ? _[modName] = require(name)(d.opts) 
+        opts
+          ? _[modName] = require(name)(opts) 
           : _[modName] = require(name)
       }
       if (d.type === 'del' && _[modName]) {
@@ -85,12 +89,14 @@ module.exports = function Bricoluer (multiLevel) {
 
       multiLevel.put(key, val, function makeKey(e) {
         // emit somekind of object
-        if (!e) emit('created module '+uid)
+        if (!e) emit('put object '+uid)
       })
     },
 
     del: function (d, emit) {
-      multiLevel.del(key, function (e) {
+      multiLevel.del(d.key, function (e) {
+        if (!e) emit('del object '+uid)
+        // if (!e) emit(' // success!
       })
     },
 
@@ -103,7 +109,7 @@ module.exports = function Bricoluer (multiLevel) {
         if (pattern[1] === path[1]) res.push(d) 
       })
       ks.on('end', function () {
-        result(res)
+        emit(res)
       })
     }, 
 
