@@ -17,7 +17,7 @@ module.exports = function Map (opts) {
   var MAP = {}
 
   var dir = opts.wilds
-  var b = browserify(opts.browserify)
+  if (opts.browserify) var b = browserify(opts.browserify)
 
   if (dir.slice(-1) !== '/') dir += '/'
 
@@ -27,7 +27,9 @@ module.exports = function Map (opts) {
 
       s.write({type:'put', key:'^', value:JSON.stringify(MAP)})
       
-      bundleJS()
+      opts.browserify 
+        ? bundleJS()
+        : s.end()
     })
   })
 
