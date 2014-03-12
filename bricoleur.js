@@ -24,11 +24,11 @@ module.exports = function Bricoluer (multiLevel) {
     },
 
     '*' : function (d, emit) {
+
       var name = d.key.split(':')[1]
       var uid = d.key.split(':')[2]
-      var modName = name + uid
-
-      var pkg = JSON.parse(d.value).nimoy
+      var modName = name +'_'+uid
+      var pkg = index[name].nimoy
       var opts = d.value
 
       if (d.type === 'put' && proc === pkg.process) {
@@ -45,18 +45,33 @@ module.exports = function Bricoluer (multiLevel) {
 
     '#' : function (d, emit) {
 
-      var modules = []
-      var useMuxDemux
+      var mods = d.value.split('|')
 
-      if (modA.process !== modB.process) useMuxDemux = true
+      mods.map(function getPkgs (uid, i, a) {
+          var name = uid.split('_')[0]
+          var pkg = index[name].nimoy
+          pkg.uid = uid
+          pkg.pos = i
+          return pkg
+      })
 
-      if (useMuxDemux) {
-        if (proc === 'browser') hotModule = module
-        if (proc === 'node') muxDemux.createStream(uid).pipe(module)
+      if (mods[0].process !== mods[1].process) {
+        for (var i=0;i<mods.length;i++) {
+          var p = mods[i].process
+          if (p === 'node') {
+            var s = muxDemux.createStream(d.value)
+            mods[i].pos === 0
+              ? _[mods[i].uid].pipe(s)
+              : s.pipe(_[mods[i].uid])
+          }
+          if (p === 'browser') {
+            hotModule = mods[i]
+            hotModule.conn = d.value
+          }
+        }
       } else {
-        _[modA.uid].pipe(_[modB.uid])
+        _[mods[0].uid].pipe(_[mods[1].uid])
       }
-
     }
 
   }, 
@@ -68,39 +83,34 @@ module.exports = function Bricoluer (multiLevel) {
   multiLevel.liveStream({ old:false }).pipe(Wilds)
 
 
-  if (proc === 'browser') muxDemux.on('connection', newMuxConn)
-
-  function newMuxConn (s) {
-    (hotModule.pos === 0)
-      ? _[hotModule.uid].pipe(s)
-      : s.pipe(_[hotModule.uid])
-  }
-
-
   var Api = fern({
 
     put: function (d, emit) { // make key string & pass in opts
+
       var key = d.key
-      var val = d.opts
       var time = new Date().getTime()
       var name = d.key.split(':')[1]
       var uid = name+time
       key += (':'+uid)
 
-      multiLevel.put(key, val, function makeKey(e) {
+      multiLevel.put(key, d.value, function (e) {
         // emit somekind of object
         if (!e) emit('put object '+uid)
       })
+
     },
 
     del: function (d, emit) {
+
       multiLevel.del(d.key, function (e) {
         if (!e) emit('del object '+uid)
         // if (!e) emit(' // success!
       })
+
     },
 
     search : function (d, emit) {
+
       var res = []
       var ks = multiLevel.createKeyStream()
 
@@ -111,6 +121,7 @@ module.exports = function Bricoluer (multiLevel) {
       ks.on('end', function () {
         emit(res)
       })
+
     }, 
 
     ls : function (d, emit) {
@@ -120,6 +131,16 @@ module.exports = function Bricoluer (multiLevel) {
 
   Api.installMuxDemux = function (mxdx) {
     muxDemux = mxdx
+  }
+
+  if (proc === 'browser') muxDemux.on('connection', newMuxConn)
+
+  function newMuxConn (s) {
+    if (s.meta === hotModule.conn) {
+      (hotModule.pos === 0)
+        ? _[hotModule.uid].pipe(s)
+        : s.pipe(_[hotModule.uid])
+    }
   }
 
 
