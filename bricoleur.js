@@ -1,21 +1,25 @@
 var fern = require('fern')
 
 
-function Bricoluer (multiLevel) { 
+function Bricoleur (multiLevel, opts) { 
 
+  var self = this
   var proc = process.title
   var hotModule
   var index
-  var _ = {} 
 
-  this.muxDemux = null  
+  var _ = {}
+  this._ = _
+  var muxDemux
+  this.muxDemux = muxDemux
+
 
   var Wilds = fern({
 
     '^' : function (d) { 
 
-      index = d
-
+      index = JSON.parse(d.value)
+      
     },
 
     '_' : function (d) {
@@ -28,18 +32,15 @@ function Bricoluer (multiLevel) {
       var uid = d.key.split(':')[2]
       var modName = name +'_'+uid
       var pkg = index[name].nimoy
-      var opts = JSON.parse(d.value)
 
       if (d.type === 'put' && proc === pkg.process) {
-        opts
-          ? _[modName] = require(name)(opts) 
-          : _[modName] = require(name)
-        Api.emit({status:1})
+        d.value
+          ? _[modName] = require(opts.wilds+name)(d.value) 
+          : _[modName] = require(opts.wilds+name)
       }
       if (d.type === 'del' && _[modName]) {
         _[modName].destroy()
         delete _[modName]
-        Api.emit({status:1})
       }
 
     },
@@ -82,7 +83,7 @@ function Bricoluer (multiLevel) {
     .on('error', console.error)
 
 
-  multiLevel.createReadStream().pipe(Wilds)
+  multiLevel.createReadStream({reverse:true}).pipe(Wilds)
   multiLevel.liveStream({ old:false }).pipe(Wilds)
 
 
