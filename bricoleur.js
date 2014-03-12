@@ -19,8 +19,6 @@ module.exports = function Bricoluer (multiLevel) {
 
     '_' : function (d, emit) {
 
-      var name = getPath(d.key)[1]
-
     },
 
     '*' : function (d, emit) {
@@ -45,7 +43,8 @@ module.exports = function Bricoluer (multiLevel) {
 
     '#' : function (d, emit) {
 
-      var mods = d.value.split('|')
+      var conn = d.value
+      var mods = conn.split('_')
 
       mods.map(function getPkgs (uid, i, a) {
           var name = uid.split('_')[0]
@@ -56,19 +55,19 @@ module.exports = function Bricoluer (multiLevel) {
       })
 
       if (mods[0].process !== mods[1].process) {
-        for (var i=0;i<mods.length;i++) {
-          var p = mods[i].process
+        mods.forEach(function (m) {
+          var p = m.process
           if (p === 'node') {
-            var s = muxDemux.createStream(d.value)
-            mods[i].pos === 0
-              ? _[mods[i].uid].pipe(s)
-              : s.pipe(_[mods[i].uid])
+            var s = muxDemux.createStream(conn)
+            m.pos === 0
+              ? _[m.uid].pipe(s)
+              : s.pipe(_[m.uid])
           }
           if (p === 'browser') {
-            hotModule = mods[i]
-            hotModule.conn = d.value
+            hotModule = m
+            hotModule.conn = conn
           }
-        }
+        })
       } else {
         _[mods[0].uid].pipe(_[mods[1].uid])
       }
