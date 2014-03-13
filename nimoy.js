@@ -33,14 +33,16 @@ if (config.crypto) {
     ciphers : cipher
   }, doHttp)
 
-  var header = {'Strict-Transport-Security':'max-age=31536000'}
 
-  file = new fileServer(config.static, header)
+  file = new fileServer(config.static, {
+    serverInfo : 'nginx',
+    'Strict-Transport-Security':'max-age=31536000'
+  })
 }
 
 if (!config.crypto) {
   server = require('http').createServer(doHttp)
-  file = new fileServer(config.static) 
+  file = new fileServer(config.static, {serverInfo:'nginx'}) 
 }
 
 function doHttp (req, res) { 
