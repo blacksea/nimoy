@@ -74,7 +74,6 @@ function Bricoleur (multiLevel, opts) {
         })
       } else {
         _[mods[0].uid].pipe(_[mods[1].uid])
-        Api.emit({status:1})
       }
     }
 
@@ -96,6 +95,7 @@ function Bricoleur (multiLevel, opts) {
         : s.pipe(_[hotModule.uid])
     }
   }
+
 } 
 
 Bricoleur.prototype.installMuxDemux = function (mxdx) {
