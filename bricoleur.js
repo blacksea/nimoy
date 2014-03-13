@@ -82,12 +82,6 @@ function Bricoleur (multiLevel, opts) {
 
   multiLevel.createReadStream({reverse:true}).pipe(Wilds)
   multiLevel.liveStream({ old:false }).pipe(Wilds)
-
-
-
-  function newMuxConn (s) {
-  }
-
 } 
 
 Bricoleur.prototype.installMuxDemux = function (mxdx) {
