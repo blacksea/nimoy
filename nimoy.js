@@ -5,13 +5,14 @@ var liveStream = require('level-live-stream')
 var fileServer = require('node-static').Server
 var webSocketStream = require('websocket-stream')
 var webSocketServer = require('ws').Server
-var bricoleur = require('./bricoleur')
+var Bricoleur = require('./bricoleur')
 var mappify = require('./_map')
 
 var server
 var brico
 var file
 var db
+
 
 var config = (process.argv[2]) 
   ? config = require(process.argv[2]) 
@@ -71,9 +72,6 @@ db = level('./'+config.host)
 liveStream.install(db)
 multiLevel.writeManifest(db, config.static+'manifest.json')
 
-brico = bricoleur(db) 
-brico.on('error', console.error)
-
 
 var browserBootScript = config.static+'boot.js'
 
@@ -86,13 +84,15 @@ writeBrowserFiles(function thenMappify () {
     browserify : browserBootScript,
     min : config.minify
   }).pipe(dbWriteStream)
-
-  dbWriteStream.on('error', console.error)
+    .on('error', console.error)
 
   dbWriteStream.on('close', function () {
+
+    brico = new Bricoleur(db)
+
     console.log('nimoy running on host: "'+config.host+'" port: "'+config.port+'"')
-    if (config.cli === true) 
-      process.stdin.pipe(require('./_cli')()).pipe(brico).pipe(process.stdout)
+    //if (config.cli === true) 
+      // process.stdin.pipe(require('./_cli')()).pipe(brico).pipe(process.stdout)
   })
 })
 
@@ -124,11 +124,8 @@ function writeBrowserFiles (written) {
   })
 
   var bricoleur = require('../bricoleur')
-  var brico = bricoleur(multiLevel)
-  brico.installMuxDemux(rpc)
-  brico.on('error', function (e) {
-    console.error(e)
-  })
+  var Brico = new bricoleur(multiLevel)
+  Brico.installMuxDemux(rpc)
   // End Browser Boot
   })) 
 
