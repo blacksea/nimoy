@@ -15,7 +15,7 @@ module.exports = function (db, opts) {
 
       if (pipe) {
         var name = cmd[1]
-        var uid = new Date.getTime()
+        var uid = new Date().getTime()
         var key = '*:'+name+':'+uid
         var value = cmd[0]
         db.put(key, value, handleResult)
@@ -35,7 +35,7 @@ module.exports = function (db, opts) {
 
       if (cmd[0] === 'put') {
         var name = cmd[1]
-        var uid = new Date.getTime()
+        var uid = new Date().getTime()
         var key = '*:'+name+':'+uid
 
         var value = (!cmd[2]) 
