@@ -7,7 +7,7 @@ var through = require('through')
 var Stream = require('stream').Stream
 
 var map = require('../_map.js')
-var bricoleur = require('../bricoleur.js')
+var bricoleur = require('../_bricoleur.js')
 
 var dbWriteStream = db.createWriteStream()
 
@@ -17,7 +17,12 @@ dbWriteStream.on('close', function startTest () {
 
   var brico = new bricoleur(db,{wilds:'./tests/testModules/'})
 
+
   db.put('*:m1:1', {}, function (e) {
+    test('is api installed ?', function (t) {
+      t.equal(brico.api instanceof Stream, true)
+      t.end()
+    })
     test('del module', function (t) {
       t.plan(1)
       t.equal(brico._['m1_1'] instanceof Stream, true)
@@ -29,32 +34,5 @@ dbWriteStream.on('close', function startTest () {
       })
     })
   })
-
-  // test('pipe modules', function (t) {
-  //   api.write('put mod1')
-
-  //   grifter = function (d) {
-  //     t.equal(d.status,1)
-  //     t.end()
-  //   }
-  // })
-
-  // test('unpipe modules', function (t) {
-  //   api.write('put mod1')
-
-  //   grifter = function (d) {
-  //     t.equal(d.status,1)
-  //     t.end()
-  //   }
-  // })
-  
-  // test('list active modules', function (t) {
-  //   api.write('put mod1')
-
-  //   grifter = function (d) {
-  //     t.equal(d.status,1)
-  //     t.end()
-  //   }
-  // })
 
 })
