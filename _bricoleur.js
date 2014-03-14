@@ -1,15 +1,16 @@
+var api = require('api')
 var fern = require('fern')
 var proc = process.title
 
 function Bricoleur (multiLevel, opts) { 
 
   var self = this
+  var muxDemux 
+  var hotModule
   var index
 
   var _ = {}
   this._ = _
-  this.muxDemux 
-  this.hotModule
 
 
   var Wilds = fern({
@@ -21,6 +22,8 @@ function Bricoleur (multiLevel, opts) {
     },
 
     '_' : function (d) {
+
+      // access db!!!!
 
     },
 
@@ -66,8 +69,8 @@ function Bricoleur (multiLevel, opts) {
               : s.pipe(_[m.uid])
           }
           if (p === 'browser') {
-            self.hotModule = m
-            self.hotModule.conn = conn
+            hotModule = m
+            hotModule.conn = conn
           }
         })
       } else {
@@ -82,18 +85,19 @@ function Bricoleur (multiLevel, opts) {
 
   multiLevel.createReadStream({reverse:true}).pipe(Wilds)
   multiLevel.liveStream({ old:false }).pipe(Wilds)
-} 
 
-Bricoleur.prototype.installMuxDemux = function (mxdx) {
-  var self = this
-  this.muxDemux = mxdx
-  if (proc === 'browser') self.muxDemux.on('connection', function newMuxConn (s) {
-    if (s.meta === self.hotModule.conn) {
-      (self.hotModule.pos === 0)
-        ? _[self.hotModule.uid].pipe(s)
-        : s.pipe(_[self.hotModule.uid])
-    }
-  })
+
+  this.installMuxDemux = function (mxdx) {
+    muxDemux = mxdx
+    if (proc === 'browser') muxDemux.on('connection', function newMuxConn (s) {
+      if (s.meta === hotModule.conn) {
+        (hotModule.pos === 0)
+          ? _[hotModule.uid].pipe(s)
+          : s.pipe(_[hotModule.uid])
+      }
+    })
+  } 
+
 } 
 
 module.exports = Bricoleur
