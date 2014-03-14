@@ -1,4 +1,4 @@
-var api = require('api')
+var api = require('./_api')
 var fern = require('fern')
 var proc = process.title
 
@@ -97,6 +97,8 @@ function Bricoleur (multiLevel, opts) {
       }
     })
   } 
+
+  this.api = api(multiLevel, {})
 
 } 
 
