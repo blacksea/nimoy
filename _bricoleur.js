@@ -52,11 +52,11 @@ function Bricoleur (multiLevel, opts) {
       var mods = conn.split('_')
 
       mods.map(function getPkgs (uid, i, a) {
-          var name = uid.split('_')[0]
-          var pkg = index[name].nimoy
-          pkg.uid = uid
-          pkg.pos = i
-          return pkg
+        var name = uid.split('_')[0]
+        var pkg = index[name].nimoy
+        pkg.uid = uid
+        pkg.pos = i
+        return pkg
       })
 
       if (mods[0].process !== mods[1].process) {
@@ -87,16 +87,19 @@ function Bricoleur (multiLevel, opts) {
   multiLevel.liveStream({ old:false }).pipe(Wilds)
 
 
+  function newMuxConn (s) {
+    if (s.meta === hotModule.conn) {
+     (hotModule.pos === 0)
+       ? _[hotModule.uid].pipe(s)
+       : s.pipe(_[hotModule.uid])
+    }
+  }
+
   this.installMuxDemux = function (mxdx) {
     muxDemux = mxdx
-    if (proc === 'browser') muxDemux.on('connection', function newMuxConn (s) {
-      if (s.meta === hotModule.conn) {
-        (hotModule.pos === 0)
-          ? _[hotModule.uid].pipe(s)
-          : s.pipe(_[hotModule.uid])
-      }
-    })
+    if (proc === 'browser') muxDemux.on('connection', newMuxConn)
   } 
+
 
   this.api = api(multiLevel, {})
 
