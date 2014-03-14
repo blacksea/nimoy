@@ -1,55 +1,96 @@
-var fern = require('fern')
+var through = require('through')
 
 module.exports = function (db, opts) {
  
-  var api = fern({
+  var api = through(function Write (d) {
 
-    put: function (d, emit) {
-      var key
-      var value
+    var cmd
 
-      db.put(key, value, handleResult)
-    },
+    if (typeof d === 'string') cmd = d.split(' ')
 
-    del: function (d, emit) {
-      var key
+    if (cmd.length === 1) {
 
-      db.del(key, handleResult)
-    },
+      var pipe = cmd[0].match('|')
+      var unpipe = cmd[0].match('-')
 
-    pipe: function (d, emit) {
-      var key
-      var value
+      if (pipe) {
+        var key = 
+        var value = cmd[0]
+        db.put(key, value, handleResult)
+      }
 
-      db.put(key, value, handleResult)
-    },
+      if (unpipe) {
+        var key = 
+        db.del(key, handleResult)
+      }
 
-    unpipe: function (d, emit) {
-      var key
-      
-      db.del(key, handleResult)
-    },
+      if (!pipe && !unpipe && cmd[0] === 'ls')  {
+        // create active map --- write stream of active modules
+      }
 
-    ls: function (d, emit) {
+    } else {
 
-      db.get(key, function (e, d) {
+      if (cmd[0] === 'put') {
+        var name = cmd[1]
+        var uid = 
+        var key = '*:'+name+':'+uid
 
-      })
-    },
+        var value = (!cmd[2]) 
+          ? {}
+          : JSON.parse(cmd[2])
 
-    search : function (d, emit) {
+        db.put(key, value, handleResult)
+      }
 
-      db.get(key, function (e, d) {
+      if (cmd[0] === 'del') {
+        var uid = cmd[1]
+        db.del(uid, handleResult)
+      }
 
-      })
+      if (cmd[0] === 'search') {
+        var str = cmd[1]
+        search(str, function result (e, res) {
+          if (e) api.emit('error', e)
+          if (!e) {
+            // format result
+          }
+        })
+      }
+
     }
 
+  }, function End () {
+
+    this.emit('end')
+
   })
+
+
+  function search (str, res) {
+    var result = []
+
+    db.createKeyStream()
+      .on('data', function (key) {
+        var items = key.split(':')
+        items.forEach(function (item) {
+          if (item === str) result.push(key)
+        })
+      })
+      .on('close', function () {
+        (result.length > 0) 
+          ? res(null, result)
+          : res(new Error('not found'), null)
+      })
+
+  }
+
 
   function handleResult (e, res) {
     if (e) api.emit('error', e)
     if (!e) api.emit('data', res)
   }
 
+
   return api
+
 }
