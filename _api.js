@@ -14,14 +14,17 @@ module.exports = function (db, opts) {
       var unpipe = cmd[0].match('-')
 
       if (pipe) {
-        var key = 
+        var name = cmd[1]
+        var uid = new Date.getTime()
+        var key = '*:'+name+':'+uid
         var value = cmd[0]
         db.put(key, value, handleResult)
       }
 
       if (unpipe) {
-        var key = 
-        db.del(key, handleResult)
+        search(str, function (e, res) {
+          db.del(res[0], handleResult)
+        })
       }
 
       if (!pipe && !unpipe && cmd[0] === 'ls')  {
@@ -32,7 +35,7 @@ module.exports = function (db, opts) {
 
       if (cmd[0] === 'put') {
         var name = cmd[1]
-        var uid = 
+        var uid = new Date.getTime()
         var key = '*:'+name+':'+uid
 
         var value = (!cmd[2]) 
