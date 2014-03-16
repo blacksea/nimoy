@@ -1,35 +1,40 @@
-module.exports = through(function Transform (d) {
+module.exports = require('through')(function Transform (d) {
 
   var self = this
 
   var uid = new Date().getTime()
 
+
   var index = [
     ['put', '*', 'put'],
     ['del', '*', 'del'],
-    ['|', '#', 'put'],
+    ['/\|/', '#', 'put'],
     ['-', '#', 'del'],
     ['ls', '+', 'put'],
     ['search', '^', 'put']
   ]
 
-  (d instanceof Buffer) 
-    ? formatFromString(d.toString().replace('\n','')) : (typeof d === 'string' && d[0] === '{')
-      ? formatFromJson(d) : noFormat(d)
+
+  if (d instanceof Buffer) {
+    formatFromString(d.toString().replace('\n','')) 
+  } else if (typeof d === 'string' && d[0] === '{') {
+    formatFromJson(d)
+  } else noFormat(d)
 
       
   function formatFromString (s) {
 
+    var c = s.split(' ')
     var cmd = {}
 
-    cmds.map(function convert (index, i, a) {
-      if (c[0].match(index[0]) !== null) {
-        cmd.key = index[0]
+    index.forEach(function convert (idx) {
+      if (c[0].match(idx[0]) !== null) {
+        cmd.key = idx[1]
         if (c[1]) cmd.key += ( ':' + c[1] )
         if (c[2]) cmd.value = c[2]
-        if (index[2] === 'put' && !c[2]) cmd.value = ''
-        cmd.key += uid
-        cmd.type = index[2]
+        if (idx[2] === 'put' && !c[2]) cmd.value = JSON.stringify({uid:uid})
+        cmd.key += (':' + uid)
+        cmd.type = idx[2]
       }
     })
 
@@ -40,7 +45,7 @@ module.exports = through(function Transform (d) {
 
   function formatFromJson (j) {
 
-    self.emit('data', cmd)
+    // self.emit('data', cmd)
 
   }
 
