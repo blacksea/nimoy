@@ -16,7 +16,7 @@
   },
   "dependencies": {
     "ws": ">=0.4.31",
-    "websocket-stream": "^0.4.0",
+    "websocket-stream": "^0.5.1",
     "level": ">=0.18.0",
     "multilevel": ">=5.5.0",
     "level-live-stream": ">=1.4.9",
@@ -26,8 +26,7 @@
     "bindshim": ">=0.0.1",
     "cli-color": ">=0.2.3",
     "slide": ">=1.1.4",
-    "node-static": ">=0.7.3",
-    "fern": ">=0.0.19"
+    "node-static": ">=0.7.3"
   },
   "devDependancies": {
     "tape": ">=2.3.2"
