@@ -5,7 +5,7 @@ var liveStream = require('level-live-stream')
 var fileServer = require('node-static').Server
 var webSocketStream = require('websocket-stream')
 var webSocketServer = require('ws').Server
-var Bricoleur = require('./bricoleur')
+var Bricoleur = require('./_bricoleur')
 var mappify = require('./_map')
 
 var server
@@ -16,7 +16,7 @@ var db
 
 var config = (process.argv[2]) 
   ? config = require(process.argv[2]) 
-  : config = require('./__conf.json') 
+  : config = require('./config.json') 
 
 if (config.modules.slice(-1) !== '/') config.modules += '/' 
 if (config.static.slice(-1) !== '/') config.static += '/'
@@ -32,7 +32,6 @@ if (config.crypto) {
     honorCipherOrder : true,
     ciphers : cipher
   }, doHttp)
-
 
   file = new fileServer(config.static, {
     serverInfo : 'nginx',
@@ -78,7 +77,7 @@ multiLevel.writeManifest(db, config.static+'manifest.json')
 var browserBootScript = config.static+'boot.js'
 
 writeBrowserFiles(function thenMappify () {
-  var dbWriteStream = db.createWriteStream({valueEncoding:'json'})
+  var dbWriteStream = db.createWriteStream()
 
   mappify({
     wilds : config.modules,
@@ -90,7 +89,9 @@ writeBrowserFiles(function thenMappify () {
 
   dbWriteStream.on('close', function () {
 
-    brico = new Bricoleur(db)
+    brico = Bricoleur(db, {wilds:config.modules})
+
+    process.stdin.pipe(brico)
 
     console.log('nimoy running on host: "'+config.host+'" port: "'+config.port+'"')
     //if (config.cli === true) 
@@ -125,7 +126,7 @@ function writeBrowserFiles (written) {
     console.error(e)
   })
 
-  var bricoleur = require('../bricoleur')
+  var bricoleur = require('../_bricoleur')
   var Brico = new bricoleur(multiLevel)
   Brico.installMuxDemux(rpc)
   // End Browser Boot
