@@ -11,7 +11,7 @@ var mappify = require('./_map')
 var server
 var brico
 var file
-var db
+var dB
 
 
 var config = (process.argv[2]) 
