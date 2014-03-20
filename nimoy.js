@@ -9,6 +9,7 @@ var Bricoleur = require('./_bricoleur')
 var mappify = require('./_map')
 
 var server
+var serverInfo = 'nginx' // uhm...
 var brico
 var file
 var dB
@@ -22,26 +23,29 @@ if (config.modules.slice(-1) !== '/') config.modules += '/'
 if (config.static.slice(-1) !== '/') config.static += '/'
 
 if (config.crypto) {
-  var cipher = 'ecdh+aesgcm:dh+aesgcm:ecdh+aes256:dh+aes256:'
-  + 'ecdh+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:'
-  + 'RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
 
-  server = require('https').createServer({
+  var tlsConfig = {
     key : fs.readFileSync(config.crypto.key),
     cert : fs.readFileSync(config.crypto.cert),
     honorCipherOrder : true,
-    ciphers : cipher
-  }, doHttp)
+    cipher : 'ecdh+aesgcm:dh+aesgcm:ecdh+aes256:dh+aes256:'+
+             'ecdh+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:'+
+             'RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
+  }
+
+  if (config.crypto.ca) tlsConfig.ca = config.crypto.ca
+
+  server = require('https').createServer(tlsConfig, doHttp)
 
   file = new fileServer(config.static, {
-    serverInfo : 'nginx',
+    serverInfo : serverInfo,
     'Strict-Transport-Security':'max-age=31536000'
   })
 }
 
 if (!config.crypto) {
   server = require('http').createServer(doHttp)
-  file = new fileServer(config.static, {serverInfo:'nginx'}) 
+  file = new fileServer(config.static, {serverInfo:serverInfo}) 
 }
 
 function doHttp (req, res) { 
@@ -76,7 +80,7 @@ multiLevel.writeManifest(db, config.static+'manifest.json')
 
 var browserBootScript = config.static+'boot.js'
 
-writeBrowserFiles(function thenMappify () {
+writeBrowserFiles(function thenMappify () { // todo: allow map to be called with cli / web api
   var dbWriteStream = db.createWriteStream()
 
   mappify({
