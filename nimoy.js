@@ -33,7 +33,7 @@ if (config.crypto) {
              'RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
   }
 
-  if (config.crypto.ca) tlsConfig.ca = config.crypto.ca
+  if (config.crypto.ca) tlsConfig.ca = fs.readFileSync(config.crypto.ca)
 
   server = require('https').createServer(tlsConfig, doHttp)
 
