@@ -4,6 +4,7 @@ var through = require('through')
 module.exports = function Bricoleur (multiLevel, opts) { 
 
   //  process sets tools
+  var proc = process.title
   var self = this
   var MuxDemux
   var Wilds = {}
