@@ -1,93 +1,98 @@
-var fern = require('fern')
+var interface = require('./_interface')
 var through = require('through')
-var proc = process.title
 
-function Bricoleur (multiLevel, opts) { 
+module.exports = function Bricoleur (multiLevel, opts) { 
 
+  //  process sets tools
   var self = this
-  var muxDemux 
-  var hotModule
-  var index
-
-  var _ = {}
-  this._ = _
+  var MuxDemux
+  var Wilds = {}
+  var _ // duplex stream returned on Bricoleur()
 
 
-  var Wilds = fern({
+  interface.pipe(multiLevel.createWriteStream()) // patch api into db
+  interface.on('error', handleErrors)
 
-    '^' : function (d) { 
+  // multiLevel.liveStream({ reverse:true })
+  //   .on('data', signalWilds)
 
-      index = JSON.parse(d.value)
-      
-    },
 
-    '_' : function (d) {
+  function signalWilds (d) {
 
-      // access db!!!!
+    if (!d.type) d.type = 'put' // only applies to old 
 
-    },
+    d.key = d.key.split(':')
 
-   '*' : function (d) {
+    var signal = d.key[0]
 
-      var name = d.key.split(':')[1]
-      var uid = d.key.split(':')[2]
-      var modName = name +'_'+uid
-      var pkg = index[name].nimoy
+    switch (signal) {
 
-      if (d.type === 'put' && proc === pkg.process) {
-        d.value
-          ? _[modName] = require(opts.wilds+name)(d.value) 
-          : _[modName] = require(opts.wilds+name)
-      }
-      if (d.type === 'del' && _[modName]) {
-        _[modName].destroy()
-        delete _[modName]
-      }
+      case '^' : packages = d.value; break; // library
 
-    },
+      case '!' : ; break; // process
 
-    '#' : function (d) {
+      case '*' : makeUnmake(d); break;
 
-      var conn = d.value
-      var mods = conn.split('_')
+      case '|' : pipeUnpipe(d); break;
 
-      mods.map(function getPkgs (uid, i, a) {
-        var name = uid.split('_')[0]
-        var pkg = index[name].nimoy
-        pkg.uid = uid
-        pkg.pos = i
-        return pkg
-      })
+      case '#' : break; // module data
 
-      if (mods[0].process !== mods[1].process) {
-        mods.forEach(function (m) {
-          var p = m.process
-          if (p === 'node') {
-            var s = self.muxDemux.createStream(conn)
-            m.pos === 0
-              ? _[m.uid].pipe(s)
-              : s.pipe(_[m.uid])
-          }
-          if (p === 'browser') {
-            hotModule = m
-            hotModule.conn = conn
-          }
-        })
-      } else {
-        _[mods[0].uid].pipe(_[mods[1].uid])
-      }
+      case '_' : break; // 
+
+      default : error({}); break;
+
     }
 
-  }, 
-  { filter:'key', sep:':', pos:0 })
-    .on('error', console.error)
+  }
 
 
-  multiLevel.createReadStream({reverse:true}).pipe(Wilds)
-  multiLevel.liveStream({ old:false }).pipe(Wilds)
+  function makeUnmake (d) {
+
+    d.value
+      ? Wilds[modName] = require(opts.wilds+name)(d.value) 
+      : Wilds[modName] = require(opts.wilds+name)
+
+    Wilds[modName].id = modName
+
+    // _.emit('data', {
+    //   status:
+    //   body:
+    //   type:
+    // })
+
+  }
 
 
-  function newMuxConn (s) {
+  function pipeUnpipe (d) {
+
+    mods.map(function getPkgs (uid, i, a) {
+      var name = uid.split('_')[0]
+      var pkg = index[name].nimoy
+      pkg.uid = uid
+      pkg.pos = i
+      a[i] = pkg
+    })
+
+    var s = self.muxDemux.createStream(conn)
+              
+    Wilds[mods[0].uid].pipe(Wilds[mods[1].uid])
+
+    m.pos === 0
+      ? Wilds[m.uid].pipe(s)
+      : s.pipe(Wilds[m.uid])
+
+    // _.emit('data', {
+    //   status:
+    //   body:
+    //   type:
+    // })
+
+  }
+
+
+  function muxPipe (soc) {
+    // make stream module
+    // call pipeUnpipe
     if (s.meta === hotModule.conn) {
      (hotModule.pos === 0)
        ? _[hotModule.uid].pipe(s)
@@ -95,99 +100,35 @@ function Bricoleur (multiLevel, opts) {
     }
   }
 
-  this.installMuxDemux = function (mxdx) {
-    muxDemux = mxdx
-    if (proc === 'browser') muxDemux.on('connection', newMuxConn)
-  } 
 
-  var api = through(function Write (d) {
-    var cmd
+  function error (e) {
+    // inherit from e
+    var err = new Error(e.msg)
+    err.code = e.code
+    _.emit('error', err)
+  }
 
-    if (typeof d === 'string') cmd = d.split(' ')
 
-    if (cmd.length === 1) {
+  function handleErrors (e) { // todo
+    console.error(e) 
+  }
 
-      if (cmd[0].match(/\|/)) { // pipe
-        var name = cmd[0]
-        var uid = new Date().getTime()
-        var key = '#:'+name+':'+uid
-        var value = cmd[0]
-        multiLevel.put(key, value, handleRes)      
-      }
 
-      if (cmd[0].match('-') !== null) { // unpipe
-        multiLevel.del(cmd[0], handleRes)
-      }
-
-      if (cmd[0] === 'ls')  {
-        // create active map --- write stream of active modules
-      }
-
-    } 
-
-    if (cmd[0] === 'put') {
-      var name = cmd[1]
-      var uid = new Date().getTime()
-      var key = '*:'+name+':'+uid
-
-      var value = (!cmd[2]) 
-        ? {}
-        : JSON.parse(cmd[2])
-
-      multiLevel.put(key, value, handleRes)
-    }
-
-    if (cmd[0] === 'del') {
-      var uid = cmd[1]
-      multiLevel.del(key, value, handleRes)
-    }
-
-    if (cmd[0] === 'search') {
-      var str = cmd[1]
-      search(str, function result (e, res) {
-        if (e) api.emit('error', e)
-        if (!e) api.emit('data', {
-          type: 'search',
-          status:1,
-          val: res
-        })
-      })
-    }
-
+  _ = through(function Write () {
+    this.emit('data')
   }, function End () {
-
     this.emit('end')
-
   })
 
-
-  function search (str, res) {
-    var result
-
-    multiLevel.createKeyStream()
-      .on('data', function (key) {
-        var items = key.split(':')
-        for (var i=0;i < items.length;i++) {
-          if (items[i] === str) {
-            result = key
-            res(null, result)
-            break;
-          }
-        }
-      })
-      .on('close', function () {
-        if (!result) res(new Error('not found'), null)
-      })
+  _.installMuxDemux = function (mxdx) {
+    muxDemux = mxdx
+    if (proc === 'browser') muxDemux.on('connection', muxPipe)
   }
 
+  _.write = interface.write.bind(interface)
+  
+  _.wilds = Wilds
 
-  function handleRes (e) {
-    if (e) api.emit('error', e)
-  }
-
-
-  this.api = api
+  return _
 
 } 
-
-module.exports = Bricoleur
