@@ -22,7 +22,7 @@ var config = (process.argv[2])
 if (config.modules.slice(-1) !== '/') config.modules += '/' 
 if (config.static.slice(-1) !== '/') config.static += '/'
 
-var mount = st({index:'index.html',path:config.static,url:'/',passthrough:true}) 
+var mount = st({index:'index.html',path:config.static,passthrough:true}) 
 
 if (config.crypto) {
 
@@ -39,20 +39,17 @@ if (config.crypto) {
 
   server = require('https').createServer(tlsConfig, function (req,res) {
     res.setHeader('Strict-Transport-Security','max-age=31536000')
-    mount(req, res, passthrough)
+    doHttp(req, res)
   })
 }
 
-if (!config.crypto) { 
-  server = require('http').createServer(function (req,res) {
-    mount(req, res, passthrough)
+if (!config.crypto)  server = require('http').createServer(doHttp)
+
+function doHttp (req, res) { 
+  mount(req, res, function passthrough () {
+    console.log(req)
+    res.end('404')
   })
-}
-
-
-function passthrough (req, res) { 
-  console.log(req) 
-  res.end('404')
 }
 
 server.listen(config.port, config.host, function setupWebSocket () {
