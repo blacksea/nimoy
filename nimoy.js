@@ -2,7 +2,7 @@ var fs = require('fs')
 var level = require('level')
 var multiLevel = require('multilevel')
 var liveStream = require('level-live-stream')
-var st = require('st')
+var fileServer = require('node-static')
 var webSocketStream = require('websocket-stream')
 var webSocketServer = require('ws').Server
 var Bricoleur = require('./_bricoleur')
@@ -37,18 +37,21 @@ if (config.crypto) {
 
   if (config.crypto.ca) tlsConfig.ca = fs.readFileSync(config.crypto.ca)
 
+  var file = fileServer.Server(config.static, {'Strict-Transport-Security','max-age=31536000'})
+
   server = require('https').createServer(tlsConfig, function (req,res) {
-    res.setHeader('Strict-Transport-Security','max-age=31536000')
     doHttp(req, res)
   })
 }
 
-if (!config.crypto)  server = require('http').createServer(doHttp)
+if (!config.crypto)  {
+  var file = fileServer.Server(config.static)
+  server = require('http').createServer(doHttp)
+}
 
 function doHttp (req, res) { 
-  mount(req, res, function passthrough () {
-    console.log(req)
-    res.end('404')
+  file.serve(req, res, function (e, res) {
+    if(e) file.serveFile('/index.html', 200, {}, req, res)
   })
 }
 
