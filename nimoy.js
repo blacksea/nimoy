@@ -2,29 +2,27 @@ var fs = require('fs')
 var url = require('url')
 var http = require('http')
 var level = require('level')
-var stache = require('templayed')
-var config = require('./config.json')
 var multilevel = require('multilevel')
 var formidable = require('formidable')
 var browserify = require('browserify')
 var livestream = require('level-live-stream')
-var engineserver = require('engine.io-stream')
+var engineServer = require('engine.io-stream')
 
 var newhmac = require('crypto').createhmac
 var key = 'italocalvino'
 var algo = 'sha256'
 var modes = {}
 
-var config = (process.argv[2]) 
+var config = (process.argv[2]) // also check db for config if no file found
   ? config = require(process.argv[2]) 
   : config = require('./config.json') 
 
-if (config.modules.slice(-1) !== '/') config.modules += '/' 
-if (config.static.slice(-1) !== '/') config.static += '/'
+if (config.files.modules.slice(-1) !== '/') config.files.modules += '/' 
+if (config.files.static.slice(-1) !== '/') config.files.static += '/'
 
 var db = level('./' + config.host)
 livestream.install(db)
-multilevel.writemanifest(db, './static/manifest.json')
+multilevel.writeManifest(db, './static/manifest.json')
 
 if (config.brico) { // handle configuration
   var conf = config.brico
@@ -35,10 +33,9 @@ if (config.brico) { // handle configuration
       gethmac({token:token,user:m}, function (d) { modes[d.key] = d.val })
     }
   }
-  db.put('config', json.stringify(conf))
+  db.put('config', JSON.stringify(conf))
 }
 
-// generate index
 var index = '<!doctype html>'
           + '<html lang="en">'
           + '<meta charset="utf-8">'
@@ -55,20 +52,28 @@ var index = '<!doctype html>'
 
 fs.writeFileSync(config.files.static+'index.html', index)
 
-// var file = fileServer.Server(config.static, {'Strict-Transport-Security','max-age=31536000'})
-// var tlsConfig = {
-//   key : fs.readFileSync(config.crypto.key),
-//   cert : fs.readFileSync(config.crypto.cert),
-//   honorCipherOrder : true,
-//   cipher : 'ecdh+aesgcm:dh+aesgcm:ecdh+aes256:dh+aes256:'+
-//            'ecdh+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:'+
-//            'RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
-// }
+var tlsConfig = {
+  key : fs.readFileSync(config.crypto.key),
+  cert : fs.readFileSync(config.crypto.cert),
+  honorCipherOrder : true,
+  cipher : 'ecdh+aesgcm:dh+aesgcm:ecdh+aes256:dh+aes256:'+
+           'ecdh+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:'+
+           'RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
+}
 
-var fileserver = require('node-static').server
-var file = new fileserver('./static')
+var fileserver = require('node-static').Server
 
-var server = http.createserver(function (req, res) {
+if (!config.crypto) {
+  var server = http.createServer(handleHttp)
+  var file = new fileserver(config.files.static)
+} else {
+  var server = http.createServer(tlsConfig, handleHttp)
+  var file = new fileServer(config.files.static, {
+    'Strict-Transport-Security','max-age=31536000'
+  })
+}
+
+function handleHttp (req, res) {
   if (req.url === '/upload' && req.method === 'post') fileupload(req, res)
 
   file.serve(req, res, function noFile (e) {
@@ -78,7 +83,7 @@ var server = http.createserver(function (req, res) {
       console.log(path)
     }
   })
-})
+}
 
 var engine = engineServer(function (wss) {
   wss.pipe(multiLevel.server(db, {
@@ -94,24 +99,34 @@ var engine = engineServer(function (wss) {
 
   wss.on('error', console.error)
 }, {cookie:false})
+  .attach(server, '/ws')
 
-engine.attach(server, '/ws')
-
-function getHmac (d, cb) { // USERS '@'
+function getHmac (d, cb) { 
   var hmac = newHmac(ALGO, KEY)
   hmac.setEncoding('hex')
   hmac.write(d.token)
   hmac.end()
-  cb({key:'@:'+d.user, val:hmac.read().toString()})
+  cb({key:'users:'+d.user, val:hmac.read().toString()})
 }
 
-function compileModules (event, file) { // CREATE BETTER LIB '!'
+function handleUpload (req, res) {
+  var form = new formidable.IncomingForm()
+  form.parse(req, function(err, fields, files) {
+    res.writeHead(200, {'content-type': 'text/plain'})
+    res.write('received upload:\n\n')
+    res.end()
+    var blob = fields.blob.split(',')[1]
+    fs.writeFileSync(config.files.uploads+fields.file, blob, {encoding:'base64'})
+  })
+}
+
+function compileModules (event, file) {// replace this !
   var inBun = config.files.bundleIn
   var outBun = config.files.bundleOut
 
   fs.readdir(config.files.modules, function (e, files) {
     var components = {}
-    var b = browserify(bunIn)
+    var b = browserify(inBun)
 
     files.forEach(function (f) {
       var name = f.split('.')[0]
@@ -128,21 +143,10 @@ function compileModules (event, file) { // CREATE BETTER LIB '!'
     db.put('library', JSON.stringify(components))
 
     var bun = fs.createWriteStream(config.files.bundleOut)
-    bun.on('finish',function () {console.log('compiled '+bunIn+' to '+bunOut)})
+    bun.on('finish',function () {console.log('compiled '+inBun+' to '+outBun)})
     b.bundle().pipe(bun)
   })
 }
 
-function handleUpload (req, res) {
-  var form = new formidable.IncomingForm()
-  form.parse(req, function(err, fields, files) {
-    res.writeHead(200, {'content-type': 'text/plain'})
-    res.write('received upload:\n\n')
-    res.end()
-    var blob = fields.blob.split(',')[1]
-    fs.writeFileSync(config.files.uploads+fields.file, blob, {encoding:'base64'})
-  })
-}
-
-fs.watch(config.files.modules, compileComponents)
-compileComponents()
+fs.watch(config.files.modules, compileModules)
+compileModules()
