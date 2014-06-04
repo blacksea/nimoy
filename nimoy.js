@@ -15,15 +15,6 @@ var key = 'italocalvino'
 var algo = 'sha256'
 var modes = {}
 
-var index = './static/index.html'
-fs.watchfile(config.components+'index.hogan', makeindex)
-
-var db = level('./data')
-livestream.install(db)
-multilevel.writemanifest(db, './static/manifest.json')
-
-var update = db.livestream()
-
 var config = (process.argv[2]) 
   ? config = require(process.argv[2]) 
   : config = require('./config.json') 
@@ -31,8 +22,11 @@ var config = (process.argv[2])
 if (config.modules.slice(-1) !== '/') config.modules += '/' 
 if (config.static.slice(-1) !== '/') config.static += '/'
 
-// configuration
-if (config.brico) {
+var db = level('./' + config.host)
+livestream.install(db)
+multilevel.writemanifest(db, './static/manifest.json')
+
+if (config.brico) { // handle configuration
   var conf = config.brico
   for (m in conf.modes) {
     if (conf.modes[m].pass) {
@@ -44,7 +38,33 @@ if (config.brico) {
   db.put('config', json.stringify(conf))
 }
 
-// server!
+// generate index
+var index = '<!doctype html>'
+          + '<html lang="en">'
+          + '<meta charset="utf-8">'
+          + '<head>'
+          + '<title>Untitiled</title>'
+          + '<link rel="stylesheet" href="/style.css">'
+          + '</head>'
+          + '<body id="canvas">'
+          + '<div class="container">'
+          + '</div>'
+          + '<script src="/bundle.js"></script>'
+          + '</body>'
+          + '</html>'
+
+fs.writeFileSync(config.files.static+'index.html', index)
+
+// var file = fileServer.Server(config.static, {'Strict-Transport-Security','max-age=31536000'})
+// var tlsConfig = {
+//   key : fs.readFileSync(config.crypto.key),
+//   cert : fs.readFileSync(config.crypto.cert),
+//   honorCipherOrder : true,
+//   cipher : 'ecdh+aesgcm:dh+aesgcm:ecdh+aes256:dh+aes256:'+
+//            'ecdh+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:'+
+//            'RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
+// }
+
 var fileserver = require('node-static').server
 var file = new fileserver('./static')
 
@@ -59,52 +79,23 @@ var server = http.createserver(function (req, res) {
     }
   })
 })
-    
+
 var engine = engineServer(function (wss) {
-  wss.pipe(multiLevel.server(db, {auth: Auth, access: Access})).pipe(wss)
+  wss.pipe(multiLevel.server(db, {
+    auth: function (user, cb) {
+      getHmac({token:user.pass,user:user.user}, function handleHmac (d) {
+        if (modes[user.user] === pass) cb(null, { name: user.user, token: d.val })
+        if (modes[user.user] !== pass) cb(new Error('wrong pass!'), null)
+        if (e) cb(e, null)
+      })
+    }, 
+    access: function (user, db, method, args) {}
+  })).pipe(wss)
+
   wss.on('error', console.error)
 }, {cookie:false})
 
 engine.attach(server, '/ws')
-
-server.listen(config.port, config.host, function () {
-  console.log('server running on port: '+config.port+' host: '+config.host)
-})
-
-if (config.crypto) {
-
-  var tlsConfig = {
-    key : fs.readFileSync(config.crypto.key),
-    cert : fs.readFileSync(config.crypto.cert),
-    honorCipherOrder : true,
-    cipher : 'ecdh+aesgcm:dh+aesgcm:ecdh+aes256:dh+aes256:'+
-             'ecdh+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:'+
-             'RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
-  }
-
-  if (config.crypto.ca) tlsConfig.ca = fs.readFileSync(config.crypto.ca)
-
-  var file = fileServer.Server(config.static, {'Strict-Transport-Security','max-age=31536000'})
-
-  server = require('https').createServer(tlsConfig, function (req,res) {
-    doHttp(req, res)
-  })
-}
-
-
-
-function Access (user, db, method, args) {// auth!
-  // if (user && user.name === 'edit') console.log('yessssss!')
-  // if (!user || user.name !== 'vc') console.log('fuk')
-}
-
-function Auth (user, cb) {
-  getHmac({token:user.pass,user:user.user}, function handleHmac (d) {
-    if (modes[user.user] === pass) cb(null, { name: user.user, token: d.val })
-    if (modes[user.user] !== pass) cb(new Error('wrong pass!'), null)
-    if (e) cb(e, null)
-  })
-}
 
 function getHmac (d, cb) { // USERS '@'
   var hmac = newHmac(ALGO, KEY)
@@ -114,55 +105,44 @@ function getHmac (d, cb) { // USERS '@'
   cb({key:'@:'+d.user, val:hmac.read().toString()})
 }
 
-// utils!
-function compileComponents (event, file) { // CREATE BETTER LIB '!'
-  fs.readdir(config.components, function (e, files) {
+function compileModules (event, file) { // CREATE BETTER LIB '!'
+  var inBun = config.files.bundleIn
+  var outBun = config.files.bundleOut
+
+  fs.readdir(config.files.modules, function (e, files) {
     var components = {}
-    var b = browserify(config.bundleIn)
+    var b = browserify(bunIn)
 
     files.forEach(function (f) {
       var name = f.split('.')[0]
       var ext = f.split('.')[1]
       if (!components[name]) components[name] = {}
-      var buf = fs.readFileSync(config.components+f).toString()
+      var buf = fs.readFileSync(config.files.modules+f).toString()
       switch (ext) {
         case 'json' : components[name].pkg = JSON.parse(buf); break;
         case 'hogan' : components[name].html = buf; break;
-        case 'js' : b.require(config.components+f, {expose: name}); break;
+        case 'js' : b.require(config.files.modules+f, {expose: name}); break;
       }
     })
 
     db.put('library', JSON.stringify(components))
 
-    var bun = fs.createWriteStream(config.bundleOut)
+    var bun = fs.createWriteStream(config.files.bundleOut)
+    bun.on('finish',function () {console.log('compiled '+bunIn+' to '+bunOut)})
     b.bundle().pipe(bun)
-
-    bun.on('finish', function () {
-      console.log('compiled bundle '+config.bundleIn+' to '+config.bundleOut)
-    })
   })
 }
 
-function makeIndex (e,res,d) {
-  if (d) d = JSON.parse(d)
-  if (!d) d = {title:config.title}
-
-  var indexHTML = fs.readFileSync(config.components+'index.hogan').toString()
-  fs.writeFileSync(index, stache(indexHTML)(d))
-}
-
-function fileUpload(req, res) {
+function handleUpload (req, res) {
   var form = new formidable.IncomingForm()
   form.parse(req, function(err, fields, files) {
     res.writeHead(200, {'content-type': 'text/plain'})
     res.write('received upload:\n\n')
     res.end()
     var blob = fields.blob.split(',')[1]
-    fs.writeFileSync(config.uploads+fields.file, blob, {encoding:'base64'})
+    fs.writeFileSync(config.files.uploads+fields.file, blob, {encoding:'base64'})
   })
 }
 
-// compile!
-fs.watch(config.components, compileComponents)
+fs.watch(config.files.modules, compileComponents)
 compileComponents()
-makeIndex()
