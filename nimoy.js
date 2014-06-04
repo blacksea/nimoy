@@ -1,6 +1,7 @@
 var fs = require('fs')
 var url = require('url')
 var http = require('http')
+var https = require('https')
 var level = require('level')
 var multilevel = require('multilevel')
 var formidable = require('formidable')
@@ -67,7 +68,7 @@ if (!config.crypto) {
   var server = http.createServer(handleHttp)
   var file = new fileserver(config.files.static)
 } else {
-  var server = http.createServer(tlsConfig, handleHttp)
+  var server = https.createServer(tlsConfig, handleHttp)
   var file = new fileServer(config.files.static, {
     'Strict-Transport-Security','max-age=31536000'
   })
