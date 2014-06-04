@@ -2,6 +2,10 @@
   "name" : "untitiled",
   "port" : 9999,
   "host" : "localhost",
+  "hmac" : {
+    "key" : "PleaseEditThisValue!",
+    "algo" : "sha256"
+  },
   "brico" : {
     "rendering" : "browser",
     "auth" : "login",

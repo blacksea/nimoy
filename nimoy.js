@@ -8,12 +8,11 @@ var formidable = require('formidable')
 var browserify = require('browserify')
 var livestream = require('level-live-stream')
 var engineServer = require('engine.io-stream')
-
 var newhmac = require('crypto').createhmac
-var key = 'italocalvino'
-var algo = 'sha256'
-var modes = {}
 
+
+
+// CONFIG
 var config = (process.argv[2]) // also check db for config if no file found
   ? config = require(process.argv[2]) 
   : config = require('./config.json') 
@@ -24,6 +23,9 @@ if (config.files.static.slice(-1) !== '/') config.files.static += '/'
 var db = level('./' + config.host)
 livestream.install(db)
 multilevel.writeManifest(db, './static/manifest.json')
+
+
+var modes = {}
 
 if (config.brico) { // handle configuration
   var conf = config.brico
@@ -36,6 +38,7 @@ if (config.brico) { // handle configuration
   }
   db.put('config', JSON.stringify(conf))
 }
+
 
 // SERVER
 fs.writeFileSync(config.files.static+'index.html', '<!doctype html>'+
@@ -55,9 +58,12 @@ fs.writeFileSync(config.files.static+'index.html', '<!doctype html>'+
 var fileserver = require('node-static').Server
 
 if (!config.crypto) {
-  var server = http.createServer(handleHttp)
   var file = new fileserver(config.files.static)
+  var server = http.createServer(handleHttp)
 } else {
+  var file = new fileServer(config.files.static, {
+    'Strict-Transport-Security':'max-age=31536000'
+  })
   var server = https.createServer({
     key : fs.readFileSync(config.crypto.key),
     cert : fs.readFileSync(config.crypto.cert),
@@ -66,14 +72,10 @@ if (!config.crypto) {
              'ecdh+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:'+
              'RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
   }, handleHttp)
-  var file = new fileServer(config.files.static, {
-    'Strict-Transport-Security':'max-age=31536000'
-  })
 }
 
 function handleHttp (req, res) {
   if (req.url === '/upload' && req.method === 'post') fileupload(req, res)
-
   file.serve(req, res, function noFile (e) {
     if (e) {
       var path = url.parse(req.url).pathname.slice(1)
@@ -94,7 +96,6 @@ var engine = engineServer(function (wss) {
     }, 
     access: function (user, db, method, args) {}
   })).pipe(wss)
-
   wss.on('error', console.error)
 }, {cookie:false})
   .attach(server, '/ws')
@@ -102,7 +103,7 @@ var engine = engineServer(function (wss) {
 
 // UTILS
 function getHmac (d, cb) { 
-  var hmac = newHmac(ALGO, KEY)
+  var hmac = newHmac(config.hmac.algo, config.hmac.key)
   hmac.setEncoding('hex')
   hmac.write(d.token)
   hmac.end()
