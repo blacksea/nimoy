@@ -17,7 +17,7 @@
     }
   },
   "files" : {
-    "modules" : "node_modules",
+    "modules" : "./node_modules",
     "bundleIn" : "./_client.js",
     "bundleOut" : "./static/bundle.js",
     "uploadDir" : "./static/files/"
