@@ -1,8 +1,25 @@
 {
-  "port": 9999,
-  "host": "localhost",
-  "minify": false,
-  "cli": true,
-  "modules": "./_wilds",
-  "static": "./_static"
+  "title" : "Untitiled",
+  "port" : 9999,
+  "host" : "localhost",
+  "brico" : {
+    "rendering" : "domRender",
+    "auth" : "login",
+    "users" : {
+      "default" : {
+        "pass" : null
+      },
+      "edit" : {
+        "pass" : "nimoy",
+        "modules" : ["actions", "ctx"], 
+        "connections" : ["actions>brico","ctx>brico","brico>actions","brico>ctx"]
+      }
+    }
+  },
+  "files" : {
+    "modules" : ,
+    "bundleIn" : ,
+    "bundleOut" : ,
+    "uploadDir" : 
+  }
 }
