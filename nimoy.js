@@ -52,24 +52,22 @@ fs.writeFileSync(config.files.static+'index.html', '<!doctype html>'+
 '</body>'+
 '</html>')
 
-var tlsConfig = {
-  key : fs.readFileSync(config.crypto.key),
-  cert : fs.readFileSync(config.crypto.cert),
-  honorCipherOrder : true,
-  cipher : 'ecdh+aesgcm:dh+aesgcm:ecdh+aes256:dh+aes256:'+
-           'ecdh+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:'+
-           'RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
-}
-
 var fileserver = require('node-static').Server
 
 if (!config.crypto) {
   var server = http.createServer(handleHttp)
   var file = new fileserver(config.files.static)
 } else {
-  var server = https.createServer(tlsConfig, handleHttp)
+  var server = https.createServer({
+    key : fs.readFileSync(config.crypto.key),
+    cert : fs.readFileSync(config.crypto.cert),
+    honorCipherOrder : true,
+    cipher : 'ecdh+aesgcm:dh+aesgcm:ecdh+aes256:dh+aes256:'+
+             'ecdh+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:'+
+             'RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
+  }, handleHttp)
   var file = new fileServer(config.files.static, {
-    'Strict-Transport-Security','max-age=31536000'
+    'Strict-Transport-Security':'max-age=31536000'
   })
 }
 
