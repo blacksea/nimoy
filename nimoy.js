@@ -37,21 +37,20 @@ if (config.brico) { // handle configuration
   db.put('config', JSON.stringify(conf))
 }
 
-var index = '<!doctype html>'
-          + '<html lang="en">'
-          + '<meta charset="utf-8">'
-          + '<head>'
-          + '<title>Untitiled</title>'
-          + '<link rel="stylesheet" href="/style.css">'
-          + '</head>'
-          + '<body id="canvas">'
-          + '<div class="container">'
-          + '</div>'
-          + '<script src="/bundle.js"></script>'
-          + '</body>'
-          + '</html>'
-
-fs.writeFileSync(config.files.static+'index.html', index)
+// SERVER
+fs.writeFileSync(config.files.static+'index.html', '<!doctype html>'+
+'<html lang="en">'+
+'<meta charset="utf-8">'+
+'<head>'+
+'<title>Untitiled</title>'+
+'<link rel="stylesheet" href="/style.css">'+
+'</head>'+
+'<body id="canvas">'+
+'<div class="container">'+
+'</div>'+
+'<script src="/bundle.js"></script>'+
+'</body>'+
+'</html>')
 
 var tlsConfig = {
   key : fs.readFileSync(config.crypto.key),
@@ -102,6 +101,8 @@ var engine = engineServer(function (wss) {
 }, {cookie:false})
   .attach(server, '/ws')
 
+
+// UTILS
 function getHmac (d, cb) { 
   var hmac = newHmac(ALGO, KEY)
   hmac.setEncoding('hex')
