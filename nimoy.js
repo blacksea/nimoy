@@ -4,7 +4,7 @@ var http = require('http')
 var https = require('https')
 var level = require('level')
 var asyncMap = require('slide').asyncMap
-var multilevel = require('multilevel')
+var multiLevel = require('multilevel')
 var formidable = require('formidable')
 var browserify = require('browserify')
 var livestream = require('level-live-stream')
@@ -32,7 +32,7 @@ if (config.files.static.slice(-1) !== '/') config.files.static += '/'
 
 var db = level('./' + config.host)
 livestream.install(db)
-multilevel.writeManifest(db, './static/manifest.json')
+multiLevel.writeManifest(db, './static/manifest.json')
 
 var modes = {} // remove this
 
@@ -134,9 +134,7 @@ function compileModules (event, file) {// replace this ! -- steal old map fn
   var inBun = config.files.bundleIn
   var outBun = config.files.bundleOut
   var b = browserify(inBun)
-
   var modulesFolder = fs.readdirSync(config.files.modules)
-
   asyncMap(modulesFolder, function (moduleFolder, next) {
     var pkgPath = config.files.modules + moduleFolder + '/package.json'
     if (!fs.existsSync(pkgPath)) { next(); return null }
@@ -146,7 +144,6 @@ function compileModules (event, file) {// replace this ! -- steal old map fn
     library[key] = pkg.nimoy
     b.require(config.files.modules+moduleFolder+'/'+pkg.main, {expose: moduleFolder})
     next()
-    // add pkg to library
   }, function end () {
     db.put('library', JSON.stringify(library))
     var bun = fs.createWriteStream(config.files.bundleOut)
