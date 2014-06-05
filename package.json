@@ -7,13 +7,15 @@
     "test": "tests"
   },
   "dependencies": {
+    "browserify" : "^4.1.8",
     "engine.io-stream": "^0.4.3",
     "level": "^0.18.0",
     "level-live-stream": "^1.4.9",
     "multilevel": "^5.6.0",
     "node-static": "^0.7.3",
     "formidable": "^1.0.14",
-    "through": "^2.3.4"
+    "through": "^2.3.4",
+    "slide": "^1.1.5"
   },
   "devDependencies": {
     "tape": "^2.13.1"
@@ -28,7 +30,7 @@
   "author": {
     "name": "Anthony Gasca",
     "email": "ag@theblacksea.cc"
-  }
+  },
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/nimoy/nimoi/issues"
