@@ -3,6 +3,7 @@ var url = require('url')
 var http = require('http')
 var https = require('https')
 var level = require('level')
+var asyncMap = require('slide').asyncMap
 var multilevel = require('multilevel')
 var formidable = require('formidable')
 var browserify = require('browserify')
@@ -11,8 +12,17 @@ var engineServer = require('engine.io-stream')
 var newhmac = require('crypto').createhmac
 
 
+// RUN -- process  next tick or self calling function !?!
+process.nextTick(function () {
+  server.listen(config.port, config.host, function () {
+    fs.watch(config.files.modules, compileModules)
+    compileModules()
+    console.log('server running on port: '+config.port+' host: '+config.host)
+  })
+})
 
-// CONFIG
+
+// CONFIG -- if no dir then make one!
 var config = (process.argv[2]) // also check db for config if no file found
   ? config = require(process.argv[2]) 
   : config = require('./config.json') 
@@ -24,8 +34,7 @@ var db = level('./' + config.host)
 livestream.install(db)
 multilevel.writeManifest(db, './static/manifest.json')
 
-
-var modes = {}
+var modes = {} // remove this
 
 if (config.brico) { // handle configuration
   var conf = config.brico
@@ -61,13 +70,12 @@ if (!config.crypto) {
   var file = new fileserver(config.files.static)
   var server = http.createServer(handleHttp)
 } else {
-  var file = new fileServer(config.files.static, {
-    'Strict-Transport-Security':'max-age=31536000'
-  })
+  var hsts = {'Strict-Transport-Security':'max-age=31536000'}
+  var file = new fileServer(config.files.static, hsts)
   var server = https.createServer({
+    honorCipherOrder : true,
     key : fs.readFileSync(config.crypto.key),
     cert : fs.readFileSync(config.crypto.cert),
-    honorCipherOrder : true,
     cipher : 'ecdh+aesgcm:dh+aesgcm:ecdh+aes256:dh+aes256:'+
              'ecdh+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:'+
              'RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
@@ -121,33 +129,28 @@ function handleUpload (req, res) {
   })
 }
 
-function compileModules (event, file) {// replace this !
+function compileModules (event, file) {// replace this ! -- steal old map fn
+  var library  = {}
   var inBun = config.files.bundleIn
   var outBun = config.files.bundleOut
+  var b = browserify(inBun)
 
-  fs.readdir(config.files.modules, function (e, files) {
-    var components = {}
-    var b = browserify(inBun)
+  var modulesFolder = fs.readdirSync(config.files.modules)
 
-    files.forEach(function (f) {
-      var name = f.split('.')[0]
-      var ext = f.split('.')[1]
-      if (!components[name]) components[name] = {}
-      var buf = fs.readFileSync(config.files.modules+f).toString()
-      switch (ext) {
-        case 'json' : components[name].pkg = JSON.parse(buf); break;
-        case 'hogan' : components[name].html = buf; break;
-        case 'js' : b.require(config.files.modules+f, {expose: name}); break;
-      }
-    })
-
-    db.put('library', JSON.stringify(components))
-
+  asyncMap(modulesFolder, function (moduleFolder, next) {
+    var pkgPath = config.files.modules + moduleFolder + '/package.json'
+    if (!fs.existsSync(pkgPath)) { next(); return null }
+    var pkg = JSON.parse(fs.readFileSync(pkgPath, {encoding:'utf8'}))
+    if (!pkg.nimoy) { next(); return null }
+    var key = 'modules:'+pkg.name
+    library[key] = pkg.nimoy
+    b.require(config.files.modules+moduleFolder+'/'+pkg.main, {expose: moduleFolder})
+    next()
+    // add pkg to library
+  }, function end () {
+    db.put('library', JSON.stringify(library))
     var bun = fs.createWriteStream(config.files.bundleOut)
     bun.on('finish',function () {console.log('compiled '+inBun+' to '+outBun)})
     b.bundle().pipe(bun)
   })
 }
-
-fs.watch(config.files.modules, compileModules)
-compileModules()
