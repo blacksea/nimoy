@@ -2,12 +2,13 @@
   "server" : {
     "port" : 9999,
     "host" : "localhost",
+    "ssl" : false
+  },
+  "bricoleur" : {
     "hmac" : {
       "key" : "PleaseEditThisValue!",
       "algo" : "sha256"
-    }
-  },
-  "bricoleur" : {
+    },
     "rendering" : "browser",
     "auth" : "login",
     "users" : {
@@ -21,11 +22,5 @@
       }
     }
   },
-  "paths" : {
-    "static" : "./static",
-    "modules" : "./node_modules",
-    "bundleIn" : "./_client.js",
-    "bundleOut" : "./static/bundle.js",
-    "uploads" : "./static/files/"
-  }
+  "modulesDirectory" : "./node_modules/"
 }
