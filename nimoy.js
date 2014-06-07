@@ -9,10 +9,10 @@ var livestream = require('level-live-stream')
 var browserify = require('browserify')
 var engineServer = require('engine.io-stream')
 var fileserver = require('node-static').Server
-var newhmac = require('crypto').createhmac
+var newHmac = require('crypto').createHmac
 var formidable = require('formidable')
 
-var users
+var users = {}
 var configFlag = process.argv[2] // specify a config file when booting
 
 !(configFlag) 
@@ -109,9 +109,9 @@ function boot (conf) {
   for (user in bricoConf.users) {
     var u = bricoConf.users[user]
     if (u.pass) {
-      delete u.pass
-      gethmac({token:token,user:user,secret:conf.bricoleur.secretKey}, function (d) { 
+      getHmac({token:u.pass,user:user,secret:bricoConf.secretKey}, function (d) { 
         users[d.key] = d.val 
+        delete u.pass
       })
     }
   }
