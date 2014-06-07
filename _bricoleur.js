@@ -1,67 +1,69 @@
 var through = require('through')
 
 module.exports = function Bricoleur (multiLevel) {
+  var cvs
 
-  var interface = through(function Write (d) { // single filter function
-   
-    // user 
-    
-    // config
-    
-    // lib/index
-
-    if (d.key) { // look at keyspace first
-      var parts = d.key.split(':')
-      var name = parts[0]
-
-      switch (keyspace) { // ?
-        case 'config' : break;
-        case 'library' : break;
-        case 'user' : break;
-        default : break;
-      }
+  var interface = through(function Write (d) {
+    if (!d.key) { 
+      console.error('bricoleur: unknown input: '+JSON.stringify(d));return null 
     }
+   
+    var path = d.key.split(':')
+    if (filter[path[0]]) filter[path[0]](d)
   })
-  
-  var canvas = { // ! to generic
-    put : function (d) { 
-      var keyspace = d.key
-      canvas._[keyspace] = canvas._['render'](moduleName)
 
-      var connection = d.value.split('>')
-      var a = findModule(connection[0])
-      var b = findModule(connection[1])
-      a.s.pipe(b.s)
-    }, 
-    del : function (d) {
-      var keyspace = d.key
-
-      var connection = d.value.split('>')
-      var a = findModule(connection[0])
-      var b = findModule(connection[1])
-      a.s.unpipe(b.s)
-      
-      canvas._[keyspace].erase()
-      delete canvas._[keyspace]
-    },
-    get : function (d) { // grab key
-      var keyspace = d.key.split(':')
-    },
-    _ : { brico : interface }
-  }
-
-  // branch for keyspace and type
+  cvs = new Canvas(interface)
 
   multiLevel.liveStream()
     .pipe(interface)
 
-  interface.canvas = canvas
-
   return interface
+}
+
+
+var filter = {
+  'library' : function (d) {
+    console.log(d)
+  },
+  'config' : function (d) {
+    console.log(d)
+  }
+}
+
+
+var Canvas = function (interface) {
+  var self = this
+
+  this._ = { brico : interface }
+
+  this.put = function (d) { 
+    var keyspace = d.key
+    Canvas._[keyspace] = Canvas._['render'](moduleName)
+    var connection = d.value.split('>')
+    var a = findModule(connection[0])
+    var b = findModule(connection[1])
+    a.s.pipe(b.s)
+  } 
+
+  this.del = function (d) {
+    var keyspace = d.key
+    var connection = d.value.split('>')
+    var a = findModule(connection[0])
+    var b = findModule(connection[1])
+    a.s.unpipe(b.s)
+    Canvas._[keyspace].erase()
+    delete Canvas._[keyspace]
+  }
+
+  this.get = function (d) { // grab key
+    var keyspace = d.key.split(':')
+  }
+  
+  this.erase = function (d) {
+
+  }
 }
 
 function genUID () {// utility functions
   return new Date().getTime()
 }
-
- 
