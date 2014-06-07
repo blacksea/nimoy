@@ -85,8 +85,12 @@ function boot (conf) {
 
   compileModules(conf.bundle, function (library) {
     db.put('library', JSON.stringify(library))
-    startServer(conf.server)
+    startServer(conf.server, function () {
+      console.log('server running')
+    })
   })
+
+  // setup bricoleur
 
   if (conf.brico) {
     var conf = conf.brico
@@ -102,6 +106,7 @@ function boot (conf) {
 }
 
 function getHmac (algo, key, d, next) { 
+  var algo = 'sha256'
   var hmac = newHmac(algo, key)
   hmac.setEncoding('hex')
   hmac.write(d.token)
@@ -131,9 +136,11 @@ function compileModules (config, cb) {
 
   }, function end () {
     var bun = fs.createWriteStream(outBun)
-    bun.on('finish',function () {console.log('compiled '+inBun+' to '+outBun)})
     b.bundle().pipe(bun)
-    cb(library)
+    bun.on('finish',function () {
+      console.log('compiled '+inBun+' to '+outBun)
+      cb(library)
+    })
   })
 }
 
