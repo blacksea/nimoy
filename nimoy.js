@@ -12,11 +12,17 @@ var fileserver = require('node-static').Server
 var newhmac = require('crypto').createhmac
 var formidable = require('formidable')
 
-!(process.argv[2]) 
+var users
+var configFlag = process.argv[2] // specify a config file when booting
+
+!(configFlag) 
   ? boot(require('./config.json'))
   : boot(process.argv[2])
 
-function startServer (conf, cb) { // WRITE INDEX!
+function startServer (conf, db, cb) { 
+
+  // just write the index... yeah...
+  
   fs.writeFileSync('./static/index.html', '<!doctype html>'+
   '<html lang="en">'+
   '<meta charset="utf-8">'+
@@ -60,10 +66,14 @@ function startServer (conf, cb) { // WRITE INDEX!
   var engine = engineServer(function (wss) {
     wss.pipe(multiLevel.server(db, {
       auth: function (user, cb) {
-        getHmac({token:user.pass,user:user.user}, function handleHmac (d) {
-          if (modes[user.user] === pass) cb(null, { name: user.user, token: d.val })
-          if (modes[user.user] !== pass) cb(new Error('wrong pass!'), null)
-          if (e) cb(e, null)
+        getHmac({
+          token:user.pass,
+          user:user.user, 
+          secret:conf.secretKey}
+          , function handleHmac (d) {
+            if (users[user.user] === pass) cb(null, { name: user.user, token: d.val })
+            if (users[user.user] !== pass) cb(new Error('wrong pass!'), null)
+            if (e) cb(e, null)
         })
       }, 
       access: function (user, db, method, args) {}
@@ -76,42 +86,46 @@ function startServer (conf, cb) { // WRITE INDEX!
 }
 
 function boot (conf) {
-  if (!conf) throw new Error('Nimoy needs a config to run!')
+  if (!conf || !conf.server || !conf.bricoleur || !conf.bundle) {
+    throw new Error('nimoy: invalid or missing config.json')
+  }
+
   if (!fs.existsSync('./static')) fs.mkdir('./static')
 
   var db = level('./' + conf.host)
   livestream.install(db)
   multiLevel.writeManifest(db, './static/manifest.json')
 
+  conf.server.secretKey = conf.bricoleur.secretKey
+
   compileModules(conf.bundle, function (library) {
     db.put('library', JSON.stringify(library))
-    startServer(conf.server, function () {
+    startServer(conf.server, db, function () {
       console.log('server running')
     })
   })
 
-  // setup bricoleur
-
-  if (conf.brico) {
-    var conf = conf.brico
-    for (m in conf.modes) {
-      if (conf.modes[m].pass) {
-        var token = conf.modes[m].pass
-        delete conf.modes[m].pass
-        gethmac({token:token,user:m}, function (d) { modes[d.key] = d.val })
-      }
+  var bricoConf = conf.bricoleur
+  for (user in bricoConf.users) {
+    var u = bricoConf.users[user]
+    if (u.pass) {
+      delete u.pass
+      gethmac({token:token,user:user,secret:conf.bricoleur.secretKey}, function (d) { 
+        users[d.key] = d.val 
+      })
     }
-    db.put('config', JSON.stringify(conf))
   }
+
+  delete bricoConf.secretKey
+  db.put('config', JSON.stringify(bricoConf))
 }
 
-function getHmac (algo, key, d, next) { 
-  var algo = 'sha256'
-  var hmac = newHmac(algo, key)
+function getHmac (d, cb) { 
+  var hmac = newHmac('sha256', d.secret)
   hmac.setEncoding('hex')
   hmac.write(d.token)
   hmac.end()
-  next({key:'users:'+d.user, val:hmac.read().toString()})
+  cb({key:'users:'+d.user, val:hmac.read().toString()})
 }
 
 function compileModules (config, cb) {
@@ -133,7 +147,6 @@ function compileModules (config, cb) {
     b.require(config.pathModules+moduleFolder+'/'+pkg.main, {expose: moduleFolder})
 
     next()
-
   }, function end () {
     var bun = fs.createWriteStream(outBun)
     b.bundle().pipe(bun)
@@ -147,7 +160,6 @@ function compileModules (config, cb) {
 function fileUpload (req, res) {
   var form = new formidable.IncomingForm()
   form.parse(req, function(err, fields, files) {
-    // this may need changing!
     res.writeHead(200, {'content-type': 'text/plain'})
     res.write('received upload:\n\n')
     res.end()
