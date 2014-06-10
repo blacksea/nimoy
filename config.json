@@ -5,10 +5,7 @@
     "ssl" : false
   },
   "bricoleur" : {
-    "hmac" : {
-      "key" : "PleaseEditThisValue!",
-      "algo" : "sha256"
-    },
+    "secretKey" : "PleaseReplaceThisTextWithYourOwn!", 
     "rendering" : "browser",
     "auth" : "login",
     "users" : {
@@ -18,9 +15,13 @@
       "edit" : {
         "pass" : "nimoy",
         "modules" : ["actions", "ctx"], 
-        "connections" : ["actions>brico","ctx>brico","brico>actions","brico>ctx"]
+        "pipes" : ["actions>brico","ctx>brico","brico>actions","brico>ctx"]
       }
     }
   },
-  "modulesDirectory" : "./node_modules/"
+  "bundle" : {
+    "pathModules" : "./node_modules/",
+    "pathBundleEntry" : "./_client.js",
+    "pathBundleOut" : "./static/bundle.js"
+  }
 }
