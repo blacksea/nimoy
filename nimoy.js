@@ -69,12 +69,16 @@ function startServer (conf, db, cb) { // just write the index... yeah...
           user:user.user, 
           secret:conf.secretKey}
           , function handleHmac (d) {
-            if (users[user.user] === pass) cb(null, { name: user.user, token: d.val })
-            if (users[user.user] !== pass) cb(new Error('wrong pass!'), null)
-            if (e) cb(e, null)
+            if (users[user.user] === d.val) cb(null, { name: user.user, token: d.val })
+            if (users[user.user] !== d.val) cb(new Error('wrong pass!'), null)
         })
       }, 
-      access: function (user, db, method, args) {} //split out
+      access: function (user, db, method, args) {
+        console.log(user)
+        console.log(db)
+        console.log(args)
+        console.log(method)
+      } //split out
     })).pipe(wss)
     wss.on('error', console.error)
   }, {cookie:false})
@@ -112,10 +116,9 @@ function boot (conf) {
   var bricoConf = conf.bricoleur
   for (user in bricoConf.users) {
     var u = bricoConf.users[user]
-    if (!u.pass) return false
-    getHmac({token:u.pass,user:user,secret:bricoConf.secretKey}, function (d) {
-      users[d.key] = d.val 
-      delete u.pass
+    if (u.pass) getHmac({token:u.pass,user:user,secret:bricoConf.secretKey}, function (d) {
+      users[user] = d.val 
+    //   delete u.pass
     })
   }
 
@@ -129,7 +132,7 @@ function getHmac (d, cb) {
   hmac.setEncoding('hex')
   hmac.write(d.token)
   hmac.end()
-  cb({key:'users:'+d.user, val:hmac.read().toString()})
+  cb({key:d.user, val:hmac.read().toString()})
 }
 
 function compileModules (config, cb) {
