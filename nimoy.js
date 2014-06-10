@@ -15,6 +15,7 @@ var formidable = require('formidable')
 var users = {}
 var configFlag = process.argv[2] // specify a config file when booting
 
+
 !(configFlag) 
   ? boot(require('./config.json'))
   : boot(process.argv[2])
@@ -84,6 +85,11 @@ function startServer (conf, db, cb) { // just write the index... yeah...
 }
 
 function boot (conf) {
+  process.stdin.on('data', function (buf) {
+    var str = buf.toString()
+    if (str === 'c\n') compileModules(conf.bundle, console.log)
+  })
+
   if (!conf || !conf.server || !conf.bricoleur || !conf.bundle) {
     throw new Error('nimoy: invalid or missing config.json')
   }
@@ -142,7 +148,7 @@ function compileModules (config, cb) {
     if (!pkg.nimoy) { next(); return null }
 
     if (fs.existsSync(templatePath)) 
-      pkg.html = fs.readFileSync(templatePath, {encoding: 'utf8'})
+      pkg.html = fs.readFileSync(templatePath, {encoding:'utf8'})
 
     var key = 'modules:'+pkg.name
     library[key] = pkg
