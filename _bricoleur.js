@@ -2,13 +2,7 @@ var through = require('through')
 var cvs
 
 module.exports = function Bricoleur (multiLevel) {
-  // check localStorage for config data > boot!
-  // figure out a boot step!
   
-  // !(localStorage.config) 
-  //   ? // wait then boot!
-  //   : boot()
-
   var interface = through(function Write (d) {
     if (!d.key) { 
       console.error('bricoleur: unknown input: '+JSON.stringify(d));
@@ -21,11 +15,7 @@ module.exports = function Bricoleur (multiLevel) {
       filter[path[0]](d)
       return null
     }
-
-    console.log(d)
-
   })
-
   cvs = new Canvas(interface)
 
   multiLevel.liveStream({reverse:true})
@@ -43,7 +33,6 @@ var filter = {
     var authPkg = findPkg(conf.auth)
 
     cvs._.render = require(conf.rendering)
-
     cvs.put(authPkg)
     cvs.put({type:'pipe', key:'pipe:000', value:'login>brico'})
   }
@@ -93,16 +82,16 @@ function genUID () {// utility functions
   return new Date().getTime()
 }
 
-function findModule (cvs, name) {
-  for (m in cvs) {
+function findModule (modules, name) {
+  for (m in modules) {
     if (name.match(m)) {
-      return cvs[m]
+      return modules[m]
       break
     }
   }
 }
 
-function findPkg (name) {
+function findPkg (name) { // should be more robust!
   var modules = JSON.parse(localStorage.library)
   for (m in modules) {
     if (name.match(modules[m].name)) {
