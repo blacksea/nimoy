@@ -15,7 +15,6 @@ var formidable = require('formidable')
 var users = {}
 var configFlag = process.argv[2] // specify a config file when booting
 
-
 !(configFlag) 
   ? boot(require('./config.json'))
   : boot(process.argv[2])
@@ -85,6 +84,7 @@ function startServer (conf, db, cb) { // just write the index... yeah...
 }
 
 function boot (conf) {
+
   process.stdin.on('data', function (buf) {
     var str = buf.toString()
     if (str === 'c\n') compileModules(conf.bundle, console.log)
@@ -120,6 +120,7 @@ function boot (conf) {
   }
 
   delete bricoConf.secretKey
+
   db.put('config', JSON.stringify(bricoConf))
 }
 
@@ -151,7 +152,9 @@ function compileModules (config, cb) {
       pkg.html = fs.readFileSync(templatePath, {encoding:'utf8'})
 
     var key = 'modules:'+pkg.name
+
     library[key] = pkg
+
     b.require(config.pathModules+moduleFolder+'/'+pkg.main, {
       expose: moduleFolder
     })
@@ -169,6 +172,7 @@ function compileModules (config, cb) {
 
 function fileUpload (req, res) {
   var form = new formidable.IncomingForm()
+
   form.parse(req, function(err, fields, files) {
     var filePath = './static/uploads/'+fields.file
     res.writeHead(200, {'content-type': 'text/plain'})
