@@ -19,10 +19,8 @@ var configFlag = process.argv[2] // specify a config file when booting
   ? boot(require('./config.json'))
   : boot(process.argv[2])
 
-function startServer (conf, db, cb) { 
+function startServer (conf, db, cb) { // just write the index... yeah...
 
-  // just write the index... yeah...
-  
   fs.writeFileSync('./static/index.html', '<!doctype html>'+
   '<html lang="en">'+
   '<meta charset="utf-8">'+
@@ -65,7 +63,7 @@ function startServer (conf, db, cb) {
 
   var engine = engineServer(function (wss) {
     wss.pipe(multiLevel.server(db, {
-      auth: function (user, cb) {
+      auth: function (user, cb) { // split to external fn
         getHmac({
           token:user.pass,
           user:user.user, 
@@ -76,7 +74,7 @@ function startServer (conf, db, cb) {
             if (e) cb(e, null)
         })
       }, 
-      access: function (user, db, method, args) {}
+      access: function (user, db, method, args) {} //split out
     })).pipe(wss)
     wss.on('error', console.error)
   }, {cookie:false})
@@ -108,12 +106,11 @@ function boot (conf) {
   var bricoConf = conf.bricoleur
   for (user in bricoConf.users) {
     var u = bricoConf.users[user]
-    if (u.pass) {
-      getHmac({token:u.pass,user:user,secret:bricoConf.secretKey}, function (d) { 
-        users[d.key] = d.val 
-        delete u.pass
-      })
-    }
+    if (!u.pass) return false
+    getHmac({token:u.pass,user:user,secret:bricoConf.secretKey}, function (d) {
+      users[d.key] = d.val 
+      delete u.pass
+    })
   }
 
   delete bricoConf.secretKey
@@ -137,14 +134,21 @@ function compileModules (config, cb) {
 
   asyncMap(modulesFolder, function (moduleFolder, next) {
     var pkgPath = config.pathModules + moduleFolder + '/package.json'
+    var templatePath = config.pathModules + moduleFolder+'/'+moduleFolder+'.hogan'
+
     if (!fs.existsSync(pkgPath)) { next(); return null }
 
     var pkg = JSON.parse(fs.readFileSync(pkgPath, {encoding:'utf8'}))
     if (!pkg.nimoy) { next(); return null }
 
+    if (fs.existsSync(templatePath)) 
+      pkg.html = fs.readFileSync(templatePath, {encoding: 'utf8'})
+
     var key = 'modules:'+pkg.name
-    library[key] = pkg.nimoy
-    b.require(config.pathModules+moduleFolder+'/'+pkg.main, {expose: moduleFolder})
+    library[key] = pkg
+    b.require(config.pathModules+moduleFolder+'/'+pkg.main, {
+      expose: moduleFolder
+    })
 
     next()
   }, function end () {
@@ -160,10 +164,11 @@ function compileModules (config, cb) {
 function fileUpload (req, res) {
   var form = new formidable.IncomingForm()
   form.parse(req, function(err, fields, files) {
+    var filePath = './static/uploads/'+fields.file
     res.writeHead(200, {'content-type': 'text/plain'})
     res.write('received upload:\n\n')
     res.end()
     var blob = fields.blob.split(',')[1]
-    fs.writeFileSync(config.files.uploads+fields.file, blob, {encoding:'base64'})
+    fs.writeFileSync(filePath, blob, {encoding:'base64'}) // encoding !?
   })
 }
