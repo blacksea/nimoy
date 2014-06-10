@@ -2,7 +2,6 @@ var through = require('through')
 var cvs
 
 module.exports = function Bricoleur (multiLevel) {
-
   // check localStorage for config data > boot!
   // figure out a boot step!
   
@@ -15,8 +14,16 @@ module.exports = function Bricoleur (multiLevel) {
       console.error('bricoleur: unknown input: '+JSON.stringify(d));
       return null 
     }
+
     var path = d.key.split(':')
-    if (filter[path[0]]) filter[path[0]](d)
+    
+    if (filter[path[0]]) {
+      filter[path[0]](d)
+      return null
+    }
+
+    console.log(d)
+
   })
 
   cvs = new Canvas(interface)
@@ -38,44 +45,61 @@ var filter = {
     cvs._.render = require(conf.rendering)
 
     cvs.put(authPkg)
-
+    cvs.put({type:'pipe', key:'pipe:000', value:'login>brico'})
   }
 }
 
 var Canvas = function (interface) {
   var self = this
 
-  this._ = { brico : interface }
+  this._ = { brico : {s: interface} }
 
   this.put = function (d) { 
-    if (d.nimoy.module) self._.render(d)
-
-    // var keyspace = d.key
-    // self._[keyspace] = self._['render'](moduleName)
-    // var connection = d.value.split('>')
-    // var a = findModule(connection[0])
-    // var b = findModule(connection[1])
-    // a.s.pipe(b.s)
-
+    if (d.nimoy && d.nimoy.module) {
+      self._[d.name] = self._.render(d)
+      return null
+    } 
+    if (d.type === 'pipe') {
+      var conn = d.value.split('>')
+      var a = findModule(self._, conn[0])
+      var b = findModule(self._, conn[1])
+      a.s.pipe(b.s)
+    }
   } 
+
   this.del = function (d) {
     var keyspace = d.key
     var connection = d.value.split('>')
-    var a = findModule(connection[0])
-    var b = findModule(connection[1])
+
+    var a = findModule(self, connection[0])
+    var b = findModule(self, connection[1])
+
     a.s.unpipe(b.s)
+
     self._[keyspace].erase()
+
     delete self._[keyspace]
   }
+
   this.get = function (d) { // grab key
     var keyspace = d.key.split(':')
   }
+
   this.erase = function (d) {
   }
 }
 
 function genUID () {// utility functions
   return new Date().getTime()
+}
+
+function findModule (cvs, name) {
+  for (m in cvs) {
+    if (name.match(m)) {
+      return cvs[m]
+      break
+    }
+  }
 }
 
 function findPkg (name) {
