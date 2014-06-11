@@ -11,11 +11,8 @@ module.exports = function Bricoleur (multiLevel) {
     if (filter[path[0]]) { filter[path[0]](d); return null }
 
     if (d.type === 'auth') multiLevel.auth({user:d.user, pass:d.pass}, function (e,result) {
-      console.log(d.origin)
       if (e) console.error(e)
-      if (!e && d.origin) {
-        console.log(cvs._)
-      }
+      if (!e && d.origin)  cvs._[d.origin].s.write(result)
     })
 
   })
@@ -42,8 +39,6 @@ var filter = {
     cvs.put({type:'pipe', key:'pipe:000', value:'login>brico'})
 
     // write to leveldb / canvas keyspace
-
-    console.log(cvs._)
   }
 }
 
