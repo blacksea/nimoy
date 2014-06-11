@@ -2,6 +2,26 @@ var through = require('through')
 var cvs
 
 module.exports = function Bricoleur (multiLevel) {
+
+  function boot () {
+
+  }
+
+  var filter = {}
+
+  filter.library = function (d) {
+    if (!localStorage.library)
+      localStorage.library = d.value
+  }
+
+  filter.config = function (d) {
+    var lib = JSON.parse(localStorage.library)
+    var conf = JSON.parse(d.value)
+
+    cvs._.render = require(conf.rendering)
+    cvs.put(search(lib, conf.auth))
+    cvs.put({key:'pipe:', value:'login>brico'}) // pipes need to use absolute ids
+  }
   
   var interface = through(function Write (d) {
     if (!d.key) return null
@@ -16,35 +36,16 @@ module.exports = function Bricoleur (multiLevel) {
         if (d.origin) { cvs._[d.origin].s.write(res); boot() }
       })
     }
+
   })
 
   cvs = new Canvas(interface)
 
-  multiLevel.liveStream({reverse:true})
+  multiLevel.liveStream({reverse : true})
     .pipe(interface)
 
   return interface
-}
 
-function boot () {
-
-}
-
-var filter = {
-  'library' : function (d) {
-    if (!localStorage.library) localStorage.library = d.value
-  },
-  'config' : function (d) {
-    var lib = JSON.parse(localStorage.library)
-
-    var conf = JSON.parse(d.value)
-
-    cvs._.render = require(conf.rendering)
-
-    cvs.put(search(lib, conf.auth))
-
-    cvs.put({key:'pipe:', value:'login>brico'}) // pipes need to use absolute ids
-  }
 }
 
 var Canvas = function (interface) {
@@ -53,7 +54,6 @@ var Canvas = function (interface) {
   this._ = {brico : {s: interface}}
 
   this.put = function (d) { 
-
     if (d.nimoy && d.nimoy.module) { // add module to db?
       d.uid = d.name + '_' + genUID()
       self._[d.uid] = self._.render(d)
@@ -83,6 +83,7 @@ var Canvas = function (interface) {
   this.erase = function (d) {  }
 }
 
+// UTILS
 function genUID () { return new Date().getTime() }
 
 function search (haystack, needle) {
