@@ -10,13 +10,12 @@ module.exports = function Bricoleur (multiLevel) {
 
     if (filter[path[0]]) filter[path[0]](d)
 
-    if (d.type === 'auth')
+    if (d.type === 'auth') {
       multiLevel.auth({user:d.user, pass:d.pass}, function handleAuth (e, res) {
-        if (!e) {
-          if (d.origin) cvs._[d.origin].s.write(result)
-          boot()
-        }
+        if (e) { console.error(e); return null }
+        if (d.origin) { cvs._[d.origin].s.write(res); boot() }
       })
+    }
   })
 
   cvs = new Canvas(interface)
@@ -56,7 +55,7 @@ var Canvas = function (interface) {
   this.put = function (d) { 
 
     if (d.nimoy && d.nimoy.module) { // add module to db?
-      d.uid = d.name + '_' + new Date().getTime()
+      d.uid = d.name + '_' + genUID()
       self._[d.uid] = self._.render(d)
       return null
     } 
@@ -67,8 +66,6 @@ var Canvas = function (interface) {
       var conn = d.value.split('>')
       var a = search(self._, conn[0])
       var b = search(self._, conn[1])
-      console.log(a)
-      console.log(b)
       a.s.pipe(b.s)
     }
   } 
@@ -86,9 +83,7 @@ var Canvas = function (interface) {
   this.erase = function (d) {  }
 }
 
-function genUID () {
-  return new Date().getTime()
-}
+function genUID () { return new Date().getTime() }
 
 function search (haystack, needle) {
   for (hay in haystack) {
