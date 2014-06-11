@@ -10,11 +10,7 @@ module.exports = function Bricoleur (multiLevel) {
     
     if (filter[path[0]]) { filter[path[0]](d); return null }
 
-    if (d.type === 'auth') multiLevel.auth({user:d.user, pass:d.pass}, function (e,result) {
-      if (e) console.error(e)
-      if (!e && d.origin)  cvs._[d.origin].s.write(result)
-    })
-
+    if (d.type === 'auth') multiLevel.auth({user:d.user, pass:d.pass}, boot)
   })
 
   cvs = new Canvas(interface)
@@ -23,6 +19,11 @@ module.exports = function Bricoleur (multiLevel) {
     .pipe(interface)
 
   return interface
+}
+
+function boot (e, res) {
+  if (e) console.error(e)
+  if (!e && d.origin) cvs._[d.origin].s.write(result)
 }
 
 var filter = {
@@ -37,15 +38,13 @@ var filter = {
 
     cvs.put(authPkg)
     cvs.put({type:'pipe', key:'pipe:000', value:'login>brico'})
-
-    // write to leveldb / canvas keyspace
   }
 }
 
 var Canvas = function (interface) {
   var self = this
 
-  this._ = { brico : {s: interface} }
+  this._ = {brico : {s: interface}}
 
   this.put = function (d) { 
     if (d.nimoy && d.nimoy.module) { // add module to db?
@@ -64,22 +63,19 @@ var Canvas = function (interface) {
   this.del = function (d) {
     var keyspace = d.key
     var connection = d.value.split('>')
-
     var a = findModule(self, connection[0])
     var b = findModule(self, connection[1])
-
     a.s.unpipe(b.s)
-
     self._[keyspace].erase()
-
     delete self._[keyspace]
   }
 
   this.erase = function (d) {
+
   }
 }
 
-function genUID () {// utility functions
+function genUID () {
   return new Date().getTime()
 }
 
@@ -93,7 +89,7 @@ function findModule (modules, name) {
   }
 }
 
-function findPkg (name) { // should be more robust!
+function findPkg (name) { 
   var modules = JSON.parse(localStorage.library)
   for (m in modules) {
     var id = m
