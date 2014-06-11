@@ -4,18 +4,19 @@ var cvs
 module.exports = function Bricoleur (multiLevel) {
   
   var interface = through(function Write (d) {
-    if (!d.key) { 
-      console.error('bricoleur: unknown input: '+JSON.stringify(d));
-      return null 
-    }
+    if (!d.key) return null
 
     var path = d.key.split(':')
     
-    if (filter[path[0]]) {
-      filter[path[0]](d)
-      return null
-    }
+    if (filter[path[0]]) { filter[path[0]](d); return null }
+
+    if (d.type === 'auth') multiLevel.auth({user:d.user, pass:d.pass}, function (e,res) {
+      if (e) console.error(e)
+      if (res) console.log(res)
+    })
+
   })
+
   cvs = new Canvas(interface)
 
   multiLevel.liveStream({reverse:true})
@@ -33,6 +34,7 @@ var filter = {
     var authPkg = findPkg(conf.auth)
 
     cvs._.render = require(conf.rendering)
+
     cvs.put(authPkg)
     cvs.put({type:'pipe', key:'pipe:000', value:'login>brico'})
   }
@@ -68,10 +70,6 @@ var Canvas = function (interface) {
     self._[keyspace].erase()
 
     delete self._[keyspace]
-  }
-
-  this.get = function (d) { // grab key
-    var keyspace = d.key.split(':')
   }
 
   this.erase = function (d) {
