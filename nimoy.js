@@ -61,21 +61,24 @@ function startServer (conf, db, cb) { // just write the index... yeah...
     })
   }
 
+  function auth (user, cb) {
+    getHmac({token:user.pass, user:user.user, secret:conf.secretKey}
+      , function handleHmac (d) {
+        if (users[user.user] === d.val) {
+          cb(null, {name: user.user, token: d.val })
+        }
+        if (users[user.user] !== d.val) {
+          cb(new Error('wrong pass!'), null)
+        }
+    })
+  }
+
+  function access (user, db, method, args) {
+
+  }
+
   var engine = engineServer(function (wss) {
-    wss.pipe(multiLevel.server(db, {
-      auth: function (user, cb) { // split to external fn
-        getHmac({
-          token:user.pass,
-          user:user.user, 
-          secret:conf.secretKey}
-          , function handleHmac (d) {
-            if (users[user.user] === d.val) cb(null, { name: user.user, token: d.val })
-            if (users[user.user] !== d.val) cb(new Error('wrong pass!'), null)
-        })
-      }, 
-      access: function (user, db, method, args) {
-      } //split out
-    })).pipe(wss)
+    wss.pipe(multiLevel.server(db, {auth:auth, access:access})).pipe(wss)
     wss.on('error', console.error)
   }, {cookie:false})
     .attach(server, '/ws')
@@ -110,11 +113,15 @@ function boot (conf) {
   })
 
   var bricoConf = conf.bricoleur
+
   for (user in bricoConf.users) {
     var u = bricoConf.users[user]
-    if (u.pass) getHmac({token:u.pass,user:user,secret:bricoConf.secretKey}, function (d) {
-      users[user] = d.val 
-    //   delete u.pass
+    if (u.pass) getHmac({
+      token:u.pass,
+      user:user,
+      secret:bricoConf.secretKey
+    }, function (d) {
+      users[user] = d.val // delete u.pass
     })
   }
 
