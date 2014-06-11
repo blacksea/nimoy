@@ -10,7 +10,7 @@
     "auth" : "login",
     "users" : {
       "default" : {
-        "pass" : null
+        "pass" : "default"
       },
       "edit" : {
         "pass" : "nimoy",
