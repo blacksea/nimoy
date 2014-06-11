@@ -7,10 +7,6 @@ var engine = require('engine.io-stream')
 var ws = engine('/ws')
 ws.pipe(db.createRpcStream()).pipe(ws)
 
-var user = (window.location.host.split('.').length ===  3)
-  ? window.location.host.split('.')[0]
-  : 'view'
-
 var buf = (!window.location.hash) 
   ? '!'
   :  window.location.hash.slice(1)
