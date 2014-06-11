@@ -6,7 +6,7 @@
   },
   "bricoleur" : {
     "secretKey" : "PleaseReplaceThisTextWithYourOwn!", 
-    "rendering" : "browser",
+    "canvasRendeR" : "browser",
     "auth" : "login",
     "users" : {
       "default" : {
