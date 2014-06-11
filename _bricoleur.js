@@ -7,10 +7,16 @@ module.exports = function Bricoleur (multiLevel) {
     if (!d.key) return null
 
     var path = d.key.split(':')
-    
-    if (filter[path[0]]) { filter[path[0]](d); return null }
 
-    if (d.type === 'auth') multiLevel.auth({user:d.user, pass:d.pass}, boot)
+    if (filter[path[0]]) filter[path[0]](d)
+
+    if (d.type === 'auth')
+      multiLevel.auth({user:d.user, pass:d.pass}, function handleAuth (e, res) {
+        if (!e) {
+          if (d.origin) cvs._[d.origin].s.write(result)
+          boot()
+        }
+      })
   })
 
   cvs = new Canvas(interface)
@@ -21,23 +27,24 @@ module.exports = function Bricoleur (multiLevel) {
   return interface
 }
 
-function boot (e, res) {
-  if (e) console.error(e)
-  if (!e && d.origin) cvs._[d.origin].s.write(result)
+function boot () {
+
 }
 
 var filter = {
   'library' : function (d) {
     if (!localStorage.library) localStorage.library = d.value
   },
-  'config' : function (d) { // boot!
+  'config' : function (d) {
+    var lib = JSON.parse(localStorage.library)
+
     var conf = JSON.parse(d.value)
-    var authPkg = findPkg(conf.auth)
 
     cvs._.render = require(conf.rendering)
 
-    cvs.put(authPkg)
-    cvs.put({type:'pipe', key:'pipe:000', value:'login>brico'})
+    cvs.put(search(lib, conf.auth))
+
+    cvs.put({key:'pipe:', value:'login>brico'}) // pipes need to use absolute ids
   }
 }
 
@@ -47,15 +54,21 @@ var Canvas = function (interface) {
   this._ = {brico : {s: interface}}
 
   this.put = function (d) { 
+
     if (d.nimoy && d.nimoy.module) { // add module to db?
-      d.uid = d.name+'_'+new Date().getTime()
+      d.uid = d.name + '_' + new Date().getTime()
       self._[d.uid] = self._.render(d)
       return null
     } 
-    if (d.type === 'pipe') { // add pipe to db?
+
+    var path = d.key.split(':')
+
+    if (path[0] === 'pipe') { // add pipe to db?
       var conn = d.value.split('>')
-      var a = findModule(self._, conn[0])
-      var b = findModule(self._, conn[1])
+      var a = search(self._, conn[0])
+      var b = search(self._, conn[1])
+      console.log(a)
+      console.log(b)
       a.s.pipe(b.s)
     }
   } 
@@ -63,39 +76,23 @@ var Canvas = function (interface) {
   this.del = function (d) {
     var keyspace = d.key
     var connection = d.value.split('>')
-    var a = findModule(self, connection[0])
-    var b = findModule(self, connection[1])
+    var a = search(self, connection[0])
+    var b = search(self, connection[1])
     a.s.unpipe(b.s)
     self._[keyspace].erase()
     delete self._[keyspace]
   }
 
-  this.erase = function (d) {
-
-  }
+  this.erase = function (d) {  }
 }
 
 function genUID () {
   return new Date().getTime()
 }
 
-function findModule (modules, name) {
-  for (m in modules) {
-    var id = m
-    if (m.match(name)) {
-      return modules[m]
-      break
-    }
-  }
-}
-
-function findPkg (name) { 
-  var modules = JSON.parse(localStorage.library)
-  for (m in modules) {
-    var id = m
-    if (id.match(name)) {
-      return modules[m]
-      break
-    }
+function search (haystack, needle) {
+  for (hay in haystack) {
+    if (hay.match(needle))
+      return haystack[hay]
   }
 }
