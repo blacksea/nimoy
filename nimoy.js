@@ -74,10 +74,6 @@ function startServer (conf, db, cb) { // just write the index... yeah...
         })
       }, 
       access: function (user, db, method, args) {
-        console.log(user)
-        console.log(db)
-        console.log(args)
-        console.log(method)
       } //split out
     })).pipe(wss)
     wss.on('error', console.error)
