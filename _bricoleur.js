@@ -2,8 +2,20 @@ var through = require('through')
 var cvs
 
 module.exports = function Bricoleur (multiLevel) {
+  var conf = null
 
-  function boot () { }
+  function boot (user) {
+    if (user.modules) {
+      user.modules.forEach(function (m) {
+        cvs.put(search(JSON.parse(localStorage.library),m)) 
+      })
+    }
+    if (user.pipes) {
+      user.pipes.forEach(function (p) {
+        cvs.put({key:'pipe:'+genUID, value:p})
+      })
+    }
+  }
 
   var filter = {}
 
@@ -13,10 +25,9 @@ module.exports = function Bricoleur (multiLevel) {
 
   filter.config = function (d) {
     var lib = JSON.parse(localStorage.library)
-    var conf = JSON.parse(d.value)
+    conf = JSON.parse(d.value)
 
     cvs._.render = require(conf.canvasRender)
-
     cvs.put(search(lib, conf.auth))
     cvs.put({key:'pipe:', value:'login>brico'}) // pipes need to use absolute ids
   }
@@ -24,7 +35,11 @@ module.exports = function Bricoleur (multiLevel) {
   filter.auth = function (d) {
     multiLevel.auth({user:d.user, pass:d.pass}, function handleAuth (e, res) {
       if (e) { console.error(e); return null }
-      if (d.origin) { cvs._[d.origin].s.write(res); boot() }
+
+      if (d.origin) { 
+        cvs._[d.origin].s.write(res); 
+        boot(conf.users[d.user])  // needs to be called with user config 
+      }
     })
   }
   
@@ -74,7 +89,6 @@ var Canvas = function (interface) {
   }
 
   this.erase = function (d) {  
-
   }
 }
 
@@ -85,4 +99,6 @@ function search (haystack, needle) { // loop through
   for (hay in haystack) {
     if (hay.match(needle)) return haystack[hay]
   }
+  console.error('not found!')
+  return null
 }

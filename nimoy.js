@@ -21,18 +21,18 @@ var configFlag = process.argv[2] // specify a config file when booting
 
 function startServer (conf, db, cb) { // just write the index... yeah...
 
-  fs.writeFileSync('./static/index.html', '<!doctype html>'+
-  '<html lang="en">'+
-  '<meta charset="utf-8">'+
-  '<head>'+
-  '<title>Untitiled</title>'+
-  '<link rel="stylesheet" href="/style.css">'+
-  '</head>'+
-  '<body id="canvas">'+
-  '<div class="container">'+
-  '</div>'+
-  '<script src="/bundle.js"></script>'+
-  '</body>'+
+  fs.writeFileSync('./static/index.html', '<!doctype html>' +
+  '<html lang="en">' +
+  '<meta charset="utf-8">' +
+  '<head>' +
+  '<title>Untitiled</title>' +
+  '<link rel="stylesheet" href="/style.css">' +
+  '</head>' +
+  '<body id="canvas">' +
+  '<div class="container">' +
+  '</div>' +
+  '<script src="/bundle.js"></script>' +
+  '</body>' +
   '</html>')
 
   if (!conf.ssl) {
@@ -45,8 +45,8 @@ function startServer (conf, db, cb) { // just write the index... yeah...
       honorCipherOrder : true,
       key : fs.readFileSync(conf.ssl.key),
       cert : fs.readFileSync(conf.ssl.cert),
-      cipher : 'ecdh+aesgcm:dh+aesgcm:ecdh+aes256:dh+aes256:'+
-               'ecdh+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:'+
+      cipher : 'ecdh+aesgcm:dh+aesgcm:ecdh+aes256:dh+aes256:' +
+               'ecdh+AES128:DH+AES:ECDH+3DES:DH+3DES:RSA+AESGCM:' +
                'RSA+AES:RSA+3DES:!aNULL:!MD5:!DSS'
     }, handleHttp)
   }
@@ -74,7 +74,6 @@ function startServer (conf, db, cb) { // just write the index... yeah...
   }
 
   function access (user, db, method, args) {
-
   }
 
   var engine = engineServer(function (wss) {
@@ -178,7 +177,6 @@ function compileModules (config, cb) {
 
 function fileUpload (req, res) {
   var form = new formidable.IncomingForm()
-
   form.parse(req, function(err, fields, files) {
     var filePath = './static/uploads/'+fields.file
     res.writeHead(200, {'content-type': 'text/plain'})
