@@ -12,7 +12,7 @@ module.exports = function Bricoleur (multiLevel) {
     }
     if (user.pipes) {
       user.pipes.forEach(function (p) {
-        cvs.draw({key:'pipe:'+genUID, value:p})
+        cvs.draw({key:'pipe:'+genUID(), value:p})
       })
     }
   }
@@ -29,7 +29,7 @@ module.exports = function Bricoleur (multiLevel) {
 
     cvs._.render = require(conf.canvasRender)
     cvs.draw(search(lib, conf.auth))
-    cvs.draw({key:'pipe:'+genUID, value:'login>brico'}) // pipes need to use ids
+    cvs.draw({key:'pipe:'+genUID(), value:'login>brico'}) // pipes need to use ids
   }
 
   filter.auth = function (d) {
@@ -74,18 +74,27 @@ var Canvas = function (interface) {
       var conn = d.value.split('>')
       var a = search(self._, conn[0])
       var b = search(self._, conn[1])
+      self._[d.key] = d.value
       a.s.pipe(b.s)
     }
   } 
 
   this.erase = function (d) {
-    var keyspace = d.key
-    var connection = d.value.split('>')
-    var a = search(self, connection[0])
-    var b = search(self, connection[1])
-    a.s.unpipe(b.s)
-    self._[keyspace].erase()
-    delete self._[keyspace]
+    var path = d.key.split(':')
+
+    if (path[0] === 'pipe') {
+      var conn = d.value.split('>')
+      var a = search(self._, conn[0])
+      var b = search(self._, conn[1])
+      a.unpipe(b)
+
+      delete self._[path]
+
+      return
+    }
+
+    self._[path].erase()
+    delete self._[path]
   }
 }
 
