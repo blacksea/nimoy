@@ -7,12 +7,12 @@ module.exports = function Bricoleur (multiLevel) {
   function boot (user) {
     if (user.modules) {
       user.modules.forEach(function (m) {
-        cvs.put(search(JSON.parse(localStorage.library),m)) 
+        cvs.draw(search(JSON.parse(localStorage.library), m)) 
       })
     }
     if (user.pipes) {
       user.pipes.forEach(function (p) {
-        cvs.put({key:'pipe:'+genUID, value:p})
+        cvs.draw({key:'pipe:'+genUID, value:p})
       })
     }
   }
@@ -28,8 +28,8 @@ module.exports = function Bricoleur (multiLevel) {
     conf = JSON.parse(d.value)
 
     cvs._.render = require(conf.canvasRender)
-    cvs.put(search(lib, conf.auth))
-    cvs.put({key:'pipe:', value:'login>brico'}) // pipes need to use ids
+    cvs.draw(search(lib, conf.auth))
+    cvs.draw({key:'pipe:'+genUID, value:'login>brico'}) // pipes need to use ids
   }
 
   filter.auth = function (d) {
@@ -50,6 +50,8 @@ module.exports = function Bricoleur (multiLevel) {
 
   cvs = new Canvas(interface)
 
+  window.cvs = cvs
+
   multiLevel.liveStream({reverse : true})
     .pipe(interface)
 
@@ -60,6 +62,7 @@ var Canvas = function (interface) {
   var self = this
 
   this._ = { brico : { s: interface } }
+
   this.draw = function (d) { 
     if (d.nimoy && d.nimoy.module) { // add module to db?
       d.uid = d.name + '_' + genUID()
@@ -74,6 +77,7 @@ var Canvas = function (interface) {
       a.s.pipe(b.s)
     }
   } 
+
   this.erase = function (d) {
     var keyspace = d.key
     var connection = d.value.split('>')
@@ -91,5 +95,4 @@ function search (haystack, needle) { // loop through
   for (hay in haystack) {
     if (hay.match(needle)) return haystack[hay]
   }
-  return false
 }
