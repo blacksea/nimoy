@@ -35,7 +35,6 @@ module.exports = function Bricoleur (multiLevel) {
   filter.auth = function (d) {
     multiLevel.auth({user:d.user, pass:d.pass}, function handleAuth (e, res) {
       if (e) { console.error(e); return false }
-
       if (d.origin) { 
         cvs._[d.origin].s.write(res); 
         boot(conf.users[d.user])  // needs to be called with user config 
@@ -61,7 +60,7 @@ var Canvas = function (interface) {
   var self = this
 
   this._ = { brico : { s: interface } }
-  this.put = function (d) { 
+  this.draw = function (d) { 
     if (d.nimoy && d.nimoy.module) { // add module to db?
       d.uid = d.name + '_' + genUID()
       self._[d.uid] = self._.render(d)
@@ -75,7 +74,7 @@ var Canvas = function (interface) {
       a.s.pipe(b.s)
     }
   } 
-  this.del = function (d) {
+  this.erase = function (d) {
     var keyspace = d.key
     var connection = d.value.split('>')
     var a = search(self, connection[0])
@@ -83,8 +82,6 @@ var Canvas = function (interface) {
     a.s.unpipe(b.s)
     self._[keyspace].erase()
     delete self._[keyspace]
-  }
-  this.erase = function (d) {  
   }
 }
 
