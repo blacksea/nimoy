@@ -14,7 +14,7 @@ var buf = (!window.location.hash)
 var bricoleur = require('./_bricoleur')(db)
                   .on('error', Errs)
         
-bricoleur.write({type:'load', key:'#:'+buf})
+bricoleur.write({type:'get', key:'canvas:'+buf})
 
 window.addEventListener('hashchange', function (e) {
   bricoleur.write({type:'load', key:'#:'+e.newURL.slice(1)})
