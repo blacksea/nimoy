@@ -39,7 +39,7 @@ function startServer (conf, db, cb) { // just write the index... yeah...
     var file = new fileserver('./static')
     var server = http.createServer(handleHttp)
   } else {
-    var hsts = {'Strict-Transport-Security':'max-age=31536000'}
+    var hsts = { 'Strict-Transport-Security' : 'max-age=31536000' }
     var file = new fileServer('./static', hsts)
     var server = https.createServer({
       honorCipherOrder : true,
@@ -62,10 +62,10 @@ function startServer (conf, db, cb) { // just write the index... yeah...
   }
 
   function auth (user, cb) {
-    getHmac({token:user.pass, user:user.user, secret:conf.secretKey}
-      , function handleHmac (d) {
+    var secret = conf.secretKey
+    getHmac({token:user.pass, user:user.user, secret:secret}, function (d) {
         if (users[user.user] === d.val) {
-          cb(null, {name: user.user, token: d.val })
+          cb(null, { name: user.user, token: d.val })
         }
         if (users[user.user] !== d.val) {
           cb(new Error('wrong pass!'), null)
@@ -73,7 +73,8 @@ function startServer (conf, db, cb) { // just write the index... yeah...
     })
   }
 
-  function access (user, db, method, args) {
+  function access (user, db, method, args) { // block writing if user !edit
+
   }
 
   var engine = engineServer(function (wss) {
@@ -89,22 +90,23 @@ function boot (conf) {
 
   process.stdin.on('data', function (buf) {
     var str = buf.toString()
-    if (str === 'c\n') compileModules(conf.bundle, console.log)
+    if (str === 'c\n') compileModules(conf.server.bundle, console.log)
   })
 
-  if (!conf || !conf.server || !conf.bricoleur || !conf.bundle) {
+  if (!conf || !conf.server || !conf.bricoleur)
     throw new Error('nimoy: invalid or missing config.json')
-  }
 
+  // provide option to generate default config
+  
   if (!fs.existsSync('./static')) fs.mkdir('./static')
 
-  var db = level('./' + conf.host)
+  var db = level('./' + conf.server.host)
   livestream.install(db)
   multiLevel.writeManifest(db, './static/manifest.json')
 
   conf.server.secretKey = conf.bricoleur.secretKey
 
-  compileModules(conf.bundle, function (library) {
+  compileModules(conf.server.bundle, function (library) {
     db.put('library', JSON.stringify(library))
     startServer(conf.server, db, function () {
       console.log('server running')
@@ -146,12 +148,12 @@ function compileModules (config, cb) {
 
   asyncMap(modulesFolder, function (moduleFolder, next) {
     var pkgPath = config.pathModules + moduleFolder + '/package.json'
-    var templatePath = config.pathModules + moduleFolder+'/'+moduleFolder+'.hogan'
+    var templatePath = config.pathModules + moduleFolder + '/' + moduleFolder +'.hogan'
 
-    if (!fs.existsSync(pkgPath)) { next(); return null }
+    if (!fs.existsSync(pkgPath)) { next(); return false }
 
     var pkg = JSON.parse(fs.readFileSync(pkgPath, {encoding:'utf8'}))
-    if (!pkg.nimoy) { next(); return null }
+    if (!pkg.nimoy) { next(); return false }
 
     if (fs.existsSync(templatePath)) 
       pkg.html = fs.readFileSync(templatePath, {encoding:'utf8'})
@@ -176,13 +178,16 @@ function compileModules (config, cb) {
 }
 
 function fileUpload (req, res) {
-  var form = new formidable.IncomingForm()
+  var form = new formidable.IncomingForm();
   form.parse(req, function(err, fields, files) {
     var filePath = './static/uploads/'+fields.file
+
     res.writeHead(200, {'content-type': 'text/plain'})
     res.write('received upload:\n\n')
     res.end()
+
     var blob = fields.blob.split(',')[1]
-    fs.writeFileSync(filePath, blob, {encoding:'base64'}) // encoding !?
+
+    fs.writeFileSync(filePath, blob, {encoding:'base64'}) 
   })
 }
