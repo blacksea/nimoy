@@ -1,21 +1,17 @@
 var through = require('through')
-var conf // arrg globals :(  !!!
+var user
+var conf 
 var cvs
 var db
 
-// on load parse / url and build with user session
-
-// define session / user abilities 
-  
 var api = {
-  auth : function (d) { // create a new session
+  auth : function (d) {
     db.auth({ user:d.user, pass:d.pass }, function (e, res) {
       if (e) { console.error(e); return false }
       if (d.origin) cvs._[d.origin].s.write(res); 
     })
   }, 
   session : function (d) {
-    // session pre-loads modules
     cvs.draw(search(lib, conf.auth))
     cvs.draw({key:'pipe:'+genUID(), value:conf.auth+'>brico'})
 
@@ -39,28 +35,24 @@ var api = {
     }
   },
   config : function (d) {
-    var lib = JSON.parse(localStorage.library)
+    // on load parse / url and build with user session
+    // define session / user abilities 
+    // config triggers the boot sequence !
+    // var lib = JSON.parse(localStorage.library)
+    // install library!
+    // start a new session! 
+    
+    // check d.type & if newer use the fresh copy!
+
     conf = JSON.parse(d.value)
 
+    localStorage.library = conf.library
+
     cvs._.render = require(conf.canvasRender) // set render!
-
-    // install library!
-    
-    // start a new session! 
-
-    
-  },
-  library : function (d) { // load library with config!
-    if (!d.type) d.type = 'put'
-    if (d.type === 'put') {
-      localStorage.library = d.value
-    } else if (d.type === 'get' && d.origin) {
-      cvs._[d.origin].s.write(JSON.parse(localStorage.library))
-    }
   }
 }
 
-module.exports = function Bricoleur (multiLevel) {
+module.exports = function Bricoleur (multiLevel, usr) {
 
   var interface = through(function Write (d) {
     if (!d.key) return // ignore if !key property
@@ -70,6 +62,7 @@ module.exports = function Bricoleur (multiLevel) {
 
   db = multiLevel
 
+  user = usr
   cvs = new Canvas(interface)
 
   window.cvs = cvs
@@ -85,9 +78,9 @@ var Canvas = function (interface) { // to save stringify cvs._ to db
 
   this._ = { brico : { s : interface } }
 
-  this.draw = function (d) { // standard object interface!!!
-    if (d.nimoy && d.nimoy.module) { // add module to db?
-      d.uid = 'module:'+d.name + ':' + genUID()
+  this.draw = function (d) { 
+    if (d.nimoy && d.nimoy.module) { // standard object interface!!!
+      d.uid = 'module:' + d.name + ':' + genUID()
       self._[d.uid] = self._.render(d)
       return 
     } 
