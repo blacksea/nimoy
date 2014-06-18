@@ -11,7 +11,7 @@ var api = {
         if (e) { console.error(e); return false }
         // set session!
         sessionStorage[res.name] = res.token
-        api.canvas(conf.users[user])
+        api.canvas(conf.users[user].canvas)
         if (d.origin) cvs._[d.origin].s.write(res)
       })
     } else if (d.type === 'del') { 
@@ -22,15 +22,22 @@ var api = {
     }
   }, 
   canvas : function (d) {
+    var objects = []
+
     if (d.modules) {
-      d.modules.forEach(function (m) {
-        cvs.draw(search(JSON.parse(localStorage.library), m)) 
+      d.modules.map(function (currentValue, index, array) {
+        var pkg = search(conf.library, currentValue) 
+        objects.push(pkg)
       })
+      objects.forEach(cvs.draw)
     }
+
     if (d.pipes) {
+      objects = []
       d.pipes.forEach(function (p) {
-        cvs.draw({key:'pipe:'+genUID(), value:p})
+        objects.push({key:'pipe:'+genUID(), value:p})
       })
+      objects.forEach(cvs.draw)
     }
   },
   config : function (d) {
@@ -42,7 +49,7 @@ var api = {
       cvs.draw(search(conf.library, conf.auth))
       cvs.draw({key:'pipe:'+genUID(),value:conf.auth+'>brico'})
     } else {
-      api.canvas(conf.users[user])
+      api.canvas(conf.users[user].canvas)
     } 
     // implement a thorough check to make sure users and tokens match
   }
@@ -54,8 +61,6 @@ module.exports = function Bricoleur (multiLevel, usr) {
 
   var interface = through(function Write (d) {
     if (!d.key || typeof d.key !== 'string') return // ignore if !key property
-
-    console.dir(d.key)
 
     var path = d.key.split(':')
 
