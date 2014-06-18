@@ -19,8 +19,9 @@ var configFlag = process.argv[2] // specify a config file when booting
   ? boot(require('./config.json'))
   : boot(process.argv[2])
 
-function startServer (conf, db, cb) { // just write the index... yeah...
+function startServer (conf, db, cb) { 
 
+  // index html! (uh, yeah...)
   fs.writeFileSync('./static/index.html', '<!doctype html>' +
   '<html lang="en">' +
   '<meta charset="utf-8">' +
@@ -73,8 +74,13 @@ function startServer (conf, db, cb) { // just write the index... yeah...
     })
   }
 
-  function access (user, db, method, args) { // block writing if user !edit
-
+  function access (user, db, method, args) {// copypaste from readme:
+    if (!user || user.name !== 'edit') {
+      //do not allow any write access
+      if (/^put|^del|^batch|write/i.test(method)) {
+        throw new Error('read-only access');
+      }
+    }
   }
 
   var engine = engineServer(function (wss) {
@@ -106,21 +112,14 @@ function boot (conf) {
 
   conf.server.secretKey = conf.bricoleur.secretKey
 
-  compileModules(conf.server.bundle, function (library) {
-    db.put('library', JSON.stringify(library))
-    startServer(conf.server, db, function () {
-      console.log('server running')
-    })
-  })
-
   var bricoConf = conf.bricoleur
 
   for (user in bricoConf.users) {
     var u = bricoConf.users[user]
     if (u.pass) getHmac({
-      token:u.pass,
-      user:user,
-      secret:bricoConf.secretKey
+      token: u.pass,
+      user: user,
+      secret: bricoConf.secretKey
     }, function (d) {
       users[user] = d.val // delete u.pass
     })
@@ -128,7 +127,15 @@ function boot (conf) {
 
   delete bricoConf.secretKey
 
-  db.put('config', JSON.stringify(bricoConf))
+  compileModules(conf.server.bundle, function (library) {
+    bricoConf.library = library
+
+    db.put('config', JSON.stringify(bricoConf))
+
+    startServer(conf.server, db, function () {
+      console.log('server running')
+    })
+  })
 }
 
 function getHmac (d, cb) { 
@@ -148,7 +155,8 @@ function compileModules (config, cb) {
 
   asyncMap(modulesFolder, function (moduleFolder, next) {
     var pkgPath = config.pathModules + moduleFolder + '/package.json'
-    var templatePath = config.pathModules + moduleFolder + '/' + moduleFolder +'.hogan'
+    var templatePath = config.pathModules + moduleFolder + '/' + moduleFolder
+                       + '.hogan'
 
     if (!fs.existsSync(pkgPath)) { next(); return false }
 
