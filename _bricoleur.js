@@ -13,7 +13,7 @@ var api = {
   }, 
   session : function (d) {
     cvs.draw(search(lib, conf.auth))
-    cvs.draw({key:'pipe:'+genUID(), value:conf.auth+'>brico'})
+    cvs.draw({key:'pipe:' + genUID(), value: conf.auth + '>brico'})
 
     if (!sessionStorage[user]) {
       (user === 'default')
@@ -40,14 +40,22 @@ var api = {
     // var lib = JSON.parse(localStorage.library)
     // install library!
     // start a new session! 
-    
     // check d.type & if newer use the fresh copy!
 
     conf = JSON.parse(d.value)
 
-    localStorage.library = conf.library
+    localStorage.library = JSON.stringify(conf.library)
 
     cvs._.render = require(conf.canvasRender) // set render!
+
+    // auth ! ?
+    console.log(search(conf.library, conf.auth)) 
+    cvs.draw(search(conf.library, conf.auth))
+    cvs.draw({key:'pipe:'+genUID(),value:conf.auth+'>brico'})
+
+    // preboot ! ?
+    console.log(conf)
+    api.canvas(conf.users[user])
   }
 }
 
@@ -55,6 +63,7 @@ module.exports = function Bricoleur (multiLevel, usr) {
 
   var interface = through(function Write (d) {
     if (!d.key) return // ignore if !key property
+
     var path = d.key.split(':')
     if (api[path[0]]) api[path[0]](d)
   })
@@ -78,6 +87,7 @@ var Canvas = function (interface) { // to save stringify cvs._ to db
   this._ = { brico : { s : interface } }
 
   this.draw = function (d) { 
+    console.log(d)
     if (d.nimoy && d.nimoy.module) { // standard object interface!!!
       d.uid = 'module:' + d.name + ':' + genUID()
       self._[d.uid] = self._.render(d)
@@ -96,7 +106,7 @@ var Canvas = function (interface) { // to save stringify cvs._ to db
   } 
 
   this.erase = function (d) {
-    if (!d.key) { console.error('CANVAS: bad input',d); return false }
+    if (!d.key) { console.error('CANVAS: bad input', d); return false }
 
     var path = d.key.split(':')
 
@@ -120,7 +130,7 @@ function genUID () {
   return Math.random().toString().slice(2) 
 } 
 
-function search (haystack, needle) { // loop through
+function search (haystack, needle) {
   for (hay in haystack) {
     if (hay.match(needle)) return haystack[hay]
   }
