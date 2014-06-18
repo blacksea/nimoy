@@ -15,8 +15,10 @@ var api = {
         if (d.origin) cvs._[d.origin].s.write(res)
       })
     } else if (d.type === 'del') { 
-      // redraw canvas
-      delete sessionStorage[user] // kill session!
+      db.deauth(function () {
+        delete sessionStorage[user] // kill session!
+        // redraw canvas --- erase user/mode modules
+      })
     }
   }, 
   canvas : function (d) {
@@ -51,7 +53,9 @@ module.exports = function Bricoleur (multiLevel, usr) {
   db = multiLevel
 
   var interface = through(function Write (d) {
-    if (!d.key) return // ignore if !key property
+    if (!d.key || typeof d.key !== 'string') return // ignore if !key property
+
+    console.dir(d.key)
 
     var path = d.key.split(':')
 
@@ -84,7 +88,6 @@ var Canvas = function (interface) { // to save stringify cvs._ to db
       var conn = d.value.split('>')
       var a = search(self._, conn[0])
       var b = search(self._, conn[1])
-
       self._[d.key] = d.value
       a.s.pipe(b.s)
     }
