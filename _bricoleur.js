@@ -29,7 +29,6 @@ var api = {
     }
     if (d.pipes) {
       d.pipes.forEach(function (p) {
-        console.log(p)
         cvs.draw({key:'pipe:'+genUID(), value:p})
       })
     }

@@ -11,7 +11,11 @@ var buf = (!window.location.hash)
   ? '!'
   :  window.location.hash.slice(1)
 
-var bricoleur = require('./_bricoleur')(db)
+var user = (window.location.host.split('.').length ===  3)
+  ? window.location.host.split('.')[0]
+  : 'default'
+
+var bricoleur = require('./_bricoleur')(db, user)
                   .on('error', Errs)
         
 bricoleur.write({type:'get', key:'canvas:'+buf})
