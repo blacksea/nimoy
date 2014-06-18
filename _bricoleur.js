@@ -11,16 +11,6 @@ var api = {
       if (d.origin) cvs._[d.origin].s.write(res); 
     })
   }, 
-  session : function (d) {
-    cvs.draw(search(lib, conf.auth))
-    cvs.draw({key:'pipe:' + genUID(), value: conf.auth + '>brico'})
-
-    if (!sessionStorage[user]) {
-      (user === 'default')
-        ? eventStream.emit('data', auth)
-        : C.draw()
-    }
-  },
   canvas : function (d) {
     if (d.modules) {
       d.modules.forEach(function (m) {
@@ -34,33 +24,41 @@ var api = {
     }
   },
   config : function (d) {
-    // on load parse / url and build with user session
-    // define session / user abilities 
-    // config triggers the boot sequence !
-    // var lib = JSON.parse(localStorage.library)
-    // install library!
-    // start a new session! 
-    // check d.type & if newer use the fresh copy!
-
     conf = JSON.parse(d.value)
 
     localStorage.library = JSON.stringify(conf.library)
 
     cvs._.render = require(conf.canvasRender) // set render!
+    // sync up localStorage with leveldb on put
 
     // auth ! ?
-    console.log(search(conf.library, conf.auth)) 
     cvs.draw(search(conf.library, conf.auth))
     cvs.draw({key:'pipe:'+genUID(),value:conf.auth+'>brico'})
 
     // preboot ! ?
-    console.log(conf)
     api.canvas(conf.users[user])
+
+    if (d.type === 'get') {
+
+      // if no active session do login 
+      cvs.draw(search(lib, conf.auth))
+
+      cvs.draw({key:'pipe:' + genUID(), value: conf.auth + '>brico'})
+
+      if (!sessionStorage[user]) {
+        (user === 'default')
+          ? eventStream.emit('data', auth)
+          : C.draw()
+      }
+    }
+
+    if (d.type === 'put') {
+
+    }
   }
 }
 
 module.exports = function Bricoleur (multiLevel, usr) {
-
   var interface = through(function Write (d) {
     if (!d.key) return // ignore if !key property
 
@@ -87,7 +85,6 @@ var Canvas = function (interface) { // to save stringify cvs._ to db
   this._ = { brico : { s : interface } }
 
   this.draw = function (d) { 
-    console.log(d)
     if (d.nimoy && d.nimoy.module) { // standard object interface!!!
       d.uid = 'module:' + d.name + ':' + genUID()
       self._[d.uid] = self._.render(d)
@@ -104,7 +101,6 @@ var Canvas = function (interface) { // to save stringify cvs._ to db
       a.s.pipe(b.s)
     }
   } 
-
   this.erase = function (d) {
     if (!d.key) { console.error('CANVAS: bad input', d); return false }
 
