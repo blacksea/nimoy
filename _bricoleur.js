@@ -39,15 +39,28 @@ var api = {
   },
   config : function (d) {
     conf = JSON.parse(d.value)
-    localStorage.library = JSON.stringify(conf.library) // sync on fresh
+
     cvs._.render = require(conf.canvasRender) // set render!
     
     if (!sessionStorage[user] && user !== 'default') {
-      cvs.draw({key: 'module:'+genUID(),value: search(conf.library, conf.auth)})
+      cvs.draw({key: 'module:'+genUID(),value: search(conf.library,conf.auth)})
       cvs.draw({key:'pipe:'+genUID(),value:conf.auth+'>brico'})
     } else {
       api.canvas(conf.users[user].canvas)
     } // implement a thorough check to make sure users and tokens match
+
+    // clumsy remove user modules from global lib
+    delete conf.library['modules:'+conf.auth]
+    delete conf.library['modules:'+conf.canvasRender]
+    conf.users[user].canvas.modules.forEach(function (item) {
+      for (m in conf.library) {
+        if (m.match(item)) {
+          console.log(m)
+          delete conf.library[m]
+        }
+      }
+    })
+    localStorage.library = JSON.stringify(conf.library)
   }
 }
 
