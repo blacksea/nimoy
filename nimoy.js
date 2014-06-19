@@ -20,8 +20,7 @@ var configFlag = process.argv[2] // specify a config file when booting
   : boot(process.argv[2])
 
 function startServer (conf, db, cb) { 
-
-  // index html! (uh, yeah...)
+  // write index html! (uh, yeah...)
   fs.writeFileSync('./static/index.html', '<!doctype html>' +
   '<html lang="en">' +
   '<meta charset="utf-8">' +
@@ -62,30 +61,34 @@ function startServer (conf, db, cb) {
     })
   }
 
-  function auth (user, cb) {
-    var secret = conf.secretKey
-    getHmac({token:user.pass, user:user.user, secret:secret}, function (d) {
-        if (users[user.user] === d.val) {
-          cb(null, { name: user.user, token: d.val })
-        }
-        if (users[user.user] !== d.val) {
-          cb(new Error('wrong pass!'), null)
-        }
-    })
-  }
-
-  function access (user, db, method, args) {// copypaste from readme:
-    if (!user || user.name !== 'edit') {
-      //do not allow any write access
-      if (/^put|^del|^batch|write/i.test(method)) {
-        throw new Error('read-only access');
-      }
-    }
-  }
-
   var engine = engineServer(function (wss) {
-    wss.pipe(multiLevel.server(db, {auth:auth, access:access})).pipe(wss)
     wss.on('error', console.error)
+    wss.pipe(multiLevel.server(db, {
+      auth: function auth (user, cb) {
+        var secret = conf.secretKey
+        getHmac({
+          token:user.pass, 
+          user:user.user, 
+          secret:secret
+        }, function (d) {
+          if (users[user.user] === d.val) {
+            cb(null, { name: user.user, token: d.val })
+          }
+          if (users[user.user] !== d.val) {
+            cb(new Error('wrong pass!'), null)
+          }
+        })
+      },
+      access: function access (user, db, method, args) {
+        // copypaste from readme:
+        if (!user || user.name !== 'edit') {
+          //do not allow any write access
+          if (/^put|^del|^batch|write/i.test(method)) {
+            throw new Error('read-only access');
+          }
+        }
+      }
+    })).pipe(wss)
   }, {cookie:false})
     .attach(server, '/ws')
 
