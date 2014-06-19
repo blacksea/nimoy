@@ -96,10 +96,12 @@ function startServer (conf, db, cb) {
 }
 
 function boot (conf) {
+  var rootModules = [conf.bricoleur.canvasRender, conf.bricoleur.auth]
 
   process.stdin.on('data', function (buf) {
     var str = buf.toString()
-    if (str === 'c\n') compileModules(conf.server.bundle, console.log)
+    if (str === 'c\n') 
+      compileModules(conf.server.bundle, rootModules, console.log)
   })
 
   if (!conf || !conf.server || !conf.bricoleur)
@@ -119,6 +121,9 @@ function boot (conf) {
 
   for (user in bricoConf.users) {
     var u = bricoConf.users[user]
+    if (u.canvas) {
+      rootModules = rootModules.concat(u.canvas.modules)
+    }
     if (u.pass) getHmac({
       token: u.pass,
       user: user,
@@ -131,7 +136,7 @@ function boot (conf) {
 
   delete bricoConf.secretKey
 
-  compileModules(conf.server.bundle, function (library) {
+  compileModules(conf.server.bundle, rootModules, function (library) {
     bricoConf.library = library
 
     db.put('config', JSON.stringify(bricoConf))
@@ -150,8 +155,13 @@ function getHmac (d, cb) {
   cb({key:d.user, val:hmac.read().toString()})
 }
 
-function compileModules (config, cb) {
-  var library  = {}
+function compileModules (config, rootModules, cb) {
+  console.log(rootModules)
+  var library  = {
+    root: {},
+    global: {}
+  } 
+  
   var inBun = config.pathBundleEntry
   var outBun = config.pathBundleOut
   var b = browserify(inBun)
@@ -170,9 +180,16 @@ function compileModules (config, cb) {
     if (fs.existsSync(templatePath)) 
       pkg.html = fs.readFileSync(templatePath, {encoding:'utf8'})
 
-    var key = 'modules:'+pkg.name
 
-    library[key] = pkg
+    var key = 'modules:'+pkg.name
+    var root = false 
+
+    for (var i=0; i < rootModules.length; i++) {
+      var m = rootModules[i]
+      if (m === pkg.name) root = true
+    }
+
+    (root) ? library.root[key] = pkg : library.global[key] = pkg;
 
     b.require(config.pathModules+moduleFolder+'/'+pkg.main, {
       expose: moduleFolder

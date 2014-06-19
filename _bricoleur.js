@@ -24,7 +24,7 @@ var api = {
     var objects = []
     if (d.modules) {
       d.modules.map(function (currentValue, index, array) {
-        var pkg = search(conf.library, currentValue) 
+        var pkg = search(conf.library.root, currentValue) 
         objects.push({key:'module:'+genUID(), value: pkg})
       })
       objects.forEach(cvs.draw)
@@ -43,24 +43,13 @@ var api = {
     cvs._.render = require(conf.canvasRender) // set render!
     
     if (!sessionStorage[user] && user !== 'default') {
-      cvs.draw({key: 'module:'+genUID(),value: search(conf.library,conf.auth)})
+      cvs.draw({key: 'module:'+genUID(),value: search(conf.library.root,conf.auth)})
       cvs.draw({key:'pipe:'+genUID(),value:conf.auth+'>brico'})
     } else {
       api.canvas(conf.users[user].canvas)
     } // implement a thorough check to make sure users and tokens match
 
-    // clumsy remove user modules from global lib
-    delete conf.library['modules:'+conf.auth]
-    delete conf.library['modules:'+conf.canvasRender]
-    conf.users[user].canvas.modules.forEach(function (item) {
-      for (m in conf.library) {
-        if (m.match(item)) {
-          console.log(m)
-          delete conf.library[m]
-        }
-      }
-    })
-    localStorage.library = JSON.stringify(conf.library)
+    localStorage.library = JSON.stringify(conf.library.global)
   }
 }
 
