@@ -6,7 +6,6 @@ var db
 
 
 var api = {}
-
 api.auth = function (d) {
   if (d.type === 'put') {
     db.auth({ user:d.value.user, pass:d.value.pass }, function (e, res) {
@@ -22,7 +21,6 @@ api.auth = function (d) {
     })
   }
 }
-
 api.canvas = function (d) {
   var objects = []
   if (d.modules) {
@@ -40,7 +38,6 @@ api.canvas = function (d) {
     objects.forEach(cvs.draw)
   }
 }
-
 api.config = function (d) {
   conf = JSON.parse(d.value)
   var rlib = conf.library.root
