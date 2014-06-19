@@ -25,7 +25,7 @@ var api = {
     if (d.modules) {
       d.modules.map(function (currentValue, index, array) {
         var pkg = search(conf.library, currentValue) 
-        objects.push(pkg)
+        objects.push({key:'module:'+genUID(), value: pkg})
       })
       objects.forEach(cvs.draw)
     }
@@ -43,7 +43,7 @@ var api = {
     cvs._.render = require(conf.canvasRender) // set render!
     
     if (!sessionStorage[user] && user !== 'default') {
-      cvs.draw(search(conf.library, conf.auth))
+      cvs.draw({key: 'module:'+genUID(),value: search(conf.library, conf.auth)})
       cvs.draw({key:'pipe:'+genUID(),value:conf.auth+'>brico'})
     } else {
       api.canvas(conf.users[user].canvas)
@@ -77,11 +77,7 @@ var Canvas = function (interface) { // to save stringify cvs._ to db
   this._ = { brico : { s : interface } }
 
   this.draw = function (d) { 
-    if (d.nimoy && d.nimoy.module) { // standard object interface!!!
-      d.uid = 'module:' + d.name + ':' + genUID()
-      self._[d.uid] = self._.render(d)
-      return 
-    } 
+    if (!d.key) { console.error('CANVAS: bad input', d); return false }
 
     var path = d.key.split(':')
 
@@ -91,14 +87,14 @@ var Canvas = function (interface) { // to save stringify cvs._ to db
       var b = search(self._, conn[1])
       self._[d.key] = d.value
       a.s.pipe(b.s)
+    } else if (path[0] === 'module') {
+      d.key += ':' + d.value.name
+      self._[d.key] = self._.render(d)
     }
   } 
 
   this.erase = function (d) {
-    if (!d.key) { 
-      console.error('CANVAS: bad input', d); 
-      return false 
-    }
+    if (!d.key) { console.error('CANVAS: bad input', d); return false }
 
     var path = d.key.split(':')
 
