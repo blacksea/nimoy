@@ -39,17 +39,19 @@ var api = {
   },
   config : function (d) {
     conf = JSON.parse(d.value)
+    var rlib = conf.library.root
+    var glib = conf.library.global
 
     cvs._.render = require(conf.canvasRender) // set render!
     
     if (!sessionStorage[user] && user !== 'default') {
-      cvs.draw({key: 'module:'+genUID(),value: search(conf.library.root,conf.auth)})
+      cvs.draw({key: 'module:'+genUID(),value: search(rlib,conf.auth)})
       cvs.draw({key:'pipe:'+genUID(),value:conf.auth+'>brico'})
     } else {
       if (conf.users[user].canvas) api.canvas(conf.users[user].canvas)
     } // implement a thorough check to make sure users and tokens match
 
-    localStorage.library = JSON.stringify(conf.library.global)
+    localStorage.library = JSON.stringify(glib)
   }
 }
 
