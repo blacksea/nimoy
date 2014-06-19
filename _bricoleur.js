@@ -7,23 +7,21 @@ var db
 var api = {
   auth : function (d) {
     if (d.type === 'put') {
-      db.auth({ user:d.user, pass:d.pass }, function (e, res) {
+      db.auth({ user:d.value.user, pass:d.value.pass }, function (e, res) {
         if (e) { console.error(e); return false }
-        // set session!
         sessionStorage[res.name] = res.token
         api.canvas(conf.users[user].canvas)
-        if (d.origin) cvs._[d.origin].s.write(res)
+        if (d.value.origin) cvs._[d.value.origin].s.write(res)
       })
     } else if (d.type === 'del') { 
-      db.deauth(function () {
-        delete sessionStorage[user] // kill session!
+      db.deauth(function () { // kill session!
+        delete sessionStorage[user]
         // redraw canvas --- erase user/mode modules
       })
     }
   }, 
   canvas : function (d) {
     var objects = []
-
     if (d.modules) {
       d.modules.map(function (currentValue, index, array) {
         var pkg = search(conf.library, currentValue) 
@@ -31,7 +29,6 @@ var api = {
       })
       objects.forEach(cvs.draw)
     }
-
     if (d.pipes) {
       objects = []
       d.pipes.forEach(function (p) {
@@ -50,8 +47,7 @@ var api = {
       cvs.draw({key:'pipe:'+genUID(),value:conf.auth+'>brico'})
     } else {
       api.canvas(conf.users[user].canvas)
-    } 
-    // implement a thorough check to make sure users and tokens match
+    } // implement a thorough check to make sure users and tokens match
   }
 }
 
@@ -99,7 +95,10 @@ var Canvas = function (interface) { // to save stringify cvs._ to db
   } 
 
   this.erase = function (d) {
-    if (!d.key) { console.error('CANVAS: bad input', d); return false }
+    if (!d.key) { 
+      console.error('CANVAS: bad input', d); 
+      return false 
+    }
 
     var path = d.key.split(':')
 
