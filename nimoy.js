@@ -121,6 +121,7 @@ function boot (conf) {
       user: user,
       secret: bricoConf.secretKey
     }, function (d) {
+      delete bricoConf.users[user].pass
       users[user] = d.val // delete u.pass
     })
   }
