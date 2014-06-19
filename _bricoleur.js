@@ -1,11 +1,31 @@
 var through = require('through')
+var api = {}
 var user
 var conf 
 var cvs
 var db
 
 
-var api = {}
+module.exports = function Bricoleur (multiLevel, usr) {
+  user = usr
+  db = multiLevel
+
+  var interface = through(function Write (d) {
+    if (!d.key || typeof d.key !== 'string') return // ignore if !key property
+
+    var path = d.key.split(':')
+
+    if (api[path[0]]) api[path[0]](d)
+  })
+
+  cvs = new Canvas(interface) 
+
+  multiLevel.liveStream({reverse : true})
+    .pipe(interface)
+
+  return interface
+}
+
 
 api.auth = function (d) {
   if (d.type === 'put') {
@@ -56,27 +76,6 @@ api.config = function (d) {
   } // implement a thorough check to make sure users and tokens match
 
   localStorage.library = JSON.stringify(glib)
-}
-
-
-module.exports = function Bricoleur (multiLevel, usr) {
-  user = usr
-  db = multiLevel
-
-  var interface = through(function Write (d) {
-    if (!d.key || typeof d.key !== 'string') return // ignore if !key property
-
-    var path = d.key.split(':')
-
-    if (api[path[0]]) api[path[0]](d)
-  })
-
-  cvs = new Canvas(interface) 
-
-  multiLevel.liveStream({reverse : true})
-    .pipe(interface)
-
-  return interface
 }
 
 
