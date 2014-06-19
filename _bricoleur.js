@@ -10,7 +10,7 @@ var api = {
       db.auth({ user:d.value.user, pass:d.value.pass }, function (e, res) {
         if (e) { console.error(e); return false }
         sessionStorage[res.name] = res.token
-        api.canvas(conf.users[user].canvas)
+        if (conf.users[user].canvas) api.canvas(conf.users[user].canvas)
         if (d.value.origin) cvs._[d.value.origin].s.write(res)
       })
     } else if (d.type === 'del') { 
@@ -46,7 +46,7 @@ var api = {
       cvs.draw({key: 'module:'+genUID(),value: search(conf.library.root,conf.auth)})
       cvs.draw({key:'pipe:'+genUID(),value:conf.auth+'>brico'})
     } else {
-      api.canvas(conf.users[user].canvas)
+      if (conf.users[user].canvas) api.canvas(conf.users[user].canvas)
     } // implement a thorough check to make sure users and tokens match
 
     localStorage.library = JSON.stringify(conf.library.global)
