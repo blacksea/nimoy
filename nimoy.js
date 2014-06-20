@@ -171,19 +171,10 @@ function startServer (conf, db, cb) {
     wss.on('error', console.error)
     wss.pipe(multiLevel.server(db, {
       auth: function auth (user, cb) {
-        var secret = conf.secretKey
-        getHmac({
-          token:user.pass, 
-          user:user.user, 
-          secret:secret
-        }, function (d) {
-          if (users[user.user] === d.val) {
+        if (users[user.user] === user.pass)
             cb(null, { name: user.user, token: d.val })
-          }
-          if (users[user.user] !== d.val) {
-            cb(new Error('wrong pass!'), null)
-          }
-        })
+        if (users[user.user] !== user.pass)
+          cb(new Error('wrong pass!'), null)
       },
       access: function access (user, db, method, args) {
         // copypaste from readme:
