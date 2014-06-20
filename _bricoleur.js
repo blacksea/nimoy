@@ -37,7 +37,7 @@ api.auth = {
     db.auth({ user:d.value.user, pass:d.value.pass }, function (e, res) {
       if (e) { console.error(e); return false }
       sessionStorage[res.name] = res.token
-      if (conf.users[user].canvas) api.canvas(conf.users[user].canvas)
+      if (conf.users[user].canvas) api.canvas.put(conf.users[user].canvas)
       if (d.value.origin) cvs._[d.value.origin].s.write(res)
     })
   }, 
@@ -51,10 +51,12 @@ api.auth = {
 api.data = {
   put : function (d) { db.put({key: d.key, value: d.value}) },
   del : function (d) { db.del(d.key) },
-  get : function (d) { db.get(d.key, function (e, res) { 
-    if (e) { console.error(e); return false }
-    cvs._[d.origin].write(res)
-  })
+  get : function (d) { 
+    db.get(d.key, function (e, res) { 
+      if (e) { console.error(e); return false }
+      cvs._[d.origin].write(res)
+    })
+  }
 }
 
 api.canvas = {
@@ -91,7 +93,7 @@ api.config = function (d) {
     cvs.draw({key: 'module:'+genUID(),value: search(rlib,conf.auth)})
     cvs.draw({key:'pipe:'+genUID(),value:conf.auth+'>brico'})
   } else {
-    if (conf.users[user].canvas) api.canvas(conf.users[user].canvas)
+    if (conf.users[user].canvas) api.canvas.put(conf.users[user].canvas)
   }
 
   localStorage.library = JSON.stringify(glib)
