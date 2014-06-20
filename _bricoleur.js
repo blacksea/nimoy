@@ -1,4 +1,5 @@
 var through = require('through')
+var hmac = require('crypto-browserify/create-hmac')
 var api = {}
 var user
 var conf 
@@ -34,7 +35,8 @@ module.exports = function Bricoleur (multiLevel, usr) {
 
 api.auth = {
   put : function (d) {
-    db.auth({ user:d.value.user, pass:d.value.pass }, function (e, res) {
+    var hash = hmac('sha256', conf.secretKey).update(d.value.pass).digest('hex')
+    db.auth({ user:d.value.user, pass:hash}, function (e, res) {
       if (e) { console.error(e); return false }
       sessionStorage[res.name] = res.token
       if (conf.users[user].canvas) api.canvas.put(conf.users[user].canvas)
@@ -54,7 +56,7 @@ api.data = {
   get : function (d) { 
     db.get(d.key, function (e, res) { 
       if (e) { console.error(e); return false }
-      cvs._[d.origin].write(res)
+      cvs._[d.key.replace('data','module')].write(res)
     })
   }
 }
@@ -92,7 +94,7 @@ api.config = function (d) {
   if (!sessionStorage[user] && user !== 'default') {
     cvs.draw({key: 'module:'+genUID(),value: search(rlib,conf.auth)})
     cvs.draw({key:'pipe:'+genUID(),value:conf.auth+'>brico'})
-  } else {
+  } else { // not ok because db is not authorized!!!!
     if (conf.users[user].canvas) api.canvas.put(conf.users[user].canvas)
   }
 
