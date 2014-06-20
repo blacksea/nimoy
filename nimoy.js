@@ -13,11 +13,117 @@ var newHmac = require('crypto').createHmac
 var formidable = require('formidable')
 
 var users = {}
+var globalConf
 var configFlag = process.argv[2] // specify a config file when booting
 
 !(configFlag) 
   ? boot(require('./config.json'))
   : boot(process.argv[2])
+
+function boot (conf) {
+  globalConf = conf
+  var rootModules = [conf.bricoleur.canvasRender, conf.bricoleur.auth]
+
+  process.stdin.on('data', function (buf) { // expand into interactive cli tool
+    // export / write db to JSON
+    // import / read db from JSON
+    
+    var str = buf.toString()
+
+    if (str === 'c\n') 
+      compileModules(conf.server.bundle, rootModules, console.log)
+  })
+
+  if (!conf || !conf.server || !conf.bricoleur)
+    throw new Error('nimoy: invalid or missing config.json')
+
+  // provide option to generate default config
+  
+  if (!fs.existsSync('./static')) fs.mkdir('./static')
+
+  var db = level('./' + conf.server.host)
+  livestream.install(db)
+  multiLevel.writeManifest(db, './static/manifest.json')
+
+  conf.server.secretKey = conf.bricoleur.secretKey
+
+  var bricoConf = conf.bricoleur
+
+  for (user in bricoConf.users) {
+    var u = bricoConf.users[user]
+    if (u.canvas) {
+      rootModules = rootModules.concat(u.canvas.modules)
+    }
+    if (u.pass) getHmac({
+      token: u.pass,
+      user: user,
+      secret: bricoConf.secretKey
+    }, function (d) {
+      delete bricoConf.users[user].pass
+      users[user] = d.val // delete u.pass
+    })
+  }
+
+  compileModules(conf.server.bundle, rootModules, function (library) {
+    bricoConf.library = library
+
+    db.put('config', JSON.stringify(bricoConf))
+
+    startServer(conf.server, db, function () {
+      console.log('server running')
+    })
+  })
+}
+
+function compileModules (config, rootModules, cb) {
+  var library  = {
+    root: {},
+    global: {}
+  } 
+  
+  var inBun = config.pathBundleEntry
+  var outBun = config.pathBundleOut
+  var b = browserify(inBun)
+  var modulesFolder = fs.readdirSync(config.pathModules)
+
+  asyncMap(modulesFolder, function (moduleFolder, next) {
+    var pkgPath = config.pathModules + moduleFolder + '/package.json'
+    var templatePath = config.pathModules + moduleFolder + '/' + moduleFolder
+                       + '.hogan'
+
+    if (!fs.existsSync(pkgPath)) { next(); return false }
+
+    var pkg = JSON.parse(fs.readFileSync(pkgPath, {encoding:'utf8'}))
+    if (!pkg.nimoy) { next(); return false }
+
+    if (fs.existsSync(templatePath)) 
+      pkg.html = fs.readFileSync(templatePath, {encoding:'utf8'})
+
+
+    var key = 'modules:'+pkg.name
+    var root = false 
+
+    for (var i=0; i < rootModules.length; i++) {
+      var m = rootModules[i]
+      if (m === pkg.name) root = true
+    }
+
+    (root) ? library.root[key] = pkg : library.global[key] = pkg;
+
+    b.require(config.pathModules+moduleFolder+'/'+pkg.main, {
+      expose: moduleFolder
+    })
+
+    next()
+  }, function end () {
+    var bun = fs.createWriteStream(outBun)
+    b.bundle().pipe(bun)
+    bun.on('finish',function () {
+      console.log('compiled '+inBun+' to '+outBun)
+      cb(library)
+    })
+  })
+}
 
 function startServer (conf, db, cb) { 
   // write index html! (uh, yeah...)
@@ -95,117 +201,6 @@ function startServer (conf, db, cb) {
   server.listen(conf.port, conf.host, cb)
 }
 
-function boot (conf) {
-  var rootModules = [conf.bricoleur.canvasRender, conf.bricoleur.auth]
-
-  process.stdin.on('data', function (buf) {
-    var str = buf.toString()
-    if (str === 'c\n') 
-      compileModules(conf.server.bundle, rootModules, console.log)
-  })
-
-  if (!conf || !conf.server || !conf.bricoleur)
-    throw new Error('nimoy: invalid or missing config.json')
-
-  // provide option to generate default config
-  
-  if (!fs.existsSync('./static')) fs.mkdir('./static')
-
-  var db = level('./' + conf.server.host)
-  livestream.install(db)
-  multiLevel.writeManifest(db, './static/manifest.json')
-
-  conf.server.secretKey = conf.bricoleur.secretKey
-
-  var bricoConf = conf.bricoleur
-
-  for (user in bricoConf.users) {
-    var u = bricoConf.users[user]
-    if (u.canvas) {
-      rootModules = rootModules.concat(u.canvas.modules)
-    }
-    if (u.pass) getHmac({
-      token: u.pass,
-      user: user,
-      secret: bricoConf.secretKey
-    }, function (d) {
-      delete bricoConf.users[user].pass
-      users[user] = d.val // delete u.pass
-    })
-  }
-
-  delete bricoConf.secretKey
-
-  compileModules(conf.server.bundle, rootModules, function (library) {
-    bricoConf.library = library
-
-    db.put('config', JSON.stringify(bricoConf))
-
-    startServer(conf.server, db, function () {
-      console.log('server running')
-    })
-  })
-}
-
-function getHmac (d, cb) { 
-  var hmac = newHmac('sha256', d.secret)
-  hmac.setEncoding('hex')
-  hmac.write(d.token)
-  hmac.end()
-  cb({key:d.user, val:hmac.read().toString()})
-}
-
-function compileModules (config, rootModules, cb) {
-  console.log(rootModules)
-  var library  = {
-    root: {},
-    global: {}
-  } 
-  
-  var inBun = config.pathBundleEntry
-  var outBun = config.pathBundleOut
-  var b = browserify(inBun)
-  var modulesFolder = fs.readdirSync(config.pathModules)
-
-  asyncMap(modulesFolder, function (moduleFolder, next) {
-    var pkgPath = config.pathModules + moduleFolder + '/package.json'
-    var templatePath = config.pathModules + moduleFolder + '/' + moduleFolder
-                       + '.hogan'
-
-    if (!fs.existsSync(pkgPath)) { next(); return false }
-
-    var pkg = JSON.parse(fs.readFileSync(pkgPath, {encoding:'utf8'}))
-    if (!pkg.nimoy) { next(); return false }
-
-    if (fs.existsSync(templatePath)) 
-      pkg.html = fs.readFileSync(templatePath, {encoding:'utf8'})
-
-
-    var key = 'modules:'+pkg.name
-    var root = false 
-
-    for (var i=0; i < rootModules.length; i++) {
-      var m = rootModules[i]
-      if (m === pkg.name) root = true
-    }
-
-    (root) ? library.root[key] = pkg : library.global[key] = pkg;
-
-    b.require(config.pathModules+moduleFolder+'/'+pkg.main, {
-      expose: moduleFolder
-    })
-
-    next()
-  }, function end () {
-    var bun = fs.createWriteStream(outBun)
-    b.bundle().pipe(bun)
-    bun.on('finish',function () {
-      console.log('compiled '+inBun+' to '+outBun)
-      cb(library)
-    })
-  })
-}
-
 function fileUpload (req, res) {
   var form = new formidable.IncomingForm();
   form.parse(req, function(err, fields, files) {
@@ -219,4 +214,12 @@ function fileUpload (req, res) {
 
     fs.writeFileSync(filePath, blob, {encoding:'base64'}) 
   })
+}
+
+function getHmac (d, cb) { 
+  var hmac = newHmac('sha256', d.secret)
+  hmac.setEncoding('hex')
+  hmac.write(d.token)
+  hmac.end()
+  cb({key:d.user, val:hmac.read().toString()})
 }
