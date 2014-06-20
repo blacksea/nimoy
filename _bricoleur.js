@@ -10,12 +10,17 @@ module.exports = function Bricoleur (multiLevel, usr) {
   user = usr
   db = multiLevel
 
+  // modules need to access canvas
+  
+  // modules need to access db
+  
   var interface = through(function Write (d) {
     if (!d.key || typeof d.key !== 'string') return // ignore if !key property
-
     var path = d.key.split(':')
-
-    if (api[path[0]]) api[path[0]](d)
+    if (api[path[0]]) {
+      if (d.type) api[path[0]][d.type](d)
+      if (!d.type) api[path[0]](d)
+    }
   })
 
   cvs = new Canvas(interface) 
@@ -27,37 +32,51 @@ module.exports = function Bricoleur (multiLevel, usr) {
 }
 
 
-api.auth = function (d) {
-  if (d.type === 'put') {
+api.auth = {
+  put : function (d) {
     db.auth({ user:d.value.user, pass:d.value.pass }, function (e, res) {
       if (e) { console.error(e); return false }
       sessionStorage[res.name] = res.token
       if (conf.users[user].canvas) api.canvas(conf.users[user].canvas)
       if (d.value.origin) cvs._[d.value.origin].s.write(res)
     })
-  } else if (d.type === 'del') { 
+  }, 
+  del : function (d) {
     db.deauth(function () { // kill session!
-      delete sessionStorage[user]
-      // redraw canvas --- erase user/mode modules
+      delete sessionStorage[user] // redraw canvas --- erase user/mode modules
     })
   }
 }
 
-api.canvas = function (d) {
-  var objects = []
-  if (d.modules) {
-    d.modules.map(function (currentValue, index, array) {
-      var pkg = search(conf.library.root, currentValue) 
-      objects.push({key:'module:'+genUID(), value: pkg})
-    })
-    objects.forEach(cvs.draw)
-  }
-  if (d.pipes) {
-    objects = []
-    d.pipes.forEach(function (p) {
-      objects.push({key:'pipe:'+genUID(), value:p})
-    })
-    objects.forEach(cvs.draw)
+api.data = {
+  put : function (d) { db.put({key: d.key, value: d.value}) },
+  del : function (d) { db.del(d.key) },
+  get : function (d) { db.get(d.key, function (e, res) { 
+    if (e) { console.error(e); return false }
+    cvs._[d.origin].write(res)
+  })
+}
+
+api.canvas = {
+  put : function (d) {
+    var objects = []
+    if (d.modules) {
+      d.modules.map(function (currentValue, index, array) {
+        var pkg = search(conf.library.root, currentValue) 
+        objects.push({key:'module:'+genUID(), value: pkg})
+      })
+      objects.forEach(cvs.draw)
+    }
+    if (d.pipes) {
+      objects = []
+      d.pipes.forEach(function (p) {
+        objects.push({key:'pipe:'+genUID(), value:p})
+      })
+      objects.forEach(cvs.draw)
+    }
+  },
+  del : function (d) {
+
   }
 }
 
@@ -73,7 +92,7 @@ api.config = function (d) {
     cvs.draw({key:'pipe:'+genUID(),value:conf.auth+'>brico'})
   } else {
     if (conf.users[user].canvas) api.canvas(conf.users[user].canvas)
-  } // implement a thorough check to make sure users and tokens match
+  }
 
   localStorage.library = JSON.stringify(glib)
 }
@@ -118,6 +137,7 @@ var Canvas = function (interface) { // to save stringify cvs._ to db
     self._[d.key].erase()
     delete self._[d.key]
   }
+
 }
 
 // UTILS
