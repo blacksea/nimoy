@@ -1,5 +1,4 @@
 var through = require('through')
-var hmac = require('crypto-browserify/create-hmac')
 var api = {}
 var user
 var conf 
@@ -35,8 +34,7 @@ module.exports = function Bricoleur (multiLevel, usr) {
 
 api.auth = {
   put : function (d) {
-    var hash = hmac('sha256', conf.secretKey).update(d.value.pass).digest('hex')
-    db.auth({ user:d.value.user, pass:hash}, function (e, res) {
+    db.auth({ user:d.value.user, pass:d.value.pass }, function (e, res) {
       if (e) { console.error(e); return false }
       sessionStorage[res.name] = res.token
       if (conf.users[user].canvas) api.canvas.put(conf.users[user].canvas)
