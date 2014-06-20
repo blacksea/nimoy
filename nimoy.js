@@ -171,9 +171,10 @@ function startServer (conf, db, cb) {
     wss.on('error', console.error)
     wss.pipe(multiLevel.server(db, {
       auth: function auth (user, cb) {
-        if (users[user.user] === user.pass)
-            cb(null, { name: user.user, token: d.val })
-        if (users[user.user] !== user.pass)
+        console.log(user)
+        if (users[user.user] === user.pass) {
+          cb(null, { name: user.user, token: user.pass })
+        } else if (users[user.user] !== user.pass)
           cb(new Error('wrong pass!'), null)
       },
       access: function access (user, db, method, args) {
