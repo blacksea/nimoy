@@ -12,7 +12,6 @@ module.exports = function Bricoleur (multiLevel, usr) {
   db = multiLevel
 
   // modules need to access canvas
-  
   // modules need to access db
   
   var interface = through(function Write (d) {
@@ -53,8 +52,10 @@ api.auth = {
   }
 }
 
-api.data = {
-  put : function (d) { db.put({key: d.key, value: d.value}) },
+api.data = { // fix this to prevent a feedback loop!
+  put : function (d) { 
+    db.put(d.key, d.value, function (e) { if (e) console.error(e) }) 
+  },
   del : function (d) { db.del(d.key) },
   get : function (d) { 
     db.get(d.key, function (e, res) { 
@@ -138,11 +139,10 @@ var Canvas = function (interface) { // to save stringify cvs._ to db
       var b = search(self._, conn[1])
       a.unpipe(b)
       delete self._[d.key]
-      return
+    } else if (path[0] === 'module') {
+      self._[d.key].erase()
+      delete self._[d.key]
     }
-
-    self._[d.key].erase()
-    delete self._[d.key]
   }
 
 }
