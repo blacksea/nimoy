@@ -1,4 +1,5 @@
 var through = require('through')
+var Buffer = require('buffer/').Buffer
 var hmac = require('crypto-browserify/create-hmac')
 var api = {}
 var home
@@ -32,8 +33,9 @@ module.exports = function Bricoleur (multiLevel, usr) {
 
 api.auth = { // API
   put : function (d) { // fix sessions!
+    var img = new Buffer(conf.uImg).toString()
     var hash = (d.value.origin) 
-      ? hmac('sha256',conf.secretKey).update(d.value.pass).digest('hex')
+      ? hmac('sha256', img).update(d.value.pass).digest('hex')
       : d.value.pass
 
     db.auth({ user:d.value.user, pass:hash }, function (e, res) {
@@ -67,7 +69,6 @@ api.data = { // fix this to prevent a feedback loop!
 
 api.canvas = { // micro macro !?! -- just modifies canvas!
   put : function (d) { // look at d.value and determine what to do
-    // pass in args for drawing template
     var objects = []
     if (d.modules) {
       d.modules.map(function (currentValue, index, array) {
@@ -91,7 +92,7 @@ api.canvas = { // micro macro !?! -- just modifies canvas!
 
 api.config = function (d) {
   conf = JSON.parse(d.value)
-  console.log(conf)
+  var secret = new Buffer(conf.uImg)
   var rlib = conf.library.root
   var glib = conf.library.global
 
@@ -165,3 +166,5 @@ function getPath () {
   if (!window.location.hash) return false
   if (window.location.hash) return window.location.hash.slice(1)
 }
+
+window.Buffer = Buffer
