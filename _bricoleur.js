@@ -1,6 +1,7 @@
 var through = require('through')
 var hmac = require('crypto-browserify/create-hmac')
 var api = {}
+var home
 var user
 var conf 
 var cvs
@@ -10,9 +11,6 @@ var db
 module.exports = function Bricoleur (multiLevel, usr) {
   user = usr
   db = multiLevel
-
-  // modules need to access canvas
-  // modules need to access db
   
   var interface = through(function Write (d) {
     if (!d.key || typeof d.key !== 'string') return // ignore if !key property
@@ -32,8 +30,8 @@ module.exports = function Bricoleur (multiLevel, usr) {
 }
 
 
-api.auth = {
-  put : function (d) {
+api.auth = { // API
+  put : function (d) { // fix sessions!
     var hash = (d.value.origin) 
       ? hmac('sha256',conf.secretKey).update(d.value.pass).digest('hex')
       : d.value.pass
@@ -46,8 +44,10 @@ api.auth = {
     })
   }, 
   del : function (d) {
-    db.deauth(function () { // kill session!
-      delete sessionStorage[user] // redraw canvas --- erase user/mode modules
+    db.deauth(function () { 
+      delete sessionStorage[user] 
+      var path = (!getPath()) ? home : home + getPath()
+      window.location = path
     })
   }
 }
@@ -65,8 +65,9 @@ api.data = { // fix this to prevent a feedback loop!
   }
 }
 
-api.canvas = {
-  put : function (d) {
+api.canvas = { // micro macro !?! -- just modifies canvas!
+  put : function (d) { // look at d.value and determine what to do
+    // pass in args for drawing template
     var objects = []
     if (d.modules) {
       d.modules.map(function (currentValue, index, array) {
@@ -90,14 +91,15 @@ api.canvas = {
 
 api.config = function (d) {
   conf = JSON.parse(d.value)
+  console.log(conf)
   var rlib = conf.library.root
   var glib = conf.library.global
 
   cvs._.render = require(conf.canvasRender) // set render!
   
   if (!sessionStorage[user] && user !== 'default') {
-    cvs.draw({key: 'module:'+genUID(),value: search(rlib,conf.auth)})
-    cvs.draw({key:'pipe:'+genUID(),value:conf.auth+'>brico'})
+    cvs.draw({key: 'module:'+genUID(), value: search(rlib,conf.auth)})
+    cvs.draw({key:'pipe:'+genUID(), value: conf.auth+'>brico'})
   } else { 
     api.auth.put({value: {user: user, pass: sessionStorage[user]}})
   }
@@ -124,7 +126,7 @@ var Canvas = function (interface) { // to save stringify cvs._ to db
       a.s.pipe(b.s)
     } else if (path[0] === 'module') {
       d.key += ':' + d.value.name
-      self._[d.key] = self._.render(d)
+      self._[d.key] = self._.render(d) // consistent stream protocol
     }
   } 
 
@@ -144,8 +146,8 @@ var Canvas = function (interface) { // to save stringify cvs._ to db
       delete self._[d.key]
     }
   }
-
 }
+
 
 // UTILS
 
@@ -157,4 +159,9 @@ function search (haystack, needle) {
   for (hay in haystack) {
     if (hay.match(needle)) return haystack[hay]
   }
+}
+
+function getPath () {
+  if (!window.location.hash) return false
+  if (window.location.hash) return window.location.hash.slice(1)
 }
