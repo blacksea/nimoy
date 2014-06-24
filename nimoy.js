@@ -24,9 +24,10 @@ function boot (conf) {
   globalConf = conf
   var rootModules = [conf.bricoleur.canvasRender, conf.bricoleur.auth]
 
-  process.stdin.on('data', function (buf) { // expand into interactive cli tool
-    // export / write db to JSON
+  process.stdin.on('data', function (buf) { 
+    // expand into interactive cli tool
     // import / read db from JSON
+    // export / write db to JSON
     
     var str = buf.toString()
 
@@ -126,7 +127,7 @@ function compileModules (config, rootModules, cb) {
 }
 
 function startServer (conf, db, cb) { 
-  // write index html! (uh, yeah...)
+
   fs.writeFileSync('./static/index.html', '<!doctype html>' +
   '<html lang="en">' +
   '<meta charset="utf-8">' +
@@ -141,12 +142,15 @@ function startServer (conf, db, cb) {
   '</body>' +
   '</html>')
 
+
   if (!conf.ssl) {
-    var file = new fileserver('./static')
+    var file = new fileserver('./static', {'X-Frame-Options' : 'Deny'})
     var server = http.createServer(handleHttp)
   } else {
-    var hsts = { 'Strict-Transport-Security' : 'max-age=31536000' }
-    var file = new fileServer('./static', hsts)
+    var file = new fileServer('./static', {
+      'X-Frame-Options' : 'Deny' 
+      'Strict-Transport-Security':'max-age=31536000',
+    })
     var server = https.createServer({
       honorCipherOrder : true,
       key : fs.readFileSync(conf.ssl.key),
@@ -170,7 +174,7 @@ function startServer (conf, db, cb) {
   var engine = engineServer(function (wss) {
     wss.on('error', console.error)
     wss.pipe(multiLevel.server(db, {
-      auth: function auth (user, cb) {
+      auth: function auth (user, cb) { // manage sessions server side!
         if (users[user.user] === user.pass) {
           cb(null, { name: user.user, token: user.pass })
         } else if (users[user.user] !== user.pass)
