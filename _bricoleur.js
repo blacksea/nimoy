@@ -1,6 +1,8 @@
+var config = require('./bricoleurConfig.json')
 var through = require('through')
 var Buffer = require('buffer/').Buffer
 var hmac = require('crypto-browserify/create-hmac')
+var rootLibrary = {}
 var api = {}
 var home
 var user
@@ -8,14 +10,39 @@ var conf
 var cvs
 var db
 
+console.log(config)
+// embed config in _brico using require !?
+// then livestream is only used to sync!
+
+
+function boot (conf) {
+  var rlib = conf.library.root
+  var glib = conf.library.global
+  localStorage.library = JSON.stringify(glib) 
+
+  cvs._.render = require(conf.canvasRender) // set render!
+  
+  if (!sessionStorage[user] && user !== 'default') {
+    cvs.draw({
+      key: 'module:'+genUID(), 
+      value: search(conf.library.root, conf.auth)
+    })
+    cvs.draw({key:'pipe:'+genUID(), value: conf.auth+'>brico'})
+  } else { // send session id not hashed pass!
+    api.auth.put({value: {name: user, session: sessionStorage[user]}})
+  }
+}
+
 
 module.exports = function Bricoleur (multiLevel, usr) {
   user = usr
   db = multiLevel
   
   var interface = through(function Write (d) {
-    if (!d.key || typeof d.key !== 'string') return // ignore if !key property
+    if (!d.key || typeof d.key !== 'string') return
+
     var path = d.key.split(':')
+
     if (api[path[0]]) {
       if (d.type) api[path[0]][d.type](d)
       if (!d.type) api[path[0]](d)
@@ -31,16 +58,30 @@ module.exports = function Bricoleur (multiLevel, usr) {
 }
 
 
-api.auth = { // API
-  put : function (d) { // fix sessions!
+api.auth = {
+  put : function (d) {
     var img = new Buffer(conf.uImg).toString()
-    var hash = (d.value.origin) 
-      ? hmac('sha256', img).update(d.value.pass).digest('hex')
-      : d.value.pass
 
-    db.auth({ user:d.value.user, pass:hash }, function (e, res) {
-      if (e) { console.error(e); return false }
-      sessionStorage[res.name] = hash
+    var auth = { name: d.value.name }
+
+    if (!d.value.session)
+      auth.pass = hmac('sha256', img).update(d.value.pass).digest('hex')
+
+    if (d.value.session) auth.session = d.value.session
+
+    db.auth(auth, function (e, res) {
+      if (e) { 
+        console.error(e)
+        if (!search(cvs._, conf.auth)) {
+          cvs.draw({
+            key: 'module:'+genUID(), 
+            value: search(conf.library.root, conf.auth)
+          })
+          cvs.draw({key:'pipe:'+genUID(), value: conf.auth+'>brico'})
+        } else console.error(e) // draw login interface!
+        return false
+      }
+      sessionStorage[res.name] = res.token
       if (conf.users[user].canvas) api.canvas.put(conf.users[user].canvas)
       if (d.value.origin) cvs._[d.value.origin].s.write(res)
     })
@@ -68,7 +109,7 @@ api.data = { // fix this to prevent a feedback loop!
 }
 
 api.canvas = { // micro macro !?! -- just modifies canvas!
-  put : function (d) { // look at d.value and determine what to do
+  put : function (d) { 
     var objects = []
     if (d.modules) {
       d.modules.map(function (currentValue, index, array) {
@@ -92,20 +133,7 @@ api.canvas = { // micro macro !?! -- just modifies canvas!
 
 api.config = function (d) {
   conf = JSON.parse(d.value)
-  var secret = new Buffer(conf.uImg)
-  var rlib = conf.library.root
-  var glib = conf.library.global
-
-  cvs._.render = require(conf.canvasRender) // set render!
-  
-  if (!sessionStorage[user] && user !== 'default') {
-    cvs.draw({key: 'module:'+genUID(), value: search(rlib,conf.auth)})
-    cvs.draw({key:'pipe:'+genUID(), value: conf.auth+'>brico'})
-  } else { 
-    api.auth.put({value: {user: user, pass: sessionStorage[user]}})
-  }
-
-  localStorage.library = JSON.stringify(glib)
+  boot(conf)
 }
 
 

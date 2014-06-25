@@ -12,6 +12,7 @@ var fileserver = require('node-static').Server
 var newHmac = require('crypto').createHmac
 var formidable = require('formidable')
 
+var sessions = {}
 var users = {}
 var globalConf
 var configFlag = process.argv[2] // specify a config file when booting
@@ -58,7 +59,7 @@ function boot (conf) {
     if (u.pass) getHmac({
       token: u.pass,
       user: user,
-      secret: bricoConf.secretKey
+      secret: bricoConf.secretKey.toString()
     }, function (d) {
       delete bricoConf.users[user].pass
       users[user] = d.val // delete u.pass
@@ -67,8 +68,10 @@ function boot (conf) {
 
   compileModules(conf.server.bundle, rootModules, function (library) {
     bricoConf.library = library
+    bricoConf.uImg = new Buffer(conf.bricoleur.secretKey)
+    delete bricoConf.secretKey
 
-    db.put('config', JSON.stringify(bricoConf))
+    fs.writeFileSync('./bricoleurConfig.json', JSON.stringify(bricoConf))
 
     startServer(conf.server, db, function () {
       console.log('server running')
@@ -117,11 +120,11 @@ function compileModules (config, rootModules, cb) {
 
     next()
   }, function end () {
+    cb(library)
     var bun = fs.createWriteStream(outBun)
     b.bundle().pipe(bun)
     bun.on('finish',function () {
       console.log('compiled '+inBun+' to '+outBun)
-      cb(library)
     })
   })
 }
@@ -148,8 +151,8 @@ function startServer (conf, db, cb) {
     var server = http.createServer(handleHttp)
   } else {
     var file = new fileServer('./static', {
-      'X-Frame-Options' : 'Deny' 
-      'Strict-Transport-Security':'max-age=31536000',
+      'X-Frame-Options' : 'Deny' ,
+      'Strict-Transport-Security':'max-age=31536000'
     })
     var server = https.createServer({
       honorCipherOrder : true,
@@ -175,13 +178,20 @@ function startServer (conf, db, cb) {
     wss.on('error', console.error)
     wss.pipe(multiLevel.server(db, {
       auth: function auth (user, cb) { // manage sessions server side!
-        if (users[user.user] === user.pass) {
-          cb(null, { name: user.user, token: user.pass })
-        } else if (users[user.user] !== user.pass)
-          cb(new Error('wrong pass!'), null)
+        var auth = false
+        if (user.pass && user.pass === users[user.name]) auth = true
+        if (user.session && user.session === sessions[user.name]) auth = true
+        if (auth === true) { // generate session if doesn't exist
+          var sessionID = Math.random().toString().slice(2) 
+          if (!sessions[user.name]) sessions[user.name] = sessionID
+          cb(null, { name: user.name, token: sessionID })
+        }
+        if (auth === false) {
+          cb(new Error('expired sesssion!'), null)
+        }
       },
       access: function access (user, db, method, args) {
-        // copypaste from readme:
+        // copypaste from multilevel readme:
         if (!user || user.name !== 'edit') {
           //do not allow any write access
           if (/^put|^del|^batch|write/i.test(method)) {
