@@ -4,17 +4,17 @@ var Buffer = require('buffer/').Buffer
 var through = require('through')
 
 
-var interface = function (db, cvs, cb) { // API
+var interface = function (db, cvs, user, cb) { 
   self = this
 
-  cvs._.render = require(config.canvasRender) // set render!
+  cvs._.render = require(config.canvasRender) 
   var login = search(config.library.root, config.auth)
 
   if (sessionStorage[user])
     self.auth({value: {name: user, session: sessionStorage[user]}})
 
   if (!sessionStorage[user] && user !== 'default')
-    cvs.draw({key:'pipe:'+genUID(), value: conf.auth + '>brico'})
+    cvs.draw({key:'pipe:'+genUID(), value: config.auth + '>brico'})
 
   cvs.draw([login,'login>brico'])
 
@@ -23,7 +23,6 @@ var interface = function (db, cvs, cb) { // API
 
   function sync (d) { // sync up with db / push updates
     var path = d.key.split(':')
-
     if (path[0] === 'library') { // install library in this function!
 
     }
@@ -35,7 +34,6 @@ var interface = function (db, cvs, cb) { // API
 
   this.auth = function (d) {
     var img = new Buffer(config.uImg).toString()
-    console.log(typeof d)
 
     var auth = { name: d.value.name }
     if (!d.value.session)
@@ -45,17 +43,17 @@ var interface = function (db, cvs, cb) { // API
 
     db.auth(auth, function (e, res) {
       if (e) { 
-        if (!search(cvs._, conf.auth)) {
+        if (!search(cvs._, config.auth)) {
           cvs.draw({
             key: 'module:'+genUID(), 
-            value: search(conf.library.root, conf.auth)
+            value: search(config.library.root, config.auth)
           })
-          cvs.draw({key:'pipe:'+genUID(), value: conf.auth + '>brico'})
+          cvs.draw({key:'pipe:'+genUID(), value: config.auth + '>brico'})
         } else console.error(e) // draw login interface!
         return false
       }
       sessionStorage[res.name] = res.token
-      if (conf.users[user].canvas) api.canvas.put(conf.users[user].canvas)
+      if (config.users[user].canvas) api.canvas.put(config.users[user].canvas)
       if (d.value.origin) cvs._[d.value.origin].s.write(res)
     })
   }
@@ -72,7 +70,7 @@ var interface = function (db, cvs, cb) { // API
     var objects = []
     if (d.modules) {
       d.modules.map(function (currentValue, index, array) {
-        var pkg = search(conf.library.root, currentValue) 
+        var pkg = search(config.library.root, currentValue) 
         objects.push({key:'module:'+genUID(), value: pkg})
       })
       objects.forEach(cvs.draw)
@@ -93,7 +91,7 @@ var interface = function (db, cvs, cb) { // API
   cb(s)
 }
 
-var Canvas = function (interface) { // to save stringify cvs._ to db
+var Canvas = function (interface) {
   var self = this
 
   this._ = { brico : { s : interface } }
@@ -132,33 +130,47 @@ var Canvas = function (interface) { // to save stringify cvs._ to db
   } 
 
   this.erase = function (d) {
-    if (!d.key) { console.error('CANVAS: bad input', d); return false }
+    if (typeof d === 'string') { 
+      if (d.split('>').length > 0) { 
+        drawPipe(d.split('>'))
+      } else drawModule(d)
+    }
+    if (typeof d === 'object' && d.nimoy) drawModule(d)
+    if (d instanceof Array) { // sync draw
+      d.forEach(function (str) {
+        if (typeof str === 'string' && str.split('>').length > 0) {
+          drawPipe(str.split('>'))
+        } else drawModule(d)
+      })
+    } 
 
-    var path = d.key.split(':')
-
-    if (path[0] === 'pipe') {
-      var conn = d.value.split('>')
-      var a = search(self._, conn[0])
-      var b = search(self._, conn[1])
+    function erasePipe (pipeID) {
+      var a = self._[pipeID][0] 
+      var b = self._[pipeID][1]
       a.unpipe(b)
-      delete self._[d.key]
-    } else if (path[0] === 'module') {
-      self._[d.key].erase()
-      delete self._[d.key]
+      delete self._[pipeID]
+    }
+
+    function eraseModule (moduleID) {
+      // check for pipes first then delete
+
+      delete self._[mod]
+     
+      var key = 'module:' + pkg.name + ':' + genUID()
+      self._[key] = self._.render(pkg)
     }
   }
 }
 
 module.exports = function Bricoleur (multiLevel, usr) {
   var cvs = new Canvas(interface) 
-  var api = new interface(multiLevel, cvs, function (s) {
+  var api = new interface(multiLevel, cvs, usr, function (s) {
     return s
   })
+  window.cvs = cvs._
 }
 
-
 // UTILS
-
 function genUID () { return Math.random().toString().slice(2) } 
 
 function search (haystack, needle) {
@@ -172,4 +184,3 @@ function getPath () {
   if (window.location.hash) return window.location.hash.slice(1)
 }
 
-window.Buffer = Buffer
