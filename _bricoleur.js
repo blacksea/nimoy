@@ -132,15 +132,15 @@ var Canvas = function (interface) {
   this.erase = function (d) {
     if (typeof d === 'string') { 
       if (d.split('>').length > 0) { 
-        drawPipe(d.split('>'))
-      } else drawModule(d)
+        erasePipe(d.split('>'))
+      } else eraseModule(d)
     }
-    if (typeof d === 'object' && d.nimoy) drawModule(d)
+    if (typeof d === 'object' && d.nimoy) eraseModule(d)
     if (d instanceof Array) { // sync draw
       d.forEach(function (str) {
         if (typeof str === 'string' && str.split('>').length > 0) {
-          drawPipe(str.split('>'))
-        } else drawModule(d)
+          erasePipe(str.split('>'))
+        } else eraseModule(d)
       })
     } 
 
@@ -183,4 +183,3 @@ function getPath () {
   if (!window.location.hash) return false
   if (window.location.hash) return window.location.hash.slice(1)
 }
-
