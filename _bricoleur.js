@@ -4,10 +4,19 @@ var Buffer = require('buffer/').Buffer
 var through = require('through')
 
 
-var interface = function (db, cvs, user, cb) { 
+var interface = function (db, cvs, user) { 
   self = this
 
+  console.log(config)
+
+  var s = through(function Write (d) { // multiple ways to call api
+    console.log(d)
+  })
+
+  cvs._.brico = {s : s}
+
   cvs._.render = require(config.canvasRender) 
+
   var login = search(config.library.root, config.auth)
 
   if (sessionStorage[user])
@@ -18,7 +27,7 @@ var interface = function (db, cvs, user, cb) {
 
   cvs.draw([login,'login>brico'])
 
-  db.livestream({reverse : true})
+  db.liveStream({reverse : true})
     .on('data', sync)
 
   function sync (d) { // sync up with db / push updates
@@ -27,10 +36,6 @@ var interface = function (db, cvs, user, cb) {
 
     }
   }
-
-  var s = through(function Write (d) { // multiple ways to call api
-    console.log(d)
-  })
 
   this.auth = function (d) {
     var img = new Buffer(config.uImg).toString()
@@ -88,7 +93,7 @@ var interface = function (db, cvs, user, cb) {
 
   }
 
-  cb(s)
+  return s
 }
 
 var Canvas = function (interface) {
@@ -107,7 +112,7 @@ var Canvas = function (interface) {
       d.forEach(function (str) {
         if (typeof str === 'string' && str.split('>').length > 0) {
           drawPipe(str.split('>'))
-        } else drawModule(d)
+        } else drawModule(str)
       })
     } 
 
@@ -123,9 +128,11 @@ var Canvas = function (interface) {
       var pkg = (typeof nameOrPkg !== 'object') 
         ? search(config.library.master, nameOrPkg)
         : nameOrPkg
+
+      console.log(pkg)
       
       var key = 'module:' + pkg.name + ':' + genUID()
-      self._[key] = self._.render(pkg)
+      self._[key] = self._.render({key:key, value:pkg})
     }
   } 
 
@@ -151,9 +158,7 @@ var Canvas = function (interface) {
       delete self._[pipeID]
     }
 
-    function eraseModule (moduleID) {
-      // check for pipes first then delete
-
+    function eraseModule (moduleID) { // check for pipes first then delete
       delete self._[mod]
      
       var key = 'module:' + pkg.name + ':' + genUID()
@@ -162,12 +167,13 @@ var Canvas = function (interface) {
   }
 }
 
-module.exports = function Bricoleur (multiLevel, usr) {
-  var cvs = new Canvas(interface) 
-  var api = new interface(multiLevel, cvs, usr, function (s) {
-    return s
-  })
+module.exports = function Bricoleur (multiLevel, usr, cb) {
+  var cvs = new Canvas() 
+  var api = new interface(multiLevel, cvs, usr)
+
   window.cvs = cvs._
+
+  return api
 }
 
 // UTILS
