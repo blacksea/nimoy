@@ -1,18 +1,7 @@
 var config = require('./bricoleurConfig.json')
-var through = require('through')
-var Buffer = require('buffer/').Buffer
 var hmac = require('crypto-browserify/create-hmac')
-var rootLibrary = {}
-var api = {}
-var home
-var user
-var conf 
-var cvs
-var db
-
-console.log(config)
-// embed config in _brico using require !?
-// then livestream is only used to sync!
+var Buffer = require('buffer/').Buffer
+var through = require('through')
 
 
 function boot (conf) {
@@ -27,34 +16,97 @@ function boot (conf) {
       key: 'module:'+genUID(), 
       value: search(conf.library.root, conf.auth)
     })
-    cvs.draw({key:'pipe:'+genUID(), value: conf.auth+'>brico'})
-  } else { // send session id not hashed pass!
+    cvs.draw({key:'pipe:'+genUID(), value: conf.auth + '>brico'})
+  } else {
     api.auth.put({value: {name: user, session: sessionStorage[user]}})
   }
 }
 
 
-module.exports = function Bricoleur (multiLevel, usr) {
-  user = usr
-  db = multiLevel
-  
-  var interface = through(function Write (d) {
-    if (!d.key || typeof d.key !== 'string') return
+var interface = function (db, cvs, cb) { // API
+  self = this
+
+  boot(config)
+
+  db.livestream({reverse : true})
+    .on('data', sync)
+
+  function sync (d) {
+    var path = d.key.split(':')
+
+  }
+
+  var s = through(function Write (d) {
+
+    // provide ways to call api in streaming fashion
+    
+    console.log(d)
+
+  })
+
+  this.deauth = function (d) {
+
+  }
+  this.auth = function (d) {
+
+  }
+
+  // auth !
+
+  // sessions !
+
+  // data !
+
+  // canvas !
+
+  cb(s)
+}
+
+var Canvas = function (interface) { // to save stringify cvs._ to db
+  var self = this
+
+  this._ = { brico : { s : interface } }
+
+  this.draw = function (d) { 
+    if (!d.key) { console.error('CANVAS: bad input', d); return false }
 
     var path = d.key.split(':')
 
-    if (api[path[0]]) {
-      if (d.type) api[path[0]][d.type](d)
-      if (!d.type) api[path[0]](d)
+    if (path[0] === 'pipe') {
+      var conn = d.value.split('>')
+      var a = search(self._, conn[0])
+      var b = search(self._, conn[1])
+      self._[d.key] = d.value
+      a.s.pipe(b.s)
+    } else if (path[0] === 'module') {
+      d.key += ':' + d.value.name
+      self._[d.key] = self._.render(d) // consistent stream protocol
     }
+  } 
+
+  this.erase = function (d) {
+    if (!d.key) { console.error('CANVAS: bad input', d); return false }
+
+    var path = d.key.split(':')
+
+    if (path[0] === 'pipe') {
+      var conn = d.value.split('>')
+      var a = search(self._, conn[0])
+      var b = search(self._, conn[1])
+      a.unpipe(b)
+      delete self._[d.key]
+    } else if (path[0] === 'module') {
+      self._[d.key].erase()
+      delete self._[d.key]
+    }
+  }
+}
+
+module.exports = function Bricoleur (multiLevel, usr) {
+  var cvs = new Canvas(interface) 
+  var api = new interface(multiLevel, cvs, function (s) {
+    return s
   })
-
-  cvs = new Canvas(interface) 
-
-  multiLevel.liveStream({reverse : true})
-    .pipe(interface)
-
-  return interface
 }
 
 
@@ -77,7 +129,7 @@ api.auth = {
             key: 'module:'+genUID(), 
             value: search(conf.library.root, conf.auth)
           })
-          cvs.draw({key:'pipe:'+genUID(), value: conf.auth+'>brico'})
+          cvs.draw({key:'pipe:'+genUID(), value: conf.auth + '>brico'})
         } else console.error(e) // draw login interface!
         return false
       }
@@ -130,53 +182,6 @@ api.canvas = { // micro macro !?! -- just modifies canvas!
 
   }
 }
-
-api.config = function (d) {
-  conf = JSON.parse(d.value)
-  boot(conf)
-}
-
-
-var Canvas = function (interface) { // to save stringify cvs._ to db
-  var self = this
-
-  this._ = { brico : { s : interface } }
-
-  this.draw = function (d) { 
-    if (!d.key) { console.error('CANVAS: bad input', d); return false }
-
-    var path = d.key.split(':')
-
-    if (path[0] === 'pipe') {
-      var conn = d.value.split('>')
-      var a = search(self._, conn[0])
-      var b = search(self._, conn[1])
-      self._[d.key] = d.value
-      a.s.pipe(b.s)
-    } else if (path[0] === 'module') {
-      d.key += ':' + d.value.name
-      self._[d.key] = self._.render(d) // consistent stream protocol
-    }
-  } 
-
-  this.erase = function (d) {
-    if (!d.key) { console.error('CANVAS: bad input', d); return false }
-
-    var path = d.key.split(':')
-
-    if (path[0] === 'pipe') {
-      var conn = d.value.split('>')
-      var a = search(self._, conn[0])
-      var b = search(self._, conn[1])
-      a.unpipe(b)
-      delete self._[d.key]
-    } else if (path[0] === 'module') {
-      self._[d.key].erase()
-      delete self._[d.key]
-    }
-  }
-}
-
 
 // UTILS
 
