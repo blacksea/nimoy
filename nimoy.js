@@ -12,24 +12,37 @@ var fileserver = require('node-static').Server
 var newHmac = require('crypto').createHmac
 var formidable = require('formidable')
 
-var sessions = {}
-var users = {}
-var globalConf
-var configFlag = process.argv[2] // specify a config file when booting
+var Sessions = function (users) { 
+  var self = this
+  this._ = {}
+
+  this.auth = function (user, cb) { 
+    var auth = false
+
+    if (user.pass && user.pass === users[user.name]) 
+      auth = true
+
+    if (user.session && self._[user.name] && self._[user.name] == user.session)      auth = true
+
+    if (auth === true) {
+      var sessionID = Math.random().toString().slice(2) 
+      if (!self._[user.name]) self._[user.name] = sessionID
+      cb(null, { name: user.name, token: self._[user.name], time: getTime() })
+    }
+    if (auth === false) cb(new Error('Bad Login'), null) // use codes instead
+  }
+}
+
+var configFlag = process.argv[2] 
 
 !(configFlag) 
   ? boot(require('./config.json'))
   : boot(process.argv[2])
 
 function boot (conf) {
-  globalConf = conf
   var rootModules = [conf.bricoleur.canvasRender, conf.bricoleur.auth]
 
   process.stdin.on('data', function (buf) { 
-    // expand into interactive cli tool
-    // import / read db from JSON
-    // export / write db to JSON
-    
     var str = buf.toString()
 
     if (str === 'c\n') 
@@ -38,8 +51,6 @@ function boot (conf) {
 
   if (!conf || !conf.server || !conf.bricoleur)
     throw new Error('nimoy: invalid or missing config.json')
-
-  // provide option to generate default config
   
   if (!fs.existsSync('./static')) fs.mkdir('./static')
 
@@ -50,6 +61,8 @@ function boot (conf) {
   conf.server.secretKey = conf.bricoleur.secretKey
 
   var bricoConf = conf.bricoleur
+
+  var users = {}
 
   for (user in bricoConf.users) {
     var u = bricoConf.users[user]
@@ -66,6 +79,8 @@ function boot (conf) {
     })
   }
 
+  var handleSessions = new Sessions(users).auth
+
   compileModules(conf.server.bundle, rootModules, function (library) {
     bricoConf.library = library
     bricoConf.uImg = new Buffer(conf.bricoleur.secretKey)
@@ -73,14 +88,15 @@ function boot (conf) {
 
     fs.writeFileSync('./bricoleurConfig.json', JSON.stringify(bricoConf))
 
-    startServer(conf.server, db, function () {
-      console.log('server running')
+    startServer(conf.server, db, handleSessions, function () { 
+      console.log('server running') 
     })
   })
 }
 
 function compileModules (config, rootModules, cb) {
   var library  = {
+    master: {},
     root: {},
     global: {}
   } 
@@ -90,19 +106,20 @@ function compileModules (config, rootModules, cb) {
   var b = browserify(inBun)
   var modulesFolder = fs.readdirSync(config.pathModules)
 
-  asyncMap(modulesFolder, function (moduleFolder, next) {
+  asyncMap(modulesFolder, function compileModule (moduleFolder, next) {
     var pkgPath = config.pathModules + moduleFolder + '/package.json'
+
     var templatePath = config.pathModules + moduleFolder + '/' + moduleFolder
                        + '.hogan'
 
     if (!fs.existsSync(pkgPath)) { next(); return false }
 
     var pkg = JSON.parse(fs.readFileSync(pkgPath, {encoding:'utf8'}))
+
     if (!pkg.nimoy) { next(); return false }
 
     if (fs.existsSync(templatePath)) 
       pkg.html = fs.readFileSync(templatePath, {encoding:'utf8'})
-
 
     var key = 'modules:'+pkg.name
     var root = false 
@@ -113,23 +130,29 @@ function compileModules (config, rootModules, cb) {
     }
 
     (root) ? library.root[key] = pkg : library.global[key] = pkg;
+    library.master[key] = pkg
 
     b.require(config.pathModules+moduleFolder+'/'+pkg.main, {
       expose: moduleFolder
     })
 
     next()
+
   }, function end () {
+
     cb(library)
+
     var bun = fs.createWriteStream(outBun)
+
     b.bundle().pipe(bun)
+
     bun.on('finish',function () {
       console.log('compiled '+inBun+' to '+outBun)
     })
   })
 }
 
-function startServer (conf, db, cb) { 
+function startServer (conf, db, auth, cb) { 
 
   fs.writeFileSync('./static/index.html', '<!doctype html>' +
   '<html lang="en">' +
@@ -144,7 +167,6 @@ function startServer (conf, db, cb) {
   '<script src="/bundle.js"></script>' +
   '</body>' +
   '</html>')
-
 
   if (!conf.ssl) {
     var file = new fileserver('./static', {'X-Frame-Options' : 'Deny'})
@@ -177,24 +199,10 @@ function startServer (conf, db, cb) {
   var engine = engineServer(function (wss) {
     wss.on('error', console.error)
     wss.pipe(multiLevel.server(db, {
-      auth: function auth (user, cb) { // manage sessions server side!
-        var auth = false
-        if (user.pass && user.pass === users[user.name]) auth = true
-        if (user.session && user.session === sessions[user.name]) auth = true
-        if (auth === true) { // generate session if doesn't exist
-          var sessionID = Math.random().toString().slice(2) 
-          if (!sessions[user.name]) sessions[user.name] = sessionID
-          cb(null, { name: user.name, token: sessionID })
-        }
-        if (auth === false) {
-          cb(new Error('expired sesssion!'), null)
-        }
-      },
+      auth: auth,
       access: function access (user, db, method, args) {
-        // copypaste from multilevel readme:
         if (!user || user.name !== 'edit') {
-          //do not allow any write access
-          if (/^put|^del|^batch|write/i.test(method)) {
+          if (/^put|^del|^batch|write/i.test(method)) { // no write access!
             throw new Error('read-only access');
           }
         }
@@ -228,3 +236,5 @@ function getHmac (d, cb) {
   hmac.end()
   cb({key:d.user, val:hmac.read().toString()})
 }
+
+function getTime() { return new Date().getTime() }
