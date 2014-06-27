@@ -1,4 +1,5 @@
 var hmac = require('crypto-browserify/create-hmac')
+var hash = require('crypto-browserify/create-hash')
 var config = require('./bricoleurConfig.json')
 var Buffer = require('buffer/').Buffer
 var through = require('through')
@@ -7,60 +8,39 @@ var through = require('through')
 var interface = function (db, cvs, user) { 
   self = this
 
-  console.log(config)
-
-  var s = through(function Write (d) { // multiple ways to call api
-    console.log(d)
+  var s = through(function Write (d) {
+    if (d.key) {
+      var path = d.key.split(':')
+      if (self[path]) self[path](d)
+    }
   })
 
   cvs._.brico = {s : s}
 
   cvs._.render = require(config.canvasRender) 
 
-  var login = search(config.library.root, config.auth)
-
-  if (sessionStorage[user])
-    self.auth({value: {name: user, session: sessionStorage[user]}})
-
-  if (!sessionStorage[user] && user !== 'default')
-    cvs.draw({key:'pipe:'+genUID(), value: config.auth + '>brico'})
-
-  cvs.draw([login,'login>brico'])
-
-  db.liveStream({reverse : true})
-    .on('data', sync)
-
-  function sync (d) { // sync up with db / push updates
-    var path = d.key.split(':')
-    if (path[0] === 'library') { // install library in this function!
-
-    }
-  }
-
   this.auth = function (d) {
-    var img = new Buffer(config.uImg).toString()
+    if (!d.value.session) {
+      var img = new Buffer(config.uImg).toString()
+      var pass = hmac('sha256', img).update(d.value.pass).digest('hex')
+      db.auth({name: d.value.name, pass: pass}, handleAuth)
+    } else if (d.value.session) {
+      db.auth({name: d.value.name, session: d.value.session}, handleAuth)
+    }
 
-    var auth = { name: d.value.name }
-    if (!d.value.session)
-      auth.pass = hmac('sha256', img).update(d.value.pass).digest('hex')
-
-    if (d.value.session) auth.session = d.value.session
-
-    db.auth(auth, function (e, res) {
-      if (e) { 
-        if (!search(cvs._, config.auth)) {
-          cvs.draw({
-            key: 'module:'+genUID(), 
-            value: search(config.library.root, config.auth)
-          })
-          cvs.draw({key:'pipe:'+genUID(), value: config.auth + '>brico'})
-        } else console.error(e) // draw login interface!
+    function handleAuth (e, res) {
+      if (e) { cvs.draw([config.auth, config.auth+'>brico']) }
+      if (!e) {
+        sessionStorage[res.name] = res.token
+        var login = search(cvs._, config.auth)
+        if (typeof login ==='object') cvs.erase(login.html.id)
+        if (config.users[user].canvas) { // !
+          cvs.draw(config.users[user].canvas.modules)
+          cvs.draw(config.users[user].canvas.pipes)
+        }
         return false
       }
-      sessionStorage[res.name] = res.token
-      if (config.users[user].canvas) api.canvas.put(config.users[user].canvas)
-      if (d.value.origin) cvs._[d.value.origin].s.write(res)
-    })
+    }
   }
 
   this.deauth = function (d) {
@@ -71,26 +51,25 @@ var interface = function (db, cvs, user) {
     })
   }
 
-  this.canvas = function (d) {
-    var objects = []
-    if (d.modules) {
-      d.modules.map(function (currentValue, index, array) {
-        var pkg = search(config.library.root, currentValue) 
-        objects.push({key:'module:'+genUID(), value: pkg})
-      })
-      objects.forEach(cvs.draw)
-    }
-    if (d.pipes) {
-      objects = []
-      d.pipes.forEach(function (p) {
-        objects.push({key:'pipe:'+genUID(), value:p})
-      })
-      objects.forEach(cvs.draw)
-    }
+  this.data = function (d) {
+    console.log(d)
   }
 
-  this.data = function (d) {
+  if (sessionStorage[user])
+    this.auth({value: {name: user, session: sessionStorage[user]}})
 
+  if (!sessionStorage[user] && user !== 'default')
+    cvs.draw([config.auth, config.auth+'>brico'])
+
+  db.liveStream({reverse : true})
+    .on('data', sync)
+
+  function sync (d) { 
+    console.log(d)
+    var path = d.key.split(':')
+    if (path[0] === 'library') {
+
+    }
   }
 
   return s
@@ -103,14 +82,14 @@ var Canvas = function (interface) {
 
   this.draw = function (d) { 
     if (typeof d === 'string') { 
-      if (d.split('>').length > 0) { 
+      if (d.split('>').length > 1) { 
         drawPipe(d.split('>'))
       } else drawModule(d)
     }
     if (typeof d === 'object' && d.nimoy) drawModule(d)
-    if (d instanceof Array) { // sync draw
+    if (d instanceof Array) {
       d.forEach(function (str) {
-        if (typeof str === 'string' && str.split('>').length > 0) {
+        if (typeof str === 'string' && str.split('>').length > 1) {
           drawPipe(str.split('>'))
         } else drawModule(str)
       })
@@ -119,7 +98,7 @@ var Canvas = function (interface) {
     function drawPipe (conn) {
       var a = search(self._, conn[0]).s
       var b = search(self._, conn[1]).s
-      var key = 'pipe:' + conn + ':' + genUID()
+      var key = 'pipe:' + genUID(conn) + ':' + conn[0] + '|' + conn[1]
       a.pipe(b)
       self._[key] = [a , b]
     }
@@ -128,24 +107,21 @@ var Canvas = function (interface) {
       var pkg = (typeof nameOrPkg !== 'object') 
         ? search(config.library.master, nameOrPkg)
         : nameOrPkg
-
-      console.log(pkg)
-      
-      var key = 'module:' + pkg.name + ':' + genUID()
+      var key = 'module:' + genUID() + ':' + pkg.name
       self._[key] = self._.render({key:key, value:pkg})
     }
   } 
 
   this.erase = function (d) {
     if (typeof d === 'string') { 
-      if (d.split('>').length > 0) { 
+      if (d.split('>').length > 1) { 
         erasePipe(d.split('>'))
       } else eraseModule(d)
     }
     if (typeof d === 'object' && d.nimoy) eraseModule(d)
-    if (d instanceof Array) { // sync draw
+    if (d instanceof Array) {
       d.forEach(function (str) {
-        if (typeof str === 'string' && str.split('>').length > 0) {
+        if (typeof str === 'string' && str.split('>').length > 1) {
           erasePipe(str.split('>'))
         } else eraseModule(d)
       })
@@ -158,11 +134,13 @@ var Canvas = function (interface) {
       delete self._[pipeID]
     }
 
-    function eraseModule (moduleID) { // check for pipes first then delete
-      delete self._[mod]
-     
-      var key = 'module:' + pkg.name + ':' + genUID()
-      self._[key] = self._.render(pkg)
+    function eraseModule (moduleID) {
+      var mod = search(self._, moduleID)
+      if (mod) {
+        mod.s.end()
+        mod.erase()
+        delete mod
+      }
     }
   }
 }
@@ -177,7 +155,11 @@ module.exports = function Bricoleur (multiLevel, usr, cb) {
 }
 
 // UTILS
-function genUID () { return Math.random().toString().slice(2) } 
+
+function genUID (name) { 
+  var r = Math.random().toString().slice(2)
+  return hash('sha1').update(name+r).digest('hex')
+} 
 
 function search (haystack, needle) {
   for (hay in haystack) {
@@ -185,7 +167,7 @@ function search (haystack, needle) {
   }
 }
 
-function getPath () {
+function getPath () { 
   if (!window.location.hash) return false
   if (window.location.hash) return window.location.hash.slice(1)
 }
