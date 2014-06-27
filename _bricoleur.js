@@ -107,7 +107,7 @@ var Canvas = function (interface) {
       var pkg = (typeof nameOrPkg !== 'object') 
         ? search(config.library.master, nameOrPkg)
         : nameOrPkg
-      var key = 'module:' + genUID() + ':' + pkg.name
+      var key = 'module:' + genUID(pkg.name) + ':' + pkg.name
       self._[key] = self._.render({key:key, value:pkg})
     }
   } 
