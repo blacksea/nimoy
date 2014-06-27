@@ -7,6 +7,10 @@
     "test": "tests"
   },
   "dependencies": {
+    "domify" : "^1.2.2",
+    "buffer" : "^2.3.2",
+    "templayed" : "^0.2.3",
+    "crypto-browserify" : "^2.1.8",
     "browserify" : "^4.1.8",
     "engine.io-stream": "^0.4.3",
     "level": "^0.18.0",
