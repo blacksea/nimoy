@@ -104,6 +104,7 @@ var Canvas = function (interface) {
     }
 
     function drawModule (nameOrPkg) {
+      console.log(config.library.master)
       var pkg = (typeof nameOrPkg !== 'object') 
         ? search(config.library.master, nameOrPkg)
         : nameOrPkg
