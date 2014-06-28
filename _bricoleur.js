@@ -9,14 +9,13 @@ var interface = function (db, cvs, user) {
   self = this
 
   var s = through(function Write (d) {
-    console.log(d)
     if (d.key) {
-      var path = d.key.split(':')
+      var path = d.key.split(':')[0]
       if (self[path]) self[path](d)
     }
   })
 
-  cvs._.brico = {s : s}
+  cvs._.brico = { s : s } 
 
   cvs._.render = require(config.canvasRender) 
 
@@ -34,7 +33,7 @@ var interface = function (db, cvs, user) {
       if (!e) {
         sessionStorage[res.name] = res.token
         var login = search(cvs._, config.auth)
-        if (typeof login ==='object') cvs.erase(login.html.id)
+        if (typeof login ==='object') cvs.erase(login.id)
         if (config.users[user].canvas) { // !
           cvs.draw(config.users[user].canvas.modules)
           cvs.draw(config.users[user].canvas.pipes)
@@ -53,7 +52,26 @@ var interface = function (db, cvs, user) {
   }
 
   this.data = function (d) {
-    console.log('data:',d)
+    console.log(d)
+    if (d.type) {
+      if (d.type === 'put') db.put(d.key,d.value)
+      if (d.type === 'get') {
+        db.get(d.key, function (e, res) {
+          if (e) {console.error(e); return false}
+          var origin = search(cvs._, d.key.split(':')[1])
+          console.log(origin, res)
+          origin.s.write(res)
+        })
+      }
+    }
+    switch (d.type) {
+      case 'put' : ;break;
+      case 'del' : db.del(d.key);break;
+      case 'get' : db.get(d.key, function (e, res) {
+        if (d.id) (!e) ? cvs._[d.id].write(res) : cvs._[d.id].write(e)
+      }); break; // !?
+      default : console.error('Data: bad input'); break;
+    }
   }
 
   if (sessionStorage[user])
@@ -97,11 +115,11 @@ var Canvas = function (interface) {
     } 
 
     function drawPipe (conn) {
-      var a = search(self._, conn[0]).s
-      var b = search(self._, conn[1]).s
+      var a = search(self._, conn[0])
+      var b = search(self._, conn[1])
       var key = 'pipe:' + genUID(conn) + ':' + conn[0] + '|' + conn[1]
-      a.pipe(b)
-      self._[key] = [a , b]
+      a.s.pipe(b.s)
+      self._[key] = [a.id , b.id]
     }
 
     function drawModule (nameOrPkg) {
