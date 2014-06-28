@@ -10,6 +10,7 @@ var browserify = require('browserify')
 var engineServer = require('engine.io-stream')
 var fileserver = require('node-static').Server
 var newHmac = require('crypto').createHmac
+var uglify = require('uglify-js')
 var formidable = require('formidable')
 
 var Sessions = function (users) { 
