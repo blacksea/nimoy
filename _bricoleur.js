@@ -9,6 +9,7 @@ var interface = function (db, cvs, user) {
   self = this
 
   var s = through(function Write (d) {
+    console.log(d)
     if (d.key) {
       var path = d.key.split(':')
       if (self[path]) self[path](d)
@@ -52,7 +53,7 @@ var interface = function (db, cvs, user) {
   }
 
   this.data = function (d) {
-    console.log(d)
+    console.log('data:',d)
   }
 
   if (sessionStorage[user])
@@ -104,7 +105,6 @@ var Canvas = function (interface) {
     }
 
     function drawModule (nameOrPkg) {
-      console.log(config.library.master)
       var pkg = (typeof nameOrPkg !== 'object') 
         ? search(config.library.master, nameOrPkg)
         : nameOrPkg
@@ -138,7 +138,6 @@ var Canvas = function (interface) {
     function eraseModule (moduleID) {
       var mod = search(self._, moduleID)
       if (mod) {
-        mod.s.end()
         mod.erase()
         delete mod
       }
