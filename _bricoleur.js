@@ -4,85 +4,6 @@ var config = require('./bricoleurConfig.json')
 var Buffer = require('buffer/').Buffer
 var through = require('through')
 
-var interface = function (db, cvs, user) { 
-  self = this
-
-  var s = through(function Write (d) {
-    if (d.key) {
-      var path = d.key.split(':')[0]
-      if (self[path]) self[path](d)
-    }
-  })
-
-  cvs._.brico = { s : s } 
-
-  cvs._.render = require(config.canvasRender) 
-
-  this.auth = function (d) {
-    if (!d.value.session) {
-      var img = new Buffer(config.uImg).toString()
-      var pass = hmac('sha256', img).update(d.value.pass).digest('hex')
-      db.auth({name: d.value.name, pass: pass}, handleAuth)
-    } else if (d.value.session) {
-      db.auth({name: d.value.name, session: d.value.session}, handleAuth)
-    }
-
-    function handleAuth (e, res) {
-      if (e) { cvs.draw([config.auth, config.auth+'>brico']) }
-      if (!e) {
-        sessionStorage[res.name] = res.token
-        var login = search(cvs._, config.auth)
-        if (typeof login ==='object') cvs.erase(login.id)
-        if (config.users[user].canvas) { // !
-          cvs.draw(config.users[user].canvas.modules)
-          cvs.draw(config.users[user].canvas.pipes)
-        }
-        return false
-      }
-    }
-  }
-
-  this.deauth = function (d) {
-    db.deauth(function () { 
-      delete sessionStorage[user] 
-      var path = (!getPath()) ? home : home + getPath()
-      window.location = path
-    })
-  }
-
-  this.data = function (d) {
-    if (d.type) {
-      if (d.type === 'put') db.put(d.key,d.value)
-      if (d.type === 'get') {
-        db.get(d.key, function (e, res) {
-          if (e) {console.error(e); return false}
-          var origin = search(cvs._, d.key.split(':')[1])
-          origin.s.write(res)
-        })
-      }
-    }
-  }
-
-  if (sessionStorage[user])
-    this.auth({value: {name: user, session: sessionStorage[user]}})
-
-  if (!sessionStorage[user] && user !== 'default')
-    cvs.draw([config.auth, config.auth+'>brico'])
-
-  db.liveStream({reverse : true})
-    .on('data', sync)
-
-  function sync (d) { 
-    var path = d.key.split(':')[0]
-    if (path === 'data') {
-      var origin = search(cvs._, d.key.split(':')[1]) // update module
-      if (origin) origin.s.write(d)
-    }
-  }
-
-  return s
-}
-
 var Canvas = function (interface) {
   var self = this
 
@@ -132,11 +53,83 @@ var Canvas = function (interface) {
   }
 }
 
-module.exports = function Bricoleur (multiLevel, usr, cb) {
+module.exports = function Bricoleur (db, user) {
+
+  var api = {}
+  api.auth = function (d) {
+    if (!d.value.session) {
+      var img = new Buffer(config.uImg).toString()
+      var pass = hmac('sha256', img).update(d.value.pass).digest('hex')
+      db.auth({name: d.value.name, pass: pass}, handleAuth)
+    } else if (d.value.session) {
+      db.auth({name: d.value.name, session: d.value.session}, handleAuth)
+    }
+
+    function handleAuth (e, res) {
+      if (e) { cvs.draw([config.auth, config.auth+'>brico']) }
+      if (!e) {
+        sessionStorage[res.name] = res.token
+        var login = search(cvs._, config.auth)
+        if (typeof login ==='object') cvs.erase(login.id)
+        if (config.users[user].canvas) { // !
+          cvs.draw(config.users[user].canvas.modules)
+          cvs.draw(config.users[user].canvas.pipes)
+        }
+        return false
+      }
+    }
+  }
+  api.deauth = function (d) {
+    db.deauth(function () { 
+      delete sessionStorage[user] 
+      var path = (!getPath()) ? home : home + getPath()
+      window.location = path
+    })
+  }
+  api.data = function (d) {
+    if (d.type) {
+      if (d.type === 'put') db.put(d.key,d.value)
+      if (d.type === 'get') {
+        db.get(d.key, function (e, res) {
+          if (e) {console.error(e); return false}
+          var origin = search(cvs._, d.key.split(':')[1])
+          origin.s.write(res)
+        })
+      }
+    }
+  }
+
+  var s = through(function Write (d) {
+    if (d.key) {
+      var path = d.key.split(':')[0]
+      if (api[path]) api[path](d)
+    }
+  })
+
   var cvs = new Canvas() 
-  var api = new interface(multiLevel, cvs, usr)
+  cvs._.brico = { s : s } 
+  cvs._.render = require(config.canvasRender) 
+
+  if (sessionStorage[user])
+    api.auth({value: {name: user, session: sessionStorage[user]}})
+
+  if (!sessionStorage[user] && user !== 'default')
+    cvs.draw([config.auth, config.auth+'>brico'])
+
+  db.liveStream({reverse : true})
+    .on('data', sync)
+
+  function sync (d) { 
+    var path = d.key.split(':')[0]
+    if (path === 'data') {
+      var origin = search(cvs._, d.key.split(':')[1]) // update module
+      if (origin) origin.s.write(d)
+    }
+  }
+
   window.cvs = cvs._
-  return api
+
+  return s
 }
 
 // UTILS
