@@ -4,7 +4,6 @@ var config = require('./bricoleurConfig.json')
 var Buffer = require('buffer/').Buffer
 var through = require('through')
 
-
 var interface = function (db, cvs, user) { 
   self = this
 
@@ -52,7 +51,6 @@ var interface = function (db, cvs, user) {
   }
 
   this.data = function (d) {
-    console.log(d)
     if (d.type) {
       if (d.type === 'put') db.put(d.key,d.value)
       if (d.type === 'get') {
@@ -63,14 +61,6 @@ var interface = function (db, cvs, user) {
           origin.s.write(res)
         })
       }
-    }
-    switch (d.type) {
-      case 'put' : ;break;
-      case 'del' : db.del(d.key);break;
-      case 'get' : db.get(d.key, function (e, res) {
-        if (d.id) (!e) ? cvs._[d.id].write(res) : cvs._[d.id].write(e)
-      }); break; // !?
-      default : console.error('Data: bad input'); break;
     }
   }
 
@@ -85,9 +75,10 @@ var interface = function (db, cvs, user) {
 
   function sync (d) { 
     console.log(d)
-    var path = d.key.split(':')
-    if (path[0] === 'library') {
-
+    var path = d.key.split(':')[0]
+    if (path === 'data') {
+      var origin = search(cvs._, d.key.split(':')[1]) // update module
+      if (origin) origin.s.write(d)
     }
   }
 
@@ -99,76 +90,58 @@ var Canvas = function (interface) {
 
   this._ = { brico : { s : interface } }
 
-  this.draw = function (d) { 
+  function parse (d, cbPipe, cbModule) {
     if (typeof d === 'string') { 
       if (d.split('>').length > 1) { 
-        drawPipe(d.split('>'))
-      } else drawModule(d)
-    }
-    if (typeof d === 'object' && d.nimoy) drawModule(d)
-    if (d instanceof Array) {
-      d.forEach(function (str) {
-        if (typeof str === 'string' && str.split('>').length > 1) {
-          drawPipe(str.split('>'))
-        } else drawModule(str)
-      })
-    } 
-
-    function drawPipe (conn) {
-      var a = search(self._, conn[0])
-      var b = search(self._, conn[1])
-      var key = 'pipe:' + genUID(conn) + ':' + conn[0] + '|' + conn[1]
-      a.s.pipe(b.s)
-      self._[key] = [a.id , b.id]
-    }
-
-    function drawModule (nameOrPkg) {
-      var pkg = (typeof nameOrPkg !== 'object') 
-        ? search(config.library.master, nameOrPkg)
-        : nameOrPkg
-      var key = 'module:' + genUID(pkg.name) + ':' + pkg.name
-      self._[key] = self._.render({key:key, value:pkg})
-    }
-  } 
-
-  this.erase = function (d) {
-    if (typeof d === 'string') { 
-      if (d.split('>').length > 1) { 
-        erasePipe(d.split('>'))
-      } else eraseModule(d)
+        cbPipe(d.split('>'))
+      } else cbModule(d)
     }
     if (typeof d === 'object' && d.nimoy) eraseModule(d)
     if (d instanceof Array) {
       d.forEach(function (str) {
         if (typeof str === 'string' && str.split('>').length > 1) {
-          erasePipe(str.split('>'))
-        } else eraseModule(d)
+          cbPipe(str.split('>'))
+        } else cbModule(d)
       })
     } 
+  }
 
-    function erasePipe (pipeID) {
+  this.draw = function (d) { 
+    parse (d, function drawPipe (conn) {
+      var a = search(self._, conn[0])
+      var b = search(self._, conn[1])
+      var key = 'pipe:' + genUID(conn) + ':' + conn[0] + '|' + conn[1]
+      a.s.pipe(b.s)
+      self._[key] = [a.id , b.id]
+    }, function drawModule (nameOrPkg) {
+      var pkg = (typeof nameOrPkg !== 'object') 
+        ? search(config.library.master, nameOrPkg)
+        : nameOrPkg
+      var key = 'module:' + genUID(pkg.name) + ':' + pkg.name
+      self._[key] = self._.render({key:key, value:pkg})
+    })
+  } 
+
+  this.erase = function (d) {
+    parse (d, function erasePipe (pipeID) { 
       var a = self._[pipeID][0] 
       var b = self._[pipeID][1]
-      a.unpipe(b)
+      a.unpipe(b) // not so sure about this...
       delete self._[pipeID]
-    }
-
-    function eraseModule (moduleID) {
+    }, function eraseModule (moduleID) {
       var mod = search(self._, moduleID)
       if (mod) {
         mod.erase()
         delete mod
       }
-    }
+    })
   }
 }
 
 module.exports = function Bricoleur (multiLevel, usr, cb) {
   var cvs = new Canvas() 
   var api = new interface(multiLevel, cvs, usr)
-
   window.cvs = cvs._
-
   return api
 }
 
