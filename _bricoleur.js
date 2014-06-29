@@ -57,7 +57,6 @@ var interface = function (db, cvs, user) {
         db.get(d.key, function (e, res) {
           if (e) {console.error(e); return false}
           var origin = search(cvs._, d.key.split(':')[1])
-          console.log(origin, res)
           origin.s.write(res)
         })
       }
@@ -74,7 +73,6 @@ var interface = function (db, cvs, user) {
     .on('data', sync)
 
   function sync (d) { 
-    console.log(d)
     var path = d.key.split(':')[0]
     if (path === 'data') {
       var origin = search(cvs._, d.key.split(':')[1]) // update module
