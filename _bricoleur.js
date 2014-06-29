@@ -92,18 +92,14 @@ var Canvas = function (interface) {
 
   function parse (d, cbPipe, cbModule) {
     if (typeof d === 'string') { 
-      if (d.split('>').length > 1) { 
-        cbPipe(d.split('>'))
-      } else cbModule(d)
+      (!d.match('>')) ? cbModule(d) : cbPipe(d.split('>'))
     }
-    if (typeof d === 'object' && d.nimoy) eraseModule(d)
     if (d instanceof Array) {
       d.forEach(function (str) {
-        if (typeof str === 'string' && str.split('>').length > 1) {
-          cbPipe(str.split('>'))
-        } else cbModule(d)
+        (!str.match('>')) ? cbModule(str) : cbPipe(str.split('>'))
       })
     } 
+    if (typeof d === 'object' && d.nimoy) cbModule(d)
   }
 
   this.draw = function (d) { 
