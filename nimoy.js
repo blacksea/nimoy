@@ -8,10 +8,10 @@ var multiLevel = require('multilevel')
 var livestream = require('level-live-stream')
 var browserify = require('browserify')
 var engineServer = require('engine.io-stream')
-var fileserver = require('node-static').Server
 var newHmac = require('crypto').createHmac
-var uglify = require('uglify-js')
 var formidable = require('formidable')
+var uglify = require('uglify-js')
+var st = require('st')
 
 var Sessions = function (users) { 
   var self = this
@@ -154,6 +154,7 @@ function compileModules (config, rootModules, cb) {
 }
 
 function startServer (conf, db, auth, cb) { 
+  var mount = st({ path: './static', url: '/', passthrough: true })
 
   fs.writeFileSync('./static/index.html', '<!doctype html>' +
   '<html lang="en">' +
@@ -170,13 +171,8 @@ function startServer (conf, db, auth, cb) {
   '</html>')
 
   if (!conf.ssl) {
-    var file = new fileserver('./static', {'X-Frame-Options' : 'Deny'})
     var server = http.createServer(handleHttp)
   } else {
-    var file = new fileServer('./static', {
-      'X-Frame-Options' : 'Deny' ,
-      'Strict-Transport-Security':'max-age=31536000'
-    })
     var server = https.createServer({
       honorCipherOrder : true,
       key : fs.readFileSync(conf.ssl.key),
@@ -188,12 +184,15 @@ function startServer (conf, db, auth, cb) {
   }
 
   function handleHttp (req, res) {
+    res.setHeader('X-Frame-Options', 'Deny')
+    if (conf.ssl) 
+      res.setHeader('Strict-Transport-Security','max-age=31536000')
     if (req.url === '/upload' && req.method === 'post') fileUpload(req, res)
-    file.serve(req, res, function noFile (e) {
-      if (e) {
-        var path = url.parse(req.url).pathname.slice(1)
-        file.serveFile('/index.html', 200, {}, req, res)
-      }
+
+    mount(req, res, function err () {
+      res.end('404')
+      // var path = url.parse(req.url).pathname.slice(1)
+      // file.serveFile('/index.html', 200, {}, req, res)
     })
   }
 
