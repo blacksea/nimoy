@@ -2,7 +2,7 @@ var hmac = require('crypto-browserify/create-hmac')
 var hash = require('crypto-browserify/create-hash')
 var config = require('./bricoleurConfig.json')
 var Buffer = require('buffer/').Buffer
-var through = require('through')
+var through = require('through2')
 
 var Canvas = function (interface) {
   var self = this
@@ -54,7 +54,7 @@ var Canvas = function (interface) {
 }
 
 module.exports = function Bricoleur (db, user) {
-
+  localStorage.library = JSON.stringify(config.library.global)
   var api = {}
   api.auth = function (d) {
     if (!d.value.session) {
@@ -99,11 +99,12 @@ module.exports = function Bricoleur (db, user) {
     }
   }
 
-  var s = through(function Write (d) {
+  var s = through.obj(function Write (d, enc, next) {
     if (d.key) {
       var path = d.key.split(':')[0]
       if (api[path]) api[path](d)
     }
+    next()
   })
 
   var cvs = new Canvas() 
