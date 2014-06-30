@@ -154,7 +154,12 @@ function compileModules (config, rootModules, cb) {
 }
 
 function startServer (conf, db, auth, cb) { 
-  var mount = st({ path: './static', url: '/', passthrough: true })
+  var mount = st({
+    index: 'index.html', 
+    path: './static', 
+    url: '/', 
+    passthrough: true 
+  })
 
   fs.writeFileSync('./static/index.html', '<!doctype html>' +
   '<html lang="en">' +
