@@ -61,6 +61,23 @@ function boot (conf) {
 
   conf.server.secretKey = conf.bricoleur.secretKey
 
+  // write index
+  fs.writeFileSync('./static/index.html', 
+    '<!doctype html>' +
+    '<html lang="en">' +
+    '<meta charset="utf-8">' +
+    '<head>' +
+    '<title>'+config.name+'</title>' +
+    '<link rel="stylesheet" href="/style.css">' +
+    '</head>' +
+    '<body id="canvas">' +
+    '<div class="container">' +
+    '</div>' +
+    '<script src="/bundle.js"></script>' +
+    '</body>' +
+    '</html>'
+  )
+
   var bricoConf = conf.bricoleur
 
   var users = {}
@@ -160,20 +177,6 @@ function startServer (conf, db, auth, cb) {
     url: '/', 
     passthrough: true 
   })
-
-  fs.writeFileSync('./static/index.html', '<!doctype html>' +
-  '<html lang="en">' +
-  '<meta charset="utf-8">' +
-  '<head>' +
-  '<title>Untitiled</title>' +
-  '<link rel="stylesheet" href="/style.css">' +
-  '</head>' +
-  '<body id="canvas">' +
-  '<div class="container">' +
-  '</div>' +
-  '<script src="/bundle.js"></script>' +
-  '</body>' +
-  '</html>')
 
   if (!conf.ssl) {
     var server = http.createServer(handleHttp)
