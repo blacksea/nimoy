@@ -10,7 +10,7 @@ var Canvas = function (interface) {
   this._ = { brico : { s : interface } }
 
   function parse (d, cbPipe, cbModule) {
-    if (typeof d === 'string') { 
+    if (typeof d === 'string') {  // check for hash!
       (!d.match('>')) ? cbModule(d) : cbPipe(d.split('>'))
     }
     if (d instanceof Array) {
@@ -51,6 +51,32 @@ var Canvas = function (interface) {
       }
     })
   }
+
+  this.import = function (name) {
+    db.get('canvas:'+name, function (e, res) {
+      if (e) {console.error(e);return}
+      console.log(res)
+
+      // current canvas - imported
+      // in current canvas but not in imported (erase)
+      // in import but not in canvas (draw)
+
+    })
+  }
+
+  this.export = function (name) {
+    var key = 'canvas:'+name
+    var cvsExport = {modules: [], pipes: []}
+    for (item in cvs._) {
+       var  type = item.split(':')[0]
+       var  hash = item.split(':')[1]
+       if (hash && hash.length === 40) { // theres a valid hash
+         if (type==='module') cvsExport.modules.push(hash)
+         if (type==='pipe') cvsExport.pipes.push(hash)
+       }
+    }
+    db.put(key, cvsExport)
+  }
 }
 
 module.exports = function Bricoleur (db, user) {
@@ -66,7 +92,12 @@ module.exports = function Bricoleur (db, user) {
     }
 
     function handleAuth (e, res) {
-      if (e) { cvs.draw([config.auth, config.auth+'>brico']) }
+      if (e) { 
+        console.error(e)
+        s.push({key:'notify', value: {text:e.message} })
+        if (!search(cvs._, config.auth))
+          cvs.draw([config.auth, config.auth+'>brico']) 
+      }
       if (!e) {
         sessionStorage[res.name] = res.token
         var login = search(cvs._, config.auth)
@@ -89,14 +120,24 @@ module.exports = function Bricoleur (db, user) {
   api.data = function (d) {
     if (d.type) {
       if (d.type === 'put') db.put(d.key,d.value)
-      if (d.type === 'get') {
+      if (d.type === 'get' && d.origin) {
+        var origin = search(cvs._, d.key.split(':')[1])
         db.get(d.key, function (e, res) {
           if (e) {console.error(e); return false}
-          var origin = search(cvs._, d.key.split(':')[1])
           origin.s.write(res)
         })
       }
     }
+  }
+  api.module = function (d) {
+
+  }
+  api.pipe = function (d) {
+
+  }
+  api.canvas = function (d) {
+    // import / export wrapper
+    
   }
 
   var s = through.obj(function Write (d, enc, next) {
