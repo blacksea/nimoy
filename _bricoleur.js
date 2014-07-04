@@ -26,6 +26,7 @@ var Canvas = function (interface) {
       var b = search(self._, conn[1])
       var hash = genUID(conn)
       var key = 'pipe:' + hash + ':' + conn[0] + '|' + conn[1]
+
       a.s.pipe(b.s)
       self._[key] = [a.id , b.id]
       self.index.pipes[hash] = [a.id, b.id]
@@ -33,6 +34,7 @@ var Canvas = function (interface) {
       var pkg = (typeof nameOrPkg !== 'object') 
         ? search(config.library.master, nameOrPkg)
         : nameOrPkg
+
       var hash = genUID(pkg.name)
       var key = 'module:' + hash + ':' + pkg.name
       self._[key] = self._.render({key:key, value:pkg})
@@ -45,11 +47,13 @@ var Canvas = function (interface) {
       var a = self._[pipeID][0] 
       var b = self._[pipeID][1]
       a.unpipe(b) 
+
       delete self._[pipeID]
       delete self.index.pipes[pipeID]
     }, function eraseModule (moduleID) {
       var mod = search(self._, moduleID)
       if (mod) { mod.erase(); delete mod }
+
       delete self.index.modules[moduleID]
     })
   }
