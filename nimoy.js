@@ -194,8 +194,6 @@ function startServer (conf, db, auth, cb) {
 
   function handleHttp (req, res) {
     res.setHeader('X-Frame-Options', 'Deny')
-    console.log(req.method)
-    console.log(req.url)
     if (conf.ssl) 
       res.setHeader('Strict-Transport-Security','max-age=31536000')
     if (req.url === '/upload' && req.method === 'POST') {
@@ -230,14 +228,12 @@ function startServer (conf, db, auth, cb) {
 function fileUpload (req, res) {
   var form = new formidable.IncomingForm();
   form.parse(req, function(err, fields, files) {
-    console.log(fields, files)
     var filePath = './static/files/'+fields.file
     var blob = fields.blob.split(',')[1]
-    fs.writeFileSync(filePath, blob, {encoding:'base64'}) 
-
     res.writeHead(200, {'content-type': 'text/plain'})
     res.write('received upload:\n\n')
     res.end()
+    fs.writeFileSync(filePath, blob, {encoding:'base64'}) 
   })
 }
 
