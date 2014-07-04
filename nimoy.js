@@ -54,6 +54,7 @@ function boot (conf) {
     throw new Error('nimoy: invalid or missing config.json')
   
   if (!fs.existsSync('./static')) fs.mkdir('./static')
+  if (!fs.existsSync('./static/files')) fs.mkdir('./static/files')
 
   var db = level('./' + conf.server.host)
   livestream.install(db)
