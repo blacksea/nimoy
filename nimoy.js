@@ -200,7 +200,8 @@ function startServer (conf, db, auth, cb) {
       fileUpload(req, res)
     } else {
       mount(req, res, function err () {
-        res.end('404')
+        res.end('<html><script type="text/javascript">' +
+                'window.location.pathname = "/";</script></html>')
         // var path = url.parse(req.url).pathname.slice(1)
         // file.serveFile('/index.html', 200, {}, req, res)
       })
