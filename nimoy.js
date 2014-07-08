@@ -215,8 +215,9 @@ function startServer (conf, db, auth, cb) {
       res.writeHead(200, {'content-type': 'text/plain'})
       res.write('received upload:\n\n')
       res.end()
-      fs.writeFileSync(filePath, blob, {encoding:'base64'}) 
-      db.put('file:'+fields.id, '/files/'+fields.file)
+      fs.writeFile(filePath, blob, {encoding:'base64'}, function (e) {
+        if (!e) db.put('file:'+fields.id, '/files/'+fields.file)
+      }) 
     })
   }
 
