@@ -1,7 +1,6 @@
 var hmac = require('crypto-browserify/create-hmac')
 var config = require('./bricoleurConfig.json')
 var Buffer = require('buffer/').Buffer
-var utils = require('./_utils')
 var search = utils.search
 var genUID = utils.UID
 var getPath = utils.getPath
