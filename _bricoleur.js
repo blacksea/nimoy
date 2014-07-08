@@ -2,9 +2,9 @@ var hmac = require('crypto-browserify/create-hmac')
 var config = require('./bricoleurConfig.json')
 var Buffer = require('buffer/').Buffer
 var utils = require('./_utils')
-var search = require('/utils/search')
-var getUID = require('/utils/UID')
-var getPath = require('/utils/getPath')
+var search = utils.search
+var getUID = utils.getUID
+var getPath = utils.getPath
 var through = require('through2')
 
 var Canvas = function (interface) {
