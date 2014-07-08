@@ -170,7 +170,7 @@ module.exports = function Bricoleur (db, user) {
 
   function sync (d) { 
     var path = d.key.split(':')[0]
-    if (path === 'file') console.log(d) // files!!!
+    if (path === 'file') console.log(d.key) // files!!!
     if (path === 'data') {
       var origin = search(cvs._, d.key.split(':')[1])
       if (origin) origin.s.write(d)
