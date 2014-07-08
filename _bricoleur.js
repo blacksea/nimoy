@@ -3,7 +3,7 @@ var config = require('./bricoleurConfig.json')
 var Buffer = require('buffer/').Buffer
 var utils = require('./_utils')
 var search = utils.search
-var getUID = utils.getUID
+var genUID = utils.getUID
 var getPath = utils.getPath
 var through = require('through2')
 
