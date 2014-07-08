@@ -1,7 +1,10 @@
 var hmac = require('crypto-browserify/create-hmac')
-var hash = require('crypto-browserify/create-hash')
 var config = require('./bricoleurConfig.json')
 var Buffer = require('buffer/').Buffer
+var utils = require('./_utils')
+var search = require('./_uitils/search')
+var getUID = require('./_uitils/UID')
+var getPath = require('./_uitils/getPath')
 var through = require('through2')
 
 var Canvas = function (interface) {
