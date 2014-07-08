@@ -166,7 +166,7 @@ function compileModules (config, rootModules, cb) {
     b.bundle().pipe(bun)
 
     bun.on('finish',function () {
-      console.log('compiled '+inBun+' to '+outBun)
+      console.log('compiled '+ inBun +' to ' + outBun)
     })
   })
 }
@@ -202,8 +202,6 @@ function startServer (conf, db, auth, cb) {
       mount(req, res, function err () {
         res.end('<html><script type="text/javascript">' +
                 'window.location.pathname = "/";</script></html>')
-        // var path = url.parse(req.url).pathname.slice(1)
-        // file.serveFile('/index.html', 200, {}, req, res)
       })
     }
   }
