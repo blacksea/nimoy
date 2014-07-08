@@ -186,18 +186,3 @@ module.exports = function Bricoleur (db, user) {
 
   return s
 }
-
-// UTILS
-function genUID (name) { 
-  var r = Math.random().toString().slice(2)
-  return hash('sha1').update(name+r).digest('hex')
-} 
-function search (haystack, needle) {
-  for (hay in haystack) {
-    if (hay.match(needle)) return haystack[hay]
-  }
-}
-function getPath () { 
-  if (!window.location.hash) return false
-  if (window.location.hash) return window.location.hash.slice(1)
-}
