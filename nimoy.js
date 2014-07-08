@@ -23,7 +23,8 @@ var Sessions = function (users) {
     if (user.pass && user.pass === users[user.name]) 
       auth = true
 
-    if (user.session && self._[user.name] && self._[user.name] == user.session)      auth = true
+    if (user.session && self._[user.name] && self._[user.name] == user.session) 
+      auth = true
 
     if (auth === true) {
       var sessionID = Math.random().toString().slice(2) 
