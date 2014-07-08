@@ -207,6 +207,19 @@ function startServer (conf, db, auth, cb) {
     }
   }
 
+  function fileUpload (req, res) {
+    var form = new formidable.IncomingForm();
+    form.parse(req, function(err, fields, files) {
+      var filePath = './static/files/'+fields.file
+      var blob = fields.blob.split(',')[1]
+      res.writeHead(200, {'content-type': 'text/plain'})
+      res.write('received upload:\n\n')
+      res.end()
+      fs.writeFileSync(filePath, blob, {encoding:'base64'}) 
+      db.put('file:'+fields.id, '/files/'+fields.file)
+    })
+  }
+
   var engine = engineServer(function (wss) {
     wss.on('error', console.error)
     wss.pipe(multiLevel.server(db, {
@@ -223,18 +236,6 @@ function startServer (conf, db, auth, cb) {
     .attach(server, '/ws')
 
   server.listen(conf.port, conf.host, cb)
-}
-
-function fileUpload (req, res) {
-  var form = new formidable.IncomingForm();
-  form.parse(req, function(err, fields, files) {
-    var filePath = './static/files/'+fields.file
-    var blob = fields.blob.split(',')[1]
-    res.writeHead(200, {'content-type': 'text/plain'})
-    res.write('received upload:\n\n')
-    res.end()
-    fs.writeFileSync(filePath, blob, {encoding:'base64'}) 
-  })
 }
 
 function getHmac (d, cb) { 
