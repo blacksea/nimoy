@@ -117,14 +117,12 @@ module.exports = function Bricoleur (db, user) {
       }
     }
   }
-
   api.deauth = function (d) {
     db.deauth(function () {
       delete sessionStorage[user] 
       var path = (!getPath()) ? home : home + getPath()
     })
   }
-
   api.data = function (d) {
     if (d.type === 'put') db.put(d.key,d.value)
     if (d.type === 'get' && d.origin) {
@@ -135,11 +133,6 @@ module.exports = function Bricoleur (db, user) {
       })
     }
   }
-
-  api.draw = function (d) { cvs.draw(d.value) }
-
-  api.erase = function (d) { cvs.erase(d.value) }
-
   api.load = function (d) {
     var name = d.value
     db.get('canvas:' + name, function (e, canvas) {
@@ -147,11 +140,12 @@ module.exports = function Bricoleur (db, user) {
       cvs.import(canvas)
     })
   }
-
   api.save = function (d) {
     var key = 'canvas:' + d.value
     db.put(key, cvs.export())
   }
+  api.draw = function (d) { cvs.draw(d.value) }
+  api.erase = function (d) { cvs.erase(d.value) }
 
   var s = through.obj(function Write (d, enc, next) {
     if (d.key) {
@@ -176,6 +170,7 @@ module.exports = function Bricoleur (db, user) {
 
   function sync (d) { 
     var path = d.key.split(':')[0]
+    if (path === 'file') console.log(d) // files!!!
     if (path === 'data') {
       var origin = search(cvs._, d.key.split(':')[1])
       if (origin) origin.s.write(d)
