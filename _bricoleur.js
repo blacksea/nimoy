@@ -11,7 +11,7 @@ var Canvas = function (interface) {
   this.index = { modules : {}, pipes : {} }
 
   function parse (d, cbPipe, cbModule) {
-    if (typeof d === 'string') { // check for hash!
+    if (typeof d === 'string') { 
       (!d.match('>')) ? cbModule(d) : cbPipe(d.split('>'))
     } else if (d instanceof Array) {
       d.forEach(function (item) {
@@ -26,17 +26,17 @@ var Canvas = function (interface) {
       var b = search(self._, conn[1])
       var hash = genUID(conn)
       var key = 'pipe:' + hash + ':' + conn[0] + '|' + conn[1]
-
       a.s.pipe(b.s)
+
       self._[key] = [a.id , b.id]
       self.index.pipes[hash] = [a.id, b.id]
     }, function drawModule (nameOrPkg) {
       var pkg = (typeof nameOrPkg !== 'object') 
         ? search(config.library.master, nameOrPkg)
         : nameOrPkg
-
       var hash = genUID(pkg.name)
       var key = 'module:' + hash + ':' + pkg.name
+
       self._[key] = self._.render({key:key, value:pkg})
       if (config.library.global[pkg.name]) self.index.modules[hash] = pkg 
     })
@@ -124,7 +124,7 @@ module.exports = function Bricoleur (db, user) {
 
   api.data = function (d) {
     if (d.type === 'put') db.put(d.key,d.value)
-    if (d.type === 'get' && d.origin) { // write back to origin
+    if (d.type === 'get' && d.origin) {
       var origin = search(cvs._, d.key.split(':')[1])
       db.get(d.key, function (e, res) {
         if (e) { console.error(e); return false }
@@ -174,7 +174,7 @@ module.exports = function Bricoleur (db, user) {
   function sync (d) { 
     var path = d.key.split(':')[0]
     if (path === 'data') {
-      var origin = search(cvs._, d.key.split(':')[1]) // update module
+      var origin = search(cvs._, d.key.split(':')[1])
       if (origin) origin.s.write(d)
     }
   }
