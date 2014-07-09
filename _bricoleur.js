@@ -155,8 +155,7 @@ module.exports = function Bricoleur (db, user) {
     next()
   })
 
-  var cvs = new Canvas() 
-  cvs._.brico = { s : s } 
+  var cvs = new Canvas(s) 
   cvs._.render = require(config.canvasRender) 
 
   if (sessionStorage[user])
