@@ -4,24 +4,40 @@ var through = require('through2')
 var utils = require('utils')
 
 
-module.exports = function Bricoleur (db, user, config) { //====================
+var config
+var login
+var user
+var db
+
+// login ui====================================================================
+login = document.createElement('div')
+login.className = 'login'
+login.innerHTML = '<form id="loginForm">'
+  + '<input type="password" placeholder="enter password" />'
+  + '<input type="submit" value="edit" style="display:none;"/>'
+  + '</form>'
+
+login.querySelector('#loginForm').addEventListener('submit', api.auth, false)
+// ============================================================================
+
+module.exports = function Bricoleur (multilevel, usr, conf) { //==============
+  db = multilevel
+  config = conf
+  user = usr
 
   if (config.canvasRender) var render = require(config.canvasRender)
-
-  var canvas = { index : {} }
 
   // boot =====================================================================
   
   if (sessionStorage[user])
-    api.auth({ value: { name: user, session: sessionStorage[user] } })
+    api.auth({ name: user, session: sessionStorage[user] })
 
-  if (!sessionStorage[user] && user !== 'default')
-    api.draw([config.auth, config.auth+'>brico'])
+  if (!sessionStorage[user] && user !== 'default') 
+    document.body.appendChild(login)
 
   // end boot =================================================================
   
-  var interface = through.obj(function Write (d, enc, next) {
-    
+  function interface (d, enc, next) {
     if (d.key) {
       var path = d.key.split(':')[0]
       if (api[path]) api[path](d)
@@ -38,9 +54,9 @@ module.exports = function Bricoleur (db, user, config) { //====================
     }
 
     next()
-    put(obj, render)
+  }
 
-  })
+  var s = through.obj(interface)
 
   db.liveStream({reverse : true})
     .on('data', sync)
@@ -54,12 +70,14 @@ module.exports = function Bricoleur (db, user, config) { //====================
     }
   }
 
-  return interface
+  return s
 
 } // ==========================================================================
 
 
 // BRICOLEUR API ==============================================================
+
+var canvas = {}
 
 var api = {}
 
@@ -70,7 +88,8 @@ api.get = function (d, cb) {
   })
 }
 
-api.put = function (d, cb) {
+api.put = function (d, cb) { // place in canvas / db
+  // parse input
   var a = utils.search(self._, conn[0])
   var b = utils.search(self._, conn[1])
   var hash = genUID(conn)
@@ -80,11 +99,12 @@ api.put = function (d, cb) {
 
   a.pipe(b)
 
-  canvas[key] = [a , b]
+  canvas[key] = [a, b]
+
+  // call db 
   canvas.index.pipes[hash] = [a.id, b.id]
 
   // mod
-
   var pkg = (typeof nameOrPkg !== 'object') 
     ? utils.search(config.library.master, nameOrPkg) 
     : nameOrPkg
@@ -94,11 +114,16 @@ api.put = function (d, cb) {
   var hash = genUID(pkg.name)
   var key = 'module:' + hash + ':' + pkg.name
   canvas[key] = render(pkg, hash)
+
+  if (pkg.data)
+    db.put({key:'module:'+hash+':'+pkg.name, value: pkg.data})
+
   if (config.library.global[pkg.name]) 
     canvas.index.modules[hash] = pkg 
 }
 
 api.del = function (d, cb) {
+  // parse input
   var a = this._[hash][0] 
   var b = this._[hash][1]
 
@@ -108,7 +133,6 @@ api.del = function (d, cb) {
   delete this.index.pipes[hash]
 
   // mod
-
   var mod = search(this._, hash)
   if (mod) { 
     document.body.removeChild(document.getElementById(hash))
@@ -144,26 +168,22 @@ api.write = function (canvasName) {
 }
 
 api.auth = function (d, cb) {
-  if (!d.session) {
+  if (!d.session && d.tagName) { // is dom event
     var img = new Buffer(config.uImg).toString()
-    var pass = hmac('sha256', img).update(d.value.pass).digest('hex')
+    var pass = hmac('sha256', img).update(d.target[0].value).digest('hex')
     db.auth({name: d.name, pass: pass}, handleAuth)
   } else if (d.session) {
     db.auth({name: d.name, session: d.session}, handleAuth)
   }
 
   function handleAuth (e, res) {
-    if (e && !search(canvas, config.auth)) { 
+    if (e && document.querySelector('.login')) {
       api.put([config.auth, config.auth+'>brico'])
       api.draw([config.auth, config.auth+'>brico']) 
     } else if (!e) {
       sessionStorage[res.name] = res.token
-      var login = search(canvas._, config.auth)
-      if (typeof login ==='object') api.erase(login.id)
-      if (config.users[user].canvas) {
-        api.draw(config.users[user].canvas.modules)
-        api.draw(config.users[user].canvas.pipes)
-      }
+      document.body.removeChild(login)
+      // load omni && then load page
       return false
     }
   }
@@ -174,36 +194,6 @@ api.deauth = function (d, cb) {
     delete sessionStorage[user] 
     var path = (!getPath()) ? home : home + getPath()
   })
-}
-
-// login!
-<div class="login">
-  <form id="loginForm">
-    <input type="password" placeholder="enter password" />
-    <input class="send submit" type="submit" value="{{mode}}" style="display:none;"/>
-  </form>
-</div>
-
-var user = (window.location.host.split('.').length ===  3)
-  ? window.location.host.split('.')[0]
-  : 'default'
-
-render(document.body, template.toString(), id)(submit) // render+bind
-
-function submit (el) {
-  var form = el.querySelector('#loginForm')
-  form.addEventListener('submit', function (e) {
-    e.preventDefault()
-    var d = {
-      key : 'auth',
-      value : {
-        origin: id,
-        name: user,
-        pass : e.target[0].value
-      }
-    }
-    s.push(d)
-  }, false)
 }
 
 
