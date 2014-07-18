@@ -13,23 +13,21 @@ var formidable = require('formidable')
 var uglify = require('uglify-js')
 var st = require('st')
 
-var Sessions = function (users) { 
-  var self = this
-  this._ = {}
-
-  this.auth = function (user, cb) { 
+var sessions = {
+  users: {},
+  _ : {},
+  auth : function (user, cb) {
     var auth = false
 
-    if (user.pass && user.pass === users[user.name]) 
+    if (user.pass && user.pass === this.users[user.name]) 
       auth = true
 
-    if (user.session && self._[user.name] && self._[user.name] == user.session) 
-      auth = true
+    if (user.session && this._[user.name] && this._[user.name] == user.session)      auth = true
 
     if (auth === true) {
       var sessionID = Math.random().toString().slice(2) 
-      if (!self._[user.name]) self._[user.name] = sessionID
-      cb(null, { name: user.name, token: self._[user.name], time: getTime() })
+      if (!this._[user.name]) this._[user.name] = sessionID
+      cb(null, { name: user.name, token: this._[user.name], time: getTime() })
     }
     if (auth === false) cb(new Error('Bad Login'), null) // use codes instead
   }
@@ -82,24 +80,14 @@ function boot (conf) {
 
   var bricoConf = conf.bricoleur
 
-  var users = {}
-
-  for (user in bricoConf.users) {
-    var u = bricoConf.users[user]
-    if (u.canvas) {
-      rootModules = rootModules.concat(u.canvas.modules)
-    }
-    if (u.pass) getHmac({
-      token: u.pass,
-      user: user,
-      secret: bricoConf.secretKey.toString()
-    }, function (d) {
-      delete bricoConf.users[user].pass
-      users[user] = d.val // delete u.pass
-    })
-  }
-
-  var handleSessions = new Sessions(users).auth
+  getHmac({
+    token: bricoConf.pass,
+    user: 'edit',
+    secret: bricoConf.secretKey.toString()
+  }, function (d) {
+    delete bricoConf.pass
+    sessions.users.edit = d.val
+  })
 
   compileModules(conf.server.bundle, rootModules, function (library) {
     bricoConf.library = library
@@ -108,7 +96,7 @@ function boot (conf) {
 
     fs.writeFileSync('./bricoleurConfig.json', JSON.stringify(bricoConf))
 
-    startServer(conf.server, db, handleSessions, function () { 
+    startServer(conf.server, db, function () { 
       console.log('server running') 
     })
   })
@@ -172,7 +160,7 @@ function compileModules (config, rootModules, cb) {
   })
 }
 
-function startServer (conf, db, auth, cb) { 
+function startServer (conf, db, cb) { 
   var mount = st({
     index: 'index.html', 
     path: './static', 
@@ -224,7 +212,7 @@ function startServer (conf, db, auth, cb) {
   var engine = engineServer(function (wss) {
     wss.on('error', console.error)
     wss.pipe(multiLevel.server(db, {
-      auth: auth,
+      auth: sessions.auth,
       access: function access (user, db, method, args) {
         if (!user || user.name !== 'edit') {
           if (/^put|^del|^batch|write/i.test(method)) { // no write access!
