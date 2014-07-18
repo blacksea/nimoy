@@ -13,6 +13,7 @@ var formidable = require('formidable')
 var uglify = require('uglify-js')
 var st = require('st')
 
+
 var sessions = {
   users: {},
   _ : {},
@@ -39,7 +40,8 @@ var configFlag = process.argv[2]
   ? boot(require('./config.json'))
   : boot(process.argv[2])
 
-function boot (conf) {
+
+function boot (conf) { // =====================================================
   var rootModules = [conf.bricoleur.canvasRender, conf.bricoleur.auth]
 
   process.stdin.on('data', function (buf) { 
@@ -100,9 +102,10 @@ function boot (conf) {
       console.log('server running') 
     })
   })
-}
+} // ==========================================================================
 
-function compileModules (config, rootModules, cb) {
+
+function compileModules (config, rootModules, cb) { // ========================
   var library  = {
     master: {},
     root: {},
@@ -158,9 +161,10 @@ function compileModules (config, rootModules, cb) {
       console.log('compiled '+ inBun +' to ' + outBun)
     })
   })
-}
+} // ==========================================================================
 
-function startServer (conf, db, cb) { 
+
+function startServer (conf, db, cb) { // ======================================
   var mount = st({
     index: 'index.html', 
     path: './static', 
@@ -225,7 +229,10 @@ function startServer (conf, db, cb) {
     .attach(server, '/ws')
 
   server.listen(conf.port, conf.host, cb)
-}
+} // ==========================================================================
+
+
+// UTILS ======================================================================
 
 function getHmac (d, cb) { 
   var hmac = newHmac('sha256', d.secret)
