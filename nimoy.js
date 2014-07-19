@@ -15,20 +15,25 @@ var st = require('st')
 
 
 var sessions = {
-  users: {},
   _ : {},
+  users: {},
   auth : function (user, cb) {
     var auth = false
 
-    if (user.pass && user.pass === this.users[user.name]) 
+    if (user.pass && user.pass === sessions.users[user.name]) 
       auth = true
 
-    if (user.session && this._[user.name] && this._[user.name] == user.session)      auth = true
+    if (user.session && sessions._[user.name] == user.session)      
+      auth = true
 
     if (auth === true) {
       var sessionID = Math.random().toString().slice(2) 
-      if (!this._[user.name]) this._[user.name] = sessionID
-      cb(null, { name: user.name, token: this._[user.name], time: getTime() })
+      if (!sessions._[user.name]) sessions._[user.name] = sessionID
+      cb(null, { 
+        name: user.name, 
+        token: sessions._[user.name], 
+        time: getTime() 
+      })
     }
     if (auth === false) cb(new Error('Bad Login'), null) // use codes instead
   }
