@@ -3,12 +3,12 @@ var url = require('url')
 var http = require('http')
 var https = require('https')
 var level = require('level')
-var asyncMap = require('slide').asyncMap
 var multiLevel = require('multilevel')
-var livestream = require('level-live-stream')
 var browserify = require('browserify')
+var livestream = require('level-live-stream')
 var engineServer = require('engine.io-stream')
 var newHmac = require('crypto').createHmac
+var asyncMap = require('slide').asyncMap
 var formidable = require('formidable')
 var uglify = require('uglify-js')
 var st = require('st')
@@ -35,7 +35,7 @@ var sessions = {
         time: getTime() 
       })
     }
-    if (auth === false) cb(new Error('Bad Login'), null) // use codes instead
+    if (auth === false) cb(new Error('Bad Login'), null)
   }
 }
 
@@ -46,7 +46,7 @@ var configFlag = process.argv[2]
   : boot(process.argv[2])
 
 
-function boot (conf) { // =====================================================
+function boot (conf) { // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   var rootModules = [conf.bricoleur.canvasRender, conf.bricoleur.auth]
 
   process.stdin.on('data', function (buf) { 
@@ -107,10 +107,10 @@ function boot (conf) { // =====================================================
       console.log('server running') 
     })
   })
-} // ==========================================================================
+} // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
-function compileModules (config, rootModules, cb) { // ========================
+function compileModules (config, rootModules, cb) { // >>>>>>>>>>>>>>>>>>>>>>>>
   var library  = {
     master: {},
     root: {},
@@ -166,10 +166,10 @@ function compileModules (config, rootModules, cb) { // ========================
       console.log('compiled '+ inBun +' to ' + outBun)
     })
   })
-} // ==========================================================================
+} // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
-function startServer (conf, db, cb) { // ======================================
+function startServer (conf, db, cb) { // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   var mount = st({
     index: 'index.html', 
     path: './static', 
@@ -234,11 +234,10 @@ function startServer (conf, db, cb) { // ======================================
     .attach(server, '/ws')
 
   server.listen(conf.port, conf.host, cb)
-} // ==========================================================================
+} // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 
-// UTILS ======================================================================
-
+// UTILS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 function getHmac (d, cb) { 
   var hmac = newHmac('sha256', d.secret)
   hmac.setEncoding('hex')

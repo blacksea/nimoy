@@ -24,25 +24,13 @@ module.exports = function Bricoleur (multilevel, usr, conf) { // >>>>>>>>>>>>>>
     next()
   })
 
-  // boot >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  if (sessionStorage[user])
-    api.auth({ name : user, session : sessionStorage[user] })
-
-  if (!sessionStorage[user] && user !== 'default') {
-    document.body.appendChild(login)
-  }
-  // end boot <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
   db.liveStream({reverse : true})
     .on('data', sync)
 
   function sync (d) { 
     var path = d.key.split(':')[0]
     if (path === 'file') console.log(d.key)
-    if (path === 'data') {
-      var origin = search(canvas._, d.key.split(':')[1])
-      if (origin) origin.s.write(d)
-    }
+    if (path === 'data') {}
   }
 
   // BRICOLEUR API >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -68,7 +56,7 @@ module.exports = function Bricoleur (multilevel, usr, conf) { // >>>>>>>>>>>>>>
     })
   }
 
-  api.put = function (d, cb) { // place in canvas / db
+  api.put = function (d, cb) { 
     var a = utils.search(canvas, conn[0])
     var b = utils.search(canvas, conn[1])
     var hash = genUID(conn)
@@ -148,19 +136,29 @@ module.exports = function Bricoleur (multilevel, usr, conf) { // >>>>>>>>>>>>>>
     })
   } // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
+  // login ui >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  login = document.createElement('div')
+  login.className = 'login'
+  login.innerHTML = '<form id="loginForm">'
+    + '<input type="password" placeholder="enter password" />'
+    + '<input type="submit" value="edit" style="display:none;" />'
+    + '</form>'
+
+  login.querySelector('#loginForm')
+    .addEventListener('submit', api.auth, false)
+  // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+    
+
+  // boot >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+  if (sessionStorage[user])
+    api.auth({ name : user, session : sessionStorage[user] })
+
+  if (!sessionStorage[user] && user !== 'default') {
+    document.body.appendChild(login)
+  }
+  // end boot <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
 
   return s
+
 } // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-
-// login ui >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-login = document.createElement('div')
-login.className = 'login'
-login.innerHTML = '<form id="loginForm">'
-  + '<input type="password" placeholder="enter password" />'
-  + '<input type="submit" value="edit" style="display:none;" />'
-  + '</form>'
-
-login.querySelector('#loginForm')
-  .addEventListener('submit', api.auth, false)
-// <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
