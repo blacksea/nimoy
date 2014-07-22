@@ -57,8 +57,6 @@ module.exports = function Bricoleur (multilevel, usr, conf) { // >>>>>>>>>>>>>>
 
   function sync (d) { 
     var path = d.key.split(':')[0]
-    if (path === 'file') console.log(d.key)
-    if (path === 'data') {}
   }
 
   // BRICOLEUR API >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -73,7 +71,6 @@ module.exports = function Bricoleur (multilevel, usr, conf) { // >>>>>>>>>>>>>>
 
   api.file = function (d, cb) {
     if (d.from) {
-      console.log(d)
       cb({to: d.from, code: 200})
     }
   }
@@ -88,9 +85,6 @@ module.exports = function Bricoleur (multilevel, usr, conf) { // >>>>>>>>>>>>>>
   api.put = function (d, cb) { 
     if (d.type === 'pipe') {
       var conn = d.value
-
-      console.log(utils.search(canvas.index, conn[0]))
-      console.log(utils.search(canvas.index, conn[1]))
 
       var a = canvas[utils.search(canvas.index, conn[0]).id]
       var b = canvas[utils.search(canvas.index, conn[1]).id]
@@ -112,7 +106,7 @@ module.exports = function Bricoleur (multilevel, usr, conf) { // >>>>>>>>>>>>>>
         ? utils.search(config.library.master, nameOrPkg) 
         : nameOrPkg
 
-      if (!pkg) console.error(d)
+      if (!pkg) handleError(e)
 
       var hash = utils.UID(pkg.name)
       pkg.id = hash
