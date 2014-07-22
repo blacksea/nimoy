@@ -41,15 +41,11 @@ module.exports = function Bricoleur (multilevel, usr, conf) { // >>>>>>>>>>>>>>
     function handleOutput (e, res) {
       if (e) handleError(e)
       if (res) {
-        console.log(res)
-        if (res.to) {
-          res.from = id
-          s.push(res)
-        }
+        if (res.to) { res.from = id; s.push(res) }
       }
     }
 
-    next() // !?
+    next() // this should likely happen in handleOutput
   })
 
   db.liveStream({reverse : true})
@@ -69,16 +65,13 @@ module.exports = function Bricoleur (multilevel, usr, conf) { // >>>>>>>>>>>>>>
 
   var api = {}
 
-  api.file = function (d, cb) {
-    if (d.from) {
-      cb({to: d.from, code: 200})
-    }
-  }
-
   api.get = function (d, cb) {
-    db.get(d.key, function returnResult (e, res) {
+    db.get(d.value, function returnResult (e, res) {
       if (e) cb(e, null)
-      if (!e) cb(null, res)
+      if (!e) {
+        var result = (d.from) ? {to:d.from, value:res} : {value:res}
+        cb(null, result)
+      }
     })
   }
 
@@ -97,7 +90,8 @@ module.exports = function Bricoleur (multilevel, usr, conf) { // >>>>>>>>>>>>>>
       
       canvas.index[hash+':'+conn[0]+'|'+conn[1]] = [a.id, b.id] // call db 
 
-      if (cb) cb(null, 200)
+      var res = (!d.from) ? {code: 200} : {code:200, to: d.from}
+      if (cb) cb(null, res)
 
     } else if (d.type === 'module') {
       var nameOrPkg = d.value
@@ -117,8 +111,8 @@ module.exports = function Bricoleur (multilevel, usr, conf) { // >>>>>>>>>>>>>>
       if (pkg.data)
         db.put({key:'module:'+hash+':'+pkg.name, value: pkg.data})
 
-
-      if (cb) cb(null, 200)
+      var res = (!d.from) ? {code: 200} : {code:200, to: d.from}
+      if (cb) cb(null, res)
     }
   }
 
