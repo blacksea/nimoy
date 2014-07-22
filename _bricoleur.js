@@ -14,23 +14,39 @@ module.exports = function Bricoleur (multilevel, usr, conf) { // >>>>>>>>>>>>>>
   config = conf
   user = usr
 
+  localStorage.library = JSON.stringify(conf.library)
+
   if (config.rendering) var render = require(config.rendering)
 
   var s = through.obj(function interface (d, enc, next) {
-    if (!d.key) {
-      next()
-      return false
-    }
+    if (!d.key) { next(); return false }
+
     var path = d.key.split(':')[0]
 
-    if (path === 'put' && typeof d.value === 'string') 
-      d.type = (!d.match('>')) ? 'module' : 'pipe'
-
-    if (api[path]) 
+    if (path === 'put' ) {
+      if (typeof d.value === 'string') {
+        d.type = (!d.match('>')) ? 'module' : 'pipe'
+        api.put(d)
+      } else if (d.value instanceof Array) 
+        d.value.forEach(function (item) {
+          var cmd = {}
+          cmd.type = (!item.match('>')) ? 'module' : 'pipe'
+          cmd.value = (cmd.type==='pipe') ? item.split('>') : item
+          api.put(cmd)
+        })
+    } else if (api[path]) {
       api[path](d, handleOutput)
+    }
 
-    function handleOutput (e, d) {
-
+    function handleOutput (e, res) {
+      if (e) handleError(e)
+      if (res) {
+        console.log(res)
+        if (res.to) {
+          res.from = id
+          s.push(res)
+        }
+      }
     }
 
     next() // !?
@@ -45,11 +61,22 @@ module.exports = function Bricoleur (multilevel, usr, conf) { // >>>>>>>>>>>>>>
     if (path === 'data') {}
   }
 
-
   // BRICOLEUR API >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  var canvas = {}
+  var id = utils.UID('brico')
+  var canvas = { index : {} }
+  canvas.index[id+':brico'] = {id : id}
+  canvas[id] = s
+
+  window.cvs = canvas
 
   var api = {}
+
+  api.file = function (d, cb) {
+    if (d.from) {
+      console.log(d)
+      cb({to: d.from, code: 200})
+    }
+  }
 
   api.get = function (d, cb) {
     db.get(d.key, function returnResult (e, res) {
@@ -62,15 +89,19 @@ module.exports = function Bricoleur (multilevel, usr, conf) { // >>>>>>>>>>>>>>
     if (d.type === 'pipe') {
       var conn = d.value
 
-      var a = utils.search(canvas, conn[0])
-      var b = utils.search(canvas, conn[1])
-      var hash = genUID(conn)
+      console.log(utils.search(canvas.index, conn[0]))
+      console.log(utils.search(canvas.index, conn[1]))
+
+      var a = canvas[utils.search(canvas.index, conn[0]).id]
+      var b = canvas[utils.search(canvas.index, conn[1]).id]
+
+      var hash = utils.UID(conn)
 
       if (!a.pipe || !b.pipe) cb(new Error('unpipeable!'), null)
 
       a.pipe(b)
       
-      canvas.index.pipes[hash] = [a.id, b.id] // call db 
+      canvas.index[hash+':'+conn[0]+'|'+conn[1]] = [a.id, b.id] // call db 
 
       if (cb) cb(null, 200)
 
@@ -82,39 +113,34 @@ module.exports = function Bricoleur (multilevel, usr, conf) { // >>>>>>>>>>>>>>
         : nameOrPkg
 
       if (!pkg) console.error(d)
-        rendering
+
       var hash = utils.UID(pkg.name)
+      pkg.id = hash
       var key = 'module:' + hash + ':' + pkg.name
       canvas[hash] = render(pkg, hash)
+      canvas.index[hash+':'+pkg.name] = pkg 
 
       if (pkg.data)
         db.put({key:'module:'+hash+':'+pkg.name, value: pkg.data})
 
-      if (config.library.global[pkg.name]) 
-        canvas.index.modules[hash] = pkg 
 
       if (cb) cb(null, 200)
     }
   }
 
   api.del = function (d, cb) {
-    if (d.type === 'pipe') {
-      // parse input
+    if (d.type === 'pipe') { // parse input
       var a = this._[hash][0] 
       var b = this._[hash][1]
-
       a.unpipe(b) 
-
       delete this._[hash]
       delete this.index.pipes[hash]
-    } else if (d.type === 'module') {
-      // mod
+    } else if (d.type === 'module') { // mod
       var mod = search(this._, hash)
       if (mod) { 
         document.body.removeChild(document.getElementById(hash))
         delete mod 
       }
-
       delete this.index.modules[hash]
     }
   }
@@ -131,12 +157,15 @@ module.exports = function Bricoleur (multilevel, usr, conf) { // >>>>>>>>>>>>>>
 
     function handleAuth (e, res) {
       if (e) {
-        console.error(e)
         if (!document.querySelector('.login')) document.body.appendChild(login)
+        handleError(e)
       } else if (!e) {
         sessionStorage[res.name] = res.token
-        api.put({type:'module', value:config.editor})
         if (document.querySelector('.login')) document.body.removeChild(login)
+        s.write({
+          key:'put', 
+          value: [config.editor,config.editor+'>brico','brico>'+config.editor]
+        })
         // load page!
         return false
       }
@@ -179,3 +208,7 @@ module.exports = function Bricoleur (multilevel, usr, conf) { // >>>>>>>>>>>>>>
   return s
 
 } // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+function handleError (e) {
+  console.error(e)
+}
