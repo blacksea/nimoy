@@ -3,16 +3,8 @@ var Buffer = require('buffer/').Buffer
 var through = require('through2')
 var utils = require('utils')
 
-var config
-var login
-var user
-var db
 
-
-module.exports = function Bricoleur (multilevel, usr, conf) { // >>>>>>>>>>>>>>
-  db = multilevel
-  config = conf
-  user = usr
+module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
 
   localStorage.library = JSON.stringify(conf.library)
 
