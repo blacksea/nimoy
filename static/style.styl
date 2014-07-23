@@ -6,15 +6,26 @@ body
   padding 0
   letter-spacing 1px
 
-.omni #mode
-  -moz-appearance none
-  -webkit-appearance none
-  border none
+input 
+  font-size 18px
+  font-family "Akkurat Mono"!important
+  letter-spacing 1px
   background transparent
-  box-shadow none
-  font-family "Akkurat Mono"
-  text-indent 0.01px
-  text-overflow ''
+  margin 0
+  padding 0
+  line-height 22px
+  border-radius 0
+  outline none
+  border none
+
+input:hover
+  color black
+
+input:focus
+  color black
+  line-height 22px
+  outline none
+  border none
 
 .overlay
   position fixed
@@ -25,13 +36,6 @@ body
   opacity 0.7
   background #f1f1f1
 
-.notify
-  width 100%
-  height 20px
-  position fixed
-  z-index 999
-  background red
-
 .login
   background-color rgba(255,255,255,0.8)
   box-sizing border-box
@@ -41,15 +45,6 @@ body
   width 100%
   height 100%
 
-.dropzone
-  border-radius 999
-  background blue
-  position absolute
-  top 0
-  left 0
-  width 120px
-  height 120px
- 
 #loginForm
   line-height 20px
   color #333
@@ -60,6 +55,38 @@ body
   margin 0
   cursor default
   z-index 999
+
+.login input:focus
+  color #333
+
+.login input 
+  border-bottom 2px solid #333
+  width 200px
+
+.omni
+  line-height 20px
+  color #333
+  position absolute
+  top 0
+  left 0
+  cursor default
+  z-index 999
+  width 100%
+  padding 0
+  margin 0
+  line-height 24px
+  position absolute
+  border-bottom 2px solid blue
+
+.omni #mode
+  -moz-appearance none
+  -webkit-appearance none
+  border none
+  background transparent
+  box-shadow none
+  font-family "Akkurat Mono"
+  text-indent 0.01px
+  text-overflow ''
 
 .omni a
   text-decoration none
@@ -127,63 +154,6 @@ body
   margin 0
   padding 0
   list-style none
-
-input 
-  font-size 18px
-  font-family "Akkurat Mono"!important
-  letter-spacing 1px
-  background transparent
-  margin 0
-  padding 0
-  line-height 22px
-  border-radius 0
-  outline none
-  border none
-
-input:hover
-  color black
-
-input:focus
-  color black
-  line-height 22px
-  outline none
-  border none
-
-.login input:focus
-  color #333
-
-.login input 
-  border-bottom 2px solid #333
-  width 200px
-
-.omni
-  line-height 20px
-  color #333
-  position absolute
-  top 0
-  left 0
-  cursor default
-  z-index 999
-  width 100%
-  padding 0
-  margin 0
-  line-height 24px
-  position absolute
-  border-bottom 2px solid blue
-
-ul.components
-  display none
-
-ul.components li
-  list-style none
-  width 40px
-  height 40px
-  line-height 40px
-  text-align center
-  float left
-
-ul.components li:hover
-  color red
 
 .context 
   font-size 9px
