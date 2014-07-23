@@ -50,7 +50,7 @@ body
   width 120px
   height 120px
  
-.omni, #loginForm
+#loginForm
   line-height 20px
   color #333
   position absolute
@@ -63,13 +63,12 @@ body
 
 .omni a
   text-decoration none
-  color black
+  color blue
 
 .omni .menu 
-  margin 0
+  margin 10px 0 10px 10px
   padding 0
   padding-top 3px
-  margin-top 28px
   float left
   width 800px
 
@@ -77,20 +76,20 @@ body
   z-index 999
   line-height 33px
   list-style none
-  border 1px solid black
-  border-bottom 2px solid black
-  border-right 2px solid black
+  border 1px solid blue
+  border-bottom 2px solid blue
+  border-right 2px solid blue
   float left
-  padding 0
-  padding-left 4px
-  padding-right 4px
+  padding 0 8px
   margin 0!important    
   font-family "Akkurat Mono"
   font-size 18px
   list-style none
+  color black
 
 .omni .filter
-  border-right none
+  color blue!important
+  border-right none!important
   text-transform uppercase
   padding-top 2px!important
   line-height 31px!important
@@ -100,20 +99,13 @@ body
   text-decoration underline
 
 .omni #search
-  width 500px
+  width 320px
   line-height 28px
   border-left none
-  padding-left 4px!important
 
-.omni .omnibox
-  letter-spacing 1px
-  height 490px
-  width 490px
-  padding 4px
-  color black
-  border-left 1px solid black
+.omni .omnibox, .omni .actions
+  border none!important
   background transparent
-  clear both
 
 .omni .status
   position fixed
@@ -165,11 +157,19 @@ input:focus
   width 200px
 
 .omni
+  line-height 20px
+  color #333
+  position absolute
+  top 0
+  left 0
+  cursor default
+  z-index 999
+  width 100%
   padding 0
   margin 0
   line-height 24px
   position absolute
-  left 13px
+  border-bottom 2px solid blue
 
 ul.components
   display none
