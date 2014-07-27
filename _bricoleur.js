@@ -72,6 +72,11 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
     db.put(d.value.key, d.value.data, cb)
   }
 
+  api.writeCanvas = function (d, cb) {
+    var value = JSON.stringify(canvas.index)
+    db.put(d.value.key, value, cb)
+  }
+
   api.put = function (d, cb) { 
     if (d.type === 'pipe') {
       var conn = d.value
