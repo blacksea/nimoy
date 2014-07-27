@@ -6,7 +6,7 @@ var utils = require('utils')
 
 module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
 
-  localStorage.library = JSON.stringify(conf.library)
+  localStorage.library = JSON.stringify(config.library)
 
   if (config.rendering) var render = require(config.rendering)
 
@@ -17,7 +17,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
 
     if (path === 'put' ) {
       if (typeof d.value === 'string') {
-        d.type = (!d.match('>')) ? 'module' : 'pipe'
+        d.type = (!d.value.match('>')) ? 'module' : 'pipe'
         api.put(d)
       } else if (d.value instanceof Array) 
         d.value.forEach(function (item) {
@@ -83,6 +83,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
       canvas.index[hash+':'+conn[0]+'|'+conn[1]] = [a.id, b.id] // call db 
 
       var res = (!d.from) ? {code: 200} : {code:200, to: d.from}
+
       if (cb) cb(null, res)
 
     } else if (d.type === 'module') {
@@ -100,7 +101,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
       canvas[hash] = render(pkg, hash)
       canvas.index[hash+':'+pkg.name] = pkg 
 
-      if (pkg.data)
+      if (pkg.nimoy.data)
         db.put({key:'module:'+hash+':'+pkg.name, value: pkg.data})
 
       var res = (!d.from) ? {code: 200} : {code:200, to: d.from}
@@ -110,18 +111,18 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
 
   api.del = function (d, cb) {
     if (d.type === 'pipe') { // parse input
-      var a = this._[hash][0] 
-      var b = this._[hash][1]
+      var conn = d.value
+      var a = canvas[conn][0] 
+      var b = canvas[conn][1]
       a.unpipe(b) 
-      delete this._[hash]
-      delete this.index.pipes[hash]
+      delete canvas.index[hash]
     } else if (d.type === 'module') { // mod
-      var mod = search(this._, hash)
+      var mod = search(canvas, hash)
       if (mod) { 
         document.body.removeChild(document.getElementById(hash))
         delete mod 
       }
-      delete this.index.modules[hash]
+      delete canvas.index[hash]
     }
   }
 
