@@ -44,8 +44,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
     .on('data', sync)
 
   function sync (d) { 
-    console.log(d)
-    var path = d.key.split(':')[0]
+    var path = d.key.toString().split(':')[0]
     if (path === 'module') console.log(d)
   }
 
@@ -70,6 +69,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
   }
 
   api.data = function (d, cb) {
+    console.log('data', d)
     db.put(d.value.key, d.value.data, cb)
   }
 
@@ -108,8 +108,10 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
       canvas.index[hash+':'+pkg.name] = pkg 
 
       if (pkg.nimoy.defaultData) {
-        console.log(pkg.nimoy.defaultData)
-        db.put({key:'module:'+hash, value: pkg.nimoy.defaultData})
+        var val = JSON.stringify(pkg.nimoy.defaultData)
+        db.put('module:'+hash, val, function (e) {
+          if (e) console.error(e)
+        })
       }
 
       var res = (!d.from) ? {code: 200} : {code:200, to: d.from}
