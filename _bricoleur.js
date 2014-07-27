@@ -67,6 +67,10 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
     })
   }
 
+  api.data = function (d, cb) {
+    db.put(d.value.key, d.value.data, cb)
+  }
+
   api.put = function (d, cb) { 
     if (d.type === 'pipe') {
       var conn = d.value
@@ -102,7 +106,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
       canvas.index[hash+':'+pkg.name] = pkg 
 
       if (pkg.nimoy.data)
-        db.put({key:'module:'+hash+':'+pkg.name, value: pkg.data})
+        db.put({key:'module:'+hash, value: pkg.data})
 
       var res = (!d.from) ? {code: 200} : {code:200, to: d.from}
       if (cb) cb(null, res)
