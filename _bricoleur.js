@@ -69,7 +69,6 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
   }
 
   api.data = function (d, cb) {
-    console.log('data', d)
     db.put(d.value.key, d.value.data, cb)
   }
 
