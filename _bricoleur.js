@@ -15,17 +15,18 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
 
     var path = d.key.split(':')[0]
 
-    if (path === 'put' ) {
+    if (path === 'put' || path === 'library') {
       if (typeof d.value === 'string') {
         d.type = (!d.value.match('>')) ? 'module' : 'pipe'
         api.put(d)
-      } else if (d.value instanceof Array) 
+      } else if (d.value instanceof Array) {
         d.value.forEach(function (item) {
           var cmd = {}
           cmd.type = (!item.match('>')) ? 'module' : 'pipe'
-          cmd.value = (cmd.type==='pipe') ? item.split('>') : item
+          cmd.value = (cmd.type === 'pipe') ? item.split('>') : item
           api.put(cmd)
         })
+      }
     } else if (api[path]) {
       api[path](d, handleOutput)
     }
@@ -33,19 +34,20 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
     function handleOutput (e, res) {
       if (e) handleError(e)
       if (res) {
+        console.log(res)
         if (res.to) { res.from = id; s.push(res) }
       }
     }
 
-    next() // this should likely happen in handleOutput
+    next()
   })
 
   db.liveStream({reverse : true})
     .on('data', sync)
 
   function sync (d) { 
+    console.log(d)
     var path = d.key.toString().split(':')[0]
-    if (path === 'module') console.log(d)
   }
 
   // BRICOLEUR API >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -72,9 +74,20 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
     db.put(d.value.key, d.value.data, cb)
   }
 
-  api.writeCanvas = function (d, cb) {
-    var value = JSON.stringify(canvas.index)
-    db.put(d.value.key, value, cb)
+  api.canvas = function (d, cb) {
+    var type = d.key.split(':')[1]
+    if (type === 'save') {
+      var idx = canvas.index
+      var safeIdx = {}
+      for (item in idx) {
+        if (!item.match(config.editor) && !item.match('brico')) {
+          safeIdx[item] = item.split(':')[0]
+        }
+      }
+      db.put('canvas:'+d.value, JSON.stringify(safeIdx), cb)
+    } if (type === 'open') {
+
+    }
   }
 
   api.put = function (d, cb) { 
@@ -98,14 +111,24 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
 
     } else if (d.type === 'module') {
       var nameOrPkg = d.value
+      var hash
+      var data
+
+      if (nameOrPkg.split(':') > 1) {
+        hash = nameOrPkg.split(':')[0]
+        nameOrPkg = nameOrPkg.split(':')[1]
+        db.get('module:'+hash, function (e, d) {
+          data = d
+        })
+      } 
 
       var pkg = (typeof nameOrPkg !== 'object') // mod
         ? utils.search(config.library.master, nameOrPkg) 
         : nameOrPkg
 
       if (!pkg) handleError(e)
+      if (!hash) hash = utils.UID(pkg.name)
 
-      var hash = utils.UID(pkg.name)
       pkg.id = hash
       var key = 'module:' + hash + ':' + pkg.name
       canvas[hash] = render(pkg, hash)
@@ -152,7 +175,10 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
 
     function handleAuth (e, res) {
       if (e) {
-        if (!document.querySelector('.login')) document.body.appendChild(login)
+        if (!document.querySelector('.login')) {
+          document.body.appendChild(login)
+          login.querySelector('input').focus()
+        }
         handleError(e)
       } else if (!e) {
         sessionStorage[res.name] = res.token
@@ -196,9 +222,9 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
 
   if (!sessionStorage[user] && user !== 'default') {
     document.body.appendChild(login)
+    login.querySelector('input').focus()
   }
   // end boot <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
 
   return s
 

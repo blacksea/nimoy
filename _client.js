@@ -1,4 +1,5 @@
 var manifest = require('./static/manifest.json')
+var config = require('./bricoleurConfig.json') // setlib!
 
 var db = require('multilevel').client(manifest)
            .on('error', Errs)
@@ -7,21 +8,23 @@ var engine = require('engine.io-stream')
 var ws = engine('/ws')
 ws.pipe(db.createRpcStream()).pipe(ws)
 
-var buf = (!window.location.hash) 
-  ? '!'
-  :  window.location.hash.slice(1)
+var canvas = (!window.location.hash) 
+  ? {key: 'canvas:open', value:'default'}
+  : {key: 'canvas:open', value:window.location.hash.slice(1)}
 
-var user = (window.location.host.split('.').length ===  3)
+var user = (window.location.host.split('.').length === 3)
   ? window.location.host.split('.')[0]
   : 'default'
 
-var bricoleur = require('./_bricoleur')(db, user)
+var bricoleur = require('./_bricoleur')(db, user, config)
                   .on('error', Errs)
-        
-bricoleur.write({type:'get', key:'canvas:'+buf})
 
+bricoleur.write(canvas)
+        
 window.addEventListener('hashchange', function (e) {
-  bricoleur.write({type:'load', key:'#:'+e.newURL.slice(1)})
+  e.preventDefault()
+  canvas.value = e.newURL.split('#')[1]
+  bricoleur.write(value)
 }, false)
 
-function Errs (err) { console.error(err) }
+function Errs (err) { console.error(err) } // wha...!!!
