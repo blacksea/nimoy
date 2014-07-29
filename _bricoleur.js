@@ -46,7 +46,6 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
     .on('data', sync)
 
   function sync (d) { 
-    console.log(d)
     var path = d.key.toString().split(':')[0]
   }
 
@@ -54,6 +53,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
   var id = utils.UID('brico')
   var canvas = { index : {} }
   canvas.index[id+':brico'] = {id : id}
+  s.id = id
   canvas[id] = s
 
   window.cvs = canvas
@@ -85,6 +85,18 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
         }
       }
       db.put('canvas:'+d.value, JSON.stringify(safeIdx), cb)
+    } else if (type === 'open') {
+      db.get('canvas:'+d.value, function (e, val) {
+        if (e) handleError(e)
+        if (val) console.log(val)
+
+        // clear current canvas then draw!
+
+
+        // for (item in idx) {
+
+        // }
+      })
     }
   }
 
