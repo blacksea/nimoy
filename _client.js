@@ -24,7 +24,7 @@ bricoleur.write(canvas)
 window.addEventListener('hashchange', function (e) {
   e.preventDefault()
   canvas.value = e.newURL.split('#')[1]
-  bricoleur.write(value)
+  bricoleur.write(canvas)
 }, false)
 
 function Errs (err) { console.error(err) } // wha...!!!
