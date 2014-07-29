@@ -85,8 +85,6 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
         }
       }
       db.put('canvas:'+d.value, JSON.stringify(safeIdx), cb)
-    } if (type === 'open') {
-
     }
   }
 
@@ -112,37 +110,40 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
     } else if (d.type === 'module') {
       var nameOrPkg = d.value
       var hash
-      var data
 
       if (nameOrPkg.split(':') > 1) {
         hash = nameOrPkg.split(':')[0]
         nameOrPkg = nameOrPkg.split(':')[1]
-        db.get('module:'+hash, function (e, d) {
-          data = d
-        })
-      } 
+      }
 
       var pkg = (typeof nameOrPkg !== 'object') // mod
         ? utils.search(config.library.master, nameOrPkg) 
         : nameOrPkg
 
       if (!pkg) handleError(e)
-      if (!hash) hash = utils.UID(pkg.name)
 
-      pkg.id = hash
-      var key = 'module:' + hash + ':' + pkg.name
-      canvas[hash] = render(pkg, hash)
-      canvas.index[hash+':'+pkg.name] = pkg 
-
-      if (pkg.nimoy.defaultData) {
-        var val = JSON.stringify(pkg.nimoy.defaultData)
+      if (!hash && pkg.nimoy.data) {
+        var val = JSON.stringify(pkg.nimoy.data)
         db.put('module:'+hash, val, function (e) {
-          if (e) console.error(e)
+          if (e) handleError(e)
         })
       }
 
-      var res = (!d.from) ? {code: 200} : {code:200, to: d.from}
-      if (cb) cb(null, res)
+      if (hash) {
+        db.get('module:'+hash, put)  
+      }
+
+      if (!hash) { hash = utils.UID(pkg.name); put() }
+
+      function put (e, data) {
+        if (e) handleError(e)
+        if (data) pkg.data = data
+        pkg.id = hash
+        canvas[hash] = render(pkg, hash)
+        canvas.index[hash+':'+pkg.name] = pkg 
+        var res = (!d.from) ? {code: 200} : {code:200, to: d.from}
+        if (cb) cb(null, res)
+      }
     }
   }
 
