@@ -129,12 +129,6 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
         })
       }
 
-      if (hash) {
-        db.get('module:'+hash, put)  
-      }
-
-      if (!hash) { hash = utils.UID(pkg.name); put() }
-
       function put (e, data) {
         if (e) handleError(e)
         if (data) pkg.data = data
@@ -144,6 +138,12 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
         var res = (!d.from) ? {code: 200} : {code:200, to: d.from}
         if (cb) cb(null, res)
       }
+
+      if (hash) {
+        db.get('module:'+hash, put)  
+      }
+
+      if (!hash) { hash = utils.UID(pkg.name); put() }
     }
   }
 
