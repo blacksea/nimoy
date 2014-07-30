@@ -134,12 +134,6 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
 
       if (!pkg) handleError(e)
 
-      if (!hash && pkg.nimoy.data) {
-        var val = JSON.stringify(pkg.nimoy.data)
-        db.put('module:'+hash, val, function (e) {
-          if (e) handleError(e)
-        })
-      }
 
       function put (e, data) {
         if (e) handleError(e)
@@ -151,11 +145,15 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
         if (cb) cb(null, res)
       }
 
-      if (hash) {
-        db.get('module:'+hash, put)  
-      }
+      if (hash) db.get('module:'+hash, put)  
 
-      if (!hash) { hash = utils.UID(pkg.name); put() }
+      if (!hash) {
+        hash = utils.UID(pkg.name)
+        if (pkg.nimoy.data) {
+          var val = JSON.stringify(pkg.nimoy.data)
+          db.put('module:'+hash, val, put)
+        } else put()
+      }
     }
   }
 
