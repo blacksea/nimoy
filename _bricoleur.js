@@ -46,6 +46,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
     .on('data', sync)
 
   function sync (d) { 
+    console.log(d)
     var path = d.key.toString().split(':')[0]
   }
 
@@ -86,16 +87,19 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
       }
       db.put('canvas:'+d.value, JSON.stringify(safeIdx), cb)
     } else if (type === 'open') {
-      db.get('canvas:'+d.value, function (e, val) {
-        if (e) handleError(e)
-        if (val) console.log(val)
-
-        // clear current canvas then draw!
-
-
-        // for (item in idx) {
-
-        // }
+      db.get('canvas:'+d.value, function (e, jsonIdx) {
+        if (e) { handleError(e); return false }
+        var idx = JSON.parse(jsonIdx)
+        for (item in canvas) {
+          if (!idx[item]&&!item.match('brico')&&!item.match(config.render)) {
+            canvas[item].erase()
+            delete canvas[item]
+          }
+        }
+        for (item in idx) {
+          var hash = item.split(':')[0]
+          if (!canvas[hash]) s.write({key:'put', value:item})
+        }
       })
     }
   }
@@ -115,29 +119,28 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
       
       canvas.index[hash+':'+conn[0]+'|'+conn[1]] = [a.id, b.id] // call db 
 
-      var res = (!d.from) ? {code: 200} : {code:200, to: d.from}
+      var res = (!d.from) ? { code: 200 } : { code:200, to: d.from }
 
       if (cb) cb(null, res)
 
     } else if (d.type === 'module') {
-      var nameOrPkg = d.value
+      var nameOrPkg 
       var hash
 
-      if (nameOrPkg.split(':') > 1) {
-        hash = nameOrPkg.split(':')[0]
-        nameOrPkg = nameOrPkg.split(':')[1]
-      }
+      if (d.value.split(':').length > 1) {
+        hash = d.value.split(':')[0]
+        nameOrPkg = d.value.split(':')[1]
+      } else nameOrPkg = d.value
 
       var pkg = (typeof nameOrPkg !== 'object') // mod
         ? utils.search(config.library.master, nameOrPkg) 
         : nameOrPkg
 
-      if (!pkg) handleError(e)
-
+      if (!pkg) handleError(new Error('no such package! '+nameOrPkg))
 
       function put (e, data) {
         if (e) handleError(e)
-        if (data) pkg.data = data
+        if (data) pkg.nimoy.data = JSON.parse(data)
         pkg.id = hash
         canvas[hash] = render(pkg, hash)
         canvas.index[hash+':'+pkg.name] = pkg 
@@ -183,7 +186,6 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
     } else if (d.session) {
       db.auth({name: d.name, session: d.session}, handleAuth)
     }
-
     function handleAuth (e, res) {
       if (e) {
         if (!document.querySelector('.login')) {
