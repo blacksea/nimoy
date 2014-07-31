@@ -66,20 +66,19 @@ input:focus
 .omni
   line-height 20px
   color #333
-  position absolute
+  position relative
   top 0
   left 0
   cursor default
   z-index 999
   width 100%
-  height 61px
-  padding 0
+  height 38px
   margin 0
+  padding 0
+  margin-bottom 20px
   line-height 24px
-  position absolute
-  border-bottom 2px solid black
   background #f1f1f1
-  background #D4EEFF
+  background #D4E0FF
   background rgba(212, 238, 255, 0.8)
   // background LightSkyBlue
 
@@ -98,7 +97,7 @@ input:focus
   color black
 
 .omni .menu 
-  margin 10px 0 10px 10px
+  margin 0
   padding 0
   padding-top 3px
   float left
@@ -106,39 +105,33 @@ input:focus
 
 .omni .menu li 
   z-index 999
-  line-height 33px
+  line-height 26px
   list-style none
-  border 1px solid black
-  border-bottom 2px solid black
-  border-right 2px solid black
   float left
-  padding 0 8px
+  padding 0 
   margin 0!important    
   font-family "Akkurat Mono"
   font-size 18px
   list-style none
   color black
 
-.omni .filter
-  color black!important
-  border-right none!important
+.omni .command
+  width 48px
+  text-align right
   text-transform uppercase
-  padding-top 2px!important
-  line-height 31px!important
   font-size 12px!important
-  text-align center
-  width 68px
+  border-bottom 2px solid black
+  padding-bottom 2px
 
 .omni .messages 
   margin 0
   padding 0
   position absolute
-  top 60px
+  top 38px
   left 0
   width 100%
   background skyBlue
   background rgba(212, 238, 255, 0.9)
-  border-bottom 2px solid black
 
 .omni .messages li
   list-style none
@@ -153,17 +146,12 @@ input:focus
 .omni #search
   width 320px
   line-height 28px
-  border-left none
+  border-bottom 2px solid black
   color black
 
-.omni .status ul li
-  list-style none
-  margin 0
-  padding 0
-  font-family "Akkurat Mono"
-  font-size 16px
-  line-height 22px
-  color black
+.omni .result
+  clear both
+  float left
 
 .omni .omnibox, .omni .actions
   text-transform uppercase
@@ -173,12 +161,7 @@ input:focus
   line-height 36px !important
 
 .omni .actions
-  color black!important
-
-.omni .status ul
-  margin 0
-  padding 0
-  list-style none
+  color #444!important
 
 .project
   position absolute
@@ -249,3 +232,6 @@ input:focus
 input[type="password"]::-webkit-input-placeholder
   color black!important
   opacity 0.4
+
+.commands 
+  display none
