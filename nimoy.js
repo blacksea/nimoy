@@ -74,12 +74,10 @@ function boot (conf) { // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     '<html lang="en">' +
     '<meta charset="utf-8">' +
     '<head>' +
-    '<title>'+conf.name+'</title>' +
+    '<title></title>' +
     '<link rel="stylesheet" href="/style.css">' +
     '</head>' +
     '<body id="canvas">' +
-    '<div class="container">' +
-    '</div>' +
     '<script src="/bundle.js"></script>' +
     '</body>' +
     '</html>'
