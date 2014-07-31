@@ -51,7 +51,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
   }
 
   // BRICOLEUR API >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  var id = utils.UID('brico')
+  var id = utils.cuid()
   var canvas = { index : {} }
   canvas.index[id+':brico'] = {id : id}
   s.id = id
@@ -111,8 +111,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
       var a = canvas[utils.search(canvas.index, conn[0]).id]
       var b = canvas[utils.search(canvas.index, conn[1]).id]
 
-      var hash = utils.UID(conn)
-
+      var hash = utils.cuid()
       if (!a.pipe || !b.pipe) cb(new Error('unpipeable!'), null)
 
       a.pipe(b)
@@ -151,7 +150,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
       if (hash) db.get('module:'+hash, put)  
 
       if (!hash) {
-        hash = utils.UID(pkg.name)
+        hash = utils.cuid()
         if (pkg.nimoy.data) {
           var val = JSON.stringify(pkg.nimoy.data)
           db.put('module:'+hash, val, put)
