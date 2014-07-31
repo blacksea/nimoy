@@ -7,6 +7,7 @@ var utils = require('utils')
 module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
 
   localStorage.library = JSON.stringify(config.library)
+  config.canvases = {}
 
   if (config.rendering) var render = require(config.rendering)
 
@@ -46,8 +47,11 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
     .on('data', sync)
 
   function sync (d) { 
-    console.log(d)
     var path = d.key.toString().split(':')[0]
+    if (path==='canvas') {
+      var name = d.key.split(':')[1]
+      config.canvases[name] = {name: name, canvas: d.value}
+    }
   }
 
   // BRICOLEUR API >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
@@ -90,10 +94,13 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
       db.get('canvas:'+d.value, function (e, jsonIdx) {
         if (e) { handleError(e); return false }
         var idx = JSON.parse(jsonIdx)
-        for (item in canvas) {
-          if (!idx[item]&&!item.match('brico')&&!item.match(config.render)) {
-            canvas[item].erase()
-            delete canvas[item]
+        for (item in canvas.index) {
+          if (!item.match('brico') && !item.match(config.editor)) {
+            var cuid = item.split(':')[0]
+            if (!idx[item]) {
+              canvas[cuid].erase()
+              delete canvas[cuid]
+            }
           }
         }
         for (item in idx) {
@@ -101,6 +108,10 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
           if (!canvas[hash]) s.write({key:'put', value:item})
         }
       })
+    } else if (type==='library') {
+      d.value = JSON.stringify(config.canvases)
+      d.to = d.from
+      cb(null, d)
     }
   }
 
