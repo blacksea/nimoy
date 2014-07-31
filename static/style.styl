@@ -66,7 +66,7 @@ input:focus
 .omni
   line-height 20px
   color #333
-  position relative
+  position fixed
   top 0
   left 0
   cursor default
@@ -164,9 +164,16 @@ input:focus
 .omni .actions
   color #444!important
 
+.hilite
+  position fixed
+  z-index 1!important
+  border 4px solid blue
+  border-radius 2px
+  opacity 0.6
+
 .project
-  position absolute
-  width 825
+  position relative
+  width 825px
   margin-left -412.5px
   left 50%
   z-index 2
@@ -221,7 +228,7 @@ input:focus
 .project .info
   float left
   clear both
-  min-width 20px
+  min-width 80px
   min-height 20px
 
 .dropzone
