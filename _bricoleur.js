@@ -48,6 +48,12 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
 
   function sync (d) { 
     var path = d.key.toString().split(':')[0]
+    if (path==='module') {
+      if (d.type === 'put' || !d.type) {
+        var cuid = d.key.split(':')[1]
+        localStorage[cuid] = d.value
+      }
+    }
     if (path==='canvas') {
       var name = d.key.split(':')[1]
       config.canvases[name] = {name: name, canvas: d.value}
@@ -129,7 +135,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
       
       canvas.index[hash+':'+conn[0]+'|'+conn[1]] = [a.id, b.id] // call db 
 
-      var res = (!d.from) ? { code: 200 } : { code:200, to: d.from }
+      var res = (!d.from) ? { code : 200 } : { code : 200, to : d.from }
 
       if (cb) cb(null, res)
 
@@ -154,7 +160,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
         pkg.id = hash
         canvas[hash] = render(pkg, hash)
         canvas.index[hash+':'+pkg.name] = pkg 
-        var res = (!d.from) ? {code: 200} : {code:200, to: d.from}
+        var res = (!d.from) ? {code : 200} : {code : 200, to : d.from}
         if (cb) cb(null, res)
       }
 
