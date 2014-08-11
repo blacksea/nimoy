@@ -1,8 +1,9 @@
 var hmac = require('crypto-browserify/create-hmac')
 var Buffer = require('buffer/').Buffer
 var through = require('through2')
-var utils = require('utils')
 var _ = require('underscore')
+var newCuid = require('cuid')
+var utils = require('utils')
 
 
 module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
@@ -62,7 +63,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
   }
 
   // BRICOLEUR API >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  var id = utils.cuid()
+  var id = newCuid()
   var canvas = { index : {} }
   canvas.index[id+':brico'] = {id : id}
   s.id = id
@@ -129,7 +130,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
       var a = canvas[utils.search(canvas.index, conn[0]).id]
       var b = canvas[utils.search(canvas.index, conn[1]).id]
 
-      var hash = utils.cuid()
+      var hash = newCuid()
       if (!a.pipe || !b.pipe) cb(new Error('unpipeable!'), null)
 
       a.pipe(b)
@@ -168,7 +169,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
       if (hash) db.get('module:'+hash, put)  
 
       if (!hash) {
-        hash = utils.cuid()
+        hash = newCuid()
         if (pkg.nimoy.data) {
           var val = JSON.stringify(pkg.nimoy.data)
           db.put('module:'+hash, val, put)
