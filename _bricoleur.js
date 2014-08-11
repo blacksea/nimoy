@@ -2,7 +2,7 @@ var hmac = require('crypto-browserify/create-hmac')
 var Buffer = require('buffer/').Buffer
 var through = require('through2')
 var _ = require('underscore')
-var newCuid = require('cuid')
+var cuid = require('cuid')
 var utils = require('utils')
 
 
@@ -52,8 +52,8 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
     var path = d.key.toString().split(':')[0]
     if (path==='module') {
       if (d.type === 'put' || !d.type) {
-        var cuid = d.key.split(':')[1]
-        localStorage[cuid] = d.value
+        var uid = d.key.split(':')[1]
+        localStorage[uid] = d.value
       }
     }
     if (path==='canvas') {
@@ -63,7 +63,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
   }
 
   // BRICOLEUR API >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  var id = newCuid()
+  var id = cuid()
   var canvas = { index : {} }
   canvas.index[id+':brico'] = {id : id}
   s.id = id
@@ -104,10 +104,10 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
         var idx = JSON.parse(jsonIdx)
         for (item in canvas.index) {
           if (!item.match('brico') && !item.match(config.editor)) {
-            var cuid = item.split(':')[0]
+            var uid = item.split(':')[0]
             if (!idx[item]) {
-              canvas[cuid].erase()
-              delete canvas[cuid]
+              canvas[uid].erase()
+              delete canvas[uid]
             }
           }
         }
@@ -130,7 +130,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
       var a = canvas[utils.search(canvas.index, conn[0]).id]
       var b = canvas[utils.search(canvas.index, conn[1]).id]
 
-      var hash = newCuid()
+      var hash = cuid()
       if (!a.pipe || !b.pipe) cb(new Error('unpipeable!'), null)
 
       a.pipe(b)
@@ -169,7 +169,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
       if (hash) db.get('module:'+hash, put)  
 
       if (!hash) {
-        hash = newCuid()
+        hash = cuid()
         if (pkg.nimoy.data) {
           var val = JSON.stringify(pkg.nimoy.data)
           db.put('module:'+hash, val, put)
