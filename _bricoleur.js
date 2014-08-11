@@ -2,6 +2,7 @@ var hmac = require('crypto-browserify/create-hmac')
 var Buffer = require('buffer/').Buffer
 var through = require('through2')
 var utils = require('utils')
+var _ = require('underscore')
 
 
 module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
@@ -12,7 +13,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
   if (config.rendering) var render = require(config.rendering)
 
   var s = through.obj(function interface (d, enc, next) {
-    if (!d.key) { next(); return false }
+    if (!d.key) { next(); return null }
 
     var path = d.key.split(':')[0]
 
@@ -98,7 +99,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
       db.put('canvas:'+d.value, JSON.stringify(safeIdx), cb)
     } else if (type === 'open') {
       db.get('canvas:'+d.value, function (e, jsonIdx) {
-        if (e) { handleError(e); return false }
+        if (e) { handleError(e); return null }
         var idx = JSON.parse(jsonIdx)
         for (item in canvas.index) {
           if (!item.match('brico') && !item.match(config.editor)) {
@@ -216,15 +217,13 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
           key:'put', 
           value: [config.editor,config.editor+'>brico','brico>'+config.editor]
         })
-        // load page!
-        return false
+        return null
       }
     }
   } 
 
   api.deauth = function (d, cb) {
     db.deauth(function () {
-      // remove editor!
       delete sessionStorage[user] 
       var path = (!getPath()) ? home : home + getPath()
     })
