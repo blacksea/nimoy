@@ -1,201 +1,151 @@
+var _ = require('underscore')
+var cuid = require('cuid')
 var hmac = require('crypto-browserify/create-hmac')
 var Buffer = require('buffer/').Buffer
 var through = require('through2')
-var _ = require('underscore')
-var cuid = require('cuid')
-var utils = require('utils')
 
 
 module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
-
-  localStorage.library = JSON.stringify(config.library)
-  config.canvases = {}
-
-  if (config.rendering) var render = require(config.rendering)
 
   var s = through.obj(function interface (d, enc, next) {
     if (!d.key) { next(); return null }
 
     var path = d.key.split(':')[0]
+    var command = d.key.split(':')[0]
 
-    if (path === 'put' || path === 'library') {
-      if (typeof d.value === 'string') {
-        d.type = (!d.value.match('>')) ? 'module' : 'pipe'
-        api.put(d)
-      } else if (d.value instanceof Array) {
-        d.value.forEach(function (item) {
-          var cmd = {}
-          cmd.type = (!item.match('>')) ? 'module' : 'pipe'
-          cmd.value = (cmd.type === 'pipe') ? item.split('>') : item
-          api.put(cmd)
-        })
-      }
-    } else if (api[path]) {
-      api[path](d, handleOutput)
-    }
+    // select command
+    // call!
+    // send result
 
-    function handleOutput (e, res) {
-      if (e) handleError(e)
-      if (res) {
-        console.log(res)
-        if (res.to) { res.from = id; s.push(res) }
-      }
-    }
+    if (typeof d.value === 'string')
+      _.find(commands, function (fn,cmd) {if (cmd===command) return fn})(val)
+
+    if (d.value instanceof Array)
+      d.value.forEach(function (item) {
+        var cmd = {}
+        cmd.type = (!item.match('>')) ? 'module' : 'pipe'
+        cmd.value = (cmd.type === 'pipe') ? item.split('>') : item
+        api.put(cmd)
+      })     
 
     next()
   })
 
-  db.liveStream({reverse : true})
-    .on('data', sync)
-
-  function sync (d) { 
-    var path = d.key.toString().split(':')[0]
-    if (path==='module') {
-      if (d.type === 'put' || !d.type) {
-        var uid = d.key.split(':')[1]
-        localStorage[uid] = d.value
-      }
-    }
-    if (path==='canvas') {
-      var name = d.key.split(':')[1]
-      config.canvases[name] = {name: name, canvas: d.value}
-    }
+  function levelDBsync (d) { 
+    // check running modules & reload
+    // update any static things
   }
+
+  db.liveStream({reverse : true})
+    .on('data', levelDBsync)
+
 
   // BRICOLEUR API >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  var id = cuid()
-  var canvas = { index : {} }
-  canvas.index[id+':brico'] = {id : id}
-  s.id = id
-  canvas[id] = s
-
-  window.cvs = canvas
-
-  var api = {}
-
-  api.get = function (d, cb) {
-    db.get(d.value, function returnResult (e, res) {
-      if (e) cb(e, null)
-      if (!e) {
-        var result = (d.from) ? {to:d.from, value:res} : {value:res}
-        cb(null, result)
+  function saveCanvas (str, cb) {
+    var idx = canvas.index
+    var safeIdx = {}
+    for (item in idx) {
+      if (!item.match(config.editor) && !item.match('brico')) {
+        safeIdx[item] = item.split(':')[0]
       }
-    })
+    }
+    db.put('canvas:'+d.value, JSON.stringify(safeIdx), cb)
   }
 
-  api.data = function (d, cb) {
-    db.put(d.value.key, d.value.data, cb)
+  function newCanvas () {
+
   }
 
-  api.canvas = function (d, cb) {
-    var type = d.key.split(':')[1]
-    if (type === 'save') {
-      var idx = canvas.index
-      var safeIdx = {}
-      for (item in idx) {
-        if (!item.match(config.editor) && !item.match('brico')) {
-          safeIdx[item] = item.split(':')[0]
+  function openCanvas (e, jsonIdx) {
+    if (e) { handleError(e); return null }
+    var idx = JSON.parse(jsonIdx)
+    for (item in canvas.index) {
+      if (!item.match('brico') && !item.match(config.editor)) {
+        var uid = item.split(':')[0]
+        if (!idx[item]) {
+          canvas[uid].erase()
+          delete canvas[uid]
         }
       }
-      db.put('canvas:'+d.value, JSON.stringify(safeIdx), cb)
-    } else if (type === 'open') {
-      db.get('canvas:'+d.value, function (e, jsonIdx) {
-        if (e) { handleError(e); return null }
-        var idx = JSON.parse(jsonIdx)
-        for (item in canvas.index) {
-          if (!item.match('brico') && !item.match(config.editor)) {
-            var uid = item.split(':')[0]
-            if (!idx[item]) {
-              canvas[uid].erase()
-              delete canvas[uid]
-            }
-          }
-        }
-        for (item in idx) {
-          var hash = item.split(':')[0]
-          if (!canvas[hash]) s.write({key:'put', value:item})
-        }
-      })
-    } else if (type==='library') {
-      d.value = JSON.stringify(config.canvases)
-      d.to = d.from
-      cb(null, d)
+    }
+    for (item in idx) {
+      var hash = item.split(':')[0]
+      if (!canvas[hash]) s.write({key:'put', value:item})
     }
   }
 
-  api.put = function (d, cb) { 
-    if (d.type === 'pipe') {
-      var conn = d.value
+  function putModule () {
+    var nameOrPkg 
+    var hash
 
-      var a = canvas[utils.search(canvas.index, conn[0]).id]
-      var b = canvas[utils.search(canvas.index, conn[1]).id]
+    if (d.value.split(':').length > 1) {
+      hash = d.value.split(':')[0]
+      nameOrPkg = d.value.split(':')[1]
+    } else nameOrPkg = d.value
 
-      var hash = cuid()
-      if (!a.pipe || !b.pipe) cb(new Error('unpipeable!'), null)
+    var pkg = (typeof nameOrPkg !== 'object') // mod
+      ? utils.search(config.library.master, nameOrPkg) 
+      : nameOrPkg
 
-      a.pipe(b)
-      
-      canvas.index[hash+':'+conn[0]+'|'+conn[1]] = [a.id, b.id] // call db 
+    if (!pkg) handleError(new Error('no such package! '+nameOrPkg))
 
-      var res = (!d.from) ? { code : 200 } : { code : 200, to : d.from }
-
+    function put (e, data) {
+      if (e) handleError(e)
+      if (data) pkg.nimoy.data = JSON.parse(data)
+      pkg.id = hash
+      canvas[hash] = render(pkg, hash)
+      canvas.index[hash+':'+pkg.name] = pkg 
+      var res = (!d.from) ? {code : 200} : {code : 200, to : d.from}
       if (cb) cb(null, res)
+    }
 
-    } else if (d.type === 'module') {
-      var nameOrPkg 
-      var hash
+    if (hash) db.get('module:'+hash, put)  
 
-      if (d.value.split(':').length > 1) {
-        hash = d.value.split(':')[0]
-        nameOrPkg = d.value.split(':')[1]
-      } else nameOrPkg = d.value
-
-      var pkg = (typeof nameOrPkg !== 'object') // mod
-        ? utils.search(config.library.master, nameOrPkg) 
-        : nameOrPkg
-
-      if (!pkg) handleError(new Error('no such package! '+nameOrPkg))
-
-      function put (e, data) {
-        if (e) handleError(e)
-        if (data) pkg.nimoy.data = JSON.parse(data)
-        pkg.id = hash
-        canvas[hash] = render(pkg, hash)
-        canvas.index[hash+':'+pkg.name] = pkg 
-        var res = (!d.from) ? {code : 200} : {code : 200, to : d.from}
-        if (cb) cb(null, res)
-      }
-
-      if (hash) db.get('module:'+hash, put)  
-
-      if (!hash) {
-        hash = cuid()
-        if (pkg.nimoy.data) {
-          var val = JSON.stringify(pkg.nimoy.data)
-          db.put('module:'+hash, val, put)
-        } else put()
-      }
+    if (!hash) {
+      hash = cuid()
+      if (pkg.nimoy.data) {
+        var val = JSON.stringify(pkg.nimoy.data)
+        db.put('module:'+hash, val, put)
+      } else put()
     }
   }
 
-  api.del = function (d, cb) {
+  function pipe () {
+    var conn = d.value
+    var a = canvas[utils.search(canvas.index, conn[0]).id]
+    var b = canvas[utils.search(canvas.index, conn[1]).id]
+
+    var hash = cuid()
+    if (!a.pipe || !b.pipe) cb(new Error('unpipeable!'), null)
+
+    a.pipe(b)
+    
+    canvas.index[hash+':'+conn[0]+'|'+conn[1]] = [a.id, b.id] // call db 
+
+    var res = (!d.from) ? { code : 200 } : { code : 200, to : d.from }
+
+    if (cb) cb(null, res)
+  }
+
+  function unpipe () {
     if (d.type === 'pipe') { // parse input
-      var conn = d.value
-      var a = canvas[conn][0] 
-      var b = canvas[conn][1]
-      a.unpipe(b) 
-      delete canvas.index[hash]
-    } else if (d.type === 'module') { // mod
-      var mod = search(canvas, hash)
-      if (mod) { 
-        document.body.removeChild(document.getElementById(hash))
-        delete mod 
-      }
-      delete canvas.index[hash]
-    }
+    var conn = d.value
+    var a = canvas[conn][0] 
+    var b = canvas[conn][1]
+    a.unpipe(b) 
+    delete canvas.index[hash]
   }
 
-  api.auth = function (d, cb) {
+  function rmModule () {
+    var mod = search(canvas, hash)
+    if (mod) { 
+      document.body.removeChild(document.getElementById(hash))
+      delete mod 
+    }
+    delete canvas.index[hash]
+  }
+
+  function auth (d, cb) {
     if (!d.session && d.target.id === 'loginForm') { // is dom event
       d.preventDefault()
       var img = new Buffer(config.uImg).toString()
@@ -223,14 +173,15 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
     }
   } 
 
-  api.deauth = function (d, cb) {
-    db.deauth(function () {
-      delete sessionStorage[user] 
-      var path = (!getPath()) ? home : home + getPath()
-    })
-  } 
-  // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
+  var commands = {
+    'put' : function (items) {
+      if (items instanceof Array) {
+      } else if (items instanceof 'string') {
+      }
+    }, 
+    'rm' : function () {
+    }
+  } // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
   // login ui >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   login = document.createElement('div')
@@ -241,13 +192,12 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
     + '</form>'
 
   login.querySelector('#loginForm')
-    .addEventListener('submit', api.auth, false)
+    .addEventListener('submit', commands.auth, false)
   // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-    
 
   // boot >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   if (sessionStorage[user])
-    api.auth({ name : user, session : sessionStorage[user] })
+    commands.auth({ name : user, session : sessionStorage[user] })
 
   if (!sessionStorage[user] && user !== 'default') {
     document.body.appendChild(login)
@@ -256,7 +206,6 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
   // end boot <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
   return s
-
 } // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
 
 function handleError (e) {
