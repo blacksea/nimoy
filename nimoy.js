@@ -11,6 +11,8 @@ var newHmac = require('crypto').createHmac
 var asyncMap = require('slide').asyncMap
 var formidable = require('formidable')
 var uglify = require('uglify-js')
+var through = require('through2')
+var path = require('path')
 var st = require('st')
 
 
@@ -132,9 +134,6 @@ function compileModules (config, rootModules, cb) { // >>>>>>>>>>>>>>>>>>>>>>>>
 
     if (!pkg.nimoy) { next(); return false }
 
-    if (fs.existsSync(templatePath)) 
-      pkg.html = fs.readFileSync(templatePath, {encoding:'utf8'})
-
     var key = 'modules:'+pkg.name
     var root = false 
 
@@ -157,6 +156,8 @@ function compileModules (config, rootModules, cb) { // >>>>>>>>>>>>>>>>>>>>>>>>
     cb(library)
 
     var bun = fs.createWriteStream(outBun)
+
+    b.transform('brfs')
 
     b.bundle().pipe(bun)
 
