@@ -28,3 +28,19 @@ window.addEventListener('hashchange', function (e) {
 }, false)
 
 function Errs (err) { console.error(err) } // wha...!!!
+
+// place login in here!
+
+if (sessionStorage[user])
+  commands.auth({ name : user, session : sessionStorage[user] })
+
+if (!sessionStorage[user] && user !== 'default') {
+  document.body.appendChild(login)
+  login.querySelector('input').focus()
+}
+
+if (process.title === 'browser') { // browser + node interface
+  login.querySelector('#loginForm')
+    .addEventListener('submit', commands.auth, false)
+}
+
