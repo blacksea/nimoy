@@ -27,20 +27,30 @@ window.addEventListener('hashchange', function (e) {
   bricoleur.write(canvas)
 }, false)
 
-function Errs (err) { console.error(err) } // wha...!!!
-
-// place login in here!
-
-if (sessionStorage[user])
-  commands.auth({ name : user, session : sessionStorage[user] })
-
+if (sessionStorage[user])// place login in here!
+  bricoluer.write({
+    name: user,
+    session: sessionStorage[user]
+  })
 if (!sessionStorage[user] && user !== 'default') {
   document.body.appendChild(login)
-  login.querySelector('input').focus()
 }
 
-if (process.title === 'browser') { // browser + node interface
-  login.querySelector('#loginForm')
-    .addEventListener('submit', commands.auth, false)
-}
+// login
 
+var login = document.createElement('div')
+login.className = 'login'
+login.innerHTML = '<form id="loginForm">'
+  + '<input type="password" placeholder="enter password" />'
+  + '<input type="submit" value="edit" style="display:none;" />'
+  + '</form>'
+
+login.querySelector('#loginForm')
+  .addEventListener('submit', function (e) {
+    bricoluer.write({
+      name: user,
+      pass: e.value[0]
+    })
+  }, false)
+
+function Errs (err) { console.error(err) } // wha...!!!
