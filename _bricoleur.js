@@ -5,7 +5,8 @@ var Buffer = require('buffer/').Buffer
 var through = require('through2')
 
 
-module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
+module.exports = function Bricoleur (db, user, config) { 
+  var canvas = {}
 
   var s = through.obj(function interface (d, enc, next) {
     if (!d.key) { next(); return null }
@@ -18,7 +19,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
     // send result
 
     if (typeof d.value === 'string')
-      _.find(commands, function (fn,cmd) {if (cmd===command) return fn})(val)
+      _.find(commands,function(fn,cmd){if (cmd === command) return fn})(val)
 
     if (d.value instanceof Array)
       d.value.forEach(function (item) {
@@ -32,16 +33,18 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
   })
 
   function levelDBsync (d) { 
-    // check running modules & reload
-    // update any static things
+
   }
 
   db.liveStream({reverse : true})
     .on('data', levelDBsync)
 
+  var commands = { add:put, auth:auth, pipe:pipe } 
 
-  // BRICOLEUR API >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  function saveCanvas (str, cb) {
+  function run (cmd) {
+  }
+ 
+  function saveCanvas (d, next) {
     var idx = canvas.index
     var safeIdx = {}
     for (item in idx) {
@@ -56,7 +59,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
 
   }
 
-  function openCanvas (e, jsonIdx) {
+  function openCanvas (d, next) {
     if (e) { handleError(e); return null }
     var idx = JSON.parse(jsonIdx)
     for (item in canvas.index) {
@@ -74,7 +77,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
     }
   }
 
-  function putModule () {
+  function putModule (d, next) {
     var nameOrPkg 
     var hash
 
@@ -88,29 +91,20 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
       : nameOrPkg
 
     if (!pkg) handleError(new Error('no such package! '+nameOrPkg))
+    if (data) pkg.nimoy.data = JSON.parse(data)
 
-    function put (e, data) {
-      if (e) handleError(e)
-      if (data) pkg.nimoy.data = JSON.parse(data)
-      pkg.id = hash
-      canvas[hash] = render(pkg, hash)
-      canvas.index[hash+':'+pkg.name] = pkg 
-      var res = (!d.from) ? {code : 200} : {code : 200, to : d.from}
-      if (cb) cb(null, res)
-    }
+    var id = cuid()
 
+    canvas[id] = require(m)(id)
+
+    // get data // check for module data
     if (hash) db.get('module:'+hash, put)  
 
-    if (!hash) {
-      hash = cuid()
-      if (pkg.nimoy.data) {
-        var val = JSON.stringify(pkg.nimoy.data)
-        db.put('module:'+hash, val, put)
-      } else put()
-    }
+    // place module data
+    db.put('module:'+hash, val, put)
   }
 
-  function pipe () {
+  function pipe (d, next) {
     var conn = d.value
     var a = canvas[utils.search(canvas.index, conn[0]).id]
     var b = canvas[utils.search(canvas.index, conn[1]).id]
@@ -120,15 +114,14 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
 
     a.pipe(b)
     
-    canvas.index[hash+':'+conn[0]+'|'+conn[1]] = [a.id, b.id] // call db 
+    canvas.index[hash+':'+conn[0]+'|'+conn[1]] = [a.id, b.id] 
 
     var res = (!d.from) ? { code : 200 } : { code : 200, to : d.from }
 
     if (cb) cb(null, res)
   }
 
-  function unpipe () {
-    if (d.type === 'pipe') { // parse input
+  function unpipe (d, next) {
     var conn = d.value
     var a = canvas[conn][0] 
     var b = canvas[conn][1]
@@ -136,7 +129,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
     delete canvas.index[hash]
   }
 
-  function rmModule () {
+  function rmModule (d, next) {
     var mod = search(canvas, hash)
     if (mod) { 
       document.body.removeChild(document.getElementById(hash))
@@ -145,7 +138,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
     delete canvas.index[hash]
   }
 
-  function auth (d, cb) {
+  function auth (d, next) { // integrate w session
     if (!d.session && d.target.id === 'loginForm') { // is dom event
       d.preventDefault()
       var img = new Buffer(config.uImg).toString()
@@ -154,6 +147,7 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
     } else if (d.session) {
       db.auth({name: d.name, session: d.session}, handleAuth)
     }
+
     function handleAuth (e, res) {
       if (e) {
         if (!document.querySelector('.login')) {
@@ -173,40 +167,8 @@ module.exports = function Bricoleur (db, user, config) { // >>>>>>>>>>>>>>>>>>>
     }
   } 
 
-  var commands = {
-    'put' : function (items) {
-      if (items instanceof Array) {
-      } else if (items instanceof 'string') {
-      }
-    }, 
-    'rm' : function () {
-    }
-  } // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-  // login ui >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  login = document.createElement('div')
-  login.className = 'login'
-  login.innerHTML = '<form id="loginForm">'
-    + '<input type="password" placeholder="enter password" />'
-    + '<input type="submit" value="edit" style="display:none;" />'
-    + '</form>'
-
-  login.querySelector('#loginForm')
-    .addEventListener('submit', commands.auth, false)
-  // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-  // boot >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  if (sessionStorage[user])
-    commands.auth({ name : user, session : sessionStorage[user] })
-
-  if (!sessionStorage[user] && user !== 'default') {
-    document.body.appendChild(login)
-    login.querySelector('input').focus()
-  }
-  // end boot <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
   return s
-} // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+} 
 
 function handleError (e) {
   console.error(e)
