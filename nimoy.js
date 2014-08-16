@@ -3,6 +3,7 @@ var url = require('url')
 var http = require('http')
 var https = require('https')
 var level = require('level')
+var emitter = require('events').EventEmitter
 var multiLevel = require('multilevel')
 var browserify = require('browserify')
 var livestream = require('level-live-stream')
@@ -14,6 +15,22 @@ var uglify = require('uglify-js')
 var through = require('through2')
 var path = require('path')
 var st = require('st')
+
+module.exports = function Nimoy (conf) {
+  var nimoy = new emitter()
+  nimoy.compile = function () {
+    compile(conf.bundle, function (e, res) {
+      if (e) { handleErr(e); return null }
+      nimoy.emit('compiled', res)
+    })
+  }
+  nimoy.boot = function () {
+    boot(conf, function () {
+      nimoy.emit('boot')
+    })
+  } 
+  return nimoy
+}
 
 
 var sessions = {
@@ -41,26 +58,7 @@ var sessions = {
   }
 }
 
-var configFlag = process.argv[2] 
-
-!(configFlag) 
-  ? boot(require('./config.json'))
-  : boot(process.argv[2])
-
-
-function boot (conf) { // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
-  var rootModules = [conf.bricoleur.canvasRender, conf.bricoleur.auth]
-
-  process.stdin.on('data', function (buf) { 
-    var str = buf.toString()
-
-    if (str === 'c\n') 
-      compileModules(conf.server.bundle, rootModules, console.log)
-  })
-
-  if (!conf || !conf.server || !conf.bricoleur)
-    throw new Error('nimoy: invalid or missing config.json')
-  
+function boot (conf, cb) { 
   if (!fs.existsSync('./static')) fs.mkdir('./static')
   if (!fs.existsSync('./static/files')) fs.mkdir('./static/files')
 
@@ -96,79 +94,42 @@ function boot (conf) { // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     sessions.users.edit = d.val
   })
 
-  compileModules(conf.server.bundle, rootModules, function (library) {
-    bricoConf.library = library
-    bricoConf.uImg = new Buffer(conf.bricoleur.secretKey)
-    delete bricoConf.secretKey
+  startServer(conf.server, db, cb)
+}
 
-    fs.writeFileSync('./bricoleurConfig.json', JSON.stringify(bricoConf))
+function compile (config, cb) {
+  var IN = config.pathBundleEntry
+  var OUT = config.pathBundleOut
+  var b = browserify(IN)
+  var library  = {} 
+  var modulesDir = fs.readdirSync(config.pathModules)
+  if (!modulesDir) {cb(err('missing modules dir!'), null); return false}
 
-    startServer(conf.server, db, function () { 
-      console.log('server running') 
-    })
-  })
-} // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
-
-
-function compileModules (config, rootModules, cb) { // >>>>>>>>>>>>>>>>>>>>>>>>
-  var library  = {
-    master: {},
-    root: {},
-    global: {}
-  } 
-  
-  var inBun = config.pathBundleEntry
-  var outBun = config.pathBundleOut
-  var b = browserify(inBun)
-  var modulesFolder = fs.readdirSync(config.pathModules)
-
-  asyncMap(modulesFolder, function compileModule (moduleFolder, next) {
-    var pkgPath = config.pathModules + moduleFolder + '/package.json'
-
-    var templatePath = config.pathModules + moduleFolder + '/' + moduleFolder
-                       + '.hogan'
-
+  asyncMap(modulesDir, function compileModule (dirname, next) {
+    dirname = config.pathModules+dirname+'/'
+    var pkgPath = dirname+'package.json'
     if (!fs.existsSync(pkgPath)) { next(); return false }
-
     var pkg = JSON.parse(fs.readFileSync(pkgPath, {encoding:'utf8'}))
+    if (!pkg || !pkg.nimoy) { next(); return false }
 
-    if (!pkg.nimoy) { next(); return false }
+    library[pkg.name] = pkg
 
-    var key = 'modules:'+pkg.name
-    var root = false 
-
-    for (var i=0; i < rootModules.length; i++) {
-      var m = rootModules[i]
-      if (m === pkg.name) root = true
-    }
-
-    (root) ? library.root[key] = pkg : library.global[key] = pkg;
-    library.master[key] = pkg
-
-    b.require(config.pathModules+moduleFolder+'/'+pkg.main, {
-      expose: moduleFolder
+    b.require(dirname+pkg.main, {
+      expose: pkg.name
     })
-
     next()
-
   }, function end () {
-
-    cb(library)
-
-    var bun = fs.createWriteStream(outBun)
-
+    var bundleJS = fs.createWriteStream(OUT)
     b.transform('brfs')
-
-    b.bundle().pipe(bun)
-
-    bun.on('finish',function () {
-      console.log('compiled '+ inBun +' to ' + outBun)
+    b.bundle().pipe(bundleJS)
+    bundleJS.on('finish',function () {
+      fs.writeFileSync('./library.json', JSON.stringify(library))
+      cb(null, library)
     })
   })
-} // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+}
 
-
-function startServer (conf, db, cb) { // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+function startServer (conf, db, cb) {
   var mount = st({
     index: 'index.html', 
     path: './static', 
@@ -177,9 +138,9 @@ function startServer (conf, db, cb) { // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
   })
 
   if (!conf.ssl) {
-    var server = http.createServer(handleHttp)
+    server = http.createServer(handleHttp)
   } else {
-    var server = https.createServer({
+    server = https.createServer({
       honorCipherOrder : true,
       key : fs.readFileSync(conf.ssl.key),
       cert : fs.readFileSync(conf.ssl.cert),
@@ -233,10 +194,8 @@ function startServer (conf, db, cb) { // >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
     .attach(server, '/ws')
 
   server.listen(conf.port, conf.host, cb)
-} // <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+} 
 
-
-// UTILS >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
 function getHmac (d, cb) { 
   var hmac = newHmac('sha256', d.secret)
   hmac.setEncoding('hex')
