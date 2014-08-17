@@ -21,19 +21,24 @@ var sessions = {}
 var users = {}
 
 module.exports = function Nimoy (conf) {
-  if (conf.session) SESSION_EXPIRE = conf.session
+  if (conf.server.sessionLength) SESSION_EXPIRE = conf.sessionLength
   var nimoy = new emitter()
   nimoy.compile = function () {
     compile(conf.bundle, function (e, res) {
       if (e) { handleErr(e); return null }
       nimoy.emit('compiled', res)
     })
+    return nimoy
   }
   nimoy.boot = function () {
     boot(conf, function () {
       nimoy.emit('boot')
     })
+    return nimoy
   } 
+  nimoy.kill = function () {
+    server.close()
+  }
   return nimoy
 }
 
@@ -55,6 +60,7 @@ function boot (conf, cb) {
   if (!fs.existsSync('./static/files')) fs.mkdir('./static/files')
 
   var db = level('./' + conf.server.host)
+  db.on('error', handleErr)
   livestream.install(db)
   multiLevel.writeManifest(db, './static/manifest.json')
 
@@ -75,14 +81,11 @@ function boot (conf, cb) {
     '</html>'
   )
 
-  var bricoConf = conf.bricoleur
-
   getHmac({
-    token: bricoConf.pass,
+    token: conf.bricoleur.pass,
     user: 'edit',
-    secret: bricoConf.secretKey.toString()
+    secret: conf.bricoleur.secretKey.toString()
   }, function (d) {
-    delete bricoConf.pass
     users.edit = d.val
   })
 
@@ -200,3 +203,7 @@ function getHmac (d, cb) {
 }
 
 function getTime() { return new Date().getTime() }
+
+function handleErr (e) {
+  console.error(e)
+}
