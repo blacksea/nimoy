@@ -6,20 +6,23 @@ var manifest = require('../static/manifest.json')
 var multilevel = require('multilevel').client(manifest)
 var nimoy = require('../nimoy')
 var es = require('engine.io-stream/client')
+var cuid = require('cuid')
+var hmac = require('crypto').createHmac
 
 var conf = {
   server : {
     port : 8000,
     host : "localhost",
     ssl : false,
-   },
+    sessionLength : 20
+  },
   bricoleur : {
     secretKey : "PleaseReplaceThisTextWithYourOwn!", 
     rendering : "browser",
     editor : "omni",
     pass : "nimoy"
   },
- bundle : {
+  bundle : {
     compress : false,
     pathModules : "./node_modules/",
     pathBundleEntry : "./_client.js",
@@ -65,15 +68,40 @@ test('NIMOY: boot', function (t) {
 
     var ws = es({path:':8000/ws',transports:['websocket']})
     ws.pipe(multilevel.createRpcStream()).pipe(ws)
+
+    var pass = hmac('sha256', conf.bricoleur.secretKey)
+    pass.setEncoding('hex')
+    pass.write('nimoy')
+    pass.end()
+
+    var creds = {
+      name : 'edit',
+      pass : pass.read().toString(),
+      id : cuid()
+    }
+
     var ls = multilevel.liveStream()
     multilevel.on('open', function () {
       multilevel.get('test', function (e,res) {
         t.equal(e instanceof Error, true)
-        t.end()
-        process.exit()
+        t.test('NIMOY: test sessions', function (st) {
+          multilevel.auth(creds, function (e, res) {
+            st.equal(!e, true)
+            delete creds.pass
+          })
+          setTimeout(function () {
+            multilevel.auth(creds, function (e,r) {
+              st.equal(!e, false)
+              t.end()
+              process.exit()
+            })
+          }, 30)
+        })
       })
     })
+
     ws.on('error', console.error)
+    multilevel.on('error', console.error)
     idx.end()
   })
 })
