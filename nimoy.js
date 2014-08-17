@@ -16,8 +16,12 @@ var through = require('through2')
 var path = require('path')
 var st = require('st')
 
+var SESSION_EXPIRE = 36000
+var sessions = {}
+var users = {}
 
 module.exports = function Nimoy (conf) {
+  if (conf.session) SESSION_EXPIRE = conf.session
   var nimoy = new emitter()
   nimoy.compile = function () {
     compile(conf.bundle, function (e, res) {
@@ -32,10 +36,6 @@ module.exports = function Nimoy (conf) {
   } 
   return nimoy
 }
-
-var SESSION_EXPIRE = 36000
-var sessions = {}
-var users = {}
 
 function auth (user, cb) { // client makes id
   if (sessions[user.id]) {
@@ -175,7 +175,7 @@ function startServer (conf, db, cb) {
   var engine = engineServer(function (wss) {
     wss.on('error', console.error)
     wss.pipe(multiLevel.server(db, {
-      auth: sessions.auth,
+      auth: auth,
       access: function access (user, db, method, args) {
         if (!user || user.name !== 'edit') {
           if (/^put|^del|^batch|write/i.test(method)) { // no write access!
