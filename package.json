@@ -29,7 +29,8 @@
     "tape": "^2.13.1"
   },
   "scripts": {
-    "test": "tape tests/bricoleur.js"
+    "test": "tape tests/nimoy.js",
+    "btest": "node index.js './testConf.json' && sleep 2 && testling --bcmd=google-chrome-unstable"
   },
   "repository": {
     "type": "git",
