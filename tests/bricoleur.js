@@ -12,28 +12,29 @@ server.pipe(client.createRpcStream()).pipe(server)
 var library = require('../library.json')
 var brico = require('../_bricoleur.js')(client,'edit',library)
 
-var placeModules = [
-  '+project',
-  '+omni',
-  'project+omni'
-]
-brico.write('@edit nimoy')
-brico.write('?project')
 
 test('TEST BRICOLEUR', function (t) {
-  var gate = 1
-  t.plan(1)
+  t.plan(6)
+
+  var commands = [
+    '+project',
+    '+omni',
+    '?omni',
+    '?#omni',
+    '+project|omni',
+    '+#ral'
+  ]
+
+  commands.forEach(function (str) {
+    brico.write(str)
+  })
 
  // receive objects
   
   brico.on('data', function (d) { // gate val should be in d
-    switch (gate) {
-      case 1 : t.equal(d.value === 'project', true, 'found project'); break;
-      default : break;
-    }
+    console.log(d)
+    t.equal(d instanceof Array, true)
   })
 
-  brico.on('error', function handleError (e) {
-
-  })
+  brico.on('error', console.error)
 })
