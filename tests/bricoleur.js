@@ -1,38 +1,39 @@
 var test = require('tape')
 var level = require('level')
-var liveStream = require('level-live-stream')
-var db = level('testDB')
-liveStream.install(db)
-var through = require('through')
-var Stream = require('stream').Stream
+var multilevel = require('multilevel')
+var ls = require('level-live-stream')
+var db = level('./testdb/')
+ls.install(db)
 
-var map = require('../_map.js')
-var bricoleur = require('../_bricoleur.js')
+var server = multilevel.server(db)
+var client = multilevel.client(require('../static/manifest.json'))
+server.pipe(client.createRpcStream()).pipe(server)
 
-var dbWriteStream = db.createWriteStream()
+var library = require('../library.json')
+var brico = require('../_bricoleur.js')(client,'edit',library)
 
-map({wilds : './testModules'}).pipe(dbWriteStream)
+var placeModules = [
+  '+project',
+  '+omni',
+  'project+omni'
+]
+brico.write('@edit nimoy')
+brico.write('?project')
 
-dbWriteStream.on('close', function startTest () {
+test('TEST BRICOLEUR', function (t) {
+  var gate = 1
+  t.plan(1)
 
-  var brico = new bricoleur(db,{wilds:'./tests/testModules/'})
-
-
-  db.put('*:m1:1', {}, function (e) {
-    test('is api installed ?', function (t) {
-      t.equal(brico.api instanceof Stream, true)
-      t.end()
-    })
-    test('del module', function (t) {
-      t.plan(1)
-      t.equal(brico._['m1_1'] instanceof Stream, true)
-    })
-    db.del('*:m1:1', function (e) {
-      test('put module', function (t) {
-        t.plan(1)
-        t.equal(!brico._['m1_1'], true)
-      })
-    })
+ // receive objects
+  
+  brico.on('data', function (d) { // gate val should be in d
+    switch (gate) {
+      case 1 : t.equal(d.value === 'project', true, 'found project'); break;
+      default : break;
+    }
   })
 
+  brico.on('error', function handleError (e) {
+
+  })
 })
