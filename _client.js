@@ -1,5 +1,7 @@
 var manifest = require('./static/manifest.json')
 var config = require('./bricoleurConfig.json') // setlib!
+var Buffer = require('buffer/').Buffer
+var IMG = new Buffer(config.uImg).toString()
 
 var db = require('multilevel').client(manifest)
            .on('error', Errs)
@@ -10,7 +12,7 @@ ws.pipe(db.createRpcStream()).pipe(ws)
 
 var canvas = (!window.location.hash) 
   ? {key: 'canvas:open', value:'default'}
-  : {key: 'canvas:open', value:window.location.hash.slice(1)}
+  : {key: 'canvas:open', value: window.location.hash.slice(1)}
 
 var user = (window.location.host.split('.').length === 3)
   ? window.location.host.split('.')[0]
@@ -19,25 +21,19 @@ var user = (window.location.host.split('.').length === 3)
 var bricoleur = require('./_bricoleur')(db, user, config)
                   .on('error', Errs)
 
-bricoleur.write(canvas)
-        
-window.addEventListener('hashchange', function (e) {
-  e.preventDefault()
-  canvas.value = e.newURL.split('#')[1]
-  bricoleur.write(canvas)
-}, false)
+// create a new bricoleur
 
-if (sessionStorage[user])// place login in here!
-  bricoluer.write({
-    name: user,
-    session: sessionStorage[user]
-  })
-if (!sessionStorage[user] && user !== 'default') {
-  document.body.appendChild(login)
-}
+// try to auth with existing session
+
+// if theres no session force login
+                  
+if (user === 'default') return false                 
+
+if (sessionStorage[user]) bricoleur.write('@'+user+' '+sessionStorage[user])
+
+if (!sessionStorage[user]) document.body.appendChild(login)
 
 // login
-
 var login = document.createElement('div')
 login.className = 'login'
 login.innerHTML = '<form id="loginForm">'
@@ -52,5 +48,10 @@ login.querySelector('#loginForm')
       pass: e.value[0]
     })
   }, false)
+
+window.addEventListener('hashchange', function (e) {
+  e.preventDefault()
+  bricoleur.write(e.newURL.slice(1))
+}, false)
 
 function Errs (err) { console.error(err) } // wha...!!!
