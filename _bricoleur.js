@@ -14,17 +14,14 @@ module.exports = function Bricoleur (db, user, config) {
 
     if (d instanceof Array) { 
       d.forEach(function (str) {
-        parseCommand(str, function (e, res) {
-          if (!e) { self.push(res) } else { self.emit('error', e) }
-          next()
-        })
+        parseCommand(str, handleResult)
       })
-    } else { 
-      parseCommand(d, function (e, res) {
-        if (!e) { self.push(res) } else { self.emit('error', e) }
-        next()
-      })
-    } 
+    } else parseCommand(d, handleResult)
+
+    function handleResult (e, res) {
+      if (!e) { self.push(res) } else { self.emit('error', e) }
+      next()
+    }
   })
 
   function parseCommand (d, cb) { 
@@ -38,42 +35,54 @@ module.exports = function Bricoleur (db, user, config) {
       ? str.slice(1).split('|') : str.slice(2)
 
     if (!action||!type||!actor) // fail!
-      { cb(new Error('wrong cmd:'+str), null) ;return false }
+      { cb(new Error('wrong cmd:'+str), null); return false }
 
     // process!
-    
-    cb(null, [action, type, actor])
-
     var id = cuid() // make an id
 
-    if (action.index > 0) { // combine / pipe
-      var modA = cmd.split(action[0])[0]
-      var modB = cmd.split(action[0])[1]
-      if (action[0]==='+') modA.pipe(modB)
-      if (action[0]==='-') modA.unpipe(modB)
-       
-      canvas[id] = 'action'
-    } else { 
-      var mod = action.input.slice(0)
-      if (action[0]==='+') { // add module 
-
-      }
-      if (action[0]==='-') { // rm module
-
-      }
-      if (action[0]==='@') { // auth
-        var pass = (checkUid(cmd[1])) ? cmd[1] : getAuthToken(cmd[1])
-        db.auth({name:cmd[0].slice(1), pass: pass}, cb)
-        db.deauth(function (e) {if (e) handleErr(e) })
-      }
-      if (action[0]==='#') { // rm module
-
-      }
+    if (action==='?') { // handle ? first
+      // check exists
+      db.get(key, cb)
     }
 
+    if (type==='|') { // PIPE
+      var modA = actor[0]
+      var modB = actor[1]
+
+      // +
+      if (action==='+') modA.pipe(modB)
+
+      // -
+      if (action==='-') modA.unpipe(modB)
+      canvas[id] = 'action'
+      cb(id)
+    } 
+    if (type==='*') { // MODULE
+      // + 
+      canvas[id] = require(actor)
+      // -
+      //find actor --- remove stream?
+      delete canvas[id]
+    }
+    if (type==='$' || type==='#') { // DATA
+      // +
+      db.put(key, d.value, cb)
+      // -
+      db.del(key, cb)
+    }
+    if (type==='@') { // USER
+      // look at auth mech agin
+      var pass = (checkUid(cmd[1])) ? cmd[1] : getAuthToken(cmd[1])
+      db.auth({name:cmd[0].slice(1), pass: pass}, cb)
+      db.deauth(function (e) { if (e) handleErr(e) })
+    }
+
+    cb(null, [action, type, actor]) // default result is a cuid
   }
 
-  function levelDBsync (d) { }
+  function levelDBsync (d) { 
+
+  }
 
   db.liveStream({reverse : true})
     .on('data', levelDBsync)
