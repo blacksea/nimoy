@@ -2,40 +2,53 @@ var _ = require('underscore')
 var cuid = require('cuid') // 25 char uid
 var through = require('through2')
 var hmac = require('crypto-browserify/create-hmac')
+var Buffer = require('buffer/').Buffer
+// var IMG = new Buffer(config.uImg).toString()
 
 module.exports = function Bricoleur (db, user, config) { 
-  var canvas = {}
-  var commands = {}
 
+  var canvas = {} // canvas is just an object with cuid hash keys
 
   var s = through.obj(function interface (d, enc, next) {
-    // process input
-    // determin db calls
-    // check for an obj w value & load
-    
-    if (d instanceof Array) { d.forEach(parseCommand); next(); return false }
+    var self = this
 
-    else if (typeof d !== 'string') { 
-      console.log(typeof d)
-      next()
-      return false
-    }
-
-    parseCommand(d)
-
-    next()
+    if (d instanceof Array) { 
+      d.forEach(function (str) {
+        parseCommand(str, function (e, res) {
+          if (!e) { self.push(res) } else { self.emit('error', e) }
+          next()
+        })
+      })
+    } else { 
+      parseCommand(d, function (e, res) {
+        if (!e) { self.push(res) } else { self.emit('error', e) }
+        next()
+      })
+    } 
   })
 
-  function parseCommand (cmd) { // try to call other commands first
-    if (cmd.split(' ')) {
-      var action = cmd.split(' ')
+  function parseCommand (str, cb) { 
+    if (typeof str !== 'string') { 
+      // its probably an object, attempt to format!
+
     }
+      
+    // parse!
+    var action = str[0].match(/\+|\-|\?/)[0]
+    var type = str.slice(1).match(/\@|\#|\$|\|/) 
+    type = (!type) ? '*' : type[0] 
+    var actor = (type==='*') ? str.slice(1) : (type==='|') 
+      ? str.slice(1).split('|') : str.slice(2)
 
-    // then do canvas actions
-    var action = cmd.match(/\+|\-/)
+    if (!action||!type||!actor) // fail!
+      { cb(new Error('wrong cmd:'+str), null) ;return false }
 
-    if (!action) return false
+    // process!
+    
 
+    cb(null, [action, type, actor])
+
+    return false // temp for test
     var id = cuid() // make an id
 
     if (action.index > 0) { // combine / pipe
@@ -43,16 +56,22 @@ module.exports = function Bricoleur (db, user, config) {
       var modB = cmd.split(action[0])[1]
       if (action[0]==='+') modA.pipe(modB)
       if (action[0]==='-') modA.unpipe(modB)
+       
       canvas[id] = 'action'
-    } else { // module action
+    } else { 
       var mod = action.input.slice(0)
-      if (action[0]==='+') { // add module
+      if (action[0]==='+') { // add module 
 
       }
       if (action[0]==='-') { // rm module
 
       }
-      if (action[0]==='@') { // auth db and get id 
+      if (action[0]==='@') { // auth
+        var pass = (checkUid(cmd[1])) ? cmd[1] : getAuthToken(cmd[1])
+        db.auth({name:cmd[0].slice(1), pass: pass}, cb)
+        db.deauth(function (e) {if (e) handleErr(e) })
+      }
+      if (action[0]==='#') { // rm module
 
       }
     }
@@ -63,20 +82,16 @@ module.exports = function Bricoleur (db, user, config) {
   db.liveStream({reverse : true})
     .on('data', levelDBsync)
 
-  commands.auth = function (d, next) { // integrate w session
-    if (!d.value.session || !d.value.name) { 
-      next(err('bad format '+ JSON.stringify(d), null))
-      return null
-    }
-    db.auth(d.value, next)
-  }
-
   return s
 } 
 
-function handleError (e) { console.error(e) }
+function getAuthToken (pass) {
+  return hmac('sha256', IMG).update(pass).digest('hex')
+}
 
 function checkUid (id) {
-  var r = (typeof id==='string' && id.length===25 && id[0]===0) ? true : false 
+  var r = (typeof id==='string' && id.length===25 && id[0]===0) ? true : false
   return r
 }
+
+function handleError (e) { console.error(e) }
