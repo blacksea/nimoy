@@ -27,12 +27,9 @@ module.exports = function Bricoleur (db, user, config) {
     } 
   })
 
-  function parseCommand (str, cb) { 
-    if (typeof str !== 'string') { 
-      // its probably an object, attempt to format!
+  function parseCommand (d, cb) { 
+    var str = (typeof d === 'string') ? d : d.key
 
-    }
-      
     // parse!
     var action = str[0].match(/\+|\-|\?/)[0]
     var type = str.slice(1).match(/\@|\#|\$|\|/) 
@@ -45,10 +42,8 @@ module.exports = function Bricoleur (db, user, config) {
 
     // process!
     
-
     cb(null, [action, type, actor])
 
-    return false // temp for test
     var id = cuid() // make an id
 
     if (action.index > 0) { // combine / pipe
@@ -75,6 +70,7 @@ module.exports = function Bricoleur (db, user, config) {
 
       }
     }
+
   }
 
   function levelDBsync (d) { }
