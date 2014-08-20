@@ -8,6 +8,7 @@ var nimoy = require('../nimoy')
 var es = require('engine.io-stream/client')
 var cuid = require('cuid')
 var hmac = require('crypto').createHmac
+var exec = require('child_process').exec
 
 var conf = {
   server : {
@@ -33,19 +34,17 @@ var conf = {
 test('NIMOY: require(nimoy) returns nimoy emitter', function (t) {
   t.plan(2)
   var n = nimoy(conf)
-  t.equal(n instanceof emitter, true)
-  t.equal(n['compile'] instanceof Function, true)
+  t.equal(n instanceof emitter, true, 'nimoy is an eventEmitter')
+  t.equal(n['compile'] instanceof Function, true, 'nimoy has compile method')
 })
 
 test('NIMOY: compile modules', function (t) {
-  t.plan(2)
+  t.plan(1)
   var n = nimoy(conf)
   n.compile()
   n.on('compiled', function (res) { 
     var exists = fs.existsSync('./library.json')
-    t.equal(exists, true)
-    var lib = fs.readFileSync('./library.json', {encoding:'utf8'})
-    t.equal(lib, JSON.stringify(res)) // kind of dumb
+    t.equal(exists, true, 'created library.json')
   })
 })
 
@@ -62,7 +61,7 @@ test('NIMOY: boot', function (t) {
       path:'/'
     }, function (res) {
       res.on('data', function (d) {
-        t.equal(d.toString(),indexHTML)
+        t.equal(d.toString(),indexHTML, 'server request ok')
       })
     })
 
@@ -86,12 +85,13 @@ test('NIMOY: boot', function (t) {
         t.equal(e instanceof Error, true)
         t.test('NIMOY: test sessions', function (st) {
           multilevel.auth(creds, function (e, res) {
-            st.equal(!e, true)
+            st.equal(!e, true, 'login ok')
             delete creds.pass
           })
           setTimeout(function () {
             multilevel.auth(creds, function (e,r) {
-              st.equal(!e, false)
+              st.equal(!e, false, 'session exists')
+              st.end()
               t.end()
               process.exit()
             })
