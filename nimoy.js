@@ -20,6 +20,8 @@ var SESSION_EXPIRE = 36000
 var sessions = {}
 var users = {}
 
+// allow websock swap (engine.io or ws)
+
 module.exports = function Nimoy (conf) {
   if (conf.server.sessionLength) SESSION_EXPIRE = conf.sessionLength
   var nimoy = new emitter()
