@@ -1,13 +1,11 @@
 var _ = require('underscore')
 var cuid = require('cuid') // 25 char uid
 var through = require('through2')
-var hmac = require('crypto-browserify/create-hmac')
-var Buffer = require('buffer/').Buffer
-// var IMG = new Buffer(config.uImg).toString()
+var hash = require('crypto-browserify/create-hash')
 
-module.exports = function Bricoleur (db, user, config) { 
+module.exports = function Bricoleur (db, user, library) { 
 
-  var canvas = {} // canvas is just an object with cuid hash keys
+  var canvas = {} 
 
   var s = through.obj(function interface (d, enc, next) {
     var self = this
@@ -18,7 +16,8 @@ module.exports = function Bricoleur (db, user, config) {
       })
     } else parseCommand(d, handleResult)
 
-    function handleResult (e, res) {
+    function handleResult (e, res) { // return to sender
+      console.log(res)
       if (!e) { self.push(res) } else { self.emit('error', e) }
       next()
     }
@@ -27,76 +26,122 @@ module.exports = function Bricoleur (db, user, config) {
   function parseCommand (d, cb) { 
     var str = (typeof d === 'string') ? d : d.key
 
-    // parse!
     var action = str[0].match(/\+|\-|\?/)[0]
     var type = str.slice(1).match(/\@|\#|\$|\|/) 
     type = (!type) ? '*' : type[0] 
     var actor = (type==='*') ? str.slice(1) : (type==='|') 
       ? str.slice(1).split('|') : str.slice(2)
 
-    if (!action||!type||!actor) // fail!
-      { cb(new Error('wrong cmd:'+str), null); return false }
-
-    // process!
-    var id = cuid() // make an id
-
-    if (action==='?') { // handle ? first
-      // check exists
-      db.get(key, cb)
+    if (!action||!type||!actor) { 
+      cb(new Error('wrong cmd:'+str), null); return false
     }
 
-    if (type==='|') { // PIPE
+    // SYMBOLS 
+    // ACTIONS: ? get/find, + add, - rm  
+    // TYPES: * modules, @ users, # canvas, $ data, | pipes
+
+    if (action==='?') { 
+
+      if (type==='*') {
+        var pkg = _.find(library, function (v,k) {if (k.match(actor)) return v})
+        var uid = _.find(canvas, function (v,k) {
+          if (k.match(actor)) 
+          return k.split(':')[1]
+        })
+        cb(null, [pkg,uid])
+        return false
+      }
+
+      if (type==='#' || type==='$') {
+        var res
+        var s = db.createKeyStream()
+        s.on('data', function (k) {
+          if (k.match(actor)) {
+            res = k
+          }
+        })
+        s.on('end', function () {
+          if (res) cb(null, res)
+          if (!res) cb(new Error('not found: '+actor), null)
+        })
+      }
+    }
+    
+
+    if (type==='|') { 
+      var id = cuid()
       var modA = actor[0]
       var modB = actor[1]
 
-      // +
       if (action==='+') modA.pipe(modB)
 
-      // -
       if (action==='-') modA.unpipe(modB)
+
       canvas[id] = 'action'
       cb(id)
     } 
-    if (type==='*') { // MODULE
-      // + 
-      canvas[id] = require(actor)
-      // -
-      //find actor --- remove stream?
-      delete canvas[id]
-    }
-    if (type==='$' || type==='#') { // DATA
-      // +
-      db.put(key, d.value, cb)
-      // -
-      db.del(key, cb)
-    }
-    if (type==='@') { // USER
-      // look at auth mech agin
-      var pass = (checkUid(cmd[1])) ? cmd[1] : getAuthToken(cmd[1])
-      db.auth({name:cmd[0].slice(1), pass: pass}, cb)
-      db.deauth(function (e) { if (e) handleErr(e) })
+
+
+    if (type==='*') {
+
+      if (action==='-') {
+        if (!canvas[actor]) cb(new Error('no module: '+actor),null)
+          else  { delete canvas[actor]; cb(null, actor) }
+        return false
+      }
+
+      if (action==='+') {
+        var id = (!actor.match(':')) ? cuid() : actor.split(':')[1]
+        var modName = (!actor.match(':')) ? actor : actor.split(':')[0]
+        var pkg = _.find(library,function(v,k) {if (k.match(modName)) return v})
+        if (!pkg) {
+          cb(new Error('module: '+modName+' not found!'), null); return false  
+        }
+        canvas[id] = require(pkg.name)(id)
+        cb(null, id)
+      }
     }
 
-    cb(null, [action, type, actor]) // default result is a cuid
+
+    if (type==='$' || type==='#') { 
+      var key = type+actor
+      if (action==='+') db.put(key, d.value, cb)
+      if (action==='-') db.del(key, cb)
+    }
+
+
+    if (type==='@') { 
+
+      if (action==='-') {
+        db.deauth(cb)
+        return false
+      }
+      var auth = actor.split(' ')
+      if (!auth) {cb(new Error('bad login'),null); return false}
+      var user = { name: auth[0] }
+      user.pass = (isCuid(auth[1])) 
+        ? auth[1]
+        : getAuthToken(auth[1])
+
+      if (action==='+') db.auth(user, cb)
+    }
   }
 
-  function levelDBsync (d) { 
+  function sync (d) { 
 
   }
 
   db.liveStream({reverse : true})
-    .on('data', levelDBsync)
+    .on('data', sync)
 
   return s
 } 
 
-function getAuthToken (pass) {
-  return hmac('sha256', IMG).update(pass).digest('hex')
-}
-
-function checkUid (id) {
+function isCuid (id) {
   var r = (typeof id==='string' && id.length===25 && id[0]===0) ? true : false
   return r
 }
 
-function handleError (e) { console.error(e) }
+function getAuthToken (pass) {return hash('sha256').update(pass).digest('hex')}
+
+function handleError (e) {console.error(e)}
