@@ -8,6 +8,8 @@ var hash = require('crypto-browserify/create-hash')
 
 ls.install(db)
 
+// use nimoy to manage sessions & to compile module library
+
 var sessions = {edit:[]}
 var pass = hash('sha256').update('nimoy').digest('hex')
 
@@ -33,28 +35,41 @@ server.pipe(client.createRpcStream()).pipe(server)
 
 var library = require('../library.json')
 var brico = require('../_bricoleur.js')(client,'edit',library)
+              .on('error', console.error)
+
+var cmds = [
+  {cmd:'+@edit nimoy', from:'auth'},
+  {cmd:'+mod1', from:'add-mod1'},
+  {cmd:'+mod2', from:'add-mod2'},
+  {cmd:'?mod2', from:'find-mod2'},
+]
 
 test('TEST BRICOLEUR', function (t) {
-  t.plan(6)
+  t.plan(7)
+  brico.on('data', function (d) {
+    if (d.key.match(cmds[0].from)) {
 
-  var commands = [
-    '+@edit nimoy',
-    '?project',
-    '?omni',
-    '+project|omni',
-    '?omni',
-    '+#test',
-    '?#test'
-  ]
+    }
+    if (d.key.match(cmds[1].from)) {
 
-  commands.forEach(function (str) {
-    brico.write(str)
+    }
+    if (d.key.match(cmds[2].from)) {
+
+    }
+    if (d.key.match(cmds[3].from)) {
+
+    }
+    if (d.key.match(cmds[4].from)) {
+      brico.write({cmd:'+'+m1+'|'+m2,from:'pipe'})
+    }
+    if (d.key.match('pipe')) {
+
+    }
+    if (d.key.match('unpipe')) {
+
+    }
+    if (d.key.match('logout')) {
+
+    }
   })
-
-  brico.on('data', function (d) { // gate val should be in d
-    console.log(d)
-    t.equal(d instanceof Array, true)
-  })
-
-  brico.on('error', console.error)
 })
