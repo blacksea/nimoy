@@ -29,7 +29,7 @@ module.exports = function Bricoleur (db, user, library) {
     var str = (typeof d === 'string') ? d : d.cmd
     if (!str) { cb(new Error('bad input!'), null); return false }
     var action = str[0].match(/\+|\-|\?/)[0]
-    var type = str.slice(1).match(/\@|\#|\$|\|/);
+    var type = str.slice(1).match(/\@|\#|\$|\|/)
     type = (type!==null) ? type[0] : isCuid(str.slice(1)) ? '!' : '*'
 
     var actor = (type==='!'||type==='*') ? str.slice(1) : (type==='|') 
@@ -64,7 +64,6 @@ module.exports = function Bricoleur (db, user, library) {
       }
     }
 
-
     if (type==='!') { // cuid
       if (action==='-') {
         if (!canvas[actor]) {
@@ -86,7 +85,6 @@ module.exports = function Bricoleur (db, user, library) {
       }
     }
 
-
     if (type==='|') { 
       var modA = _.find(canvas,function (v,k) {return k.match(actor[0])})
       var modB = _.find(canvas,function (v,k) {return k.match(actor[1])})
@@ -105,7 +103,6 @@ module.exports = function Bricoleur (db, user, library) {
         return false
       }
     } 
-
 
     if (type==='*') {
 
@@ -129,7 +126,6 @@ module.exports = function Bricoleur (db, user, library) {
       }
     }
 
-
     if (type==='$' || type==='#') { 
       var key = type+actor
       res.value = key
@@ -142,7 +138,6 @@ module.exports = function Bricoleur (db, user, library) {
         if (!e) cb(null, res)
       })
     }
-
 
     if (type==='@') { 
       if (action==='-') {
