@@ -4,7 +4,6 @@ var through = require('through2')
 var hash = require('crypto-browserify/create-hash')
 
 module.exports = function Bricoleur (db, user, library) { 
-
   var canvas = {} 
 
   var s = through.obj(function interface (d, enc, next) {
@@ -39,12 +38,13 @@ module.exports = function Bricoleur (db, user, library) {
     if (!action||!type||!actor) { 
       cb(new Error('wrong cmd:'+str), null); return false
     }
-    var res = {key:type+':'+actor}
+
+    var res = {}
+    res.key = (type==='|') ? type : type+':'+actor 
 
     // SYMBOLS 
     // ACTIONS: ? get/find, + add, - rm  
     // TYPES: * modules, @ users, # canvas, $ data, | pipes
-
     if (action==='?') { // should also allow for multiple results
       if (type==='*') {
         var pkg = _.find(library, function (v,k) {if (k.match(actor)) return v})
@@ -67,39 +67,42 @@ module.exports = function Bricoleur (db, user, library) {
 
     if (type==='!') { // cuid
       if (action==='-') {
-        var key = _.find(canvas, function (v,k) {if (k.match(actor)) return k})
-        res.value = key
-        if (key && canvas[key]) { delete canvas[key]; cb(null, res) }
-        else cb(new Error(actor+' not found'), null)
+        if (!canvas[actor]) {
+          cb(new Error(actor + ' not found'),null)
+          return false
+        }
+        if (canvas[actor] instanceof Array) {
+          var modAcuid = canvas[actor][0]
+          var modBcuid = canvas[actor][1]
+          var rs = canvas[modAcuid]
+          var ws = canvas[modBcuid]
+          rs.destroy()
+          rs.unpipe(ws)
+        }
+        delete canvas[actor] 
+        res.value = actor
+        cb(null, res) 
+        return false
       }
     }
 
 
     if (type==='|') { 
-      console.log(actor)
-      if (isCuid(actor[0])===false || isCuid(actor[1])===false) {
-        cb(new Error('unpipeable',null))
-      } else {
-        // check if cuid!
-        var modA = _.find(canvas,function (v,k) {if(k.match(actor[0])) return v})
-        var modB = _.find(canvas,function (v,k) {if(k.match(actor[1])) return v})
+      var modA = _.find(canvas,function (v,k) {return k.match(actor[0])})
+      var modB = _.find(canvas,function (v,k) {return k.match(actor[1])})
 
-        if (action==='+') {
-          var id = cuid()
-          modA.pipe(modB)
-          canvas[id] = 'action'
-          res.value = id
-          cb(null, res)
-        }
+      if (!modA || !modB) {
+        cb(new Error('unpipeable'+actor,null)) 
+        return false
+      }
 
-        if (action==='-') {
-          var modA = canvas[actor][0]
-          var modB = canvas[actor][0]
-          modA.unpipe(modB)
-          delete canvas[actor]
-          res.value = actor
-          cb(null, res)
-        }
+      if (action==='+') {
+        var id = cuid()
+        modA.pipe(modB)
+        canvas[id] = actor
+        res.value = id
+        cb(null, res)
+        return false
       }
     } 
 
@@ -109,7 +112,7 @@ module.exports = function Bricoleur (db, user, library) {
       if (action==='-') {
         res.value = actor
         if (!canvas[actor]) cb(new Error('no module: '+actor),null)
-          else  { delete canvas[actor]; cb(null, res)
+          else  { delete canvas[actor]; cb(null, res) }
         return false
       }
 
@@ -165,14 +168,18 @@ module.exports = function Bricoleur (db, user, library) {
   db.liveStream({reverse : true})
     .on('data', sync)
 
+  function isCuid (id) {
+    var r = (typeof id==='string' && id.length===25 && id[0]==='c') ? true : false
+    return r
+  }
+
+  function getAuthToken (pass) {
+    return hash('sha256').update(pass).digest('hex')
+  }
+
+  function handleError (e) {
+    console.error(e)
+  }
+
   return s
 } 
-
-function isCuid (id) {
-  var r = (typeof id==='string' && id.length===25 && id[0]==='c') ? true : false
-  return r
-}
-
-function getAuthToken (pass) {return hash('sha256').update(pass).digest('hex')}
-
-function handleError (e) {console.error(e)}
