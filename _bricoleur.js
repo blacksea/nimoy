@@ -30,9 +30,9 @@ module.exports = function Bricoleur (db, user, library) {
     if (!str) { cb(new Error('bad input!'), null); return false }
     var action = str[0].match(/\+|\-|\?/)[0]
     var type = str.slice(1).match(/\@|\#|\$|\|/)
-    type = (type!==null) ? type[0] : isCuid(str.slice(1)) ? '!' : '*'
+    type = (type!==null) ? type[0] : isCuid(str.slice(1)) ? '^' : '*'
 
-    var actor = (type==='!'||type==='*') ? str.slice(1) : (type==='|') 
+    var actor = (type==='^'||type==='*') ? str.slice(1) : (type==='|') 
       ? str.slice(1).split('|') : str.slice(2)
 
     if (!action||!type||!actor) { 
@@ -45,7 +45,8 @@ module.exports = function Bricoleur (db, user, library) {
     // SYMBOLS 
     // ACTIONS: ? get/find, + add, - rm  
     // TYPES: * modules, @ users, # canvas, $ data, | pipes
-    if (action==='?') { // should also allow for multiple results
+    
+    if (action==='?') { // add support for an array of matches & data value search
       if (type==='*') {
         var pkg = _.find(library, function (v,k) {if (k.match(actor)) return v})
         var uid = _.find(canvas, function (v,k) {
@@ -64,7 +65,7 @@ module.exports = function Bricoleur (db, user, library) {
       }
     }
 
-    if (type==='!') { // cuid
+    if (type==='^') { // cuid
       if (action==='-') {
         if (!canvas[actor]) {
           cb(new Error(actor + ' not found'),null)
@@ -129,7 +130,7 @@ module.exports = function Bricoleur (db, user, library) {
     if (type==='$' || type==='#') { 
       var key = type+actor
       res.value = key
-      if (action==='+') db.put(key, d.value, function (e) {
+      if (action==='+') db.put(key, _.keys(canvas), function (e) {
         if (e) cb (e, null)
         if (!e) cb(null, res)
       })
