@@ -35,7 +35,7 @@ var cmds = [
   {cmd:'?mod2', from:'findMod2'}
 ]
 
-test('TEST BRICOLEUR', function (t) {
+test('BRICOLEUR STREAMING API', function (t) {
   var pipe, m1, m2
 
   var tests = {
