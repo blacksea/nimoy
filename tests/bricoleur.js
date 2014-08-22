@@ -6,29 +6,27 @@ var ls = require('level-live-stream')
 var db = level('./testdb/')
 var cuid = require('cuid')
 var hash = require('crypto-browserify/create-hash')
-var nimoy = require('nimoy')
+var nimoy = require('../_nimoy.js')
 
 ls.install(db)
-
-var sessions = {edit:[]}
-var pass = hash('sha256').update('nimoy').digest('hex')
 
 var server = multilevel.server(db, {
   auth : nimoy.auth,
   access : function (u,db,m,a) {}
 })
+
 var client = multilevel.client(require('../static/manifest.json'))
 server.pipe(client.createRpcStream()).pipe(server)
 
-nimoy.compile('', function (library) {
-  library['mod1'] = { name : './tests/mod1' }
-  library['mod2'] = { name : './tests/mod2' }
+var config = require('../config.json')
 
-  brico = require('../_bricoleur.js')(client,'edit',library)
-            .on('error', console.error)
+var library = {}
 
-  test('TEST BRICOLEUR', main)
-})
+library['mod1'] = { name : './tests/mod1' }
+library['mod2'] = { name : './tests/mod2' }
+
+brico = require('../_bricoleur.js')(client,'edit',library)
+          .on('error', console.error)
 
 var cmds = [
   {cmd:'+@edit nimoy', from:'auth'},
@@ -37,12 +35,12 @@ var cmds = [
   {cmd:'?mod2', from:'findMod2'}
 ]
 
-var main = function (t) {
+test('TEST BRICOLEUR', function (t) {
   var pipe, m1, m2
 
   var tests = {
     auth : function (d) {
-      t.equal(d.value,sessions['edit'][0], 'auth succesfull')
+      t.equal(isCuid(d.value),true, 'auth succesfull')
     },
     addMod1 : function (d) {
       t.equal(isCuid(d.value), true, 'placed module1')
@@ -89,8 +87,7 @@ var main = function (t) {
     var k = path[path.length-1]
     tests[k](d)
   })
-
-}
+})
 
 function isCuid (id) {
   var r = (typeof id==='string' && id.length===25 && id[0]==='c') ? true : false
