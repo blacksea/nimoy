@@ -18,7 +18,7 @@ var server = multilevel.server(db, {
     if (!user.token && pass===user.pass) {
       var sess = cuid()
       sessions[user.name].push(sess)
-      cb(null, {token:sess})
+      cb(null, {value:sess})
       return null
     } else if (user.token) {
       var exists = _.find(session[user.name],function (s) {
@@ -34,6 +34,15 @@ var client = multilevel.client(require('../static/manifest.json'))
 server.pipe(client.createRpcStream()).pipe(server)
 
 var library = require('../library.json')
+
+library['mod1'] = {
+  name : './tests/mod1'
+}
+
+library['mod2'] = {
+  name : './tests/mod2'
+}
+
 var brico = require('../_bricoleur.js')(client,'edit',library)
               .on('error', console.error)
 
@@ -41,35 +50,51 @@ var cmds = [
   {cmd:'+@edit nimoy', from:'auth'},
   {cmd:'+mod1', from:'add-mod1'},
   {cmd:'+mod2', from:'add-mod2'},
-  {cmd:'?mod2', from:'find-mod2'},
+  {cmd:'?mod2', from:'find-mod2'}
 ]
 
 test('TEST BRICOLEUR', function (t) {
   t.plan(7)
-  brico.on('data', function (d) {
-    if (d.key.match(cmds[0].from)) {
 
+  var pipe, m1, m2
+
+  cmds.forEach(function (c) {
+    brico.write(c)
+  })
+
+  brico.on('data', function (d) {
+    console.log(d)
+    if (d.key.match(cmds[0].from)) {
+      t.equal(d.value,sessions['edit'][0], 'auth succesfull')
     }
     if (d.key.match(cmds[1].from)) {
-
+      t.equal(isCuid(d.value), true, 'placed module1')
+      m1 = d.value
     }
     if (d.key.match(cmds[2].from)) {
-
+      t.equal(isCuid(d.value), true, 'placed module2')
+      m2 = d.value
     }
     if (d.key.match(cmds[3].from)) {
-
-    }
-    if (d.key.match(cmds[4].from)) {
+      t.equal(d.value instanceof Array, true, 'search complete')
       brico.write({cmd:'+'+m1+'|'+m2,from:'pipe'})
     }
-    if (d.key.match('pipe')) {
-
+    if (d.key.slice(2) === 'pipe') {
+      pipe = d.value
+      t.equal(isCuid(d.value),true, 'piped modules')
+      brico.write({cmd:'-'+pipe,from:'unpipe'})
     }
     if (d.key.match('unpipe')) {
-
+      t.equal(d.value,pipe, 'unpiped modules')
+      brico.write({cmd:'-@edit',from:'logout'})
     }
     if (d.key.match('logout')) {
-
+      t.equal(d.value, 'edit', 'logged out')
     }
   })
 })
+
+function isCuid (id) {
+  var r = (typeof id==='string' && id.length===25 && id[0]==='c') ? true : false
+  return r
+}
