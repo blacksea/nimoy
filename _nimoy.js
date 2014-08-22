@@ -1,4 +1,5 @@
 var fs = require('fs')
+var _ = require('underscore')
 var url = require('url')
 var http = require('http')
 var https = require('https')
@@ -30,15 +31,15 @@ module.exports.auth = auth
 function cli (d, enc, n) {}
 
 function auth (user, cb) { // client makes id
-  if (!user.pass||!user.name){cb(new Error('bad login!'), null);return false}
+  if (!user.pass||!user.name) {cb(new Error('bad login!'), null);return false}
   if (!isCuid(user.pass)) {
     var sess = cuid()
     sessions[user.name].push(sess)
     cb(null, {key:'@'+user.name,value:sess})
   } else {
-    var exists = _.find(session[user.name],function (s){return s===user.pass})
-    if (exists) cb(null, {token:user.token})
-    if (!exists) cb(new Error('bad login!'), null)
+    if (_.find(sessions[user.name], function (p){return p===user.pass})){
+      cb(null, {key:'@:'+user.name,value:user.pass})
+    } else cb(new Error('bad login!'), null)
   }
 }
 
@@ -46,16 +47,14 @@ function boot (conf, cb) {
   if (!fs.existsSync('./static')) fs.mkdir('./static')
   if (!fs.existsSync('./static/files')) fs.mkdir('./static/files')
 
-  pass = hash('256').update(conf.server.pass).digest('hex')
+  var h = hash('SHA256').update('nimoy').digest('hex')
 
-  var db = level('./' + conf.server.host)
+  var db = level(__dirname+'/'+conf.host)
              .on('error', handleErr)
 
   livestream.install(db)
 
   multiLevel.writeManifest(db, './static/manifest.json')
-
-  conf.server.secretKey = conf.bricoleur.secretKey
 
   // write index
   fs.writeFileSync('./static/index.html', 
@@ -72,7 +71,7 @@ function boot (conf, cb) {
     '</html>'
   )
 
-  startServer(conf.server, db, cb)
+  startServer(conf, db, cb)
 }
 
 function compile (conf, cb) {
@@ -81,20 +80,27 @@ function compile (conf, cb) {
   var b = browserify(IN)
   var library  = {} 
 
-  asyncMap(__dirname+'/node_modules', function compileModule (dir, next) {
-    var pkgPath =  __dirname+'/'+dir+'/package.json'
-    if (!fs.existsSync(pkgPath)) { next(); return false }
-    var pkg = JSON.parse(fs.readFileSync(pkgPath, {encoding:'utf8'}))
-    if (!pkg || !pkg.nimoy) { next(); return false }
-    library[pkg.name] = pkg
-    b.require(dirname+pkg.main, {expose: pkg.name})
+  var folders = fs.readdirSync(__dirname+'/node_modules')
+
+  asyncMap(folders, function compileModule (dir, next) {
+    var folder = __dirname +'/node_modules/'+dir
+
+    if (dir[0]!=='.') {
+      var pkg = (fs.existsSync(folder))
+        ? JSON.parse(fs.readFileSync(folder+'/package.json', {encoding:'utf8'}))
+        : null
+
+      if (pkg.nimoy) {
+        library[pkg.name] = pkg
+        b.require(folder+'/'+pkg.main, {expose: pkg.name})
+      }
+    }
     next()
   }, function end () {
     var bundleJS = fs.createWriteStream(OUT)
     b.transform('brfs')
     b.bundle().pipe(bundleJS)
     bundleJS.on('finish',function () {
-      fs.writeFileSync('./library.json', JSON.stringify(library))
       cb(null, library)
     })
   })
