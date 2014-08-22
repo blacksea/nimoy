@@ -193,7 +193,7 @@ module.exports = function Bricoleur (db, user, library) {
     }
   }
 
-  function sync (d) { 
+  function sync (d) { // use this!
 
   }
 
