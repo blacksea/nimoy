@@ -54,7 +54,7 @@ var cmds = [
 ]
 
 test('TEST BRICOLEUR', function (t) {
-  t.plan(7)
+  t.plan(9)
 
   var pipe, m1, m2
 
@@ -63,7 +63,6 @@ test('TEST BRICOLEUR', function (t) {
   })
 
   brico.on('data', function (d) {
-    console.log(d)
     if (d.key.match(cmds[0].from)) {
       t.equal(d.value,sessions['edit'][0], 'auth succesfull')
     }
@@ -81,7 +80,15 @@ test('TEST BRICOLEUR', function (t) {
     }
     if (d.key.slice(2) === 'pipe') {
       pipe = d.value
-      t.equal(isCuid(d.value),true, 'piped modules')
+      t.equal(isCuid(pipe),true, 'piped modules')
+      brico.write({cmd:'+#cvs',from:'save'})
+    }
+    if (d.key.match('save')) {
+      t.equal(d.value,'#:cvs', 'saved')
+      brico.write({cmd:'!#cvs',from:'load'})
+    }
+    if (d.key.match('load')) {
+      t.equal(d.value,'#:cvs', 'loaded')
       brico.write({cmd:'-'+pipe,from:'unpipe'})
     }
     if (d.key.match('unpipe')) {

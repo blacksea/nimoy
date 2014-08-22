@@ -28,12 +28,14 @@ module.exports = function Bricoleur (db, user, library) {
   function parseCommand (d, cb) { 
     var str = (typeof d === 'string') ? d : d.cmd
     if (!str) { cb(new Error('bad input!'), null); return false }
-    var action = str[0].match(/\+|\-|\?/)[0]
-    var type = str.slice(1).match(/\@|\#|\$|\|/)
+    var action = str[0].match(/\+|\-|\?|\!/)[0]
+    var type = str.slice(1).match(/\@|\#|\$|\||\*/)
     type = (type!==null) ? type[0] : isCuid(str.slice(1)) ? '^' : '*'
 
-    var actor = (type==='^'||type==='*') ? str.slice(1) : (type==='|') 
+    var actor = (type==='^'||str.slice(1)[0]) ? str.slice(1):(type==='|') 
       ? str.slice(1).split('|') : str.slice(2)
+
+    console.log(str)
 
     if (!action||!type||!actor) { 
       cb(new Error('wrong cmd:'+str), null); return false
@@ -43,10 +45,10 @@ module.exports = function Bricoleur (db, user, library) {
     res.key = (type==='|') ? type : type+':'+actor 
 
     // SYMBOLS 
-    // ACTIONS: ? get/find, + add, - rm  
-    // TYPES: * modules, @ users, # canvas, $ data, | pipes
+    // ACTIONS: ? get/find, + add, - rm , ! open 
+    // TYPES: * modules, @ users, # canvas, $ data, | pipes, ^ cuid
     
-    if (action==='?') { // add support for an array of matches & data value search
+    if (action==='?') { // add support for an array of matches & deeper search
       if (type==='*') {
         var pkg = _.find(library, function (v,k) {if (k.match(actor)) return v})
         var uid = _.find(canvas, function (v,k) {
@@ -65,19 +67,25 @@ module.exports = function Bricoleur (db, user, library) {
       }
     }
 
+    if (action==='!'&&type==='#') {
+      db.get(type+':'+actor, function (e, jsn) {
+        var cvs = JSON.parse(jsn)
+        res.value = type+':'+actor
+        var last = cvs[cvs.length-1]
+        _.each(cvs, function (cmd) {
+          parseCommand(cmd, function (e, r) {
+            if (e) cb(e, null) // failed! \ check for last result
+            if (cmd===last) cb(null, res) // success!
+          })
+        })
+      })
+    }
+
     if (type==='^') { // cuid
       if (action==='-') {
         if (!canvas[actor]) {
           cb(new Error(actor + ' not found'),null)
           return false
-        }
-        if (canvas[actor] instanceof Array) {
-          var modAcuid = canvas[actor][0]
-          var modBcuid = canvas[actor][1]
-          var rs = canvas[modAcuid]
-          var ws = canvas[modBcuid]
-          rs.destroy()
-          rs.unpipe(ws)
         }
         delete canvas[actor] 
         res.value = actor
@@ -103,6 +111,15 @@ module.exports = function Bricoleur (db, user, library) {
         cb(null, res)
         return false
       }
+
+      if (action==='-') {
+        var modAcuid = canvas[actor[0]]
+        var modBcuid = canvas[actor[1]]
+        var rs = canvas[modAcuid]
+        var ws = canvas[modBcuid]
+        rs.destroy()
+        rs.unpipe(ws)
+      }
     } 
 
     if (type==='*') {
@@ -121,19 +138,34 @@ module.exports = function Bricoleur (db, user, library) {
         if (!pkg) {
           cb(new Error('module: '+modName+' not found!'), null); return false  
         }
+        // key is a command format
         canvas[id] = require(pkg.name)(id)
+        canvas[id].name = modName
         res.value = id
         cb(null, res)
       }
     }
 
     if (type==='$' || type==='#') { 
-      var key = type+actor
+      // look for cuid
+      var key = type+':'+actor
       res.value = key
-      if (action==='+') db.put(key, _.keys(canvas), function (e) {
-        if (e) cb (e, null)
-        if (!e) cb(null, res)
-      })
+      if (action==='+') {
+        var val
+        if (type==='#') {
+          cmds = []
+          _.each(canvas, function (v,k) {
+            var t = (v instanceof Array) ? '|' : '*'
+            var a = (t==='|') ? v.join('|') : v.name+':'+k
+            cmds.push('+'+t+a)
+          })
+          val = JSON.stringify(cmds)
+        } else val = d.value
+        db.put(key, val, function (e) {
+          if (e) cb (e, null)
+          if (!e) cb(null, res)
+        })
+      }
       if (action==='-') db.del(key, function (e) {
         if (e) cb (e, null)
         if (!e) cb(null, res)
