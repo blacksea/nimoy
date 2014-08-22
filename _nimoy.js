@@ -4,45 +4,29 @@ var http = require('http')
 var https = require('https')
 var level = require('level')
 var emitter = require('events').EventEmitter
-var multiLevel = require('multilevel')
-var browserify = require('browserify')
 var livestream = require('level-live-stream')
 var engineServer = require('engine.io-stream')
-var newHmac = require('crypto').createHmac
 var asyncMap = require('slide').asyncMap
+var hash = require('crypto').createHash
+var multiLevel = require('multilevel')
+var browserify = require('browserify')
 var formidable = require('formidable')
 var uglify = require('uglify-js')
 var through = require('through2')
 var path = require('path')
 var st = require('st')
 
-var SESSION_EXPIRE = 36000
 var sessions = {}
 var users = {}
+var pass
 
 // allow websock swap (engine.io or ws)
+module.exports.boot = boot
+module.exports.cli = through.obj(cli)
+module.exports.compile = compile
+module.exports.auth = auth
 
-module.exports = function Nimoy (conf) {
-  if (conf.server.sessionLength) SESSION_EXPIRE = conf.sessionLength
-  var nimoy = new emitter()
-  nimoy.compile = function () {
-    compile(conf.bundle, function (e, res) {
-      if (e) { handleErr(e); return null }
-      nimoy.emit('compiled', res)
-    })
-    return nimoy
-  }
-  nimoy.boot = function () {
-    boot(conf, function () {
-      nimoy.emit('boot')
-    })
-    return nimoy
-  } 
-  nimoy.kill = function () {
-    server.close()
-  }
-  return nimoy
-}
+function cli (d, enc, n) {}
 
 function auth (user, cb) { // client makes id
   if (sessions[user.id]) {
@@ -60,6 +44,8 @@ function auth (user, cb) { // client makes id
 function boot (conf, cb) { 
   if (!fs.existsSync('./static')) fs.mkdir('./static')
   if (!fs.existsSync('./static/files')) fs.mkdir('./static/files')
+
+  pass = hash('256').update(conf.server.pass).digest('hex')
 
   var db = level('./' + conf.server.host)
   db.on('error', handleErr)
@@ -94,7 +80,6 @@ function boot (conf, cb) {
   startServer(conf.server, db, cb)
 }
 
-
 function compile (config, cb) {
   var IN = config.pathBundleEntry
   var OUT = config.pathBundleOut
@@ -122,11 +107,11 @@ function compile (config, cb) {
     b.bundle().pipe(bundleJS)
     bundleJS.on('finish',function () {
       fs.writeFileSync('./library.json', JSON.stringify(library))
+
       cb(null, library)
     })
   })
 }
-
 
 function startServer (conf, db, cb) {
   var mount = st({
@@ -194,17 +179,6 @@ function startServer (conf, db, cb) {
 
   server.listen(conf.port, conf.host, cb)
 } 
-
-
-function getHmac (d, cb) { 
-  var hmac = newHmac('sha256', d.secret)
-  hmac.setEncoding('hex')
-  hmac.write(d.token)
-  hmac.end()
-  cb({key:d.user, val:hmac.read().toString()})
-}
-
-function getTime() { return new Date().getTime() }
 
 function handleErr (e) {
   console.error(e)
