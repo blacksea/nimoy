@@ -47,7 +47,7 @@ module.exports = function Bricoleur (db, user, library) {
     // ACTIONS: ? get/find, + add, - rm , ! open 
     // TYPES: * modules, @ users, # canvas, $ data, | pipes, ^ cuid
     
-    if (action==='?') { // add support for an array of matches & deeper search
+    if (action==='?') { // improve w. multiple results / deeper search
       if (type==='*') {
         var pkg = _.find(library, function (v,k) {if (k.match(actor)) return v})
         var uid = _.find(canvas, function (v,k) {
@@ -73,19 +73,19 @@ module.exports = function Bricoleur (db, user, library) {
         var last = cvs[cvs.length-1]
         _.each(_.keys(canvas).reverse(), function (k) {
           parseCommand('-'+k, function (e,res) {
-            if (e) cb(e, null) // failed! \ check for last result
+            if (e) cb(e, null)
           })
         })
         _.each(cvs, function (cmd) {
           parseCommand(cmd, function (e, r) {
-            if (e) cb(e, null) // failed! \ check for last result
-            if (!e && cmd===last) cb(null, res) // success!
+            if (e) cb(e, null)
+            if (!e && cmd===last) cb(null, res)
           })
         })
       })
     }
 
-    if (type==='^') { // cuid
+    if (type==='^') {
       if (action==='-') {
         if (!canvas[actor]) {
           cb(new Error(actor + ' not found'),null)
@@ -143,7 +143,6 @@ module.exports = function Bricoleur (db, user, library) {
         if (!pkg) {
           cb(new Error('module: '+modName+' not found!'), null); return false  
         }
-        // key is a command format
         canvas[id] = require(pkg.name)(id)
         canvas[id].name = modName
         res.value = id
@@ -152,7 +151,6 @@ module.exports = function Bricoleur (db, user, library) {
     }
 
     if (type==='$' || type==='#') { 
-      // look for cuid
       var key = type+':'+actor
       res.value = key
       if (action==='+') {
