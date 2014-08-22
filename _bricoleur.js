@@ -32,10 +32,9 @@ module.exports = function Bricoleur (db, user, library) {
     var type = str.slice(1).match(/\@|\#|\$|\||\*/)
     type = (type!==null) ? type[0] : isCuid(str.slice(1)) ? '^' : '*'
 
-    var actor = (type==='^'||str.slice(1)[0]) ? str.slice(1):(type==='|') 
-      ? str.slice(1).split('|') : str.slice(2)
-
-    console.log(str)
+    var actor = (type==='^') ? str.slice(1) : (type==='|') 
+      ? str.slice(1).split('|') : (type==='*'&&str[1]!=='*') 
+      ? str.slice(1) : str.slice(2)
 
     if (!action||!type||!actor) { 
       cb(new Error('wrong cmd:'+str), null); return false
@@ -72,10 +71,15 @@ module.exports = function Bricoleur (db, user, library) {
         var cvs = JSON.parse(jsn)
         res.value = type+':'+actor
         var last = cvs[cvs.length-1]
+        _.each(_.keys(canvas).reverse(), function (k) {
+          parseCommand('-'+k, function (e,res) {
+            if (e) cb(e, null) // failed! \ check for last result
+          })
+        })
         _.each(cvs, function (cmd) {
           parseCommand(cmd, function (e, r) {
             if (e) cb(e, null) // failed! \ check for last result
-            if (cmd===last) cb(null, res) // success!
+            if (!e && cmd===last) cb(null, res) // success!
           })
         })
       })
@@ -87,7 +91,14 @@ module.exports = function Bricoleur (db, user, library) {
           cb(new Error(actor + ' not found'),null)
           return false
         }
-        delete canvas[actor] 
+        if (canvas[actor] instanceof Array) {
+          var val = canvas[actor]
+          var rs = canvas[val[0]]
+          var ws = canvas[val[1]]
+          rs.destroy()
+          rs.unpipe(ws)
+          delete canvas[actor] 
+        } else delete canvas[actor]
         res.value = actor
         cb(null, res) 
         return false
@@ -95,8 +106,13 @@ module.exports = function Bricoleur (db, user, library) {
     }
 
     if (type==='|') { 
-      var modA = _.find(canvas,function (v,k) {return k.match(actor[0])})
-      var modB = _.find(canvas,function (v,k) {return k.match(actor[1])})
+      var id = cuid()
+      if (actor[1].split(':').length>1) {
+        id = actor[1].split(':')[1]
+        actor[1] = actor[1].split(':')[0]
+      }
+      var modA = canvas[actor[0]]
+      var modB = canvas[actor[1]]
 
       if (!modA || !modB) {
         cb(new Error('unpipeable'+actor,null)) 
@@ -104,26 +120,15 @@ module.exports = function Bricoleur (db, user, library) {
       }
 
       if (action==='+') {
-        var id = cuid()
         modA.pipe(modB)
         canvas[id] = actor
         res.value = id
         cb(null, res)
         return false
       }
-
-      if (action==='-') {
-        var modAcuid = canvas[actor[0]]
-        var modBcuid = canvas[actor[1]]
-        var rs = canvas[modAcuid]
-        var ws = canvas[modBcuid]
-        rs.destroy()
-        rs.unpipe(ws)
-      }
     } 
 
     if (type==='*') {
-
       if (action==='-') {
         res.value = actor
         if (!canvas[actor]) cb(new Error('no module: '+actor),null)
@@ -154,10 +159,11 @@ module.exports = function Bricoleur (db, user, library) {
         var val
         if (type==='#') {
           cmds = []
-          _.each(canvas, function (v,k) {
+          _.each(_.keys(canvas), function (k) {
+            var v = canvas[k]
             var t = (v instanceof Array) ? '|' : '*'
-            var a = (t==='|') ? v.join('|') : v.name+':'+k
-            cmds.push('+'+t+a)
+            var c = (t==='|') ? v.join('|')+':'+k : t+canvas[k].name+':'+k
+            cmds.push('+'+c)
           })
           val = JSON.stringify(cmds)
         } else val = d.value
