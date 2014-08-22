@@ -1,27 +1,11 @@
 {
   "server" : {
+    "pass" : "nimoy",
     "port" : 9999,
     "host" : "localhost",
-    "ssl" : false
-  },
-  "bricoleur" : {
-    "secretKey" : "PleaseReplaceThisTextWithYourOwn!", 
-    "canvasRender" : "browser",
-    "auth" : "login",
-    "users" : {
-      "default" : {
-        "pass" : "default"
-      },
-      "edit" : {
-        "pass" : "nimoy",
-        "modules" : ["actions", "ctx"], 
-        "pipes" : ["actions>brico","ctx>brico","brico>actions","brico>ctx"]
-      }
-    }
-  },
-  "bundle" : {
-    "pathModules" : "./node_modules/",
-    "pathBundleEntry" : "./_client.js",
-    "pathBundleOut" : "./static/bundle.js"
+    "ssl" : false,
+    "path_static" : "./static",
+    "path_files" : "./static/files",
+    "minify" : false
   }
 }
