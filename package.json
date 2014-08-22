@@ -29,7 +29,8 @@
     "tape": "^2.13.1"
   },
   "scripts": {
-    "test": "tape tests/nimoy.js",
+    "start":"node nimoy.js",
+    "test": "tape tests/*.js",
     "btest": "node index.js './testConf.json' && sleep 2 && testling --bcmd=google-chrome-unstable"
   },
   "repository": {
