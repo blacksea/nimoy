@@ -14,9 +14,10 @@ var formidable = require('formidable')
 var uglify = require('uglify-js')
 var through = require('through2')
 var path = require('path')
+var cuid = require('cuid')
 var st = require('st')
 
-var sessions = {}
+var sessions = {edit:[]}
 var users = {}
 var pass
 
@@ -29,16 +30,16 @@ module.exports.auth = auth
 function cli (d, enc, n) {}
 
 function auth (user, cb) { // client makes id
-  if (sessions[user.id]) {
-    if (getTime() < sessions[user.id]+SESSION_EXPIRE) {
-      cb(null, {status:1})
-    } else cb(new Error('Expired session!'), null)
-    return false
+  if (!user.pass||!user.name){cb(new Error('bad login!'), null);return false}
+  if (!isCuid(user.pass)) {
+    var sess = cuid()
+    sessions[user.name].push(sess)
+    cb(null, {key:'@'+user.name,value:sess})
+  } else {
+    var exists = _.find(session[user.name],function (s){return s===user.pass})
+    if (exists) cb(null, {token:user.token})
+    if (!exists) cb(new Error('bad login!'), null)
   }
-  if (user.pass && user.pass === users[user.name]) {
-    sessions[user.id] = getTime()
-    cb(null,{status:1})
-  } else cb(new Error('Bad Login'), null)
 }
 
 function boot (conf, cb) { 
@@ -48,8 +49,10 @@ function boot (conf, cb) {
   pass = hash('256').update(conf.server.pass).digest('hex')
 
   var db = level('./' + conf.server.host)
-  db.on('error', handleErr)
+             .on('error', handleErr)
+
   livestream.install(db)
+
   multiLevel.writeManifest(db, './static/manifest.json')
 
   conf.server.secretKey = conf.bricoleur.secretKey
@@ -69,37 +72,22 @@ function boot (conf, cb) {
     '</html>'
   )
 
-  getHmac({
-    token: conf.bricoleur.pass,
-    user: 'edit',
-    secret: conf.bricoleur.secretKey.toString()
-  }, function (d) {
-    users.edit = d.val
-  })
-
   startServer(conf.server, db, cb)
 }
 
-function compile (config, cb) {
-  var IN = config.pathBundleEntry
-  var OUT = config.pathBundleOut
+function compile (conf, cb) {
+  var IN = __dirname + '/_client.js'
+  var OUT = conf.path_static+'/bundle.js'
   var b = browserify(IN)
   var library  = {} 
-  var modulesDir = fs.readdirSync(config.pathModules)
-  if (!modulesDir) {cb(err('missing modules dir!'), null); return false}
 
-  asyncMap(modulesDir, function compileModule (dirname, next) {
-    dirname = config.pathModules+dirname+'/'
-    var pkgPath = dirname+'package.json'
+  asyncMap(__dirname+'/node_modules', function compileModule (dir, next) {
+    var pkgPath =  __dirname+'/'+dir+'/package.json'
     if (!fs.existsSync(pkgPath)) { next(); return false }
     var pkg = JSON.parse(fs.readFileSync(pkgPath, {encoding:'utf8'}))
     if (!pkg || !pkg.nimoy) { next(); return false }
-
     library[pkg.name] = pkg
-
-    b.require(dirname+pkg.main, {
-      expose: pkg.name
-    })
+    b.require(dirname+pkg.main, {expose: pkg.name})
     next()
   }, function end () {
     var bundleJS = fs.createWriteStream(OUT)
@@ -107,7 +95,6 @@ function compile (config, cb) {
     b.bundle().pipe(bundleJS)
     bundleJS.on('finish',function () {
       fs.writeFileSync('./library.json', JSON.stringify(library))
-
       cb(null, library)
     })
   })
@@ -116,7 +103,7 @@ function compile (config, cb) {
 function startServer (conf, db, cb) {
   var mount = st({
     index: 'index.html', 
-    path: './static', 
+    path: conf.path_static,
     url: '/', 
     passthrough: true 
   })
@@ -148,8 +135,8 @@ function startServer (conf, db, cb) {
     }
   }
 
-  function fileUpload (req, res) {
-    var form = new formidable.IncomingForm();
+  function fileUpload (req, res) { // replace w. external!?
+    var form = new formidable.IncomingForm()
     form.parse(req, function(err, fields, files) {
       var filePath = './static/files/'+fields.file
       var blob = fields.blob.split(',')[1]
@@ -180,6 +167,9 @@ function startServer (conf, db, cb) {
   server.listen(conf.port, conf.host, cb)
 } 
 
-function handleErr (e) {
-  console.error(e)
+function handleErr (e) { console.error(e) }
+
+function isCuid (id) {
+  var r = (typeof id==='string' && id.length===25 && id[0]==='c') ? true : false
+  return r
 }
