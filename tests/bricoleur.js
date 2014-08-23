@@ -73,6 +73,7 @@ test('BRICOLEUR STREAMING API', function (t) {
     },
     logout: function (d) {
       t.equal(d.value, 'edit', 'logged out')
+      setTimeout(process.exit, 5)
     }
   }
 
