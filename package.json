@@ -34,7 +34,7 @@
   },
   "scripts": {
     "start": "node nimoy.js",
-    "test": "tape tests/*.js"
+    "test": "tape tests/all.js"
   },
   "repository": {
     "type": "git",
