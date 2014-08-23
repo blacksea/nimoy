@@ -37,7 +37,7 @@ function auth (user, cb) { // client makes id
     sessions[user.name].push(sess)
     cb(null, {key:'@'+user.name,value:sess})
   } else {
-    if (_.find(sessions[user.name], function (p){return p===user.pass})){
+    if (_.find(sessions[user.name], function (s){if(s===user.pass)return true})){
       cb(null, {key:'@:'+user.name,value:user.pass})
     } else cb(new Error('bad login!'), null)
   }
@@ -71,7 +71,9 @@ function boot (conf, cb) {
     '</html>'
   )
 
-  startServer(conf, db, cb)
+  startServer(conf, db, function () {
+    cb(server.close)
+  })
 }
 
 function compile (conf, cb) {
@@ -97,6 +99,7 @@ function compile (conf, cb) {
     }
     next()
   }, function end () {
+    fs.writeFileSync(__dirname+'/library.json', JSON.stringify(library))
     var bundleJS = fs.createWriteStream(OUT)
     b.transform('brfs')
     b.bundle().pipe(bundleJS)
