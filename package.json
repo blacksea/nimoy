@@ -6,32 +6,34 @@
   "directories": {
     "test": "tests"
   },
-  "testling" : {
-    "files":"tests/bricoleur.js"
+  "testling": {
+    "files": "tests/bricoleur.js"
   },
   "dependencies": {
     "browserify": "^4.1.8",
     "buffer": "^2.3.2",
     "crypto-browserify": "^2.1.8",
-    "domify": "^1.2.2",
+    "cuid": "^1.2.4",
     "engine.io-stream": "^0.4.3",
     "formidable": "^1.0.14",
     "level": "^0.18.0",
     "level-live-stream": "^1.4.9",
     "multilevel": "^5.6.0",
-    "node-static": "^0.7.3",
     "slide": "^1.1.5",
+    "st": "^0.5.1",
     "templayed": "^0.2.3",
-    "through": "^2.3.4",
+    "through2": "^0.6.1",
+    "uglify-js": "^2.4.15",
     "underscore": "^1.6.0"
   },
   "devDependencies": {
-    "tape": "^2.13.1"
+    "tape": "^2.13.1",
+    "websocket-stream": "^0.6.0",
+    "ws": "^0.4.32"
   },
   "scripts": {
-    "start":"node nimoy.js",
-    "test": "tape tests/*.js",
-    "btest": "node index.js './testConf.json' && sleep 2 && testling --bcmd=google-chrome-unstable"
+    "start": "node nimoy.js",
+    "test": "tape tests/*.js"
   },
   "repository": {
     "type": "git",
