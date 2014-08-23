@@ -1,37 +1,25 @@
 var manifest = require('./static/manifest.json')
-var config = require('./bricoleurConfig.json') // setlib!
-var Buffer = require('buffer/').Buffer
-var IMG = new Buffer(config.uImg).toString()
+var lib = require('./library.json')
+var url = require('url')
+var cuid = require('cuid')
+
+var engine = require('engine.io-stream')
+var ws = engine('/ws')
 
 var db = require('multilevel').client(manifest)
            .on('error', Errs)
 
-var engine = require('engine.io-stream')
-var ws = engine('/ws')
 ws.pipe(db.createRpcStream()).pipe(ws)
 
-var canvas = (!window.location.hash) 
-  ? {key: 'canvas:open', value:'default'}
-  : {key: 'canvas:open', value: window.location.hash.slice(1)}
+var loc = url.parse(window.location.origin)
 
-var user = (window.location.host.split('.').length === 3)
-  ? window.location.host.split('.')[0]
-  : 'default'
+var user = (loc.host.split('.').length>1) ? loc.host.split('.')[0] : 'unuser'
+var canvas = (loc.hash) ? loc.hash : 'home'
 
-var bricoleur = require('./_bricoleur')(db, user, config)
+var bricoleur = require('./_bricoleur')(db, user, lib)
                   .on('error', Errs)
-
-// create a new bricoleur
-
-// try to auth with existing session
-
-// if theres no session force login
                   
-if (user === 'default') return false                 
-
 if (sessionStorage[user]) bricoleur.write('@'+user+' '+sessionStorage[user])
-
-if (!sessionStorage[user]) document.body.appendChild(login)
 
 // login
 var login = document.createElement('div')
@@ -51,7 +39,10 @@ login.querySelector('#loginForm')
 
 window.addEventListener('hashchange', function (e) {
   e.preventDefault()
-  bricoleur.write(e.newURL.slice(1))
+  canvas = (loc.hash) ? loc.hash : 'home'
+  bricoleur.write('!'+canvas)
 }, false)
+
+if (!sessionStorage[user]) document.body.appendChild(login)
 
 function Errs (err) { console.error(err) } // wha...!!!
