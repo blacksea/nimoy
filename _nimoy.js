@@ -37,7 +37,7 @@ function auth (user, cb) { // client makes id
     sessions[user.name].push(sess)
     cb(null, {key:'@'+user.name,value:sess})
   } else {
-    if (_.find(sessions[user.name], function (s){if(s===user.pass)return true})){
+    if (_.find(sessions[user.name],function (s){return s===user.pass})) {
       cb(null, {key:'@:'+user.name,value:user.pass})
     } else cb(new Error('bad login!'), null)
   }
@@ -89,7 +89,7 @@ function compile (conf, cb) {
 
     if (dir[0]!=='.') {
       var pkg = (fs.existsSync(folder))
-        ? JSON.parse(fs.readFileSync(folder+'/package.json', {encoding:'utf8'}))
+        ? JSON.parse(fs.readFileSync(folder+'/package.json',{encoding:'utf8'}))
         : null
 
       if (pkg.nimoy) {
@@ -179,6 +179,7 @@ function startServer (conf, db, cb) {
 function handleErr (e) { console.error(e) }
 
 function isCuid (id) {
-  var r = (typeof id==='string' && id.length===25 && id[0]==='c') ? true : false
+  var r = (typeof id==='string' && id.length===25 && id[0]==='c') 
+    ? true : false
   return r
 }

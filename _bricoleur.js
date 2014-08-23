@@ -49,7 +49,7 @@ module.exports = function Bricoleur (db, user, library) {
     
     if (action==='?') { // improve w. multiple results / deeper search
       if (type==='*') {
-        var pkg = _.find(library, function (v,k) {if (k.match(actor)) return v})
+        var pkg = _.find(library, function (v,k) {if(k.match(actor)) return v})
         var uid = _.find(canvas, function (v,k) {
           if (k.match(actor)) return k.split(':')[1]
         })
@@ -201,7 +201,8 @@ module.exports = function Bricoleur (db, user, library) {
     .on('data', sync)
 
   function isCuid (id) {
-    var r = (typeof id==='string' && id.length===25 && id[0]==='c') ? true : false
+    var r = (typeof id==='string' && id.length===25 && id[0]==='c') 
+      ? true : false
     return r
   }
 
