@@ -5,7 +5,6 @@ var cuid = require('cuid')
 var nimoy = require('../_nimoy')
 var hash = require('crypto').createHash
 var emitter = require('events').EventEmitter
-var manifest = require('../static/manifest.json')
 var multilevel = require('multilevel').client(manifest)
 var es = require('engine.io-stream/client')
 
