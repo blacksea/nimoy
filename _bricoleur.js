@@ -1,5 +1,5 @@
 var _ = require('underscore')
-var cuid = require('cuid') // 25 char uid
+var cuid = require('cuid')
 var through = require('through2')
 var hash = require('crypto-browserify/create-hash')
 
@@ -43,7 +43,6 @@ module.exports = function Bricoleur (db, user, library) {
     var res = {}
     res.key = (type==='|') ? type : type+':'+actor 
 
-    // SYMBOLS 
     // ACTIONS: ? get/find, + add, - rm , ! open 
     // TYPES: * modules, @ users, # canvas, $ data, | pipes, ^ cuid
     
@@ -139,7 +138,7 @@ module.exports = function Bricoleur (db, user, library) {
       if (action==='+') {
         var id = (!actor.match(':')) ? cuid() : actor.split(':')[1]
         var modName = (!actor.match(':')) ? actor : actor.split(':')[0]
-        var pkg = _.find(library,function(v,k) {if (k.match(modName)) return v})
+        var pkg = _.find(library,function(v,k){if (k.match(modName)) return v})
         if (!pkg) {
           cb(new Error('module: '+modName+' not found!'), null); return false  
         }
