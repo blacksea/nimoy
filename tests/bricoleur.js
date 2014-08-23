@@ -9,6 +9,7 @@ var hash = require('crypto-browserify/create-hash')
 var nimoy = require('../_nimoy.js')
 
 ls.install(db)
+multiLevel.writeManifest(db, './static/manifest.json')
 
 var server = multilevel.server(db, {
   auth : nimoy.auth,
