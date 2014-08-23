@@ -20,7 +20,8 @@ test('NIMOY COMPILE MODULES', function (t) {
 })
 
 test('NIMOY BOOT SERVER', function (t) {
-  nimoy.boot(conf, function (e) {
+  t.plan(3)
+  nimoy.boot(conf, function (kill) {
 
     var indexHTML = fs.readFileSync('./static/index.html',{encoding:'utf8'})
     var getIndex = http.request({
@@ -50,8 +51,6 @@ test('NIMOY BOOT SERVER', function (t) {
     setTimeout(function () {
       multilevel.auth(creds, function (e,r) {
         t.equal(isCuid(r.value), true, 'session exists!')
-        t.end()
-        process.exit()
       })
     }, 30)
   })
