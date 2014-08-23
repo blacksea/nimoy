@@ -9,7 +9,6 @@ var multilevel = require('multilevel').client()
 var es = require('engine.io-stream/client')
 
 var conf = require('../config.json')
-console.log(conf)
 var pass = hash('sha256').update(conf.pass,'utf8').digest('hex')
 
 test('NIMOY COMPILE MODULES', function (t) {
