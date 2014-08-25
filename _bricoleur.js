@@ -4,6 +4,8 @@ var through = require('through2')
 var hash = require('crypto-browserify/create-hash')
 
 module.exports = function Bricoleur (db, user, library) { 
+  // provide a wayt to hook into api stream -- (through the mL mux?
+
   var canvas = {} 
 
   var s = through.obj(function interface (d, enc, next) {
@@ -43,6 +45,7 @@ module.exports = function Bricoleur (db, user, library) {
     var res = {}
     res.key = (type==='|') ? type : type+':'+actor 
 
+    // SYMBOLS 
     // ACTIONS: ? get/find, + add, - rm , ! open 
     // TYPES: * modules, @ users, # canvas, $ data, | pipes, ^ cuid
     
@@ -138,11 +141,11 @@ module.exports = function Bricoleur (db, user, library) {
       if (action==='+') {
         var id = (!actor.match(':')) ? cuid() : actor.split(':')[1]
         var modName = (!actor.match(':')) ? actor : actor.split(':')[0]
-        var pkg = _.find(library,function(v,k){if (k.match(modName)) return v})
+        var pkg = _.find(library,function(v,k) {if (k.match(modName)) return v})
         if (!pkg) {
           cb(new Error('module: '+modName+' not found!'), null); return false  
         }
-        canvas[id] = require(pkg.name)(id)
+        canvas[id] = require(pkg.name)({id:id}) // find a way to hook in opts
         canvas[id].name = modName
         res.value = id
         cb(null, res)
