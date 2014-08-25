@@ -1,9 +1,9 @@
 var fs = require('fs')
-var _ = require('underscore')
 var url = require('url')
 var http = require('http')
 var https = require('https')
 var level = require('level')
+var _ = require('underscore')
 var emitter = require('events').EventEmitter
 var livestream = require('level-live-stream')
 var engineServer = require('engine.io-stream')
@@ -22,10 +22,11 @@ var sessions = {edit:[]}
 var users = {}
 var pass
 
-// allow websock swap (engine.io or ws)
+// allow websock \ swap (engine.io or ws)
 module.exports.boot = boot
-module.exports.cli = through.obj(cli)
+module.exports.cli = through.obj(cli) // new brico then pipe into process
 module.exports.compile = compile
+module.exports.upload = fileUpload
 module.exports.auth = auth
 
 function cli (d, enc, n) {}
