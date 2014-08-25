@@ -145,20 +145,6 @@ function startServer (conf, db, cb) {
     }
   }
 
-  function fileUpload (req, res) { // replace w. external!?
-    var form = new formidable.IncomingForm()
-    form.parse(req, function(err, fields, files) {
-      var filePath = './static/files/'+fields.file
-      var blob = fields.blob.split(',')[1]
-      res.writeHead(200, {'content-type': 'text/plain'})
-      res.write('received upload:\n\n')
-      res.end()
-      fs.writeFile(filePath, blob, {encoding:'base64'}, function (e) {
-        if (!e) db.put('file:'+fields.id, '/files/'+fields.file)
-      }) 
-    })
-  }
-
   var engine = engineServer(function (wss) {
     wss.on('error', console.error)
     wss.pipe(multiLevel.server(db, {
@@ -176,6 +162,20 @@ function startServer (conf, db, cb) {
 
   server.listen(conf.port, conf.host, cb)
 } 
+
+function fileUpload (req, res) { // replace w. external!?
+  var form = new formidable.IncomingForm()
+  form.parse(req, function(err, fields, files) {
+    var filePath = './static/files/'+fields.file
+    var blob = fields.blob.split(',')[1]
+    res.writeHead(200, {'content-type': 'text/plain'})
+    res.write('received upload:\n\n')
+    res.end()
+    fs.writeFile(filePath, blob, {encoding:'base64'}, function (e) {
+      if (!e) db.put('file:'+fields.id, '/files/'+fields.file)
+    }) 
+  })
+}
 
 function handleErr (e) { console.error(e) }
 
