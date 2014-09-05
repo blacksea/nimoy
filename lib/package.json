@@ -1,0 +1,6 @@
+{
+  "name": "lib",
+  "scripts": {
+    "test": "browserify -t brfs test.js | testling"
+  }
+}

@@ -4,8 +4,7 @@ var through = require('through2')
 var hash = require('crypto-browserify/create-hash')
 
 module.exports = function Bricoleur (db, user, library) { 
-  // provide a wayt to hook into api stream -- (through the mL mux?
-
+  // provide a way to hook into api stream -- through the mL mux?
   var canvas = {} 
 
   var s = through.obj(function interface (d, enc, next) {
@@ -20,12 +19,18 @@ module.exports = function Bricoleur (db, user, library) {
     function handleResult (e, res) { 
       if (res) {
         if (d.from) res.key += ':'+d.from
+        console.log(res)
         self.push(res)
       }
       if (e) self.emit('error', e)
-      next()
     }
+
+    next()
   })
+
+  s.name = 'bricoleur'
+
+  canvas[cuid()] = s
 
   function parseCommand (d, cb) { 
     var str = (typeof d === 'string') ? d : d.cmd
@@ -43,7 +48,7 @@ module.exports = function Bricoleur (db, user, library) {
     }
 
     var res = {}
-    res.key = (type==='|') ? type : type+':'+actor 
+    res.key = (type==='|') ? type : type + ':' + actor 
 
     // SYMBOLS 
     // ACTIONS: ? get/find, + add, - rm , ! open 
@@ -113,16 +118,22 @@ module.exports = function Bricoleur (db, user, library) {
         id = actor[1].split(':')[1]
         actor[1] = actor[1].split(':')[0]
       }
-      var modA = canvas[actor[0]]
-      var modB = canvas[actor[1]]
 
-      if (!modA || !modB) {
+      for (var i=0;i<actor.length;i++) {
+        actor[i] = (isCuid(actor[i]))
+          ? actor[i] 
+          : _.find(_.keys(canvas),function(k){
+            return canvas[k].name===actor[i] 
+          })
+      }
+
+      if (!canvas[actor[0]] || !canvas[actor[1]]) {
         cb(new Error('unpipeable'+actor,null)) 
         return false
       }
 
       if (action==='+') {
-        modA.pipe(modB)
+        canvas[actor[0]].pipe(canvas[actor[1]])
         canvas[id] = actor
         res.value = id
         cb(null, res)
@@ -133,22 +144,37 @@ module.exports = function Bricoleur (db, user, library) {
     if (type==='*') {
       if (action==='-') {
         res.value = actor
-        if (!canvas[actor]) cb(new Error('no module: '+actor),null)
-          else  { delete canvas[actor]; cb(null, res) }
+        if (!canvas[actor]) cb(new Error('no module: '+actor), null)
+        else  { delete canvas[actor]; cb(null, res) }
         return false
       }
-
       if (action==='+') {
-        var id = (!actor.match(':')) ? cuid() : actor.split(':')[1]
-        var modName = (!actor.match(':')) ? actor : actor.split(':')[0]
-        var pkg = _.find(library,function(v,k) {if (k.match(modName)) return v})
+        var modCuid = actor.split(':')[1]
+        var id = (!modCuid) ? cuid : modCuid()
+        var modName = (!modCuid) ? actor : actor.split(':')[0]
+        var opts = {id: id}
+
+        var pkg = _.find(library,function(v,k){if (k.match(modName)) return v})
         if (!pkg) {
           cb(new Error('module: '+modName+' not found!'), null); return false  
-        }
-        canvas[id] = require(pkg.name)({id:id}) // find a way to hook in opts
+        } 
+
         canvas[id].name = modName
         res.value = id
-        cb(null, res)
+
+        if (!modCuid) {
+          canvas[id] = require(pkg.name)(opts) // find a way to hook in opts
+          cb(null, res)
+          return false
+        }
+        if (modCuid && pkg.data) {
+          db.get('$:'+modCuid, function (e, mData) {
+            if (e) { opts.data = pkg.data }
+            opts.data = mData
+            canvas[id] = require(pkg.name)(opts)
+            cb(null, res)
+          })
+        } 
       }
     }
 
@@ -217,4 +243,4 @@ module.exports = function Bricoleur (db, user, library) {
   }
 
   return s
-} 
+}
