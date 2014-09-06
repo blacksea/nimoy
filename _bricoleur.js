@@ -19,7 +19,6 @@ module.exports = function Bricoleur (db, user, library) {
     function handleResult (e, res) { 
       if (res) {
         if (d.from) res.key += ':'+d.from
-        console.log(res)
         self.push(res)
       }
       if (e) self.emit('error', e)
@@ -27,10 +26,8 @@ module.exports = function Bricoleur (db, user, library) {
 
     next()
   })
-
   s.name = 'bricoleur'
-
-  canvas[cuid()] = s
+  canvas[cuid()] = s 
 
   function parseCommand (d, cb) { 
     var str = (typeof d === 'string') ? d : d.cmd
@@ -85,8 +82,10 @@ module.exports = function Bricoleur (db, user, library) {
         })
         _.each(cvs, function (cmd) {
           parseCommand(cmd, function (e, r) {
-            if (e) cb(e, null)
-            if (!e && cmd===last) cb(null, res)
+            if (e) {cb(e, null)}
+            if (!e && cmd===last) {
+              cb(null, res)
+            }
           })
         })
       })
@@ -123,7 +122,7 @@ module.exports = function Bricoleur (db, user, library) {
         actor[i] = (isCuid(actor[i]))
           ? actor[i] 
           : _.find(_.keys(canvas),function(k){
-            return canvas[k].name===actor[i] 
+            return canvas[k].name === actor[i] 
           })
       }
 
@@ -150,31 +149,41 @@ module.exports = function Bricoleur (db, user, library) {
       }
       if (action==='+') {
         var modCuid = actor.split(':')[1]
-        var id = (!modCuid) ? cuid : modCuid()
+        var id = (!modCuid) ? cuid() : modCuid
         var modName = (!modCuid) ? actor : actor.split(':')[0]
         var opts = {id: id}
-
-        var pkg = _.find(library,function(v,k){if (k.match(modName)) return v})
-        if (!pkg) {
-          cb(new Error('module: '+modName+' not found!'), null); return false  
-        } 
-
-        canvas[id].name = modName
         res.value = id
 
+        var pkg = _.find(library, function(v,k){if(k.match(modName))return v})
+        if (!pkg) {
+          if (modName === 'bricoleur') { 
+            canvas[id] = s; 
+            cb(null,res)
+            return false 
+          } else {
+            cb(new Error('module: '+modName+' not found!'), null) 
+            return false  
+          }
+        } 
         if (!modCuid) {
           canvas[id] = require(pkg.name)(opts) // find a way to hook in opts
+          canvas[id].name = modName
           cb(null, res)
           return false
         }
         if (modCuid && pkg.data) {
           db.get('$:'+modCuid, function (e, mData) {
             if (e) { opts.data = pkg.data }
-            opts.data = mData
+            if (!e) opts.data = mData
             canvas[id] = require(pkg.name)(opts)
+            canvas[id].name = modName
             cb(null, res)
           })
-        } 
+        } else if (modCuid && !pkg.data) {
+          canvas[id] = require(pkg.name)(opts)
+          canvas[id].name = modName
+          cb(null, res)
+        }
       }
     }
 
