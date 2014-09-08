@@ -1,7 +1,7 @@
 var cuid = require('cuid')
-var dex = require('./dex.js')
-var omni = require('./omni.js')({id:cuid()})
-var dombii = require('./dombii')
+var dex = require('../lib/dex.js')
+var omni = require('../lib/omni.js')({id:cuid()})
+var dombii = require('../lib/dombii')
 var test = require('tape')
 
 var fs = require('fs')
@@ -55,7 +55,6 @@ test('DAX', function (t) {
   var d = climbToCuid(targ)
 
   // simulate a context click action!
-  
   // where to store the indexed templates!
 
   for (k in index[d]) {
@@ -66,7 +65,7 @@ test('DAX', function (t) {
     }
   }
 
-  t.ok(html.index[d], 'indexed item exists') // but how to load?
+  t.ok(html.index[d], 'indexed item exists')
   targ.dispatchEvent(click)
   t.end()
 })
