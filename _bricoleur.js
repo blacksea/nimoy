@@ -17,20 +17,25 @@ module.exports = function Bricoleur (db, user, library) {
     } else parseCommand(d, handleResult)
 
     function handleResult (e, res) { 
-      if (res) {
+      if (!e && res) {
         if (d.from) res.key += ':'+d.from
         self.push(res)
+      } else if (e) {
+        // format an error obj & push!
+        e.to = d.from
+        s.push(e)
       }
-      if (e) self.emit('error', e)
     }
 
     next()
   })
+
   s.name = 'bricoleur'
+
   canvas[cuid()] = s 
 
   function parseCommand (d, cb) { 
-    var str = (typeof d === 'string') ? d : d.cmd
+    var str = (typeof d === 'string') ? d : (!d.cmd) ? null : d.cmd
     if (!str) { cb(new Error('bad input!'), null); return false }
     var action = str[0].match(/\+|\-|\?|\!/)[0]
     var type = str.slice(1).match(/\@|\#|\$|\||\*/)
@@ -247,9 +252,7 @@ module.exports = function Bricoleur (db, user, library) {
     return hash('sha256').update(pass).digest('hex')
   }
 
-  function handleError (e) {
-    console.error(e)
-  }
+
 
   return s
 }
