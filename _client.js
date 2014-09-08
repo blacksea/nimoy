@@ -25,17 +25,4 @@ window.addEventListener('hashchange', function (e) {
   bricoleur.write('!'+canvas)
 }, false)
 
-if (sessionStorage[user]) 
-  bricoleur.write('@'+user+' '+sessionStorage[user])
-
-if (!sessionStorage[user]) 
-  bricoleur.write(['+login','+login|bricoleur','+bricoleur|login'])
-
 function Errs (err) { console.error(err) }
-
-bricoleur.on('data', function (d) {
-  // look for auth
-  // if () {
-  //   bricoleur.write(['+omni','+omni|bricoleur','+bricoleur|omni'])
-  // }
-})
