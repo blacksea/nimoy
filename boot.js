@@ -27,7 +27,8 @@ function libDirChange (e,f) {
 function writeLib (lib) {
   fs.writeFileSync(conf.path_static+'/library.json')
   console.log('wrote lib to '+conf.path_static+'/library.json')
-  exec('notify-send "NIMOY : compiled library!"',function(e,s,se){})
+  exec('notify-send "wrote lib to '+conf.path_static+'/library.json'+'"',
+       function(e,s,se){})
 }
 
 nimoy.compile(conf, writeLib)
