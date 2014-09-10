@@ -32,15 +32,24 @@ module.exports.auth = auth
 function cli (d, enc, n) {}
 
 function auth (user, cb) { // client makes id
-  if (!user.pass||!user.name) {cb(new Error('bad login!'), null);return false}
+  if (!user.pass||!user.name) {
+    var e = new Error('bad login!')
+    e.code = 1
+    cb(e, null)
+    return false
+  }
   if (!isCuid(user.pass)) {
     var sess = cuid()
     sessions[user.name].push(sess)
     cb(null, {key:'@'+user.name,value:sess})
   } else {
     if (_.find(sessions[user.name],function (s){return s===user.pass})) {
-      cb(null, {key:'@:'+user.name,value:user.pass})
-    } else cb(new Error('bad login!'), null)
+      cb(null, {key:'@'+user.name,value:user.pass})
+    } else {
+      var e = new Error('bad login!')
+      e.code = 1
+      cb(e, null)
+    }
   }
 }
 
@@ -84,6 +93,8 @@ function compile (conf, cb) {
   var library  = {} 
 
   var folders = fs.readdirSync(__dirname+'/node_modules')
+
+  // also compile the core lib
 
   asyncMap(folders, function compileModule (dir, next) {
     var folder = __dirname +'/node_modules/'+dir
