@@ -20,6 +20,8 @@ var canvas = (loc.hash) ? loc.hash : 'home'
 var bricoleur = require('./_bricoleur')(db, user, lib)
                   .on('error', Errs)
 
+bricoleur.write('!'+canvas)
+
 if (user==='edit') {
   var omni = require('./lib/omni.js')({id:cuid()})
   omni.pipe(bricoleur).pipe(omni)
@@ -27,6 +29,7 @@ if (user==='edit') {
                   
 window.addEventListener('hashchange', function (e) {
   e.preventDefault()
+  loc = url.parse(e.newURL)
   canvas = (loc.hash) ? loc.hash : 'home'
   bricoleur.write('!'+canvas)
 }, false)
