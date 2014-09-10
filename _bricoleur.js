@@ -20,8 +20,7 @@ module.exports = function Bricoleur (db, user, library) {
       if (!e && res) {
         if (d.from) res.key += ':'+d.from
         self.push(res)
-      } else if (e) {
-        // format an error obj & push!
+      } else if (e) { // format an error obj & push!
         e.to = d.from
         s.push(e)
       }
@@ -77,6 +76,7 @@ module.exports = function Bricoleur (db, user, library) {
 
     if (action==='!'&&type==='#') {
       db.get(type+':'+actor, function (e, jsn) {
+        if (e) { cb(e, null); return false }
         var cvs = JSON.parse(jsn)
         res.value = type+':'+actor
         var last = cvs[cvs.length-1]
@@ -251,8 +251,6 @@ module.exports = function Bricoleur (db, user, library) {
   function getAuthToken (pass) {
     return hash('sha256').update(pass).digest('hex')
   }
-
-
 
   return s
 }
