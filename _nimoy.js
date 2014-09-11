@@ -7,6 +7,7 @@ var _ = require('underscore')
 var emitter = require('events').EventEmitter
 var livestream = require('level-live-stream')
 var engineServer = require('engine.io-stream')
+var websocServer = require('ws').Server
 var asyncMap = require('slide').asyncMap
 var hash = require('crypto').createHash
 var multiLevel = require('multilevel')
@@ -60,7 +61,7 @@ function boot (conf, cb) {
   var h = hash('SHA256').update('nimoy').digest('hex')
 
   var db = level(__dirname+'/'+conf.host)
-             .on('error', handleErr)
+             .on('error', handleErrs)
 
   livestream.install(db)
 
@@ -156,9 +157,9 @@ function startServer (conf, db, cb) {
     }
   }
 
-  var engine = engineServer(function (wss) {
-    wss.on('error', console.error)
-    wss.pipe(multiLevel.server(db, {
+  function handleSoc (soc) {
+    soc.on('error', handleErrs)
+    soc.pipe(multiLevel.server(db, {
       auth: auth,
       access: function access (user, db, method, args) {
         if (!user || user.name !== 'edit') {
@@ -167,11 +168,20 @@ function startServer (conf, db, cb) {
           }
         }
       }
-    })).pipe(wss)
-  }, {cookie:false})
-    .attach(server, '/ws')
+    })).pipe(soc)
+  }
 
   server.listen(conf.port, conf.host, cb)
+
+  if (conf.soc==='engine') { 
+    engineServer(handleSoc, {cookie:false})
+      .attach(server, '/ws')
+  } else if (conf.soc==='ws' || !conf.soc) {
+    var wss = new websocServer({server:server})
+    wss.on('connection', function (soc) {
+      handleSoc(require('websocket-stream')(soc))
+    })
+  }
 } 
 
 function fileUpload (req, res) { // replace w. external!?
@@ -188,7 +198,7 @@ function fileUpload (req, res) { // replace w. external!?
   })
 }
 
-function handleErr (e) { console.error(e) }
+function handleErrs (e) { console.error(e) }
 
 function isCuid (id) {
   var r = (typeof id==='string' && id.length===25 && id[0]==='c') 

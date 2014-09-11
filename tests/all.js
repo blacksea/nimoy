@@ -41,6 +41,10 @@ var cmds = [
   {cmd:'?mod2', from:'findMod2'}
 ]
 
+// do headless tests with testling / phantom
+// tests : nimoy | bricoleur | client | lib
+// how to run/test _client!?
+
 test('BRICOLEUR STREAMING API', function (t) {
   var pipe, m1, m2
 
@@ -60,24 +64,24 @@ test('BRICOLEUR STREAMING API', function (t) {
       t.equal(d.value instanceof Array, true, 'search complete')
       brico.write({cmd:'+'+m1+'|'+m2,from:'pipe'})
     },
-    pipe: function (d) {
+    pipe : function (d) {
       pipe = d.value
       t.equal(isCuid(pipe),true, 'piped modules')
       brico.write({cmd:'+#cvs',from:'save'})
     },
-    save: function (d) {
+    save : function (d) {
       t.equal(d.value,'#:cvs', 'saved')
       brico.write({cmd:'!#cvs',from:'load'})
     },
-    load: function (d) {
+    load : function (d) {
       t.equal(d.value,'#:cvs', 'loaded')
       brico.write({cmd:'-'+pipe,from:'unpipe'})
     },
-    unpipe: function (d) {
+    unpipe : function (d) {
       t.equal(d.value,pipe, 'unpiped modules')
       brico.write({cmd:'-@edit',from:'logout'})
     },
-    logout: function (d) {
+    logout : function (d) {
       t.equal(d.value, 'edit', 'logged out')
     }
   }
@@ -95,11 +99,6 @@ test('BRICOLEUR STREAMING API', function (t) {
   })
 })
 
-function isCuid (id) {
-  var r = (typeof id==='string' && id.length===25 && id[0]==='c') ? true : false
-  return r
-}
-
 var conf = require('../config.json')
 var pass = hash('sha256').update(conf.pass,'utf8').digest('hex')
 
@@ -113,8 +112,8 @@ test('NIMOY COMPILE MODULES', function (t) {
 test('NIMOY BOOT SERVER', function (t) {
   t.plan(3)
   nimoy.boot(conf, function (kill) {
-
     var indexHTML = fs.readFileSync('./static/index.html',{encoding:'utf8'})
+
     var getIndex = http.request({
       hostname:conf.host,
       port:conf.port,
@@ -124,9 +123,12 @@ test('NIMOY BOOT SERVER', function (t) {
         t.equal(d.toString(),indexHTML, 'server request ok')
       })
     })
+
     getIndex.end()
 
-    var ws = es({path:':9999/ws',transports:['websocket']})
+    // var ws = es({path:':9999/ws',transports:['websocket']})
+    // var bindshim = require('bindshim')
+    var ws = require('websocket-stream')('ws://localhost:9999')
     ws.pipe(client.createRpcStream()).pipe(ws)
 
     var creds = {
