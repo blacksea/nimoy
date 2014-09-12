@@ -27,7 +27,9 @@
     "templayed": "^0.2.3",
     "through2": "^0.6.1",
     "uglify-js": "^2.4.15",
-    "underscore": "^1.6.0"
+    "underscore": "^1.6.0",
+    "websocket-stream": "^1.0.2",
+    "ws": "0.6.0"
   },
   "devDependencies": {
     "tape": "^2.13.1",
