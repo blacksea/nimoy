@@ -1,0 +1,10 @@
+{
+  "pass" : "nimoy",
+  "port" : 9999,
+  "host" : "localhost",
+  "ssl" : false,
+  "path_static" : "static",
+  "path_files" : "static/files",
+  "bundle" : "stream",
+  "minify" : false
+}
