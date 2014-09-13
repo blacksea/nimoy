@@ -20,7 +20,7 @@ test('BOOT NIMOY', function (t) { // run boot command!
   
   // plug a test script in after bricoleur that just manipulates ui
 
-  t.plan(3)
+  t.plan(2)
 
   t.on('end', function () {
     run.stop()
