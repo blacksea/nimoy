@@ -8,6 +8,7 @@ var configFlag = process.argv[2]
 var exec = require('child_process').exec
 var timeModified = ''
 
+
 var conf = !(configFlag) 
   ? require('./config.json')
   : require(process.argv[2])
@@ -29,7 +30,15 @@ function libDirChange (e,f) {
 function streamBundle (e,s) {
   process.stdout.write('200')
   process.nextTick(function () {
-    s.pipe(process.stdout)
+    var bundleFile = __dirname+'/'+conf.path_static+'/bundle.js'
+    var bundleStream = fs.createWriteStream(bundleFile)
+
+    if (conf.bundle && conf.bundle === 'stream') 
+      s.pipe(process.stdout)
+
+    if (!conf.bundle || conf.bundle === 'file')
+      s.pipe(bundleStream)
+
     s.on('end',function () {
       process.stdout.write('X0X')
       nimoy.boot(conf, function (kill) {
