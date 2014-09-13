@@ -53,6 +53,9 @@ test('BOOT NIMOY', function (t) { // run boot command!
   nimoy.stderr.on('data', function (e) { // fail if error!
     t.fail()
     console.error(e.toString())
+    nimoy.kill()
+    run.stop()
+    t.end()
   })
 })
 
