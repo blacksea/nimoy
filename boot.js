@@ -1,5 +1,7 @@
 // quickstart wrapper for nimoy!
 
+// allow for ws or engine-io to handle sockets
+
 var fs = require('fs')
 var nimoy = require('./_nimoy')
 var configFlag = process.argv[2] 
@@ -24,16 +26,17 @@ function libDirChange (e,f) {
   }
 }
 
-function writeLib (lib) {
-  fs.writeFileSync(conf.path_static+'/library.json')
-  console.log('wrote lib to '+conf.path_static+'/library.json')
-  exec('notify-send "wrote lib to '+conf.path_static+'/library.json'+'"',
-       function(e,s,se){})
+function streamBundle (e,s) {
+  process.stdout.write('200')
+  process.nextTick(function () {
+    s.pipe(process.stdout)
+    s.on('end',function () {
+      process.stdout.write('X0X')
+      nimoy.boot(conf, function (kill) {
+        process.stdout.write('000')
+      })
+    })
+  })
 }
 
-nimoy.compile(conf, writeLib)
-
-nimoy.boot(conf, function (kill) {
-  console.log('Nimoy running on p: '+conf.port+' h: '+conf.host)
-})
-
+nimoy.compile(conf, streamBundle)

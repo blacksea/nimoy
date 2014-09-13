@@ -10,7 +10,7 @@ var btest = fs.readFileSync('./browser.js','utf8')
 // ZOMG!
 
 test('BOOT NIMOY', function (t) { // run boot command!
-  var nimoy = spawn('node',['../boot','./config.json'])
+  var nimoy = spawn('node',['../boot','./tests/config.json'])
   var run = brun()
   var bundle = ''
 
