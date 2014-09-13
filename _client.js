@@ -5,12 +5,6 @@ var cuid = require('cuid')
 var bindshim = require('bindshim')
 
 // read config for socket connection / engine
-lib.env = (!lib.env) 
-  ? {port:80,host:window.location.hostname}
-  : lib.env
-
-if (!lib.env.soc) lib.env.soc = 'ws'
-
 var ws = (lib.env.soc==='ws') 
   ? require('websocket-stream')('ws://'+lib.env.host+':'+lib.env.port)
   : require('engine.io-stream')('/ws')
