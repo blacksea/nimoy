@@ -8,6 +8,7 @@ var emitter = require('events').EventEmitter
 var livestream = require('level-live-stream')
 var engineServer = require('engine.io-stream')
 var websocServer = require('ws').Server
+var wsStream = require('websocket-stream')
 var asyncMap = require('slide').asyncMap
 var hash = require('crypto').createHash
 var multiLevel = require('multilevel')
@@ -29,6 +30,8 @@ module.exports.cli = through.obj(cli) // new brico then pipe into process
 module.exports.compile = compile
 module.exports.upload = fileUpload
 module.exports.auth = auth
+
+var db
 
 function cli (d, enc, n) {}
 
@@ -55,20 +58,10 @@ function auth (user, cb) { // client makes id
 }
 
 function boot (conf, cb) { 
-  if (!fs.existsSync('./static')) fs.mkdir('./static')
-  if (!fs.existsSync('./static/files')) fs.mkdir('./static/files')
-
   var h = hash('SHA256').update('nimoy').digest('hex')
 
-  var db = level(__dirname+'/'+conf.host)
-             .on('error', handleErrs)
-
-  livestream.install(db)
-
-  multiLevel.writeManifest(db, './static/manifest.json')
-
   // write index
-  fs.writeFileSync('./static/index.html', 
+  fs.writeFileSync(__dirname+'/static/index.html', 
     '<!doctype html>' +
     '<html lang="en">' +
     '<meta charset="utf-8">' +
@@ -88,8 +81,16 @@ function boot (conf, cb) {
 }
 
 function compile (conf, cb) {
+  if (!fs.existsSync(__dirname+'/static')) fs.mkdir(__dirname+'/static')
+  if (!fs.existsSync(__dirname+'/static/files'))fs.mkdir(__dirname+'/static/files')
+
+  db = level(__dirname+'/'+conf.host)
+             .on('error', handleErrs)
+  livestream.install(db)
+  multiLevel.writeManifest(db, __dirname+'/static/manifest.json')
+
   var IN = __dirname + '/_client.js'
-  var OUT = conf.path_static+'/bundle.js'
+  var OUT = __dirname + '/'+conf.path_static+'/bundle.js'
   var b = browserify(IN)
   var library  = {} 
 
@@ -112,20 +113,18 @@ function compile (conf, cb) {
     }
     next()
   }, function end () {
+    library.env = {port: conf.port, host: conf.host}  
     fs.writeFileSync(__dirname+'/library.json', JSON.stringify(library))
     var bundleJS = fs.createWriteStream(OUT)
     b.transform('brfs')
-    b.bundle().pipe(bundleJS)
-    bundleJS.on('finish',function () {
-      cb(null, library)
-    })
+    cb(null,b.bundle())
   })
 }
 
 function startServer (conf, db, cb) {
   var mount = st({
     index: 'index.html', 
-    path: conf.path_static,
+    path: __dirname+'/'+conf.path_static,
     url: '/', 
     passthrough: true 
   })
@@ -156,19 +155,18 @@ function startServer (conf, db, cb) {
       })
     }
   }
-
+  
   function handleSoc (soc) {
-    soc.on('error', handleErrs)
     soc.pipe(multiLevel.server(db, {
-      auth: auth,
-      access: function access (user, db, method, args) {
-        if (!user || user.name !== 'edit') {
-          if (/^put|^del|^batch|write/i.test(method)) { // no write access!
-            throw new Error('read-only access');
-          }
+    auth: auth,
+    access: function access (user, db, method, args) {
+      if (!user || user.name !== 'edit') {
+        if (/^put|^del|^batch|write/i.test(method)) { // no write access!
+          throw new Error('read-only access');
         }
       }
-    })).pipe(soc)
+    }})).pipe(soc)
+    soc.on('error', console.error)
   }
 
   server.listen(conf.port, conf.host, cb)
@@ -179,7 +177,8 @@ function startServer (conf, db, cb) {
   } else if (conf.soc==='ws' || !conf.soc) {
     var wss = new websocServer({server:server})
     wss.on('connection', function (soc) {
-      handleSoc(require('websocket-stream')(soc))
+      var s = wsStream(soc)
+      handleSoc(s)
     })
   }
 } 
@@ -187,7 +186,7 @@ function startServer (conf, db, cb) {
 function fileUpload (req, res) { // replace w. external!?
   var form = new formidable.IncomingForm()
   form.parse(req, function(err, fields, files) {
-    var filePath = './static/files/'+fields.file
+    var filePath = __dirname+'/static/files/'+fields.file
     var blob = fields.blob.split(',')[1]
     res.writeHead(200, {'content-type': 'text/plain'})
     res.write('received upload:\n\n')
