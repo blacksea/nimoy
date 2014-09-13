@@ -11,7 +11,7 @@ var btest = fs.readFileSync('./browser.js','utf8')
 
 test('BOOT NIMOY', function (t) { // run boot command!
   var nimoy = spawn('node',['../boot','./tests/config.json'])
-  var run = brun()
+  var run = brun({browser:'phantom'})
   var bundle = ''
 
   // prepare a config to use when booting
