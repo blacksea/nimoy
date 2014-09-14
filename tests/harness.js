@@ -23,8 +23,6 @@ function runner (t) {
   // var phantom = run()
   var bundle = ''
 
-  t.plan(2)
-
   t.on('end', function () {
     // phantom.stop()
     nimoy.kill()
@@ -49,6 +47,7 @@ function runner (t) {
       t.ok(md,'server running')
     } else if (md === '200') {
       t.ok(md,'piping bundle')
+      t.end()
       // var bunLoc = 'http://'+conf.host+':'+conf.port+'/bundle.js'
       // var bun = require('request')(bunLoc)
       // bun.on('data', function (d) {
@@ -62,7 +61,7 @@ function runner (t) {
     console.error(e.toString())
     nimoy.kill()
     // phantom.stop()
-    t.end()
+    // t.end()
   })
 }
 
