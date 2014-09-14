@@ -6,7 +6,7 @@ var through = require('through2')
 // and use somekind of external thing to do ui
 // load a ui test module here and stream the output
 
-var cmds = [
+var cmds = [ // no objects 
   {cmd:'+@edit nimoy', from:'auth'},
   {cmd:'+mod1', from:'addMod1'},
   {cmd:'+mod2', from:'addMod2'},
