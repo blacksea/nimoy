@@ -58,8 +58,11 @@ function auth (user, cb) { // client makes id
 }
 
 function boot (conf, cb) { 
-  if (!fs.existsSync(__dirname+'/static')) fs.mkdir(__dirname+'/static')
-  if (!fs.existsSync(__dirname+'/static/files'))fs.mkdir(__dirname+'/static/files')
+  if (!fs.existsSync(__dirname+'/static')) 
+    fs.mkdirSync(__dirname+'/static')
+
+  if (!fs.existsSync(__dirname+'/static/files'))
+    fs.mkdirSync(__dirname+'/static/files')
 
   db = level(__dirname+'/'+conf.host)
              .on('error', handleErrs)
