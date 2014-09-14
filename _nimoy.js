@@ -58,6 +58,14 @@ function auth (user, cb) { // client makes id
 }
 
 function boot (conf, cb) { 
+  if (!fs.existsSync(__dirname+'/static')) fs.mkdir(__dirname+'/static')
+  if (!fs.existsSync(__dirname+'/static/files'))fs.mkdir(__dirname+'/static/files')
+
+  db = level(__dirname+'/'+conf.host)
+             .on('error', handleErrs)
+  livestream.install(db)
+  multiLevel.writeManifest(db, __dirname+'/static/manifest.json')
+
   var h = hash('SHA256').update('nimoy').digest('hex')
 
   // write index
@@ -81,32 +89,24 @@ function boot (conf, cb) {
 }
 
 function compile (conf, cb) {
-  if (!fs.existsSync(__dirname+'/static')) fs.mkdir(__dirname+'/static')
-  if (!fs.existsSync(__dirname+'/static/files'))fs.mkdir(__dirname+'/static/files')
-
-  db = level(__dirname+'/'+conf.host)
-             .on('error', handleErrs)
-  livestream.install(db)
-  multiLevel.writeManifest(db, __dirname+'/static/manifest.json')
-
   var IN = __dirname + '/_client.js'
   var OUT = __dirname + '/'+conf.path_static+'/bundle.js'
+  var MODULES = __dirname + '/' + conf.path_modules
   var b = browserify(IN)
   var library  = {} 
 
-  var folders = fs.readdirSync(__dirname+'/node_modules')
+  var folders = fs.readdirSync(MODULES)
 
   // also compile the core lib
-
   asyncMap(folders, function compileModule (dir, next) {
-    var folder = __dirname +'/node_modules/'+dir
-
+    var folder = __dirname +'/'+conf.path_modules+dir
+    if (!fs.statSync(folder).isDirectory()) {next();return false}
     if (dir[0]!=='.') {
       var pkg = (fs.existsSync(folder))
         ? JSON.parse(fs.readFileSync(folder+'/package.json',{encoding:'utf8'}))
         : null
 
-      if (pkg.nimoy) {
+      if (pkg && pkg.nimoy) {
         library[pkg.name] = pkg
         b.require(folder+'/'+pkg.main, {expose: pkg.name})
       }
@@ -117,7 +117,8 @@ function compile (conf, cb) {
     fs.writeFileSync(__dirname+'/library.json', JSON.stringify(library))
     var bundleJS = fs.createWriteStream(OUT)
     b.transform('brfs')
-    cb(null,b.bundle())
+    b.bundle().pipe(bundleJS)
+    bundleJS.on('finish', cb)
   })
 }
 
