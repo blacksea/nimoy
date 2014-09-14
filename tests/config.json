@@ -1,10 +1,10 @@
 {
   "pass" : "nimoy",
   "port" : 9999,
-  "host" : "localhost",
+  "host" : "nimoy.dev",
   "ssl" : false,
   "path_static" : "static",
+  "path_modules" : "tests/test_modules/",
   "path_files" : "static/files",
-  "bundle" : "stream",
   "minify" : false
 }
