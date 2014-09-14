@@ -20,19 +20,19 @@ db.put('#:tst', JSON.stringify(testCommands), function (e) {
 
 function runner (t) { 
   var nimoy = spawn('node',['../boot','./tests/config.json'])
-  var phantom = run()
+  // var phantom = run()
   var bundle = ''
 
   t.plan(2)
 
   t.on('end', function () {
-    phantom.stop()
+    // phantom.stop()
     nimoy.kill()
   })
 
-  phantom.on('data', function (d) { // output to test!
-    console.log(d)
-  })
+  // phantom.on('data', function (d) { // output to test!
+  //   console.log(d)
+  // })
 
   function runBrowser () {
     phantom.write(bundle)
@@ -61,7 +61,7 @@ function runner (t) {
   nimoy.stderr.on('data', function (e) {
     console.error(e.toString())
     nimoy.kill()
-    phantom.stop()
+    // phantom.stop()
     t.end()
   })
 }
