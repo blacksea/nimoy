@@ -40,7 +40,7 @@
   },
   "scripts": {
     "start": "node nimoy.js",
-    "test": "cd tests && node runner.js"
+    "test": "cd tests && node harness.js"
   },
   "repository": {
     "type": "git",
