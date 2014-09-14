@@ -77,4 +77,3 @@ function isCuid (id) {
 
   return r
 }
-
