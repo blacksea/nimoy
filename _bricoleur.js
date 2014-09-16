@@ -18,8 +18,13 @@ module.exports = function Bricoleur (db, library) {
     } else parseCommand(d, handleResult)
 
     function handleResult (e, res) { 
-        var response = (e) ? e : res // arrg!
-        self.push(response)
+      if (res && res.parcel) {
+        if (!res.key) res.key = res.parcel
+        else res.key += (':'+res.parcel)
+        delete res.parcel
+      }
+      var response = (e) ? e : res // arrg!
+      self.push(response)
     }
 
     next()
@@ -29,15 +34,16 @@ module.exports = function Bricoleur (db, library) {
   canvas[ID].name = 'bricoleur'
 
   function parseCommand (d, cb) { 
-
-    // need a mini cuid parcel that persists!
-    // need a better parser
+    var res = {}
     
     var str = (typeof d === 'string') ? d : (!d.cmd) ? null : d.cmd // .cmd sucks!
     if (!str) { cb(new Error('bad input!'), null); return false }
 
     var parcel = (str.split(':').length > 1) ? str.split(':')[1] : null
-    if (parcel) str = str.split(':')[0] // scrub parcel from actor
+    if (parcel) {
+      res.parcel = parcel
+      str = str.split(':')[0] // scrub parcel from actor
+    }
 
     var action = str[0].match(/\+|\-|\?|\!/)[0]
     var type = str.slice(1).match(/\@|\#|\$|\||\*/)
@@ -53,8 +59,6 @@ module.exports = function Bricoleur (db, library) {
     if (!action||!type||!actor) { 
       cb(new Error('wrong cmd:'+str), null); return false
     }
-
-    var res = {}
 
     // SYMBOLS 
     // ACTIONS: ? get/find, + add, - rm , ! open 
@@ -134,9 +138,7 @@ module.exports = function Bricoleur (db, library) {
       for (var i=0;i<actor.length;i++) {
         actor[i] = (isCuid(actor[i]))
           ? actor[i] 
-          : _.find(_.keys(canvas),function(k){
-            return canvas[k].name === actor[i] 
-          })
+          : nameToCuid(actor[i])
       }
 
       if (!canvas[actor[0]] || !canvas[actor[1]]) {
@@ -151,13 +153,22 @@ module.exports = function Bricoleur (db, library) {
         cb(null, res)
         return false
       }
+
+      if (action==='-') {
+        canvas[actor[0]].destroy()
+        canvas[actor[0]].unpipe(canvas[actor[1]])
+        res.value = pipeToCuid(actor)
+        delete canvas[res.value]
+        cb(null, res)
+      }
     } 
 
     if (type==='*') {
       if (action==='-') {
+        actor = (!isCuid(actor)) ? nameToCuid(actor) : actor
         res.value = actor
         if (!canvas[actor]) cb(new Error('no module: '+actor), null)
-        else  { delete canvas[actor]; cb(null, res) }
+        else  { canvas[actor].destroy() ;delete canvas[actor]; cb(null, res) }
         return false
       }
       if (action==='+') {
@@ -256,9 +267,22 @@ module.exports = function Bricoleur (db, library) {
     return r
   }
 
+  function nameToCuid (name) {
+     return _.find(_.keys(canvas),function(k){
+            return canvas[k].name === name
+     })
+  }
+  function pipeToCuid (pipe) {
+    return _.find(_.keys(canvas),function(k){
+          return canvas[k].toString() === pipe.toString()
+   })
+  }
+
   function getAuthToken (pass) {
     return hash('sha256').update(pass).digest('hex')
   }
+
+  window.cvs = canvas
 
   return s
 }
