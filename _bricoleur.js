@@ -3,9 +3,10 @@ var cuid = require('cuid')
 var through = require('through2')
 var hash = require('crypto-browserify/create-hash')
 
-module.exports = function Bricoleur (db, user, library) { 
+module.exports = function Bricoleur (db, library) { 
   // provide a way to hook into api stream -- through the mL mux?
   var canvas = {} 
+  var ID = cuid()
 
   var s = through.obj(function interface (d, enc, next) {
     var self = this
@@ -17,39 +18,43 @@ module.exports = function Bricoleur (db, user, library) {
     } else parseCommand(d, handleResult)
 
     function handleResult (e, res) { 
-      if (!e && res) {
-        if (d.from) res.key += ':'+d.from
-        self.push(res)
-      } else if (e) { // format an error obj & push!
-        e.to = d.from
-        s.push(e)
-      }
+        var response = (e) ? e : res // arrg!
+        self.push(response)
     }
 
     next()
   })
 
-  s.name = 'bricoleur'
-
-  canvas[cuid()] = s 
+  canvas[ID] = s 
+  canvas[ID].name = 'bricoleur'
 
   function parseCommand (d, cb) { 
-    var str = (typeof d === 'string') ? d : (!d.cmd) ? null : d.cmd
+
+    // need a mini cuid parcel that persists!
+    // need a better parser
+    
+    var str = (typeof d === 'string') ? d : (!d.cmd) ? null : d.cmd // .cmd sucks!
     if (!str) { cb(new Error('bad input!'), null); return false }
+
+    var parcel = (str.split(':').length > 1) ? str.split(':')[1] : null
+    if (parcel) str = str.split(':')[0] // scrub parcel from actor
+
     var action = str[0].match(/\+|\-|\?|\!/)[0]
     var type = str.slice(1).match(/\@|\#|\$|\||\*/)
-    type = (type!==null) ? type[0] : isCuid(str.slice(1)) ? '^' : '*'
 
-    var actor = (type==='^') ? str.slice(1) : (type==='|') 
-      ? str.slice(1).split('|') : (type==='*'&&str[1]!=='*') 
+    type = (type !== null) ? type[0] : isCuid(str.slice(1)) ? '^' : '*'
+
+    var actor = (type === '^') ? str.slice(1) : (type === '|') 
+      ? str.slice(1).split('|') : (type === '*' && str[1] !== '*') 
       ? str.slice(1) : str.slice(2)
+
+
 
     if (!action||!type||!actor) { 
       cb(new Error('wrong cmd:'+str), null); return false
     }
 
     var res = {}
-    res.key = (type==='|') ? type : type + ':' + actor 
 
     // SYMBOLS 
     // ACTIONS: ? get/find, + add, - rm , ! open 
@@ -81,9 +86,10 @@ module.exports = function Bricoleur (db, user, library) {
         res.value = type+':'+actor
         var last = cvs[cvs.length-1]
         _.each(_.keys(canvas).reverse(), function (k) {
-          parseCommand('-'+k, function (e,res) {
-            if (e) cb(e, null)
-          })
+          if (canvas[k].name!=='bricoleur') 
+            parseCommand('-'+k, function (e,res) {
+              if (e) cb(e, null)
+            })
         })
         _.each(cvs, function (cmd) {
           parseCommand(cmd, function (e, r) {
@@ -118,6 +124,8 @@ module.exports = function Bricoleur (db, user, library) {
 
     if (type==='|') { 
       var id = cuid()
+
+      // remove cuid here---always generate---pipe role could be improved
       if (actor[1].split(':').length>1) {
         id = actor[1].split(':')[1]
         actor[1] = actor[1].split(':')[0]
@@ -153,7 +161,7 @@ module.exports = function Bricoleur (db, user, library) {
         return false
       }
       if (action==='+') {
-        var modCuid = actor.split(':')[1]
+        var modCuid = actor.split(':')[1] //!!!!
         var id = (!modCuid) ? cuid() : modCuid
         var modName = (!modCuid) ? actor : actor.split(':')[0]
         var opts = {id: id}
