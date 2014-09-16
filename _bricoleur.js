@@ -155,6 +155,7 @@ module.exports = function Bricoleur (db, library) {
       }
 
       if (action==='-') {
+        // make sure stream has a destroy method!
         canvas[actor[0]].destroy()
         canvas[actor[0]].unpipe(canvas[actor[1]])
         res.value = pipeToCuid(actor)
@@ -281,8 +282,6 @@ module.exports = function Bricoleur (db, library) {
   function getAuthToken (pass) {
     return hash('sha256').update(pass).digest('hex')
   }
-
-  window.cvs = canvas
 
   return s
 }
