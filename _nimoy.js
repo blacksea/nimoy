@@ -36,6 +36,8 @@ var db
 function cli (d, enc, n) {}
 
 function auth (user, cb) { // client makes id
+  var res = {}
+  if (user.parcel) res.parcel = parcel
   if (!user.pass||!user.name) {
     var e = new Error('bad login!')
     e.code = 1
@@ -45,10 +47,14 @@ function auth (user, cb) { // client makes id
   if (!isCuid(user.pass)) {
     var sess = cuid()
     sessions[user.name].push(sess)
-    cb(null, {key:'@'+user.name,value:sess})
+    res.key = '@'+user.name
+    res.value = sess
+    cb(null, res)
   } else {
     if (_.find(sessions[user.name],function (s){return s===user.pass})) {
-      cb(null, {key:'@'+user.name,value:user.pass})
+      res.key = '@'+user.name
+      res.value = user.pass
+      cb(null, res)
     } else {
       var e = new Error('bad login!')
       e.code = 1
