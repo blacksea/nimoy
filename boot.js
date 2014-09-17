@@ -21,8 +21,8 @@ function libDirChange (e,f) {
 }
 
 nimoy.boot(conf, function (kill) {
-  process.stdout.write('000')
+  process.stdout.write('up on port '+conf.port+' & host '+conf.host+'\n')
   nimoy.compile(conf, function () {
-    process.stdout.write('200')
+    process.stdout.write('wrote bundle to '+__dirname+'/'+conf.path_static+'/bundle.js'+'\n')
   })
 })
