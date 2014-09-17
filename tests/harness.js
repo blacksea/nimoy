@@ -61,7 +61,7 @@ nimoy.stdout.on('data', function (d) {
   }
 })
 
-Nimoy.stderr.on('data', function (e) {
+nimoy.stderr.on('data', function (e) {
   console.error('FAIL',e.toString())
   nimoy.kill()
   phantom.stop()
