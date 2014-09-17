@@ -19,11 +19,11 @@ module.exports = function Bricoleur (db, library) {
 
     function handleResult (e, res) { 
       if (res && res.parcel) {
+        if (res.key) res.key += ':'+res.parcel
         if (!res.key) res.key = res.parcel
-        else res.key += (':'+res.parcel)
         delete res.parcel
       }
-      var response = (e) ? e : res // arrg!
+      var response = (!e) ? res : e // arrg!
       self.push(response)
     }
 
@@ -35,6 +35,8 @@ module.exports = function Bricoleur (db, library) {
 
   function parseCommand (d, cb) { 
     var res = {}
+
+    // what about spaces!
     
     var str = (typeof d === 'string') ? d : (!d.cmd) ? null : d.cmd // .cmd sucks!
     if (!str) { cb(new Error('bad input!'), null); return false }
@@ -53,8 +55,6 @@ module.exports = function Bricoleur (db, library) {
     var actor = (type === '^') ? str.slice(1) : (type === '|') 
       ? str.slice(1).split('|') : (type === '*' && str[1] !== '*') 
       ? str.slice(1) : str.slice(2)
-
-
 
     if (!action||!type||!actor) { 
       cb(new Error('wrong cmd:'+str), null); return false
@@ -251,6 +251,7 @@ module.exports = function Bricoleur (db, library) {
         ? auth[1]
         : getAuthToken(auth[1])
 
+      if (parcel) user.parcel = parcel
       if (action==='+') db.auth(user, cb)
     }
   }
