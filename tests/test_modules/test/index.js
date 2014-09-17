@@ -1,13 +1,9 @@
 var through = require('through2')
+var _ = require('underscore')
 var test = require('tape')
 var cuid = require('cuid')
-var _ = require('underscore')
 
-// attach a cuid like a mini cargo in bricoleur
-
-// trace commands as they flow through bricoleur!
-
-var cmds = [ // no objects 
+var cmds = [
   ['+@edit nimoy', cuid()],
   ['+gooshter', cuid()],
   ['+pumicle', cuid()],
@@ -18,10 +14,13 @@ var cmds = [ // no objects
   ['-@edit', cuid()]
 ]
 
+// update gooshter / pumicle to use dombii / dex / etc!
+// actual use cases!
+
 module.exports = function ClientTest (opts) {
   var p = through.obj()
 
-  test('bricoleur api', function (t) {
+  test('bricoleur api', function (t) { // add omni tests!
     t.plan(cmds.length) 
 
     cmds.forEach(function (c) {
@@ -30,18 +29,19 @@ module.exports = function ClientTest (opts) {
 
     p.on('data', function (d) {
       if (typeof d === 'object' && d.key && d.value) {
+
         var i = (d.key.split(':').length>1) 
-          ? dex(d.key.split(':')[1],cmds) 
-          : dex(d.key,cmds)
+          ? dex(d.key.split(':')[1], cmds) 
+          : dex(d.key, cmds)
 
         if (typeof i === 'string') i = Math.abs(i)
 
         var c = cmds[i]
-        if (i!==0&&i!==7) t.ok(isCuid(d.value), 'cmd: '+c[0])
+
+        if (i !== 0 && i !== 7) t.ok(isCuid(d.value), 'cmd: '+c[0])
+        // if (i==7) winodw.location.hash = '@'
         else t.ok(d.value, 'cmd: '+c[0])
-      } else {
-        console.log(JSON.stringify(d))
-      }
+      } 
     })
   })
 
@@ -60,6 +60,18 @@ function dex (str, arr) {
   }
   return res.toString()
 }
+
+// MUTATIONS!
+
+document.body.addEventListener("DOMNodeInserted", function (ev) {
+  var el = ev.target
+}, false)
+
+document.body.addEventListener("DOMNodeRemoved", function (ev) {
+  var el = ev.target
+}, false)
+
+// HELPERS!
 
 function isCuid (id) {
   var r = (typeof id==='string' && id.length===25 && id[0]==='c') 
