@@ -24,12 +24,8 @@ var sessions = {edit:[]}
 var users = {}
 var pass
 
-// allow websock \ swap (engine.io or ws)
 module.exports.boot = boot
-module.exports.cli = through.obj(cli) // new brico then pipe into process
 module.exports.compile = compile
-module.exports.upload = fileUpload
-module.exports.auth = auth
 
 var db
 var pass
