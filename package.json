@@ -1,13 +1,10 @@
 {
   "name": "nimoy",
   "version": "1.0.0",
-  "description": "",
+  "description": "bricoleur based, retro-futuristic network software",
   "main": "nimoy.js",
   "directories": {
     "test": "tests"
-  },
-  "testling": {
-    "files": "tests/bricoleur.js"
   },
   "dependencies": {
     "bindshim": "0.0.1",
@@ -40,8 +37,8 @@
     "ws": "^0.4.32"
   },
   "scripts": {
-    "start": "node nimoy.js",
-    "test": "cd tests && node harness.js"
+    "start": "node boot.js",
+    "test": "cd tests && node index.js"
   },
   "repository": {
     "type": "git",
