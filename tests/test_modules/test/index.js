@@ -29,21 +29,24 @@ module.exports = function ClientTest (opts) {
     })
 
     p.on('data', function (d) {
-      var i = Math.abs(d[0])
-      var res = d[1]
-      var c = cmds[i]
-      if (i!==0&&i!==7) t.ok(isCuid(res.value), 'cmd: '+c[0])
-      else t.ok(res.value, 'cmd: '+c[0])
+      if (typeof d === 'object' && d.key && d.value) {
+        var i = (d.key.split(':').length>1) 
+          ? dex(d.key.split(':')[1],cmds) 
+          : dex(d.key,cmds)
+
+        if (typeof i === 'string') i = Math.abs(i)
+
+        var c = cmds[i]
+        if (i!==0&&i!==7) t.ok(isCuid(d.value), 'cmd: '+c[0])
+        else t.ok(d.value, 'cmd: '+c[0])
+      } else {
+        console.log(JSON.stringify(d))
+      }
     })
   })
 
   var s = through.obj(function (d, enc, next) { 
-    if (typeof d === 'object' && d.key && d.value) {
-      var i
-      if (d.key.split(':').length>1) i = dex(d.key.split(':')[1],cmds)
-      else i = dex(d.key,cmds)
-      if (i) p.write([i,d])
-    }
+    p.write(d)
     next()
   })
 
