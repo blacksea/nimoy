@@ -43,15 +43,10 @@ function parseUrl (URL) {
 }
 
 function Errs (err) {
-  console.error(err)
   if (err.code===1) {
     if (omni.write) omni.write({code:1})
   }
 }
-
-bricoleur.on('data', function (d) {
-  console.log(d)
-})
 
 parseUrl(window.location.origin)
 window.addEventListener('hashchange', parseUrl, false)
