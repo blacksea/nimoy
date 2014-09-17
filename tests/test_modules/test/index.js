@@ -1,79 +1,67 @@
-// BROWSER TESTS!
-
 var through = require('through2')
+var test = require('tape')
+var cuid = require('cuid')
+var _ = require('underscore')
 
-// just run through commands
-// and use somekind of external thing to do ui
-// load a ui test module here and stream the output
+// attach a cuid like a mini cargo in bricoleur
+
+// trace commands as they flow through bricoleur!
 
 var cmds = [ // no objects 
-  {cmd:'+@edit nimoy', from:'auth'},
-  {cmd:'+mod1', from:'addMod1'},
-  {cmd:'+mod2', from:'addMod2'},
-  {cmd:'?mod2', from:'findMod2'}
+  ['+@edit nimoy', cuid()],
+  ['+gooshter', cuid()],
+  ['+pumicle', cuid()],
+  ['+gooshter|pumicle', cuid()],
+  ['-gooshter|pumicle', cuid()],
+  ['-gooshter', cuid()],
+  ['-pumicle', cuid()],
+  ['-@edit', cuid()]
 ]
 
 module.exports = function ClientTest (opts) {
-  console.log('nuglet')
+  var p = through.obj()
 
-  var s = through.obj(function (d,enc,next) {
+  test('bricoleur api', function (t) {
+    t.plan(cmds.length) 
 
+    cmds.forEach(function (c) {
+      s.push(c[0]+':'+c[1])
+    })
+
+    p.on('data', function (d) {
+      var i = Math.abs(d[0])
+      var res = d[1]
+      var c = cmds[i]
+      if (i!==0&&i!==7) t.ok(isCuid(res.value), 'cmd: '+c[0])
+      else t.ok(res.value, 'cmd: '+c[0])
+    })
+  })
+
+  var s = through.obj(function (d, enc, next) { 
+    if (typeof d === 'object' && d.key && d.value) {
+      var i
+      if (d.key.split(':').length>1) i = dex(d.key.split(':')[1],cmds)
+      else i = dex(d.key,cmds)
+      if (i) p.write([i,d])
+    }
     next()
   })
- 
+
   return s
 }
 
-// test('BRICOLEUR STREAMING API', function (t) {
-//   var pipe, m1, m2
-// 
-//   var tests = {
-//     auth : function (d) {
-//       t.equal(isCuid(d.value),true, 'auth succesfull')
-//     },
-//     addMod1 : function (d) {
-//       t.equal(isCuid(d.value), true, 'placed module1')
-//       m1 = d.value
-//     },
-//     addMod2 : function (d) {
-//       t.equal(isCuid(d.value), true, 'placed module2')
-//       m2 = d.value
-//     },
-//     findMod2 : function (d) {
-//       t.equal(d.value instanceof Array, true, 'search complete')
-//       brico.write({cmd:'+'+m1+'|'+m2,from:'pipe'})
-//     },
-//     pipe : function (d) {
-//       pipe = d.value
-//       t.equal(isCuid(pipe),true, 'piped modules')
-//       brico.write({cmd:'+#cvs',from:'save'})
-//     },
-//     save : function (d) {
-//       t.equal(d.value,'#:cvs', 'saved')
-//       brico.write({cmd:'!#cvs',from:'load'})
-//     },
-//     load : function (d) {
-//       t.equal(d.value,'#:cvs', 'loaded')
-//       brico.write({cmd:'-'+pipe,from:'unpipe'})
-//     },
-//     unpipe : function (d) {
-//       t.equal(d.value,pipe, 'unpiped modules')
-//       brico.write({cmd:'-@edit',from:'logout'})
-//     },
-//     logout : function (d) {
-//       t.equal(d.value, 'edit', 'logged out')
-//     }
-//   }
-// 
-//   t.plan(_.keys(tests).length)
-// 
-//   cmds.forEach(function (c) {
-//     brico.write(c)
-//   })
-// 
-//   brico.on('data', function (d) {
-//     var path = d.key.split(':')
-//     var k = path[path.length-1]
-//     tests[k](d)
-//   })
-// })
+function dex (str, arr) { 
+  var res = null
+  for (var i=0;i<arr.length;i++) {
+    arr[i].forEach(function (item) { if (item === str) res = i })
+  }
+  return res.toString()
+}
+
+function isCuid (id) {
+  var r = (typeof id==='string' && id.length===25 && id[0]==='c') 
+    ? true 
+    : false
+
+  return r
+}
