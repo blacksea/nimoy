@@ -32,19 +32,20 @@ module.exports.upload = fileUpload
 module.exports.auth = auth
 
 var db
+var pass
 
 function cli (d, enc, n) {}
 
 function auth (user, cb) { // client makes id
   var res = {}
-  if (user.parcel) res.parcel = parcel
+  if (user.parcel) res.parcel = user.parcel
   if (!user.pass||!user.name) {
     var e = new Error('bad login!')
     e.code = 1
     cb(e, null)
     return false
   }
-  if (!isCuid(user.pass)) {
+  if (!isCuid(user.pass) && user.pass===pass) { // verify pass!
     var sess = cuid()
     sessions[user.name].push(sess)
     res.key = '@'+user.name
@@ -64,6 +65,8 @@ function auth (user, cb) { // client makes id
 }
 
 function boot (conf, cb) { 
+  pass = hash('sha256').update(conf.pass).digest('hex')
+  
   if (!fs.existsSync(__dirname+'/static')) 
     fs.mkdirSync(__dirname+'/static')
 
