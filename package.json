@@ -4,7 +4,9 @@
   "description": "bricoleur based, retro-futuristic network software",
   "main": "nimoy.js",
   "directories": {
-    "test": "tests"
+    "test": "tests",
+    "lib": "lib",
+    "static": "static"
   },
   "dependencies": {
     "bindshim": "0.0.1",
