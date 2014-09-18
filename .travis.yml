@@ -21,6 +21,6 @@ deploy:
     secure: c05npS/x+5c4QH1juX4AIZvHhRvoE54PeZ24IdO/LQQsGZE3+q6D0PhBhChbzwxUoscRfkFOH1fP7/l3cXHTwH6buycM8RBdl0agP2hWhZcKHFh1H2o/0m3B2VrHopEy5Fa/SflYKllwRtXs7KlbGnZtrSkFhRy0F6ENPZkd0p4=
   on:
     tags: true
-    condition: "$TRAVIS_TAG =~ ^v.*$"
+    condition: "$TRAVIS_TAG =~ ^v*$"
     repo: nimoy/nimoy
     all_branches: true
