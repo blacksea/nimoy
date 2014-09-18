@@ -4,6 +4,14 @@ var _ = require('underscore')
 var test = require('tape')
 var cuid = require('cuid')
 
+sim.contextMenu = function (el) { // contextmenu monkeypatch
+  var e = document.createEvent('MouseEvents')
+  e.initMouseEvent(
+    'contextmenu',true,true,window,1,0,0,0,0,false,false,false,false,1,null
+  )
+  el.dispatchEvent(e)
+}
+
 var cmds = [
   ['+@edit nimoy', cuid()],
   ['+gooshter', cuid()],
@@ -80,6 +88,7 @@ function interfaceTest (t) {
         typeIt(pumicle, input) 
       })
       t.ok(target, 'omni drawn')
+
     }
   }
 
