@@ -19,6 +19,20 @@ db.put('#:tst', JSON.stringify(testCommands), function (e) { db.close() })
 test('Nimoy Boot Script', function (t) {
   t.plan(2)
 
+  t.on('end', function () { // run browser tests in phantom
+    var bunLoc = 'http://'+conf.host+':'+conf.port+'/bundle.js'
+    var bun = require('request')(bunLoc)
+    bun.on('data', function (d) {
+      bundle += d
+    })
+    bun.on('end', function startPhantom () {
+      phantom.write(bundle)
+      phantom.write(";window.addEventListener('load',"
+        + "function(){window.location.hash='tst'},false);")
+      phantom.end()
+    })
+  })
+
   var phantom = run()
 
   var nimoy = spawn('node',['../boot','./tests/config.json'])
@@ -39,22 +53,11 @@ test('Nimoy Boot Script', function (t) {
       t.ok(md, 'server runs')
     } else if (md === 'wrote') {
       t.ok(md, 'http request')
-      var bunLoc = 'http://'+conf.host+':'+conf.port+'/bundle.js'
-      var bun = require('request')(bunLoc)
-      bun.on('data', function (d) {
-        bundle += d
-      })
-      bun.on('end', function startPhantom () {
-        phantom.write(bundle)
-        phantom.write(";window.addEventListener('load',"
-          + "function(){window.location.hash='tst'},false);")
-        phantom.end()
-      })
     } else console.log(d.toString()) 
   })
 
   nimoy.stderr.on('data', function (e) {
-    console.error('FAIL',e.toString())
+    console.error('FAIL', e.toString())
     nimoy.kill()
     phantom.stop()
   })
