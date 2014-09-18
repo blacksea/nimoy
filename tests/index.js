@@ -46,9 +46,8 @@ phantom.on('data', function (d) {
 var nimoy = spawn('node',['../boot','./tests/config.json'])
 
 nimoy.stdout.on('data', function (d) {
-  console.log(d.toString()) 
-  var md = d.toString().slice(0,5)
-  if (md === 'wrote') runBrowserTests()
+  var chunk = d.toString().slice(0,5)
+  if (chunk === 'wrote') runBrowserTests()
 })
 
 nimoy.stderr.on('data', function (e) {
