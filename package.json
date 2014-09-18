@@ -1,6 +1,6 @@
 {
   "name": "nimoy",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "bricoleur based, retro-futuristic network software",
   "main": "nimoy.js",
   "directories": {
