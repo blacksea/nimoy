@@ -1,5 +1,5 @@
 var through = require('through2')
-var sim = require('simulate-dom-event')
+var sim = require('simulate')
 var _ = require('underscore')
 var test = require('tape')
 var cuid = require('cuid')
@@ -11,24 +11,18 @@ var cmds = [
   ['+gooshter|pumicle', cuid()],
   ['-gooshter|pumicle', cuid()],
   ['-gooshter', cuid()],
-  ['-pumicle', cuid()]
-  // ['-@edit', cuid()]
+  ['-pumicle', cuid()],
+  ['-@edit', cuid()]
 ]
-
-// update gooshter / pumicle to use dombii / dex / etc!
-// actual use cases!
 
 module.exports = function ClientTest (opts) {
   var p = through.obj()
   var done = false
 
-  test('bricoleur api', function (t) { // add omni tests!
-    t.plan(cmds.length) 
+  // run sep dombii / drompii tests!
 
-    t.on('end', function () {
-      done = true
-      test('gui: user login', uiTest)
-    })
+  test('bricoleur api', function (t) { 
+    t.plan(cmds.length) 
 
     cmds.forEach(function (c) {
       s.push(c[0]+':'+c[1])
@@ -42,10 +36,16 @@ module.exports = function ClientTest (opts) {
 
         if (typeof i === 'string') i = Math.abs(i)
         var c = cmds[i]
-        if (i !== 0 && i !== 7) t.ok(isCuid(d.value), 'cmd: '+c[0])
-        else t.ok(d.value, 'cmd: '+c[0])
+        if (i !== 0 && i !== 7) t.ok(isCuid(d.value), 'do '+c[0])
+        else t.ok(d.value, 'do '+c[0])
       } 
     })
+
+    t.on('end', function () {
+      done = true
+      test('gui interactions', uiTest)
+    })
+
   })
 
   var s = through.obj(function (d, enc, next) { 
@@ -59,18 +59,45 @@ module.exports = function ClientTest (opts) {
 function uiTest (t) {
   t.plan(3)
 
+  // keyed commands
+  
+  var pumicle = [
+    ['?',63],
+    ['p',112],
+    ['u',117],
+    ['m',109],
+    ['i',105],
+    ['c',99],
+    ['l',108],
+    ['e',101]
+  ]
+
+  var gooshter = ['?','p','u','m','i','c','l','e']
+
+  function keySim (arr, el) {
+    arr.forEach(function (k) { el.value += k; sim.keyup(el,k) })
+  }
+
   document.body.addEventListener("DOMNodeInserted", function (e) {
     var target = e.target.children[0]
+
     if (target.className==='login') {
+
       t.ok(target, 'login drawn')
       target.querySelector('#login').value = 'nimoy'
-      var inp = target.querySelector('#login')
-      inp.value = 'nimoy'
-      process.nextTick(function () {
-        window.simulateEvent(target,'submit')
+      process.nextTick(function () { sim.submit(target) })
+
+    } else if (target.className==='omni') {
+
+      var input = target.querySelector('input')
+
+      process.nextTick(function () { 
+        // keySim(pumicle, input) 
+        keySim(gooshter, input) 
       })
-    } else if (target.className === 'omni') {
+
       t.ok(target, 'omni drawn')
+
     }
   }, false)
 
@@ -79,11 +106,8 @@ function uiTest (t) {
     t.equal(target.className,'login','login erased')
   }, false)
 
-  // login!
-  window.location.hash = '@'
+  window.location.hash = '@' // trigger login
 }
-
-// helpers
 
 function isCuid (id) {
   var r = (typeof id==='string' && id.length===25 && id[0]==='c') 
