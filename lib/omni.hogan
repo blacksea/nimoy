@@ -1,21 +1,4 @@
 <div class='omni'>
-  <ul>
-    <li><input></input><li>
-    <li class='result'><li>
-    <li><input></input</li>
-  </ul>
+  <input class='oz'></input>
+  <div class='hup'></div>
 </div>
-
-<!-- <textarea class='grifter edit editBox'  -->
-<!--   style="left:{{x}};top:{{y}};width:{{w}};height:{{h}};"> -->
-<!-- </textarea> -->
-
-<!-- <li class='notification'>{{msg}}</li> -->
-
-<!-- <div class='hilite'  -->
-<!--   style="left:{{x}};top:{{y}};width:{{w}};height:{{h}};"> -->
-<!-- </div> -->
-
-<!-- <div class='dropzone grifter'  -->
-<!--   style="left:{{x}};top:{{y}};width:{{w}};height:{{h}};"> -->
-<!-- </div> -->
