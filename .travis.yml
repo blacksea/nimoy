@@ -1,15 +1,24 @@
 addons:
   hosts:
-    - "nimoy.dev"
-    - "edit.nimoy.dev"
+  - nimoy.dev
+  - edit.nimoy.dev
 
 before_install:
-  - "export DISPLAY=:99.0"
-  - "sh -e /etc/init.d/xvfb start"
+- export DISPLAY=:99.0
+- sh -e /etc/init.d/xvfb start
 
 language: node_js
 
 node_js:
-  - "0.10"
+- '0.10'
 
 email: false
+
+deploy:
+  provider: npm
+  email: ag@theblacksea.cc
+  api_key:
+    secure: c05npS/x+5c4QH1juX4AIZvHhRvoE54PeZ24IdO/LQQsGZE3+q6D0PhBhChbzwxUoscRfkFOH1fP7/l3cXHTwH6buycM8RBdl0agP2hWhZcKHFh1H2o/0m3B2VrHopEy5Fa/SflYKllwRtXs7KlbGnZtrSkFhRy0F6ENPZkd0p4=
+  on:
+    tags: true
+    repo: nimoy/nimoy
