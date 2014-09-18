@@ -17,68 +17,54 @@ var cmds = [
 
 module.exports = function ClientTest (opts) {
   var p = through.obj()
+  var s = through.obj(function (d,enc,next) { if (!done) p.write(d); next()})
   var done = false
 
-  // run sep dombii / drompii tests!
+  function getIndex (str, arr) { 
+    var res = null
+    for (var i=0;i<arr.length;i++) {
+      arr[i].forEach(function (item) { if (item === str) res = i })
+    }
+    return res.toString()
+  }
 
   test('bricoleur api', function (t) { 
     t.plan(cmds.length) 
 
-    cmds.forEach(function (c) {
-      s.push(c[0]+':'+c[1])
-    })
+    cmds.forEach(function (c) { s.push(c[0]+':'+c[1]) })
 
     p.on('data', function (d) {
       if (typeof d === 'object' && d.key && d.value) {
         var i = (d.key.split(':').length>1) 
-          ? dex(d.key.split(':')[1], cmds) 
-          : dex(d.key, cmds)
+          ? getIndex(d.key.split(':')[1], cmds) 
+          : getIndex(d.key, cmds)
 
         if (typeof i === 'string') i = Math.abs(i)
         var c = cmds[i]
-        if (i !== 0 && i !== 7) t.ok(isCuid(d.value), 'do '+c[0])
-        else t.ok(d.value, 'do '+c[0])
+        t.ok(d.value, 'do '+c[0])
       } 
     })
 
     t.on('end', function () {
       done = true
-      test('gui interactions', uiTest)
+      test('gui interactions', interfaceTest)
     })
-
-  })
-
-  var s = through.obj(function (d, enc, next) { 
-    if (!done) p.write(d)
-    next()
   })
 
   return s
 }
 
-function uiTest (t) {
+function interfaceTest (t) {
   t.plan(3)
 
-  // keyed commands
-  
-  var pumicle = [
-    ['?',63],
-    ['p',112],
-    ['u',117],
-    ['m',109],
-    ['i',105],
-    ['c',99],
-    ['l',108],
-    ['e',101]
-  ]
+  // key sequences
+  var pumicle = ['?','p','u','m','i','c','l','e']
 
-  var gooshter = ['?','p','u','m','i','c','l','e']
-
-  function keySim (arr, el) {
+  function typeIt (arr, el) {
     arr.forEach(function (k) { el.value += k; sim.keyup(el,k) })
   }
 
-  document.body.addEventListener("DOMNodeInserted", function (e) {
+  function domNodeAdd (e) {
     var target = e.target.children[0]
 
     if (target.className==='login') {
@@ -90,37 +76,20 @@ function uiTest (t) {
     } else if (target.className==='omni') {
 
       var input = target.querySelector('input')
-
       process.nextTick(function () { 
-        // keySim(pumicle, input) 
-        keySim(gooshter, input) 
+        typeIt(pumicle, input) 
       })
-
       t.ok(target, 'omni drawn')
-
     }
-  }, false)
+  }
 
-  document.body.addEventListener("DOMNodeRemoved", function (e) {
+  function domNodeRm (e) {
     var target = e.target.children[0]
     t.equal(target.className,'login','login erased')
-  }, false)
+  }
 
   window.location.hash = '@' // trigger login
-}
 
-function isCuid (id) {
-  var r = (typeof id==='string' && id.length===25 && id[0]==='c') 
-    ? true 
-    : false
-
-  return r
-}
-
-function dex (str, arr) { 
-  var res = null
-  for (var i=0;i<arr.length;i++) {
-    arr[i].forEach(function (item) { if (item === str) res = i })
-  }
-  return res.toString()
+  document.body.addEventListener("DOMNodeInserted", domNodeAdd, false)
+  document.body.addEventListener("DOMNodeRemoved", domNodeRm, false)
 }
