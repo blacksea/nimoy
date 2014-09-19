@@ -67,7 +67,6 @@ function interfaceTest (t) {
 
   // test dombii! && possibly drompii!
 
-  // key sequences
   var pumicle = ['?','p','u','m','i','c','l','e']
 
   function typeIt (arr, el) {
@@ -84,12 +83,12 @@ function interfaceTest (t) {
       target.querySelector('#login').value = 'nimoy'
       process.nextTick(function () { sim.submit(target) })
 
-    } else if (target.className==='omni') {
+    } else if (target.children[0].className==='omni') {
       var input = target.querySelector('input')
-      process.nextTick(function () { 
-        typeIt(pumicle, input) 
+      // process.nextTick(function () { 
+        // typeIt(pumicle, input) 
         // sim.contextMenu(document.body.querySelector('.mool'))
-      })
+      // })
       t.ok(target, 'omni drawn')
     }
   }
