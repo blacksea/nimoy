@@ -10,6 +10,7 @@ var prettyTap = require('tap-spec')()
 
 var conf = require('./config.json')
 var db = level('../'+conf.host)
+var safetyKill // kill if test hangs in browser
 
 var bundle = ''
 
@@ -37,9 +38,14 @@ function runBrowserTests () {
 phantom.pipe(prettyTap).pipe(process.stdout)
 
 phantom.on('data', function (d) {
+  if (!safetyKill) safetyKill = setTimeout(function () {
+    phantom.stop()
+    nimoy.kill()
+  }, 60000)
   if (d.slice(0,4) ==='# ok' || d.slice(0,6) === '# fail') {
     phantom.stop()
     nimoy.kill()
+    if (safetyKill) clearTimeout(safetyKill)
   }
 })
 
