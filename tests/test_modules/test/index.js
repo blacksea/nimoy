@@ -65,6 +65,8 @@ module.exports = function ClientTest (opts) {
 function interfaceTest (t) {
   t.plan(3)
 
+  // test dombii! && possibly drompii!
+
   // key sequences
   var pumicle = ['?','p','u','m','i','c','l','e']
 
@@ -73,28 +75,28 @@ function interfaceTest (t) {
   }
 
   function domNodeAdd (e) {
-    var target = e.target.children[0]
+    var target = e.target
 
     if (target.className==='login') {
+      // simulate bad logins as well!
 
       t.ok(target, 'login drawn')
       target.querySelector('#login').value = 'nimoy'
       process.nextTick(function () { sim.submit(target) })
 
     } else if (target.className==='omni') {
-
       var input = target.querySelector('input')
       process.nextTick(function () { 
         typeIt(pumicle, input) 
+        // sim.contextMenu(document.body.querySelector('.mool'))
       })
       t.ok(target, 'omni drawn')
-
     }
   }
 
   function domNodeRm (e) {
-    var target = e.target.children[0]
-    t.equal(target.className,'login','login erased')
+    var target = e.target
+    if (target.className==='login') t.ok(target,'login erased')
   }
 
   window.location.hash = '@' // trigger login

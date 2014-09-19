@@ -48,5 +48,5 @@ function Errs (err) {
   }
 }
 
-parseUrl(window.location.origin)
+parseUrl(window.location.href)
 window.addEventListener('hashchange', parseUrl, false)

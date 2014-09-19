@@ -17,6 +17,7 @@
     "cuid": "^1.2.4",
     "engine.io-stream": "^0.4.3",
     "formidable": "^1.0.14",
+    "html-patcher": "0.0.2",
     "htmlparser2": "^3.7.3",
     "level": "^0.18.0",
     "level-live-stream": "^1.4.9",
