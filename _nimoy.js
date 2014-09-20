@@ -30,6 +30,18 @@ module.exports.compile = compile
 var db
 var pass
 
+var INDEX = '<!doctype html>' +
+  '<html lang="en">' +
+  '<meta charset="utf-8">' +
+  '<head>' +
+  '<title></title>' +
+  '<link rel="stylesheet" href="/style.css">' +
+  '</head>' +
+  '<body id="canvas">' +
+  '<script src="/bundle.js"></script>' +
+  '</body>' +
+  '</html>'
+
 function cli (d, enc, n) {}
 
 function auth (user, cb) { // client makes id
@@ -77,19 +89,8 @@ function boot (conf, cb) {
   var h = hash('SHA256').update('nimoy').digest('hex')
 
   // write index
-  fs.writeFileSync(__dirname+'/static/index.html', 
-    '<!doctype html>' +
-    '<html lang="en">' +
-    '<meta charset="utf-8">' +
-    '<head>' +
-    '<title></title>' +
-    '<link rel="stylesheet" href="/style.css">' +
-    '</head>' +
-    '<body id="canvas">' +
-    '<script src="/bundle.js"></script>' +
-    '</body>' +
-    '</html>'
-  )
+
+  fs.writeFileSync(__dirname+'/static/index.html', INDEX)
 
   startServer(conf, db, function () {
     cb(server.close)
@@ -159,8 +160,7 @@ function startServer (conf, db, cb) {
       fileUpload(req, res)
     } else {
       mount(req, res, function err () {
-        res.end('<html><script type="text/javascript">' +
-                'window.location.pathname = "/";</script></html>')
+        res.end(INDEX)
       })
     }
   }
@@ -211,5 +211,6 @@ function handleErrs (e) { console.error(e) }
 function isCuid (id) {
   var r = (typeof id==='string' && id.length===25 && id[0]==='c') 
     ? true : false
+
   return r
 }
