@@ -14,7 +14,11 @@ function libDirChange (e,f) {
   if (e === 'change') {
     var ctime = fs.statSync(__dirname+'/lib/'+f).ctime.toString()
     if (timeModified !== ctime) {
-      nimoy.compile(conf, streamBundle)
+      nimoy.compile(conf, function () {
+        exec('notify-send "NIMOY: COMPILED!"',function (e,s,es) {
+        })
+        process.stdout.write('wrote bundle to '+__dirname+'/'+conf.path_static+'/bundle.js'+'\n')
+      })
       timeModified = ctime
     }
   }
