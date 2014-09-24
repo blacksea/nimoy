@@ -132,12 +132,16 @@ function compile (conf, cb) {
 }
 
 function startServer (conf, db, cb) {
-  var mount = st({
+  var stOpts = {
     index: 'index.html', 
     path: __dirname+'/'+conf.path_static,
     url: '/', 
     passthrough: true 
-  })
+  }
+
+  if (conf.dev) stOpts.cache = false
+
+  var mount = st(stOpts)
 
   if (!conf.ssl) {
     server = http.createServer(handleHttp)
