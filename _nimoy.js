@@ -59,16 +59,16 @@ function auth (user, cb) { // client makes id
     res.key = '@'+user.name
     res.value = sess
     cb(null, res)
-  } else {
-    if (_.find(sessions[user.name],function (s){return s===user.pass})) {
-      res.key = '@'+user.name
-      res.value = user.pass
-      cb(null, res)
-    } else {
-      var e = new Error('bad login!')
-      e.code = 1
-      cb(e, null)
-    }
+  } else if (_.find(sessions[user.name],function (s){return s===user.pass})) {
+    res.key = '@'+user.name
+    res.value = user.pass
+    cb(null, res)
+  } else { 
+    var e
+    if (!isCuid(user.pass)) e = new Error('Wrong password!')
+    else e = new Error('Expired session')
+    e.code = 1
+    cb(e, null)
   }
 }
 
@@ -127,7 +127,10 @@ function compile (conf, cb) {
     var bundleJS = fs.createWriteStream(OUT)
     b.transform('brfs')
     b.bundle().pipe(bundleJS)
-    bundleJS.on('finish', cb)
+    bundleJS.on('finish', function () {
+      if (conf.minify) fs.writeFileSync(OUT,uglify.minify(OUT).code)
+      cb()
+    })
   })
 }
 
