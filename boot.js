@@ -32,7 +32,11 @@ function libDirChange (e,f) {
     if (timeModified !== ctime) {
       nimoy.compile(conf, function () {
         exec('notify-send "NIMOY: LIB COMPILED!"',function (e,s,es) {})
-        process.stdout.write('wrote bundle to '+__dirname+'/'+conf.path_static+'/bundle.js'+'\n')
+
+        process.stdout.write('wrote bundle to '
+                             + __dirname+'/'+conf.path_static
+                             + '/bundle.js'
+                             +'\n')
       })
       timeModified = ctime
     }
