@@ -2,12 +2,28 @@ var _ = require('underscore')
 var cuid = require('cuid')
 var through = require('through2')
 var hash = require('crypto-browserify/create-hash')
+var muxDemux = require('mux-demux')
 
 module.exports = function Bricoleur (db, library) { 
-  // provide a way to hook into api stream -- through the mL mux?
   var canvas = {} 
   var ID = cuid()
+  var syncCache = {}
 
+  function sync (d) { 
+    var id = d.key.split('$:')[1]
+    if (id && syncCache[id] !== ID) // not sure about this!
+      canvas[id].$.push(d.value)
+  }
+
+  // persistence for objects
+  var dbMuxDemux = muxDemux(function (s) {
+    var key = '$:'+s.meta
+    syncCache[s.meta] = ID 
+    s.on('data', function put (val) { db.put(key,JSON.stringify(val)) })
+  })
+  var moduleDataMuxDemux = muxDemux()
+  moduleDataMuxDemux.pipe(dbMuxDemux)
+  
   var s = through.obj(function interface (d, enc, next) {
     var self = this
 
@@ -23,11 +39,10 @@ module.exports = function Bricoleur (db, library) {
         if (!res.key) res.key = res.parcel
         delete res.parcel
       }
-      var response = (!e) ? res : e // arrg!
+      var response = (!e) ? res : e
       self.push(response)
+      next()
     }
-
-    next()
   })
 
   canvas[ID] = s 
@@ -36,9 +51,8 @@ module.exports = function Bricoleur (db, library) {
   function parseCommand (d, cb) { 
     var res = {}
 
-    // what about spaces!
-    
-    var str = (typeof d === 'string') ? d : (!d.cmd) ? null : d.cmd // .cmd sucks!
+    var str = (typeof d === 'string') ? d : (!d.cmd) ? null : d.cmd 
+
     if (!str) { cb(new Error('bad input!'), null); return false }
 
     var parcel = (str.split(':').length > 1) ? str.split(':')[1] : null
@@ -47,9 +61,11 @@ module.exports = function Bricoleur (db, library) {
       str = str.split(':')[0] // scrub parcel from actor
     }
 
-    var action = str[0].match(/\+|\-|\?|\!/)[0]
-    var type = str.slice(1).match(/\@|\#|\$|\||\*/)
+    var action = str[0].match(/\+|\-|\?|\!/)
+    if (!action) return false
+    action = action[0]
 
+    var type = str.slice(1).match(/\@|\#|\$|\||\*/)
     type = (type !== null) ? type[0] : isCuid(str.slice(1)) ? '^' : '*'
 
     var actor = (type === '^') ? str.slice(1) : (type === '|') 
@@ -67,6 +83,7 @@ module.exports = function Bricoleur (db, library) {
     if (action==='?') { // improve w. multiple results / deeper search
       if (type==='*') {
         var pkg = _.find(library, function (v,k) {if(k.match(actor)) return v})
+
         var uid = _.find(canvas, function (v,k) {
           if (k.match(actor)) return k.split(':')[1]
         })
@@ -74,7 +91,8 @@ module.exports = function Bricoleur (db, library) {
         cb(null, res)
         return false
       }
-      if (type==='#' || type==='$') {
+
+      if (type==='#'||type==='$') {
         db.createKeyStream()
           .on('data', function (k) {
             res.value = k
@@ -116,8 +134,14 @@ module.exports = function Bricoleur (db, library) {
           var val = canvas[actor]
           var rs = canvas[val[0]]
           var ws = canvas[val[1]]
-          rs.destroy()
-          rs.unpipe(ws)
+          if (rs.$) {
+            rs.$.destroy()
+            rs.s.destroy()
+            rs.s.unpipe(ws)
+          } else {
+            rs.destroy()
+            rs.unpipe(ws)
+          }
           delete canvas[actor] 
         } else delete canvas[actor]
         res.value = actor
@@ -146,18 +170,20 @@ module.exports = function Bricoleur (db, library) {
         return false
       }
 
-      if (action==='+') {
-        canvas[actor[0]].pipe(canvas[actor[1]])
+      var readable =(!canvas[actor[0]].$)?canvas[actor[0]]:canvas[actor[0]].s
+      var writable =(!canvas[actor[1]].$)?canvas[actor[1]]:canvas[actor[1]].s
+
+      if (action==='+') { // check canvas value for data binding
+        readable.pipe(writable)
         canvas[id] = actor
         res.value = id
         cb(null, res)
         return false
       }
 
-      if (action==='-') {
-        // make sure stream has a destroy method!
-        canvas[actor[0]].destroy()
-        canvas[actor[0]].unpipe(canvas[actor[1]])
+      if (action==='-') { // make sure stream has a destroy method!
+        readable.destroy()
+        readable.unpipe(writable)
         res.value = pipeToCuid(actor)
         delete canvas[res.value]
         cb(null, res)
@@ -165,50 +191,53 @@ module.exports = function Bricoleur (db, library) {
     } 
 
     if (type==='*') {
+
       if (action==='-') {
         actor = (!isCuid(actor)) ? nameToCuid(actor) : actor
         res.value = actor
         if (!canvas[actor]) cb(new Error('no module: '+actor), null)
-        else  { canvas[actor].destroy() ;delete canvas[actor]; cb(null, res) }
+        if (canvas[actor].s && canvas[actor].s.pipe) { // destroy pipe!
+          canvas[actor].s.destroy()
+          canvas[actor].$.destroy()
+          delete canvas[pipeFromPiped(actor)]
+        } else if (canvas[actor].pipe) {
+          canvas[actor].destroy()
+          delete canvas[pipeFromPiped(actor)]
+        }
+        delete canvas[actor]
+        cb(null, res)
         return false
       }
+
       if (action==='+') {
-        var modCuid = actor.split(':')[1] //!!!!
-        var id = (!modCuid) ? cuid() : modCuid
-        var modName = (!modCuid) ? actor : actor.split(':')[0]
+        var id = (!parcel) ? cuid() : parcel
         var opts = {id: id}
         res.value = id
 
-        var pkg = _.find(library, function(v,k){if(k.match(modName))return v})
+        var pkg = _.find(library,function(v,k){if(k.match(actor))return v})
         if (!pkg) {
-          if (modName === 'bricoleur') { 
-            canvas[id] = s; 
+          if (actor === 'bricoleur') { 
+            canvas[id] = s 
             cb(null,res)
             return false 
           } else {
-            cb(new Error('module: '+modName+' not found!'), null) 
+            cb(new Error('module: ' + actor + ' not found!'), null) 
             return false  
           }
         } 
-        if (!modCuid) {
-          canvas[id] = require(pkg.name)(opts) // find a way to hook in opts
-          canvas[id].name = modName
-          cb(null, res)
-          return false
-        }
-        if (modCuid && pkg.data) {
-          db.get('$:'+modCuid, function (e, mData) {
-            if (e) { opts.data = pkg.data }
-            if (!e) opts.data = mData
-            canvas[id] = require(pkg.name)(opts)
-            canvas[id].name = modName
-            cb(null, res)
-          })
-        } else if (modCuid && !pkg.data) {
-          canvas[id] = require(pkg.name)(opts)
-          canvas[id].name = modName
-          cb(null, res)
-        }
+
+        var mod = require(pkg.name)
+
+        canvas[id] = (mod.length > 1) 
+          ? mod(opts, moduleDataMuxDemux.createStream(id))
+          : mod(opts)
+
+        canvas[id].name = actor
+
+        if (canvas[id].$)  // do data binding
+          db.get('$:'+id, function (e,val){if(!e)canvas[id].$.push(val)})
+
+        cb(null, res)
       }
     }
 
@@ -256,11 +285,7 @@ module.exports = function Bricoleur (db, library) {
     }
   }
 
-  function sync (d) { // use this!
-
-  }
-
-  db.liveStream({reverse : true})
+  db.liveStream({old:false})
     .on('data', sync)
 
   function isCuid (id) {
@@ -270,13 +295,22 @@ module.exports = function Bricoleur (db, library) {
   }
 
   function nameToCuid (name) {
-     return _.find(_.keys(canvas),function(k){
-            return canvas[k].name === name
+     return _.find(_.keys(canvas), function(k){
+       return canvas[k].name === name
      })
   }
+
+  function pipeFromPiped (piped) {
+    var res
+    var p = _.pairs(canvas)
+    res = _.find(p,function (arr) {return _.contains(arr[1],piped)})
+    if (res) return res[0]
+    else return false
+  }
+
   function pipeToCuid (pipe) {
-    return _.find(_.keys(canvas),function(k){
-          return canvas[k].toString() === pipe.toString()
+    return _.find(_.keys(canvas), function (k) {
+      return canvas[k].toString() === pipe.toString()
    })
   }
 
