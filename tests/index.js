@@ -24,8 +24,11 @@ phantom.on('error', console.error)
 function runBrowserTests () {
   var bunLoc = 'http://'+conf.host+':'+conf.port+'/bundle.js'
   var bun = require('request')(bunLoc)
+  bun.on('error', function (e) {
+    console.error(e)
+  })
   bun.on('data', function (d) {
-    bundle += d
+    bundle += d.toString()
   })
   bun.on('end', function startPhantom () {
     phantom.write(bundle)
@@ -53,6 +56,7 @@ var nimoy = spawn('node',['../boot','./tests/config.json'])
 
 nimoy.stdout.on('data', function (d) {
   var chunk = d.toString().slice(0,5)
+  console.log(d.toString())
   if (chunk === 'wrote') runBrowserTests()
 })
 
