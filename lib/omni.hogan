@@ -1,12 +1,8 @@
+<!-- OMNI -->
 <div class='omni' style="top:{{y}}px;left:{{x}}px;">
   <h1>/\\/ / /\\/\\ // \\/</h1>
+
   <input class='oz'></input>
-  <ul>
-  {{#hup}}
-  <li style="color:{{#sel}}blue{{/sel}}>
-      <div class='hup' style='background-image:url({{icon}});'>{{name}}</div>
-      <span class='label'>{{txt}}</span>
-    </li>
-  {{/hup}}
-  </ul>
+
+  <canvas id="cvs"></canvas>
 </div>
