@@ -46,8 +46,8 @@ phantom.on('data', function (d) {
     nimoy.kill()
   }, 60000)
   if (d.slice(0,4) ==='# ok' || d.slice(0,6) === '# fail') {
-    phantom.stop()
     nimoy.kill()
+    phantom.stop()
     if (safetyKill) clearTimeout(safetyKill)
   }
 })
