@@ -176,12 +176,13 @@ function startServer (conf, db, cb) {
     soc.pipe(multiLevel.server(db, {
     auth: auth,
     access: function access (user, db, method, args) {
-      if (!user) return false
-      var name = user.key.slice(1)
-      if (!_.values(sessions[name],function (v) {return v===user.value})) {
+      if (!user || !_.values(sessions[user.key.slice(1)],
+                             function(v){return v===user.value})) {
+
         if (/^put|^del|^batch|write/i.test(method)) { // no write access!
           throw new Error('read-only access');
         }
+
       }
     }})).pipe(soc)
     soc.on('error', console.error)
