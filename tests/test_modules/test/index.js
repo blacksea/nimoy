@@ -34,7 +34,7 @@ cmds[cuid()] = ['+gooshter|pumicle', function (t,d)
 
 cmds[cuid()] = ['+#cvs', function (t,d)
   {t.ok(d.value, 'save canvas : +#canvas')}]
-
+ 
 cmds[cuid()] = ['!#cvs', function (t,d)
   {t.ok(d.value, 'load canvas : !#canvas')}]
 
@@ -47,31 +47,24 @@ cmds[cuid()] = ['-pumicle', function (t,d)
 cmds[cuid()] = ['-@edit', function (t,d) 
   {t.ok(d.value, 'logout : -@edit')}]
 
+
 module.exports = function BrowserTest (opts) {
   var done = false
 
   var updates = new emitter()
 
-  var s = through.obj(function (c,e,n) {
-    updates.emit('res', c)
-    n()
-  })
-
-
-  // queue // handle commands correctly!
-
+  var s = through.obj(function (c,e,n) {updates.emit('res', c);n()})
 
   test('bricoleur api', function (t) { 
-    function cmdsLength () { var i=0; for (c in cmds) i++; return i }
-    t.plan(cmdsLength()) 
+    t.plan(commandQueue.length) 
 
-    for (c in cmds) { s.push(cmds[c][0]+':'+c) }
+    for (c in cmds) s.push(cmds[c][0]+':'+c)
 
     updates.on('res', function (d) { // handle errors!
       if (d instanceof Error) {} // fail!
       if (!d.key || done) { return null }
       var k = (d.key.split(':').length > 1) ? d.key.split(':')[1] : d.key
-      if (cmds[k]) cmds[k][1](t,d)
+      cmds[k][1](t,d)
     })
 
     t.on('end', function () { done = true; test('gui interactions', domTest) })
@@ -95,7 +88,7 @@ function domTest (t) {
   function domNodeAdd (e) {
     var target = e.target
 
-    if (target.className==='login') { // simulate bad logins as well!
+    if (target.className==='login') { 
 
       t.ok(target, 'login drawn')
       target.querySelector('#login').value = 'nimoy'
