@@ -15,9 +15,7 @@ sim.contextMenu = function (el) {
 } ///////////////////////////////////////////////////////////////////////////
 
 
-// BRICOLEUR API tests
-
-
+// BRICOLEUR API tests //////////////////////////////////////////////////////
 var cmds = {}
 
 cmds[cuid()] = ['+@edit nimoy', function(t,d)
@@ -46,36 +44,10 @@ cmds[cuid()] = ['-pumicle', function (t,d)
 
 cmds[cuid()] = ['-@edit', function (t,d) 
   {t.ok(d.value, 'logout : -@edit')}]
+/////////////////////////////////////////////////////////////////////////////
 
 
-module.exports = function BrowserTest (opts) {
-  var done = false
-
-  var updates = new emitter()
-
-  var s = through.obj(function (c,e,n) {updates.emit('res', c);n()})
-
-  test('bricoleur api', function (t) { 
-    t.plan(_.keys(cmds).length) 
-
-    for (c in cmds) s.push(cmds[c][0]+':'+c)
-
-    updates.on('res', function (d) { // handle errors!
-      if (d instanceof Error) {} // fail!
-      if (!d.key || done) { return null }
-      var k = (d.key.split(':').length > 1) ? d.key.split(':')[1] : d.key
-      cmds[k][1](t,d)
-    })
-
-    t.on('end', function () { done = true; test('gui interactions', domTest) })
-  })
-
-  return s
-}
-
-
-// UI / DOM tests!
-
+// DOM / UI tests ///////////////////////////////////////////////////////////
 function domTest (t) {
   t.plan(3)
 
@@ -115,4 +87,23 @@ function domTest (t) {
   window.location.hash = '@' 
   document.body.addEventListener("DOMNodeInserted", domNodeAdd, false)
   document.body.addEventListener("DOMNodeRemoved", domNodeRm, false)
+} ////////////////////////////////////////////////////////////////////////////
+
+
+module.exports = function BrowserTest (opts) {
+  var done = false
+  var updates = new emitter()
+  var s = through.obj(function (c,e,n) {updates.emit('res', c);n()})
+  test('bricoleur api', function (t) { 
+    t.plan(_.keys(cmds).length) 
+    for (c in cmds) s.push(cmds[c][0]+':'+c)
+    updates.on('res', function (d) { // handle errors!
+      if (d instanceof Error) {} // fail!
+      if (!d.key || done) { return null }
+      var k = (d.key.split(':').length > 1) ? d.key.split(':')[1] : d.key
+      cmds[k][1](t,d)
+    })
+    t.on('end', function () { done = true; test('gui interactions', domTest) })
+  })
+  return s
 }
