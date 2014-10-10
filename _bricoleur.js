@@ -11,18 +11,18 @@ module.exports = function Bricoleur (db, library) {
 
   function sync (d) { 
     var id = d.key.split('$:')[1]
-
     if (id && canvas[id] && syncCache[id] !== ID) // not sure about this!
       canvas[id].$.push(d.value) // should be write!
   }
 
   // persistence for objects
-  var dbMuxDemux = muxDemux(function (s) {
-    var key = '$:'+s.meta
-    syncCache[s.meta] = ID 
-    s.on('data', function put (val) { db.put(key,JSON.stringify(val)) })
+  var dbMuxDemux = muxDemux(function (st) {
+    var key = '$:'+st.meta
+    syncCache[st.meta] = ID 
+    st.on('data', function put (val) { db.put(key,JSON.stringify(val)) })
   })
   var moduleDataMuxDemux = muxDemux()
+
   moduleDataMuxDemux.pipe(dbMuxDemux)
   
   var s = through.obj(function interface (d, enc, next) {
@@ -34,7 +34,6 @@ module.exports = function Bricoleur (db, library) {
       })
     } else parseCommand(d, handleResult)
 
-    next() 
 
     function handleResult (e, res) { 
       if (res && res.parcel) {
@@ -44,6 +43,7 @@ module.exports = function Bricoleur (db, library) {
       }
       var response = (!e) ? res : e
       self.push(response)
+      next() 
     }
   })
 
@@ -104,15 +104,15 @@ module.exports = function Bricoleur (db, library) {
       db.get(type+':'+actor, function (e, jsn) {
         if (e) { cb(e, null); return false }
         var cvs = JSON.parse(jsn)
-        res.value = type+':'+actor
+        res.value = type+':'+actor // this glob res is probby
         var last = cvs[cvs.length-1]
         _.each(_.keys(canvas).reverse(), function (k) {
-          if (canvas[k].name!=='bricoleur') 
-            parseCommand('-'+k, function (e,res) {
+          if (canvas[k].name!=='bricoleur')  // bricoluer stream still gets destroyed :(
+            parseCommand('-'+k, function (e,r) {
               if (e) cb(e, null)
             })
         })
-        _.each(cvs, function (cmd) {
+        _.each(cvs, function (cmd) { 
           parseCommand(cmd, function (e, r) {
             if (e) {cb(e, null)}
             if (!e && cmd===last) {
@@ -132,6 +132,7 @@ module.exports = function Bricoleur (db, library) {
           var val = canvas[actor]
           var rs = canvas[val[0]]
           var ws = canvas[val[1]]
+          if (rs.name==='bricoleur'||ws.name==='bricoleur') {cb(null,res);return false}
           if (rs.$) {
             rs.$.destroy()
             rs.s.destroy()
@@ -173,7 +174,7 @@ module.exports = function Bricoleur (db, library) {
 
       if (action==='+') { // check canvas value for data binding
         readable.pipe(writable)
-        canvas[id] = actor
+        canvas[id] = actor 
         res.value = id
         cb(null, res)
         return false
@@ -235,11 +236,12 @@ module.exports = function Bricoleur (db, library) {
         if (pkg.mask) canvas[id].mask = pkg.mask // mask from canvas save!
 
         if (canvas[id].$) { // do data binding
-          var $ = canvas[id].$
-          db.get('$:'+id, function (e,val){if (!e) $.push(val)})
-        }
-
-        cb(null, res)
+          // var $ = canvas[id].$
+          db.get('$:'+id, function (e,val){ 
+            if (!e) { canvas[id].$.push(val) }
+            cb(null, res)  // silent fail if !val
+          })
+        } else cb(null, res)
       }
     }
 
@@ -250,14 +252,14 @@ module.exports = function Bricoleur (db, library) {
         var val
         if (type==='#') {
           cmds = []
-          _.each(_.keys(canvas), function (k) {
+          _.each(_.keys(canvas), function (k) { // note: masking is still weirdo
             var v = canvas[k]
             var mask
             var t = (v instanceof Array) ? '|' : '*'
             if (t==='|') v.forEach(function(m){if(canvas[m].mask)mask=true})
-            if (t==='*') if (v.mask) mask = true
+            if (t==='*') if (v.mask || v.name === 'bricoleur') mask = true
             var c = (t==='|') ? v.join('|')+':'+k : t+canvas[k].name+':'+k
-            if (!mask) cmds.push('+'+c)
+            if (!mask) {cmds.push('+'+c)}
           })
           val = JSON.stringify(cmds)
         } else val = d.value
