@@ -41,6 +41,10 @@ function loadCanvas (loc) {
   }
 }
 
+bricoleur.on('data', function (d) {
+  if (d instanceof Error) console.error(d.message)
+})
+
 window.addEventListener('hashchange', loadCanvas, false)
 
 window.addEventListener('popstate', function (e) {
