@@ -236,9 +236,9 @@ module.exports = function Bricoleur (db, library) {
         if (pkg.mask) canvas[id].mask = pkg.mask // mask from canvas save!
 
         if (canvas[id].$) { // do data binding
-          // var $ = canvas[id].$
+          var $ = canvas[id].$
           db.get('$:'+id, function (e,val){ 
-            if (!e) { canvas[id].$.push(val) }
+            if (!e) { $.push(val) }
             cb(null, res)  // silent fail if !val
           })
         } else cb(null, res)
