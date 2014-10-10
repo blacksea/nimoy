@@ -56,7 +56,7 @@ module.exports = function BrowserTest (opts) {
   var s = through.obj(function (c,e,n) {updates.emit('res', c);n()})
 
   test('bricoleur api', function (t) { 
-    t.plan(commandQueue.length) 
+    t.plan(_.keys(cmds).length) 
 
     for (c in cmds) s.push(cmds[c][0]+':'+c)
 
