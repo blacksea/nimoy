@@ -11,8 +11,9 @@ module.exports = function Bricoleur (db, library) {
 
   function sync (d) { 
     var id = d.key.split('$:')[1]
-    if (id && syncCache[id] !== ID) // not sure about this!
-      canvas[id].$.push(d.value)
+
+    if (id && canvas[id] && syncCache[id] !== ID) // not sure about this!
+      canvas[id].$.push(d.value) // should be write!
   }
 
   // persistence for objects
@@ -33,6 +34,8 @@ module.exports = function Bricoleur (db, library) {
       })
     } else parseCommand(d, handleResult)
 
+    next() 
+
     function handleResult (e, res) { 
       if (res && res.parcel) {
         if (res.key) res.key += ':'+res.parcel
@@ -41,7 +44,6 @@ module.exports = function Bricoleur (db, library) {
       }
       var response = (!e) ? res : e
       self.push(response)
-      next()
     }
   })
 
@@ -56,10 +58,7 @@ module.exports = function Bricoleur (db, library) {
     if (!str) { cb(new Error('bad input!'), null); return false }
 
     var parcel = (str.split(':').length > 1) ? str.split(':')[1] : null
-    if (parcel) {
-      res.parcel = parcel
-      str = str.split(':')[0] // scrub parcel from actor
-    }
+    if (parcel) { res.parcel = parcel ; str = str.split(':')[0] }
 
     var action = str[0].match(/\+|\-|\?|\!/)
     if (!action) return false
@@ -129,8 +128,7 @@ module.exports = function Bricoleur (db, library) {
         if (!canvas[actor]) {
           cb(new Error(actor + ' not found'),null)
           return false
-        }
-        if (canvas[actor] instanceof Array) {
+        } else if (canvas[actor] instanceof Array) {
           var val = canvas[actor]
           var rs = canvas[val[0]]
           var ws = canvas[val[1]]
@@ -234,8 +232,12 @@ module.exports = function Bricoleur (db, library) {
 
         canvas[id].name = actor
 
-        if (canvas[id].$)  // do data binding
-          db.get('$:'+id, function (e,val){if(!e)canvas[id].$.push(val)})
+        if (pkg.mask) canvas[id].mask = pkg.mask // mask from canvas save!
+
+        if (canvas[id].$) { // do data binding
+          var $ = canvas[id].$
+          db.get('$:'+id, function (e,val){if (!e) $.push(val)})
+        }
 
         cb(null, res)
       }
@@ -250,9 +252,12 @@ module.exports = function Bricoleur (db, library) {
           cmds = []
           _.each(_.keys(canvas), function (k) {
             var v = canvas[k]
+            var mask
             var t = (v instanceof Array) ? '|' : '*'
+            if (t==='|') v.forEach(function(m){if(canvas[m].mask)mask=true})
+            if (t==='*') if (v.mask) mask = true
             var c = (t==='|') ? v.join('|')+':'+k : t+canvas[k].name+':'+k
-            cmds.push('+'+c)
+            if (!mask) cmds.push('+'+c)
           })
           val = JSON.stringify(cmds)
         } else val = d.value
@@ -270,8 +275,8 @@ module.exports = function Bricoleur (db, library) {
     if (type==='@') { 
       if (action==='-') {
         res.value = actor
-        db.deauth(function (e) {cb(null, res)})
-        return false
+        db.deauth(function (e) {if (e) cb(e,null); else cb(null, res)})
+        return null
       }
       var auth = actor.split(' ')
       if (!auth) {cb(new Error('bad login'),null); return false}
