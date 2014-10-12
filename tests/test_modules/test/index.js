@@ -37,21 +37,21 @@ cmds[cuid()] = ['!#cvs', function (t,d)
   {t.ok(d.value, 'load canvas : !#canvas')}]
 
 cmds[cuid()] = ['-gooshter', function (t,d)
-  {t.ok(d.value, 'rm module : -gooshter')}]
+  {t.ok(d.value, 'rm gooshter : -gooshter')}]
 
 cmds[cuid()] = ['-pumicle', function (t,d) 
   {t.ok(d.value, 'rm pumicle : -pumicle')}]
 
 cmds[cuid()] = ['-@edit', function (t,d) 
   {t.ok(d.value, 'logout : -@edit')}]
-/////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
 
 
-// DOM / UI tests ///////////////////////////////////////////////////////////
+// DOM / UI tests ////////////////////////////////////////////////////////////
 function domTest (t) {
   t.plan(3)
 
-  var pumicle = ['?','p','u','m','i','c','l','e']
+  var CVS = ['!','#','c','v','s','\r']
 
   function typeIt (arr, el) {
     arr.forEach(function (k) { el.value += k; sim.keyup(el,k) })
@@ -69,13 +69,17 @@ function domTest (t) {
     } else if (target.children[0].className==='omni') {
 
       var input = target.querySelector('input')
+
       process.nextTick(function () { 
-        // typeIt(pumicle, input)
-        // sim.submit(input)
-        // sim.contextMenu(document.body.querySelectorAll('.mool')[2])
+        // use this to place a module
+        typeIt(CVS, input) 
+        sim.submit(input)
       })
+
       t.ok(target, 'omni drawn')
 
+    } else if (target.children[0].className==='pumicle') {
+      // sim.contextMenu(document.body.querySelector('.txt'))
     }
   }
 
@@ -93,17 +97,23 @@ function domTest (t) {
 module.exports = function BrowserTest (opts) {
   var done = false
   var updates = new emitter()
-  var s = through.obj(function (c,e,n) {updates.emit('res', c);n()})
+
+  var s = through.obj( function (c,e,n) { updates.emit('res', c); n() })
+
   test('bricoleur api', function (t) { 
     t.plan(_.keys(cmds).length) 
+
     for (c in cmds) s.push(cmds[c][0]+':'+c)
+
     updates.on('res', function (d) { // handle errors!
       if (d instanceof Error) {} // fail!
       if (!d.key || done) { return null }
       var k = (d.key.split(':').length > 1) ? d.key.split(':')[1] : d.key
       cmds[k][1](t,d)
     })
+
     t.on('end', function () { done = true; test('gui interactions', domTest) })
   })
+
   return s
 }

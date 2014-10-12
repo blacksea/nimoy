@@ -34,16 +34,16 @@ function loadCanvas (loc) {
     : loc.hash.slice(1)
 
   if (canvas[0] === '@') {
-    omni = require('./lib/omni.js')({id:cuid()})
+    omni = require('./lib/omni.js')({id:cuid(),lib:lib})
     omni.pipe(bricoleur).pipe(omni)
   } else {
     bricoleur.write('!#'+canvas)
   }
 }
 
-bricoleur.on('data', function (d) {
-  if (d instanceof Error) console.error(d.message)
-})
+// bricoleur.on('data', function (d) {
+//   if (d instanceof Error) console.error(d.message)
+// })
 
 window.addEventListener('hashchange', loadCanvas, false)
 
