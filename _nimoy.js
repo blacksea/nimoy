@@ -116,6 +116,8 @@ function compile (conf, cb) {
         : null
 
       if (pkg && pkg.nimoy) {
+        if (pkg.template) 
+          pkg.template = fs.readFileSync(folder+'/'+pkg.template,'utf8')
         library[pkg.name] = pkg
         b.require(folder+'/'+pkg.main, {expose: pkg.name})
       }
