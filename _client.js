@@ -34,7 +34,7 @@ function loadCanvas (loc) {
     : loc.hash.slice(1)
 
   if (canvas[0] === '@') {
-    omni = require('./lib/omni.js')({id:cuid(),lib:lib})
+    omni = require('./lib/omni.js')({id:cuid()})
     omni.pipe(bricoleur).pipe(omni)
   } else {
     bricoleur.write('!#'+canvas)
