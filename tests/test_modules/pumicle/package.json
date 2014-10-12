@@ -1,5 +1,7 @@
 {
   "main" : "index.js",
   "name" : "pumicle",
-  "nimoy" : true
+  "nimoy" : true,
+  "template" : "p.hogan",
+  "description" : "hardcase puminator"
 }
