@@ -116,8 +116,6 @@ function compile (conf, cb) {
         : null
 
       if (pkg && pkg.nimoy) {
-        if (pkg.template) 
-          pkg.template = fs.readFileSync(folder+'/'+pkg.template,'utf8')
         library[pkg.name] = pkg
         b.require(folder+'/'+pkg.main, {expose: pkg.name})
       }
@@ -179,12 +177,10 @@ function startServer (conf, db, cb) {
     auth: auth,
     access: function access (user, db, method, args) {
       if (!user || !_.values(sessions[user.key.slice(1)],
-                             function(v){return v===user.value})) {
-
+      function(v){return v===user.value})) {
         if (/^put|^del|^batch|write/i.test(method)) { // no write access!
           throw new Error('read-only access');
         }
-
       }
     }})).pipe(soc)
     soc.on('error', console.error)
