@@ -5,14 +5,19 @@ var hash = require('crypto-browserify/create-hash')
 var muxDemux = require('mux-demux')
 
 module.exports = function Bricoleur (db, library) { 
-  var canvas = {} 
+  // need a good desc. of canvas -- whats in there!
+  
+  // put the canvas in leveldb !?
+
+  var canvas = {} // maybe this should be in leveldb? // allow access!
+
   var ID = cuid()
   var syncCache = {}
 
   function sync (d) { 
     var id = d.key.split('$:')[1]
     if (id && canvas[id] && syncCache[id] !== ID) // not sure about this!
-      canvas[id].$.push(d.value) // should be write!
+      canvas[id].$.push(JSON.parse(d.value)) // should be write!
   }
 
   // persistence for objects
@@ -33,7 +38,6 @@ module.exports = function Bricoleur (db, library) {
         parseCommand(str, handleResult)
       })
     } else parseCommand(d, handleResult)
-
 
     function handleResult (e, res) { 
       if (res && res.parcel) {
@@ -107,7 +111,7 @@ module.exports = function Bricoleur (db, library) {
         res.value = type+':'+actor // this glob res is probby
         var last = cvs[cvs.length-1]
         _.each(_.keys(canvas).reverse(), function (k) {
-          if (canvas[k].name!=='bricoleur')  // bricoluer stream still gets destroyed :(
+          if (canvas[k].name!=='bricoleur')  
             parseCommand('-'+k, function (e,r) {
               if (e) cb(e, null)
             })
@@ -128,11 +132,16 @@ module.exports = function Bricoleur (db, library) {
         if (!canvas[actor]) {
           cb(new Error(actor + ' not found'),null)
           return false
-        } else if (canvas[actor] instanceof Array) {
+        } else if (canvas[actor] instanceof Array) { // sometimes pipes 
           var val = canvas[actor]
           var rs = canvas[val[0]]
           var ws = canvas[val[1]]
-          if (rs.name==='bricoleur'||ws.name==='bricoleur') {cb(null,res);return false}
+          // do not destroy bricoleur streams! -- but do unpipe!
+          if (rs&&rs.name==='bricoleur'||ws&&ws.name==='bricoleur') {
+            // why is rs sometimes undefined!
+            cb(null,res) 
+            return false
+          } 
           if (rs.$) {
             rs.$.destroy()
             rs.s.destroy()
@@ -238,7 +247,7 @@ module.exports = function Bricoleur (db, library) {
         if (canvas[id].$) { // do data binding
           var $ = canvas[id].$
           db.get('$:'+id, function (e,val){ 
-            if (!e) { $.push(val) }
+            if (!e) { $.push(JSON.parse(val)) }
             cb(null, res)  // silent fail if !val
           })
         } else cb(null, res)
@@ -252,7 +261,7 @@ module.exports = function Bricoleur (db, library) {
         var val
         if (type==='#') {
           cmds = []
-          _.each(_.keys(canvas), function (k) { // note: masking is still weirdo
+          _.each(_.keys(canvas), function (k) {// note: masking is still weirdo
             var v = canvas[k]
             var mask
             var t = (v instanceof Array) ? '|' : '*'
