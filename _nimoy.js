@@ -34,7 +34,7 @@ var INDEX = '<!doctype html>' +
   '<html lang="en">' +
   '<meta charset="utf-8">' +
   '<head>' +
-  '<title></title>' +
+  '<title>&#x02135;</title>' +
   '<link rel="stylesheet" href="/style.css">' +
   '</head>' +
   '<body id="canvas">' +
