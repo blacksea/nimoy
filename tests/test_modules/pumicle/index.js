@@ -1,17 +1,19 @@
 var through = require('through2')
+var D = require('../../../lib/dombii.js')
+var PUMICLE = require('fs').readFileSync(__dirname+'/p.hogan','utf8')
 
 module.exports = function pumicle (opts, $) {
-  $.on('data', function (d) {
-  })
+  var pum = new D({template : PUMICLE, parent : document.body, id : opts.id})
+
+  $.on('data', function (d) { pum.draw(d) })
 
   var s = through.obj(function (data, enc, next) {
     next()
   })
 
-  setTimeout(function () {
-    var d = {x:90}
-    $.write(d)
-  },1)
+  pum.draw({txt : 'fzf', src : '/files/ban.png'})
+
+  s.on('close', pum.erase)
 
   return {s:s, $:$}
 }
