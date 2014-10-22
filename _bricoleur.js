@@ -1,34 +1,33 @@
 var _ = require('underscore')
-var cuid = require('cuid')
 var through = require('through2')
 var hash = require('crypto-browserify/create-hash')
 var muxDemux = require('mux-demux')
+var cuid = require('cuid')
 
-module.exports = function Bricoleur (db, library) { 
-  // need a good desc. of canvas -- whats in there!
-  
-  // put the canvas in leveldb !?
+module.exports = function Bricoleur (db, library) {
 
-  var canvas = {} // maybe this should be in leveldb? // allow access!
-
+  var canvas = {} 
   var ID = cuid()
   var syncCache = {}
 
   function sync (d) { 
     var id = d.key.split('$:')[1]
-    if (id && canvas[id] && syncCache[id] !== ID) // not sure about this!
-      canvas[id].$.push(JSON.parse(d.value)) // should be write!
+    if (id && d.value && typeof d.value === 'string') 
+      d.value = JSON.parse(d.value)
+    if (canvas[id] && canvas[id].$) {
+      canvas[id].$.push(d.value)
+    }
   }
 
-  // persistence for objects
-  var dbMuxDemux = muxDemux(function (st) {
+
+  var dbMuxDemux = muxDemux(function (st) { // persistence/data binding/hack //
     var key = '$:'+st.meta
     syncCache[st.meta] = ID 
     st.on('data', function put (val) { db.put(key,JSON.stringify(val)) })
   })
   var moduleDataMuxDemux = muxDemux()
-
   moduleDataMuxDemux.pipe(dbMuxDemux)
+
   
   var s = through.obj(function interface (d, enc, next) {
     var self = this
@@ -51,16 +50,26 @@ module.exports = function Bricoleur (db, library) {
     }
   })
 
+
   canvas[ID] = s 
   canvas[ID].name = 'bricoleur'
 
+
   function parseCommand (d, cb) { 
+    var str
+    var data
     var res = {}
 
-    var str = (typeof d === 'string') ? d : (!d.cmd) ? null : d.cmd 
+    if (typeof d === 'object' && d.key && d.value) {
+      str = d.key 
+      data = d.value
+    } else if (typeof d === 'string') { 
+      str = d
+    } else str = null
 
     if (!str) { cb(new Error('bad input!'), null); return false }
 
+    // parcel functionality needs to be fixed
     var parcel = (str.split(':').length > 1) ? str.split(':')[1] : null
     if (parcel) { res.parcel = parcel ; str = str.split(':')[0] }
 
@@ -83,7 +92,7 @@ module.exports = function Bricoleur (db, library) {
     // ACTIONS: ? get/find, + add, - rm , ! open 
     // TYPES: * modules, @ users, # canvas, $ data, | pipes, ^ cuid
     
-    if (action==='?') { // improve w. multiple results / deeper search
+    if (action==='?') { 
       if (type==='*') {
         var pkg = _.find(library, function (v,k) {if(k.match(actor)) return v})
 
@@ -108,10 +117,10 @@ module.exports = function Bricoleur (db, library) {
       db.get(type+':'+actor, function (e, jsn) {
         if (e) { cb(e, null); return false }
         var cvs = JSON.parse(jsn)
-        res.value = type+':'+actor // this glob res is probby
+        res.value = type+':'+actor
         var last = cvs[cvs.length-1]
         _.each(_.keys(canvas).reverse(), function (k) {
-          if (canvas[k].name!=='bricoleur')  
+          if (canvas[k].name !== 'bricoleur')  
             parseCommand('-'+k, function (e,r) {
               if (e) cb(e, null)
             })
@@ -132,26 +141,35 @@ module.exports = function Bricoleur (db, library) {
         if (!canvas[actor]) {
           cb(new Error(actor + ' not found'),null)
           return false
-        } else if (canvas[actor] instanceof Array) { // sometimes pipes 
+        } else if (canvas[actor] instanceof Array) {
           var val = canvas[actor]
           var rs = canvas[val[0]]
           var ws = canvas[val[1]]
+
           // do not destroy bricoleur streams! -- but do unpipe!
-          if (rs&&rs.name==='bricoleur'||ws&&ws.name==='bricoleur') {
-            // why is rs sometimes undefined!
-            cb(null,res) 
+          if (rs && rs.name==='bricoleur' || ws && ws.name === 'bricoleur') {
+            cb(null, res) 
             return false
           } 
+
           if (rs.$) {
             rs.$.destroy()
             rs.s.destroy()
-            rs.s.unpipe(ws)
+            rs.s.unpipe(ws) // is it piped though !?
           } else {
             rs.destroy()
             rs.unpipe(ws)
           }
+
           delete canvas[actor] 
-        } else delete canvas[actor]
+        } else {
+          if (canvas[actor].$) {
+            canvas[actor].s.destroy()
+            canvas[actor].$.destroy()
+          }
+          delete canvas[actor]
+        }
+
         res.value = actor
         cb(null, res) 
         return false
@@ -218,14 +236,14 @@ module.exports = function Bricoleur (db, library) {
       }
 
       if (action==='+') {
-        var id = (!parcel) ? cuid() : parcel
-        var opts = {id: id}
-        res.value = id
+        var uid = (!parcel) ? cuid() : parcel
+
+        res.value = uid
 
         var pkg = _.find(library,function(v,k){if(k.match(actor))return v})
         if (!pkg) {
           if (actor === 'bricoleur') { 
-            canvas[id] = s 
+            canvas[uid] = s 
             cb(null,res)
             return false 
           } else {
@@ -236,18 +254,19 @@ module.exports = function Bricoleur (db, library) {
 
         var mod = require(pkg.name)
 
-        canvas[id] = (mod.length > 1) 
-          ? mod(opts, moduleDataMuxDemux.createStream(id))
-          : mod(opts)
+        canvas[uid] = (mod.length > 1) 
+          ? mod({id:uid}, moduleDataMuxDemux.createStream(uid))
+          : mod({id:uid})
 
-        canvas[id].name = actor
+        canvas[uid].name = actor
 
-        if (pkg.mask) canvas[id].mask = pkg.mask // mask from canvas save!
+        if (pkg.mask) canvas[uid].mask = pkg.mask // mask from canvas save!
 
-        if (canvas[id].$) { // do data binding
-          var $ = canvas[id].$
-          db.get('$:'+id, function (e,val){ 
-            if (!e) { $.push(JSON.parse(val)) }
+        if (canvas[uid].$) { // do data binding
+          var $ = canvas[uid].$
+          db.get('$:'+uid, function (e,val){ 
+            if (typeof val === 'string') val = JSON.parse(val)
+            if (!e) { $.push(val) }
             cb(null, res)  // silent fail if !val
           })
         } else cb(null, res)
@@ -261,7 +280,7 @@ module.exports = function Bricoleur (db, library) {
         var val
         if (type==='#') {
           cmds = []
-          _.each(_.keys(canvas), function (k) {// note: masking is still weirdo
+          _.each(_.keys(canvas), function (k) {
             var v = canvas[k]
             var mask
             var t = (v instanceof Array) ? '|' : '*'
@@ -271,7 +290,7 @@ module.exports = function Bricoleur (db, library) {
             if (!mask) {cmds.push('+'+c)}
           })
           val = JSON.stringify(cmds)
-        } else val = d.value
+        } else val = JSON.stringify(data)
         db.put(key, val, function (e) {
           if (e) cb (e, null)
           if (!e) cb(null, res)
@@ -285,7 +304,8 @@ module.exports = function Bricoleur (db, library) {
 
     if (type==='@') { 
       if (action==='-') {
-        res.value = actor
+        res.value = '-'+actor
+        delete sessionStorage.edit
         db.deauth(function (e) {if (e) cb(e,null); else cb(null, res)})
         return null
       }
