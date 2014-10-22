@@ -1,8 +1,7 @@
 <!-- OMNI -->
-<div class='omni' style="top:{{y}}px;left:{{x}}px;">
-  <h1>/\\/ / /\\/\\ // \\/</h1>
-
-  <input class='oz'></input>
-
-  <canvas id="cvs"></canvas>
+<div class='omni'>
+  <span class='log'>&#x02135;</span>
+  <div class='block'>
+    <input class='oz' placeholder=''></input>
+  </div>
 </div>
