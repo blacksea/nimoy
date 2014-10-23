@@ -3,5 +3,11 @@
   "name" : "pumicle",
   "nimoy" : true,
   "template" : "p.hogan",
-  "description" : "hardcase puminator"
+  "description" : "hardcase puminator",
+  "data" : {
+    "txt" : "sample",
+    "src" : "/files/1x1.png",
+    "w" : 200,
+    "h" : 200
+  }
 }
