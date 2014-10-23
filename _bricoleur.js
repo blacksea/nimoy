@@ -20,7 +20,7 @@ module.exports = function Bricoleur (db, library) {
   }
 
 
-  var dbMuxDemux = muxDemux(function (st) { // persistence/data binding/hack //
+  var dbMuxDemux = muxDemux(function (st) { //persistence/data binding/hack//
     var key = '$:'+st.meta
     syncCache[st.meta] = ID 
     st.on('data', function put (val) { db.put(key,JSON.stringify(val)) })
@@ -28,6 +28,7 @@ module.exports = function Bricoleur (db, library) {
   var moduleDataMuxDemux = muxDemux()
   moduleDataMuxDemux.pipe(dbMuxDemux)
 
+  // parcel can be used for routing but also to hold cuids !?!
   
   var s = through.obj(function interface (d, enc, next) {
     var self = this
@@ -70,8 +71,8 @@ module.exports = function Bricoleur (db, library) {
     if (!str) { cb(new Error('bad input!'), null); return false }
 
     // parcel functionality needs to be fixed
-    var parcel = (str.split(':').length > 1) ? str.split(':')[1] : null
-    if (parcel) { res.parcel = parcel ; str = str.split(':')[0] }
+    var parcel = (str.split('/').length > 1) ? str.split('/')[1] : null
+    if (parcel) { res.parcel = parcel ; str = str.split('/')[0] }
 
     var action = str[0].match(/\+|\-|\?|\!/)
     if (!action) return false
@@ -236,13 +237,14 @@ module.exports = function Bricoleur (db, library) {
       }
 
       if (action==='+') {
-        var uid = (!parcel) ? cuid() : parcel
+        var uid = (actor.split(':').length>1) ? actor.split(':')[1] : cuid()
+        var name = (actor.match(':')) ? actor.split(':')[0] : actor
 
         res.value = uid
 
-        var pkg = _.find(library,function(v,k){if(k.match(actor))return v})
+        var pkg = _.find(library,function(v,k){if(k.match(name))return v})
         if (!pkg) {
-          if (actor === 'bricoleur') { 
+          if (name === 'bricoleur') { 
             canvas[uid] = s 
             cb(null,res)
             return false 
@@ -258,7 +260,7 @@ module.exports = function Bricoleur (db, library) {
           ? mod({id:uid}, moduleDataMuxDemux.createStream(uid))
           : mod({id:uid})
 
-        canvas[uid].name = actor
+        canvas[uid].name = pkg.name
 
         if (pkg.mask) canvas[uid].mask = pkg.mask // mask from canvas save!
 
@@ -267,6 +269,7 @@ module.exports = function Bricoleur (db, library) {
           db.get('$:'+uid, function (e,val){ 
             if (typeof val === 'string') val = JSON.parse(val)
             if (!e) { $.push(val) }
+            if (e && pkg.data) { $.push(pkg.data) } // use sample data
             cb(null, res)  // silent fail if !val
           })
         } else cb(null, res)
