@@ -19,10 +19,9 @@ module.exports = function Bricoleur (db, library) {
     }
   }
 
-
-  var dbMuxDemux = muxDemux(function (st) { //persistence/data binding/hack//
+  var dbMuxDemux = muxDemux(function (st) { // persistence/data binding/hack //
     var key = '$:'+st.meta
-    syncCache[st.meta] = ID 
+    syncCache[st.meta] = ID
     st.on('data', function put (val) { db.put(key,JSON.stringify(val)) })
   })
   var moduleDataMuxDemux = muxDemux()
@@ -148,7 +147,7 @@ module.exports = function Bricoleur (db, library) {
           var ws = canvas[val[1]]
 
           // do not destroy bricoleur streams! -- but do unpipe!
-          if (rs && rs.name==='bricoleur' || ws && ws.name === 'bricoleur') {
+          if (rs && rs.name==='bricoleur' || ws && ws.name==='bricoleur') {
             cb(null, res) 
             return false
           } 
@@ -197,8 +196,8 @@ module.exports = function Bricoleur (db, library) {
         return false
       }
 
-      var readable =(!canvas[actor[0]].$)?canvas[actor[0]]:canvas[actor[0]].s
-      var writable =(!canvas[actor[1]].$)?canvas[actor[1]]:canvas[actor[1]].s
+      var readable = (!canvas[actor[0]].$)?canvas[actor[0]]:canvas[actor[0]].s
+      var writable = (!canvas[actor[1]].$)?canvas[actor[1]]:canvas[actor[1]].s
 
       if (action==='+') { // check canvas value for data binding
         readable.pipe(writable)
@@ -221,7 +220,9 @@ module.exports = function Bricoleur (db, library) {
 
       if (action==='-') {
         actor = (!isCuid(actor)) ? nameToCuid(actor) : actor
+
         res.value = actor
+
         if (!canvas[actor]) cb(new Error('no module: '+actor), null)
         if (canvas[actor].s && canvas[actor].s.pipe) { // destroy pipe!
           canvas[actor].s.destroy()
@@ -334,8 +335,8 @@ module.exports = function Bricoleur (db, library) {
   }
 
   function nameToCuid (name) {
-     return _.find(_.keys(canvas), function(k){
-       return canvas[k].name === name
+     return _.find(_.keys(canvas), function(k) {
+       return canvas[k].name.match(name)
      })
   }
 
