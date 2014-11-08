@@ -34,7 +34,7 @@ var INDEX = '<!doctype html>' +
   '<html lang="en">' +
   '<meta charset="utf-8">' +
   '<head>' +
-  '<title>&#x02135;</title>' +
+  '<title>&#x02135;IMOY</title>' +
   '<link rel="stylesheet" href="/style.css">' +
   '</head>' +
   '<body id="canvas">' +
@@ -83,6 +83,7 @@ function boot (conf, cb) {
 
   db = level(__dirname+'/'+conf.host)
              .on('error', handleErrs)
+
   livestream.install(db)
   multiLevel.writeManifest(db, __dirname+'/static/manifest.json')
 
@@ -91,6 +92,7 @@ function boot (conf, cb) {
   // write index
 
   fs.writeFileSync(__dirname+'/static/index.html', INDEX)
+
 
   startServer(conf, db, function () {
     cb(server.close)

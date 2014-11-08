@@ -1,6 +1,5 @@
 {
-  "name": "lib",
   "scripts": {
-    "test": "browserify -t brfs ../tests/libtest.js | testling --bcmd google-chrome"
+    "test" : "node ../tests/index.js"
   }
 }

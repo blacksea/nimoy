@@ -1,5 +1,5 @@
 <form class='login'> 
-  <span class='desc'>LOGIN</span>
-  <input id='login' type='password'></input>
+  <input id='login' type='password' placeholder=' &#60; type password here'></input>
   {{#err}}<span class='error'>{{msg}}</span>{{/err}}
 </form>
+

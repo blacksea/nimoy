@@ -56,12 +56,10 @@ var nimoy = spawn('node',['../boot','./tests/config.json'])
 
 nimoy.stdout.on('data', function (d) {
   var chunk = d.toString().slice(0,5)
-  console.log(d.toString())
   if (chunk === 'wrote') runBrowserTests()
 })
 
 nimoy.stderr.on('data', function (e) {
-  console.error('FAIL', e.toString())
   nimoy.kill()
   phantom.stop()
 })
@@ -70,5 +68,6 @@ function isCuid (id) {
   var r = (typeof id==='string' && id.length===25 && id[0]==='c') 
     ? true 
     : false
+
   return r
 }

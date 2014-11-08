@@ -6,5 +6,7 @@
   "path_static" : "static",
   "path_modules" : "tests/test_modules/",
   "path_files" : "static/files",
-  "minify" : false
+  "minify" : false,
+  "cache" : false,
+  "watch" : true
 }

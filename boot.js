@@ -23,7 +23,6 @@ function compileCSS (e,f) {
       cssMod = ctime
     }
   }
-
 }
 
 function libDirChange (e,f) {
@@ -31,12 +30,10 @@ function libDirChange (e,f) {
     var ctime = fs.statSync(__dirname+'/lib/'+f).ctime.toString()
     if (timeModified !== ctime) {
       nimoy.compile(conf, function () {
-        exec('notify-send "NIMOY: LIB COMPILED!"',function (e,s,es) {})
-
+        exec('notify-send "NIMOY: LIB COMPILED!"', function (e,s,es) {})
         process.stdout.write('wrote bundle to '
-                             + __dirname+'/'+conf.path_static
-                             + '/bundle.js'
-                             +'\n')
+                             + __dirname + '/' + conf.path_static
+                             + '/bundle.js' + '\n')
       })
       timeModified = ctime
     }
@@ -46,6 +43,8 @@ function libDirChange (e,f) {
 nimoy.boot(conf, function (kill) {
   process.stdout.write('up on port '+conf.port+' & host '+conf.host+'\n')
   nimoy.compile(conf, function () {
-    process.stdout.write('wrote bundle to '+__dirname+'/'+conf.path_static+'/bundle.js'+'\n')
+    process.stdout.write('wrote bundle to '
+                         + __dirname + '/' + conf.path_static
+                         + '/bundle.js' + '\n')
   })
 })

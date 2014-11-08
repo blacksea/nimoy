@@ -1,7 +1,12 @@
-<!-- OMNI -->
 <div class='omni'>
-  <span class='log'>&#x02135;</span>
-  <div class='block'>
-    <input class='oz' placeholder=''></input>
-  </div>
+  <div id='cvs' style='display:{{bones}}'></div>
+  <ul class='tray'>
+    <li class='name'><input class='canvasName' value={{cvs}}></input></li>
+    <li class='pallette'>&#9998;</li>
+    <li class='xray' title = 'x-ray' 
+      {{#bones}} style='color:white; {{/bones}}'>&#10684;</li>
+    <li class='blackbox'><input></input></li>
+    <li class='exit' title='logout'>&times;</li>
+  </ul>
+  <ul class='lib'>{{#lib}}<li draggable="true">{{name}}</li>{{/lib}}</ul>
 </div>

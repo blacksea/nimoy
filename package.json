@@ -15,6 +15,7 @@
     "buffer": "^2.3.2",
     "crypto-browserify": "^2.1.8",
     "cuid": "^1.2.4",
+    "d3": "^3.4.13",
     "engine.io-stream": "^0.4.3",
     "formidable": "^1.0.14",
     "html-patcher": "0.0.2",

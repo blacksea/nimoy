@@ -1,5 +1,4 @@
 <div class='pumicle'>
   <span class='txt'>{{txt}}</span>
-  <!-- set a background gradient! -->
   <img src={{src}} width={{w}} height={{h}}></img>
 </div>

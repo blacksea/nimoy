@@ -3,6 +3,7 @@ var lib = require('./library.json')
 var url = require('url')
 var cuid = require('cuid')
 var bindshim = require('bindshim')
+var om = require('./lib/omni.js')
 var omni
 
 var ws = (!lib.env.soc || lib.env.soc === 'ws') 
@@ -33,17 +34,13 @@ function loadCanvas (loc) {
     ? 'home' 
     : loc.hash.slice(1)
 
-  if (canvas[0] === '@') {
-    omni = require('./lib/omni.js')({id:cuid()})
+  if (canvas[0] === '@' || sessionStorage.edit) {
+    omni = om({id:cuid(),lib:lib})
     omni.pipe(bricoleur).pipe(omni)
-  } else {
-    bricoleur.write('!#'+canvas)
-  }
-}
+  } 
 
-// bricoleur.on('data', function (d) {
-//   if (d instanceof Error) console.error(d.message)
-// })
+  if (canvas[0] !== '@') bricoleur.write('!#'+canvas)
+}
 
 window.addEventListener('hashchange', loadCanvas, false)
 

@@ -1,79 +1,184 @@
 @import "fonts.css"
 
+@media (min-width: 640px)
+  body 
+
+@media (min-width: 1024px)
+  body
+
+*, *:before, *:after
+  -moz-box-sizing border-box
+  -webkit-box-sizing border-box
+  box-sizing border-box
+
+svg // only do this in chrome
+  shape-rendering: crispEdges;
+
+svg text::selection
+  background #f1f1f1!important
+  fill black!important
+
 body
-  background white
   font-size 12px
-  font-family "Akkurat Pro"
+  font-family "Andale Mono"
   margin 0
   padding 0
 
 body.editing
-  margin-top 40px
+  margin-top 56px
 
 input, input:focus
-  float left
-  background #DBB8BF
+  font-family "Andale Mono"!important
   color #080A17!important
-  font-family "Akkurat Mono"!important
-  font-size 11px
-  line-height 12px
   -webkit-font-smoothing subpixel-antialiased
-  letter-spacing 1px
-  padding 2px 4px
+  padding 0
   outline none
-  border none
-  border-radius 3px
+  background transparent!important
+  border 1px solid #080A17
 
-.omni .block input, .login input
-  margin 1px
-  width 186px
-
-.omni, .login
-  background #080A17
-  background rgba(8, 10, 23, 0.87)
-  color #f1f1f1
-  width 100%
-  height 28px
+.omni .tray, .login
+  width 402px
   position fixed
-  left 0
-  top 0 
-  padding 10px 0 0
+  left 10px
+  top 10px
+  margin 0
+  list-style none
+  padding 0
   z-index 999
+  font-family "Andale Mono"
 
-.omni .caret, .login .caret
-  color #40B2AA
-  font-family 'Akkurat Light'
-  font-size 36px
-  padding-right 6px
-  line-height 33px
-  float left
+.login 
+  height 28px
+  line-height 28px
+  box-shadow 0px 2px 13px #C3C2C2
+  background #A6ECD3
+  border-radius 6px
+  width 206px
 
-.omni .log, .login .log
-  color #DBB8BF
-  padding 0 8px 0
-  font-size 22px
-  line-height 22px
-  float left
-
-.omni .block
-  float left
-
-.login .desc
-  float left
-  color #DBB8BF
-  letter-spacing 1px
-  line-height 11px
-  margin 4px 8px 
+.login input
+  border none!important
+  width 186px
+  padding 0 4px
 
 .login .error 
   float left
-  color #FC9E9C
-  background rgba(149, 0, 23, 0.51)
+  clear both
+  color black
+  background #A6ECD3
   text-transform uppercase
   letter-spacing 1px
   border-radius 3px
-  margin 2px 8px
-  padding 0px 2px
+  margin 18px 0px
+
+.omni .tray li
+  padding 0
+  margin 0px 6px 0px 0px!important
+  border-radius 3px
+  float left
+  height 28px
+  line-height 28px
+  box-shadow 0px 2px 13px #C3C2C2
+
+.omni .tray .name
+  background #F9F5C3
+  padding 0px 4px 0px 4px
+
+.omni .tray .name input
+  text-align center
+
+.omni .tray .pallette
+  background #FFEDED
+
+.omni .tray .blackbox
+  background #252733
+  width 180px
+
+.omni .tray .blackbox input
+  width 176px
+  border none
+  padding-left 4px
+  color #f1f1f1!important
+
+.omni .tray .xray
+  color #f1f1f1
+  background rgba(6, 6, 19, 0.81)
+
+.omni .tray .exit, .omni .tray .xray, .omni .tray .pallette
+  text-align center
+  font-size 28px
+  width 28px
+
+.omni .tray .exit
+  background #A6ECD3
+  color #201F1F
+
+.omni .tray .canvasName
+  width 92px
+  border none
+  // margin 5px 0px 0px 6px
+  color #080A17!important
+  border none
+  border-radius 0px
+
+.omni .tray .pallette
+  // line-height 17px
+  // background rgba(255, 255, 255, 0.4)
+  border-radius 3px
+
+.omni .tray .pallette span
+  float left
+  // padding 6px 0px 2px 0px
+  font-size 32px
+  color #080A17!important
+
+.omni .tray .pallette input
+  color #080A17!important
+  // padding-left 2px
+  // padding 5px 5px 0px
+  font-size 13px
+  border none!important
+  width 100px
+
+.omni .save, .omni .open
+  font-size 11px
+  font-weight 600
+  line-height 15px
+  font-family "Andale Mono"
+  background rgba(241, 241, 241, 0.9)
+  border-radius 3px
+  color #080A17!important
+  text-align center
+  border none
+  outline none
+
+.omni .lib
+  display none
+  z-index 9999
+  position fixed
+  left 106px
+  top 42px
+  background #EDEDEE
+  width 128px
+  list-style none
+  margin 0
+  padding 2px 4px
+  border-radius 6px
+
+.omni .lib li
+  border-radius 6px
+  background #EDEDEE
+  font-size 12px
+  line-height 24px
+
+#cvs
+  position fixed
+  top 46px
+  left 10px
+  border-radius 6px
+  background rgba(14, 127, 168, 0.81)
+  background rgba(6, 6, 19, 0.81)
+  display none
+  // background rgba(8, 10, 23, 0.85)
 
 .grifter
   background rgba(8, 10, 23, 0.87)
@@ -90,6 +195,9 @@ input, input:focus
   border-right 2px solid black
   box-shadow 0px 0px 30px #080A17
 
+.pumicle
+  float left
+
 img
   border none
   background -webkit-gradient(
@@ -104,3 +212,46 @@ img
   background -webkit-linear-gradient(bottom, #D69FB0 0%, #CDD4DE 100%)
   background -ms-linear-gradient(bottom, #D69FB0 0%, #CDD4DE 100%)
   background linear-gradient(to bottom, #D69FB0 0%, #CDD4DE 100%)
+
+[title]:before 
+  content attr(title)
+  font-size 14px!important
+  line-height 14px
+  height 14px!important
+  position absolute
+  opacity 0
+  transition all 0.07s ease
+  padding 0px 4px 0px 4px
+  color #333
+  // box-shadow 1px 1px 8px rgba(6, 6, 6, 0.25) 
+  text-transform uppercase
+
+[title]:hover:before
+  opacity 1
+  background #FDF669
+  margin-top -12px
+  color #333
+  margin-left 20px    
+
+[title]:not([tooltip-persistent]):before 
+  pointer-events none
+
+::-webkit-input-placeholder 
+  color black!important
+  opacity 0.6
+
+::-moz-placeholder 
+  color black
+  opacity 0.6
+
+::-moz-placeholder
+  color black
+  opacity 0.6
+
+::-ms-input-placeholder
+  color black
+  opacity 0.6
+
+title 
+  display none
+

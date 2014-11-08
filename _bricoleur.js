@@ -4,11 +4,15 @@ var hash = require('crypto-browserify/create-hash')
 var muxDemux = require('mux-demux')
 var cuid = require('cuid')
 
-module.exports = function Bricoleur (db, library) {
+// push out current canvas state -- only ... what about stream objects
+// brico tracks canvas and emits changes to canvas!
+// be careful with match + regex! do some filtering beforehand!
 
+module.exports = function Bricoleur (db, library) {
   var canvas = {} 
   var ID = cuid()
   var syncCache = {}
+
 
   function sync (d) { 
     var id = d.key.split('$:')[1]
@@ -19,7 +23,7 @@ module.exports = function Bricoleur (db, library) {
     }
   }
 
-  var dbMuxDemux = muxDemux(function (st) { // persistence/data binding/hack //
+  var dbMuxDemux = muxDemux(function (st) {
     var key = '$:'+st.meta
     syncCache[st.meta] = ID
     st.on('data', function put (val) { db.put(key,JSON.stringify(val)) })
@@ -27,8 +31,8 @@ module.exports = function Bricoleur (db, library) {
   var moduleDataMuxDemux = muxDemux()
   moduleDataMuxDemux.pipe(dbMuxDemux)
 
-  // parcel can be used for routing but also to hold cuids !?!
-  
+  // emit a shorthand efficient new canvas state obj when command completes!
+
   var s = through.obj(function interface (d, enc, next) {
     var self = this
 
@@ -50,9 +54,29 @@ module.exports = function Bricoleur (db, library) {
     }
   })
 
-
   canvas[ID] = s 
   canvas[ID].name = 'bricoleur'
+
+
+  function compressCanvas () {
+    var c = {}
+    _.each(canvas, function (v,k) {
+      if (v instanceof Array) {
+        c[k] = v
+      } else if (typeof v === 'object') {
+        if (v.name && v.name !== 'bricoleur') {
+          c[k] = {id : k}
+          if (v.name) c[k].name = v.name
+          if (!v.pipe) {
+            for (prop in v) {
+              if (!v[prop].pipe) c[k][prop] = v[prop]
+            }
+          }
+        }
+      }
+    })
+    return c
+  }
 
 
   function parseCommand (d, cb) { 
@@ -69,7 +93,6 @@ module.exports = function Bricoleur (db, library) {
 
     if (!str) { cb(new Error('bad input!'), null); return false }
 
-    // parcel functionality needs to be fixed
     var parcel = (str.split('/').length > 1) ? str.split('/')[1] : null
     if (parcel) { res.parcel = parcel ; str = str.split('/')[0] }
 
@@ -88,10 +111,12 @@ module.exports = function Bricoleur (db, library) {
       cb(new Error('wrong cmd:'+str), null); return false
     }
 
+
     // SYMBOLS 
     // ACTIONS: ? get/find, + add, - rm , ! open 
     // TYPES: * modules, @ users, # canvas, $ data, | pipes, ^ cuid
     
+
     if (action==='?') { 
       if (type==='*') {
         var pkg = _.find(library, function (v,k) {if(k.match(actor)) return v})
@@ -117,7 +142,10 @@ module.exports = function Bricoleur (db, library) {
       db.get(type+':'+actor, function (e, jsn) {
         if (e) { cb(e, null); return false }
         var cvs = JSON.parse(jsn)
-        res.value = type+':'+actor
+
+        // res.value = type+':'+actor
+        // res.value = compressCanvas()
+        
         var last = cvs[cvs.length-1]
         _.each(_.keys(canvas).reverse(), function (k) {
           if (canvas[k].name !== 'bricoleur')  
@@ -129,6 +157,7 @@ module.exports = function Bricoleur (db, library) {
           parseCommand(cmd, function (e, r) {
             if (e) {cb(e, null)}
             if (!e && cmd===last) {
+              res.value = compressCanvas()
               cb(null, res)
             }
           })
@@ -155,7 +184,7 @@ module.exports = function Bricoleur (db, library) {
           if (rs.$) {
             rs.$.destroy()
             rs.s.destroy()
-            rs.s.unpipe(ws) // is it piped though !?
+            rs.s.unpipe(ws) 
           } else {
             rs.destroy()
             rs.unpipe(ws)
@@ -170,7 +199,7 @@ module.exports = function Bricoleur (db, library) {
           delete canvas[actor]
         }
 
-        res.value = actor
+        res.value = compressCanvas()
         cb(null, res) 
         return false
       }
@@ -202,16 +231,18 @@ module.exports = function Bricoleur (db, library) {
       if (action==='+') { // check canvas value for data binding
         readable.pipe(writable)
         canvas[id] = actor 
-        res.value = id
+        res.value = compressCanvas()
         cb(null, res)
         return false
       }
 
-      if (action==='-') { // make sure stream has a destroy method!
-        readable.destroy()
+      if (action==='-') { // do not destroy streams when unpiping!
         readable.unpipe(writable)
-        res.value = pipeToCuid(actor)
-        delete canvas[res.value]
+
+        var uid = pipeToCuid(actor)
+        
+        delete canvas[uid]
+        res.value = compressCanvas()
         cb(null, res)
       }
     } 
@@ -221,9 +252,11 @@ module.exports = function Bricoleur (db, library) {
       if (action==='-') {
         actor = (!isCuid(actor)) ? nameToCuid(actor) : actor
 
-        res.value = actor
+        if (!canvas[actor]) {
+          cb(new Error('no module: '+actor), null)
+          return false
+        }
 
-        if (!canvas[actor]) cb(new Error('no module: '+actor), null)
         if (canvas[actor].s && canvas[actor].s.pipe) { // destroy pipe!
           canvas[actor].s.destroy()
           canvas[actor].$.destroy()
@@ -233,6 +266,7 @@ module.exports = function Bricoleur (db, library) {
           delete canvas[pipeFromPiped(actor)]
         }
         delete canvas[actor]
+        res.value = compressCanvas()
         cb(null, res)
         return false
       }
@@ -241,7 +275,6 @@ module.exports = function Bricoleur (db, library) {
         var uid = (actor.split(':').length>1) ? actor.split(':')[1] : cuid()
         var name = (actor.match(':')) ? actor.split(':')[0] : actor
 
-        res.value = uid
 
         var pkg = _.find(library,function(v,k){if(k.match(name))return v})
         if (!pkg) {
@@ -254,6 +287,8 @@ module.exports = function Bricoleur (db, library) {
             return false  
           }
         } 
+
+        pkg.id = uid
 
         var mod = require(pkg.name)
 
@@ -271,15 +306,18 @@ module.exports = function Bricoleur (db, library) {
             if (typeof val === 'string') val = JSON.parse(val)
             if (!e) { $.push(val) }
             if (e && pkg.data) { $.push(pkg.data) } // use sample data
+            res.value = compressCanvas()
             cb(null, res)  // silent fail if !val
           })
-        } else cb(null, res)
+        } else {
+          res.value = compressCanvas()
+          cb(null, res)
+        }
       }
     }
 
     if (type==='$' || type==='#') { 
       var key = type+':'+actor
-      res.value = key
       if (action==='+') {
         var val
         if (type==='#') {
@@ -297,11 +335,13 @@ module.exports = function Bricoleur (db, library) {
         } else val = JSON.stringify(data)
         db.put(key, val, function (e) {
           if (e) cb (e, null)
+          res.value = compressCanvas()
           if (!e) cb(null, res)
         })
       }
       if (action==='-') db.del(key, function (e) {
         if (e) cb (e, null)
+        res.value = compressCanvas()
         if (!e) cb(null, res)
       })
     }
@@ -336,7 +376,9 @@ module.exports = function Bricoleur (db, library) {
 
   function nameToCuid (name) {
      return _.find(_.keys(canvas), function(k) {
-       return canvas[k].name.match(name)
+       var uid = canvas[k].name.match(name)
+       if (!uid) return null
+       return uid
      })
   }
 
