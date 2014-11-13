@@ -11,21 +11,22 @@
   -webkit-box-sizing border-box
   box-sizing border-box
 
-svg // only do this in chrome
+svg 
   shape-rendering: crispEdges;
 
 svg text::selection
   background #f1f1f1!important
   fill black!important
 
+a
+  color #080A17
+  text-decoration none
+
 body
   font-size 12px
   font-family "Andale Mono"
   margin 0
   padding 0
-
-body.editing
-  margin-top 56px
 
 input, input:focus
   font-family "Andale Mono"!important
@@ -36,105 +37,89 @@ input, input:focus
   background transparent!important
   border 1px solid #080A17
 
-.omni .tray, .login
-  width 402px
+.omni, .login
+  background rgba(255, 255, 255, 0.93)
+  border  1px solid rgba(8, 10, 23, 0.29) 
+  width 320px
+  min-height 460px
   position fixed
   left 10px
   top 10px
   margin 0
   list-style none
-  padding 0
+  padding 8px 10px 10px 10px
   z-index 999
   font-family "Andale Mono"
+  cursor -webkit-grab
+  cursor grab
 
-.login 
-  height 28px
-  line-height 28px
-  box-shadow 0px 2px 13px #C3C2C2
-  background #A6ECD3
-  border-radius 6px
-  width 206px
-
-.login input
-  border none!important
-  width 186px
-  padding 0 4px
-
-.login .error 
-  float left
-  clear both
-  color black
-  background #A6ECD3
-  text-transform uppercase
-  letter-spacing 1px
-  border-radius 3px
-  margin 18px 0px
+.omni .tray 
+  list-style none
+  margin 0 
+  padding 0
 
 .omni .tray li
-  padding 0
-  margin 0px 6px 0px 0px!important
-  border-radius 3px
+  padding 2px 2px 10px 2px 
+  margin 8
+  margin-right 1px
   float left
-  height 28px
-  line-height 28px
-  box-shadow 0px 2px 13px #C3C2C2
+//  box-shadow 0px 2px 13px #C3C2C2
 
-.omni .tray .name
-  background #F9F5C3
-  padding 0px 4px 0px 4px
+.omni .blackbox
+  position absolute
+  bottom 10px
+  left 10px
 
-.omni .tray .name input
-  text-align center
-
-.omni .tray .pallette
-  background #FFEDED
-
-.omni .tray .blackbox
-  background #252733
-  width 180px
-
-.omni .tray .blackbox input
-  width 176px
-  border none
-  padding-left 4px
-  color #f1f1f1!important
+.omni .blackbox input
+  background transparent
+  border 1px dotted
+  font-size 12px
+  padding-left 2px
+  padding 0 0 2px 2px
+  height 16px
+  width 268px
 
 .omni .tray .xray
-  color #f1f1f1
-  background rgba(6, 6, 19, 0.81)
+  margin-left 4px
+  color #333
+//  background rgba(6, 6, 19, 0.81)
 
-.omni .tray .exit, .omni .tray .xray, .omni .tray .pallette
-  text-align center
-  font-size 28px
-  width 28px
+.omni .tray .xray, .omni .tray .pallette
+  float right
+  line-height 16px
+  font-size 24px
+  border-radius 5px
 
-.omni .tray .exit
-  background #A6ECD3
-  color #201F1F
+.omni .exit
+  position absolute
+  bottom 0px
+  right 12px
+  font-size 30px
+  color #080A17
+
+.omni .tray
+  cursor default
 
 .omni .tray .canvasName
-  width 92px
+  width 234px
   border none
-  // margin 5px 0px 0px 6px
+  border-bottom 2px solid
   color #080A17!important
-  border none
-  border-radius 0px
+  font-size 12px
+  padding-left 2px
+  padding 0 0 2px 2px
+  height 16px
 
 .omni .tray .pallette
-  // line-height 17px
-  // background rgba(255, 255, 255, 0.4)
-  border-radius 3px
+  background #FAFAFA
 
 .omni .tray .pallette span
   float left
-  // padding 6px 0px 2px 0px
   font-size 32px
   color #080A17!important
 
 .omni .tray .pallette input
   color #080A17!important
-  // padding-left 2px
-  // padding 5px 5px 0px
   font-size 13px
   border none!important
   width 100px
@@ -152,33 +137,138 @@ input, input:focus
   outline none
 
 .omni .lib
-  display none
-  z-index 9999
-  position fixed
-  left 106px
-  top 42px
-  background #EDEDEE
-  width 128px
+  cursor default
+  background #FAFAFA
   list-style none
-  margin 0
-  padding 2px 4px
+  margin-top 24px
+  padding 14px
   border-radius 6px
+  height 390px
 
 .omni .lib li
-  border-radius 6px
-  background #EDEDEE
-  font-size 12px
+  background white
+  margin 2px 0 0 2px
+  border 1px dotted black
+  padding 0px 6px 0px 6px
+  list-style none
   line-height 24px
+  height 24px
+  font-size 12px
+  float left
+
+.omni .lib span
+  text-transform uppercase
+  font-weight 600
+
+.login 
+  min-height 12px
+  padding 4px
+
+.login input
+  font-size 12px
+  width 310px
+  border 1px dotted
+  padding 0 4px
+
+.login .error 
+  color rgb(231, 2, 45)
+  background rgba(255, 144, 168, 0.62)
+  line-height 16px
+  text-transform uppercase
+  letter-spacing 1px
+  padding 0 4px 0 4px
+  margin 4px 0 0 0
+  position absolute
+  right 5px
+  top 1px
+
+.header
+  float left 
+  clear both
+  height 80px
+  width 100%
+
+.header ul
+  position relative
+  padding 0
+  margin 0
+  margin-left -275px
+  margin-top 50px
+  left 50%
+  width 550px
+  list-style none
+
+.header ul li
+  padding 0
+  margin 0
+  margin-right 10px
+  height 30px
+  float left
+
+.project
+  float left
+  clear both
+
+.project .full
+  float left
+
+.project .desc
+  float left
+
+.project ul
+  float left
+  clear both
+  list-style none
+  margin 10px 0 0 0
+  padding 0
+
+.project ul li
+  margin-right 10px
+  float left
+
+.category
+  position relative
+  margin-left -400px
+  left 50%
+  width 800px
+
+.category ul
+  list-style none
+  margin 0
+  padding 0
+
+.category ul li
+  padding 0
+  margin 0
+
+.category h1
+  font-size 14px
+  text-transform uppercase
+  margin 0
+  color #555
+
+.article 
+  position relative
+  width 800px
+  left 50%
+  margin-left -400px
+
+.article .txt
+  width 400px
+  margin-right 10px
+
+.article img
+  float right
 
 #cvs
   position fixed
+  z-index 9999
   top 46px
   left 10px
   border-radius 6px
-  background rgba(14, 127, 168, 0.81)
-  background rgba(6, 6, 19, 0.81)
+  background rgba(6, 6, 19, 0.9)
+  box-shadow 0px 2px 13px #C3C2C2
   display none
-  // background rgba(8, 10, 23, 0.85)
 
 .grifter
   background rgba(8, 10, 23, 0.87)
@@ -212,46 +302,3 @@ img
   background -webkit-linear-gradient(bottom, #D69FB0 0%, #CDD4DE 100%)
   background -ms-linear-gradient(bottom, #D69FB0 0%, #CDD4DE 100%)
   background linear-gradient(to bottom, #D69FB0 0%, #CDD4DE 100%)
-
-[title]:before 
-  content attr(title)
-  font-size 14px!important
-  line-height 14px
-  height 14px!important
-  position absolute
-  opacity 0
-  transition all 0.07s ease
-  padding 0px 4px 0px 4px
-  color #333
-  // box-shadow 1px 1px 8px rgba(6, 6, 6, 0.25) 
-  text-transform uppercase
-
-[title]:hover:before
-  opacity 1
-  background #FDF669
-  margin-top -12px
-  color #333
-  margin-left 20px    
-
-[title]:not([tooltip-persistent]):before 
-  pointer-events none
-
-::-webkit-input-placeholder 
-  color black!important
-  opacity 0.6
-
-::-moz-placeholder 
-  color black
-  opacity 0.6
-
-::-moz-placeholder
-  color black
-  opacity 0.6
-
-::-ms-input-placeholder
-  color black
-  opacity 0.6
-
-title 
-  display none
-
