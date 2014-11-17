@@ -1,3 +1,4 @@
+var _ = require('underscore')
 var manifest = require('./static/manifest.json')
 var lib = require('./library.json')
 var url = require('url')
@@ -18,7 +19,7 @@ ws.pipe(db.createRpcStream()).pipe(ws)
 var bricoleur = require('./_bricoleur')(db,lib)
                   .on('error', Errs)
 
-var omni = require('./lib/omni.js')({id:cuid(),lib:lib})
+var omni = require('./lib/omni.js')({id:cuid(),lib:_.clone(lib)})
 
 omni.pipe(bricoleur).pipe(omni)
 
