@@ -4,6 +4,7 @@ var hash = require('crypto-browserify/create-hash')
 var muxDemux = require('mux-demux')
 var cuid = require('cuid')
 
+
 // push out current canvas state -- only ... what about stream objects
 // brico tracks canvas and emits changes to canvas!
 // be careful with match + regex! do some filtering beforehand!
@@ -111,7 +112,6 @@ module.exports = function Bricoleur (db, library) {
       cb(new Error('wrong cmd:'+str), null); return false
     }
 
-
     // SYMBOLS 
     // ACTIONS: ? get/find, + add, - rm , ! open 
     // TYPES: * modules, @ users, # canvas, $ data, | pipes, ^ cuid
@@ -144,7 +144,7 @@ module.exports = function Bricoleur (db, library) {
         var cvs = JSON.parse(jsn)
 
         // res.value = type+':'+actor
-        // res.value = compressCanvas()
+         res.value = compressCanvas()
         
         var last = cvs[cvs.length-1]
         _.each(_.keys(canvas).reverse(), function (k) {
@@ -153,6 +153,7 @@ module.exports = function Bricoleur (db, library) {
               if (e) cb(e, null)
             })
         })
+        if (cvs.length===0) { cb(null, res); return false }
         _.each(cvs, function (cmd) { 
           parseCommand(cmd, function (e, r) {
             if (e) {cb(e, null)}
