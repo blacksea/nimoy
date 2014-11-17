@@ -30,24 +30,21 @@ body
 
 input, input:focus
   font-family "Andale Mono"!important
-  color #080A17!important
   -webkit-font-smoothing subpixel-antialiased
-  padding 0
   outline none
+  padding 0
   background transparent!important
-  border 1px solid #080A17
+  color #080A17!important
 
 .omni, .login
-  background rgba(255, 255, 255, 0.93)
-  border  1px solid rgba(8, 10, 23, 0.29) 
+  background #f9f9f9
   width 320px
-  min-height 460px
   position fixed
   left 10px
   top 10px
   margin 0
+  border-radius 5px
   list-style none
-  padding 8px 10px 10px 10px
   z-index 999
   font-family "Andale Mono"
   cursor -webkit-grab
@@ -59,59 +56,56 @@ input, input:focus
   padding 0
 
 .omni .tray li
-  padding 2px 2px 10px 2px 
-  margin 8
+  padding 2px
   margin-right 1px
+  line-height 12px
   float left
-//  box-shadow 0px 2px 13px #C3C2C2
 
 .omni .blackbox
   position absolute
-  bottom 10px
-  left 10px
+  bottom 0px
+  right 22px
+  padding 0 0 4px 4px
 
 .omni .blackbox input
-  background transparent
-  border 1px dotted
+  border none
   font-size 12px
-  padding-left 2px
-  padding 0 0 2px 2px
-  height 16px
-  width 268px
-
-.omni .tray .xray
-  margin-left 4px
-  color #333
-//  background rgba(6, 6, 19, 0.81)
+  padding 0
+  line-height 12px
+  width 198px
 
 .omni .tray .xray, .omni .tray .pallette
   float right
-  line-height 16px
-  font-size 24px
-  border-radius 5px
+  line-height 18px
 
 .omni .exit
   position absolute
   bottom 0px
-  right 12px
-  font-size 30px
-  color #080A17
+  right 0px
+  font-size 24px
+
+.cap
+  font-size 21px
+  line-height 18px
+  border-radius 5px
+  border-left 2px solid white
+  border-top 2px solid white
+  border-right 1px solid #DDD
+  border-bottom 1px solid #DDD
+  box-shadow 0px 0px 4px rgba(216, 216, 216, 0.64) inset
+  padding 2px
 
 .omni .tray
   cursor default
 
 .omni .tray .canvasName
-  width 234px
+  width 170px
   border none
-  border-bottom 2px solid
   color #080A17!important
   font-size 12px
-  padding-left 2px
-  padding 0 0 2px 2px
-  height 16px
-
-.omni .tray .pallette
-  background #FAFAFA
+  margin 0
+  padding 0 2px
+  line-height 16px
 
 .omni .tray .pallette span
   float left
@@ -140,35 +134,32 @@ input, input:focus
   cursor default
   background #FAFAFA
   list-style none
-  margin-top 24px
-  padding 14px
+  padding 0
+  margin 36px
   border-radius 6px
-  height 390px
 
 .omni .lib li
-  background white
   margin 2px 0 0 2px
   border 1px dotted black
   padding 0px 6px 0px 6px
   list-style none
-  line-height 24px
-  height 24px
+  line-height 12px
   font-size 12px
   float left
 
 .omni .lib span
   text-transform uppercase
-  font-weight 600
 
 .login 
   min-height 12px
   padding 4px
+  cursor default
 
 .login input
   font-size 12px
-  width 310px
-  border 1px dotted
+  width 308px
   padding 0 4px
+  margin 2px
 
 .login .error 
   color rgb(231, 2, 45)
@@ -179,8 +170,8 @@ input, input:focus
   padding 0 4px 0 4px
   margin 4px 0 0 0
   position absolute
-  right 5px
-  top 1px
+  right 7px
+  top 6px
 
 .header
   float left 
