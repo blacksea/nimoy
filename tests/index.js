@@ -10,7 +10,7 @@ var prettyTap = require('tap-spec')()
 
 var conf = require('./config.json')
 var db = level('../'+conf.host)
-var safetyKill // kill if test hangs in browser
+var safetyKill
 
 var bundle = ''
 
@@ -24,16 +24,11 @@ phantom.on('error', console.error)
 function runBrowserTests () {
   var bunLoc = 'http://'+conf.host+':'+conf.port+'/bundle.js'
   var bun = require('request')(bunLoc)
-  bun.on('error', function (e) {
-    console.error(e)
-  })
-  bun.on('data', function (d) {
-    bundle += d.toString()
-  })
+  bun.on('error', function (e) { console.error(e) })
+  bun.on('data', function (d) { bundle += d.toString() })
   bun.on('end', function startPhantom () {
     phantom.write(bundle)
-    phantom.write(";window.addEventListener('load',"
-      + "function(){window.location.hash='tst'},false);")
+    phantom.write(";window.onload=function(){window.location.hash='tst'};")
     phantom.end()
   })
 }
