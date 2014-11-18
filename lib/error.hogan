@@ -1,0 +1,3 @@
+<div class='error' style='top:{{y}}px;left:{{x}}px;'>
+  <span>{{msg}}</span>
+</div>
