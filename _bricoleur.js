@@ -1,9 +1,8 @@
 var _ = require('underscore')
 var through = require('through2')
-var hash = require('crypto-browserify/create-hash')
 var muxDemux = require('mux-demux')
 var cuid = require('cuid')
-
+var createHash = require('crypto-browserify/create-hash')
 
 // push out current canvas state -- only ... what about stream objects
 // brico tracks canvas and emits changes to canvas!
@@ -13,7 +12,6 @@ module.exports = function Bricoleur (db, library) {
   var canvas = {} 
   var ID = cuid()
   var syncCache = {}
-
 
   function sync (d) { 
     var id = d.key.split('$:')[1]
@@ -57,7 +55,6 @@ module.exports = function Bricoleur (db, library) {
 
   canvas[ID] = s 
   canvas[ID].name = 'bricoleur'
-
 
   function compressCanvas () {
     var c = {}
@@ -398,7 +395,7 @@ module.exports = function Bricoleur (db, library) {
   }
 
   function getAuthToken (pass) {
-    return hash('sha256').update(pass).digest('hex')
+    return createHash('sha256').update(pass).digest('hex')
   }
 
   return s
