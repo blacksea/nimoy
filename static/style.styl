@@ -37,8 +37,8 @@ input, input:focus
   color #080A17!important
 
 .omni, .login
-  background rgba(249, 249, 249, 0.83)
-  // background #f9f9f9
+  // background rgba(249, 249, 249, 0.83)
+  background rgba(8, 10, 23, 0.94)
   width 320px
   position fixed
   left 10px
@@ -54,6 +54,9 @@ input, input:focus
   list-style none
   margin 0 
   padding 0
+
+.omni a
+  color rgba(255, 255, 255, 0.6)
 
 .omni .tray li
   padding 2px
@@ -91,13 +94,11 @@ input, input:focus
   width 26px
   border-radius 7px
   line-height 16px
-  border-left 1px solid rgba(255, 255, 255, 0.7)
-  border-top 1px solid rgba(255, 255, 255, 0.7)
-  border-right 1px solid rgba(0, 0, 0, 0.4)
-  border-top 1px solid rgba(0, 0, 0, 0.1)
-  border-left 1px solid rgba(0, 0, 0, 0.1)
-  border-bottom 1px solid rgba(0, 0, 0, 0.4)
-  box-shadow -1px -2px 6px rgba(94, 86, 86, 0.18) inset
+  border-top 1px solid rgba(255, 255, 255, 0.26)
+  border-left 1px solid rgba(255, 255, 255, 0.15)
+  border-right 1px #000
+  border-bottom 1px #000
+  box-shadow -1px -2px 6px rgba(245, 238, 238, 0.2) inset
 
 .omni .tray
   cursor default
@@ -109,6 +110,7 @@ input, input:focus
   width 200px
   border none
   color #080A17!important
+  color rgba(255, 255, 255, 0.79)!important
   font-size 12px
   margin 0
   padding 0 6px
@@ -116,10 +118,8 @@ input, input:focus
   background rgba(177, 177, 177, 0.19)!important
   border-radius 7px
 
-.omni .tray .pallette span
-  float left
-  font-size 32px
-  color #080A17!important
+.omni .tray .pallette a
+  padding-bottom 2px
 
 .omni .tray .pallette input
   color #080A17!important
@@ -149,14 +149,15 @@ input, input:focus
 
 .omni .lib li
   margin 2px 0 0 2px
-  border 1px dotted black
+  border 1px dotted rgba(255, 255, 255, 0.79)
+  background rgba(8, 10, 23, 0.94)
+  color rgba(255, 255, 255, 0.79)
   padding 0px 6px 0px 6px
   list-style none
   line-height 12px
   font-size 12px
   float right
   clear both
-
 
 .omni .lib span
   text-transform uppercase
@@ -171,22 +172,23 @@ input, input:focus
   width 296px
   padding 0 4px
   background rgba(177, 177, 177, 0.19)!important
+  color rgba(255, 255, 255, 0.8)!important
   border-radius 6px
   outline none
   border none
   margin 8px
 
-.login .error 
-  color rgb(231, 2, 45)
-  background rgba(255, 144, 168, 0.62)
-  line-height 16px
-  text-transform uppercase
-  letter-spacing 1px
+.error 
+  color black
+  background rgba(255, 243, 10, 0.65)
+  line-height 18px
   padding 0 4px 0 4px
   margin 4px 0 0 0
+  box-shadow 1px 2px 6px rgba(0, 0, 0, 0.3)
+  border-radius 5px
+  font-size 14px
   position absolute
-  right 7px
-  top 6px
+  z-index 999
 
 .header
   float left 
