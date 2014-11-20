@@ -1,0 +1,41 @@
+{
+  "main" : "index.js",
+  "name" : "header",
+  "nimoy" : true,
+  "type" : "⊶",
+  "template" : "head.hogan",
+  "description" : "main banner and navigation menu",
+  "data" : {
+    "bg" : "/files/1x1.png",
+    "menu" : [{
+      "link": "/",
+      "img": "/files/1x1.png",
+      "w" : 100,
+      "h" : 20
+    },
+    {
+      "link": "/",
+      "img": "/files/1x1.png",
+      "w" : 100,
+      "h" : 20
+    },
+    {
+      "link": "/",
+      "img": "/files/1x1.png",
+      "w" : 100,
+      "h" : 20
+    },
+    {
+      "link": "/",
+      "img": "/files/1x1.png",
+      "w" : 100,
+      "h" : 20
+    },
+    {
+      "link": "/",
+      "img": "/files/1x1.png",
+      "w" : 100,
+      "h" : 20
+    }]
+  }
+}

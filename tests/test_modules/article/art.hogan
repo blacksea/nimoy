@@ -1,0 +1,4 @@
+<div class='article'>
+  <div class='txt'>{{txt}}</div>
+  <img src={{src}} width={{w}} height={{h}}></img>
+</div>
