@@ -1,4 +1,5 @@
-
-<textarea class='grifter' 
-  style="top:{{y}}px;left:{{x}}px;width:{{w}}px;height:{{h}}px;">{{body}}</textarea>
-
+<form class='grifter' style='top:{{y}}px;left:{{x}}px;'>
+  <ul>
+    {{#props}}<li><span>{{key}}</span><textarea>{{value}}</textarea></li>{{/props}}
+  </ul>
+</form>

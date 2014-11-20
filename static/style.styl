@@ -67,8 +67,8 @@ input, input:focus
   position absolute
   bottom 0px
   right 28px
-  padding 0 0 4px 4px
-  border-radius 7px
+  padding 0 0 3px 2px
+  border-radius 5px
   background rgba(177, 177, 177, 0.19)!important
 
 .omni .blackbox input
@@ -105,22 +105,24 @@ input, input:focus
 
 .omni .tray .name
   padding 0
+  margin 0 0 0 1px
 
 .omni .tray .canvasName
   width 200px
   border none
-  color #080A17!important
+  // color #080A17!important
   color rgba(255, 255, 255, 0.79)!important
   font-size 14px
   margin 0
   padding 0 6px
   line-height 16px
   background rgba(177, 177, 177, 0.19)!important
-  border-radius 7px
+  border-radius 5px
 
 .omni .tray .pallette a
   padding-bottom 2px
   margin-right 2px
+  color rgba(222, 111, 162, 0.65)
 
 .omni .save, .omni .open
   font-size 11px
@@ -281,8 +283,8 @@ input, input:focus
   display none
 
 .grifter
-  background rgba(8, 10, 23, 0.87)
-  color #f1f1f1
+  background rgba(8, 10, 23, 0.94)
+  border-radius 9px
   font-size 14px
   position absolute
   min-height 33px
@@ -294,6 +296,33 @@ input, input:focus
   border-bottom 2px solid black
   border-right 2px solid black
   box-shadow 0px 0px 30px #080A17
+
+.grifter ul 
+  cursor default
+  margin 0
+  padding 0
+
+.grifter ul li
+  list-style none
+  margin 2px 0 1px 0
+  pading 0
+
+.grifter ul li span
+  position relative
+  color rgba(134, 255, 204, 0.65)
+  float left
+  width 40px
+
+.grifter ul li textarea
+  floar left
+  color rgba(255, 255, 255, 0.79)!important
+  background rgba(177, 177, 177, 0.19)!important
+  padding 0 6px 0 6px
+  outline none
+  border none
+  height 16px
+  line-height 16px
+  border-radius 6px
 
 .pumicle
   float left
