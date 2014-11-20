@@ -37,7 +37,6 @@ input, input:focus
   color #080A17!important
 
 .omni, .login
-  // background rgba(249, 249, 249, 0.83)
   background rgba(8, 10, 23, 0.94)
   width 320px
   position fixed
@@ -60,7 +59,7 @@ input, input:focus
 
 .omni .tray li
   padding 2px
-  margin-right 1px
+  margin-right 2px
   line-height 12px
   float left
 
@@ -74,10 +73,11 @@ input, input:focus
 
 .omni .blackbox input
   border none
-  font-size 12px
   padding 0
   line-height 12px
+  color rgba(255, 255, 255, 0.75)!important
   width 198px
+  font-size 14px
 
 .omni .tray .xray, .omni .tray .pallette
   float right
@@ -111,7 +111,7 @@ input, input:focus
   border none
   color #080A17!important
   color rgba(255, 255, 255, 0.79)!important
-  font-size 12px
+  font-size 14px
   margin 0
   padding 0 6px
   line-height 16px
@@ -120,12 +120,7 @@ input, input:focus
 
 .omni .tray .pallette a
   padding-bottom 2px
-
-.omni .tray .pallette input
-  color #080A17!important
-  font-size 13px
-  border none!important
-  width 100px
+  margin-right 2px
 
 .omni .save, .omni .open
   font-size 11px
@@ -149,34 +144,41 @@ input, input:focus
 
 .omni .lib li
   margin 2px 0 0 2px
-  border 1px dotted rgba(255, 255, 255, 0.79)
   background rgba(8, 10, 23, 0.94)
   color rgba(255, 255, 255, 0.79)
-  padding 0px 6px 0px 6px
+  padding 0px 3px 2px 3px
   list-style none
   line-height 12px
-  font-size 12px
+  font-size 14px
   float right
   clear both
 
-.omni .lib span
-  text-transform uppercase
+.omni .lib li b
+  color rgba(134, 255, 204, 0.65)
+  padding 0 8px 0 0
+  font-size 16px
+  font-weight lighter
 
 .login 
   min-height 12px
-  padding 4px
+  padding 10px
+  width 300px
   cursor default
 
 .login input
   font-size 12px
-  width 296px
+  width 230px
   padding 0 4px
-  background rgba(177, 177, 177, 0.19)!important
+  background rgba(177, 177, 177, 0.2)!important
   color rgba(255, 255, 255, 0.8)!important
   border-radius 6px
   outline none
   border none
-  margin 8px
+  margin 0 0 0 6px
+
+.login span
+  color rgba(255, 255, 255, 0.8)!important
+  float left
 
 .error 
   color black

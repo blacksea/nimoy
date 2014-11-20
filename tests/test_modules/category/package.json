@@ -1,0 +1,38 @@
+{
+  "main" : "index.js",
+  "name" : "category",
+  "nimoy" : true,
+  "type" : "ψ",
+  "template" : "cat.hogan",
+  "description" : "row of category thumbs",
+  "data" : {
+    "title" : "category name",
+    "projects" : [
+      {
+        "src" : "/files/1x1.png",
+        "w" : 150,
+        "h" : 150
+      },
+      {
+        "src" : "/files/1x1.png",
+        "w" : 150,
+        "h" : 150
+      },
+      {
+        "src" : "/files/1x1.png",
+        "w" : 150,
+        "h" : 150
+      },
+      {
+        "src" : "/files/1x1.png",
+        "w" : 150,
+        "h" : 150
+      },
+      {
+        "src" : "/files/1x1.png",
+        "w" : 150 ,
+        "h" : 150
+      }
+    ]
+  }
+}
