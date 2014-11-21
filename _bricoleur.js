@@ -254,7 +254,6 @@ module.exports = function Bricoleur (db, library) {
           cb(new Error('no module: '+actor), null)
           return false
         }
-
         if (canvas[actor].s && canvas[actor].s.pipe) { // destroy pipe!
           canvas[actor].s.destroy()
           canvas[actor].$.destroy()
@@ -290,27 +289,23 @@ module.exports = function Bricoleur (db, library) {
 
         var mod = require(pkg.name)
 
-        canvas[uid] = (mod.length > 1) 
-          ? mod({id:uid}, moduleDataMuxDemux.createStream(uid))
-          : mod({id:uid})
+        canvas[uid] = mod(moduleDataMuxDemux.createStream(uid))
 
         canvas[uid].name = pkg.name
 
         if (pkg.mask) canvas[uid].mask = pkg.mask // mask from canvas save!
 
-        if (canvas[uid].$) { // do data binding
-          var $ = canvas[uid].$
-          db.get('$:'+uid, function (e,val){ 
-            if (typeof val === 'string') val = JSON.parse(val)
-            if (!e) { $.push(val) }
-            if (e && pkg.data) { $.push(pkg.data) } // use sample data
-            res.value = compressCanvas()
-            cb(null, res)  // silent fail if !val
-          })
-        } else {
+        var $ = canvas[uid].$
+
+        $.push(pkg)
+
+        db.get('$:'+uid, function (e,val){ 
+          if (typeof val === 'string') val = JSON.parse(val)
+          if (!e) { $.push(val) }
+          if (e && pkg.data) { $.push(pkg.data) } // use sample data
           res.value = compressCanvas()
-          cb(null, res)
-        }
+          cb(null, res)  // silent fail if !val
+        })
       }
     }
 

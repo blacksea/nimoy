@@ -1,25 +1,17 @@
 var through = require('through2')
 var D = require('../../../lib/dombii.js')
-var PROJECT = require('fs').readFileSync(__dirname+'/proj.hogan','utf8')
 
-module.exports = function project (opts, $) {
+module.exports = function ($) { // a shell that wraps input data into vis and binds events
 
-  var proj = new D({
-    template : PROJECT, 
-    parent : document.body, 
-    id : opts.id,
-    events : [
-      ['.thumbs li a', 'click', function (e) {
-        e.preventDefault()
-        console.log(e)
-      }]
-    ]
+  var t // template
+  var s = through.obj()
+
+  $.on('data', function (d) { 
+    if (d.nimoy) t = new D(d)
+    else t.draw(d) 
   })
 
-  $.on('data', function (d) { proj.draw(d) })
-
-  var s = through.obj(function (data, enc, next) { next() })
-  s.on('close', proj.erase)
+  s.on('close', function () {t.erase()})
 
   return {s:s, $:$}
 }
