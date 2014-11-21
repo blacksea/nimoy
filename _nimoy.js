@@ -111,13 +111,18 @@ function compile (conf, cb) {
   // also compile the core lib
   asyncMap(folders, function compileModule (dir, next) {
     var folder = __dirname +'/'+conf.path_modules+dir
+
     if (!fs.statSync(folder).isDirectory()) {next();return false}
+
     if (dir[0]!=='.') {
       var pkg = (fs.existsSync(folder))
         ? JSON.parse(fs.readFileSync(folder+'/package.json',{encoding:'utf8'}))
         : null
 
       if (pkg && pkg.nimoy) {
+        if (pkg.template)
+          pkg.template=fs.readFileSync(folder+'/'+pkg.template,{encoding:'utf8'})
+
         library[pkg.name] = pkg
         b.require(folder+'/'+pkg.main, {expose: pkg.name})
       }
