@@ -171,11 +171,13 @@ module.exports = function Bricoleur (db, library) {
           return '+'+v.name
         })
         db.put('_:'+actor, macro, function (e) {
-          cb(null,res)
+          if (!e) cb(null,res)
+          if (e) cb(e,null)
         })
       } else if (action==='-') {
-        db.put('_:'+actor, macro, function (e) {
-          cb(null,res)
+        db.del('_:'+actor,function (e) {
+          if (!e) cb(null,res)
+          if (e) cb(e,null)
         })
       }
     }
@@ -298,10 +300,12 @@ module.exports = function Bricoleur (db, library) {
             return false 
           } else {
             // try to load group!
-
-            cb(new Error('module: ' + actor + ' not found!'), null) 
-            return false  
+            db.get('_:'+actor, function (e,d) {
+              if (!e) parseCommand(d, cb) // uhm!
+              if (e) cb(new Error('module: ' + actor + ' not found!'), null) 
+            })
           }
+          return false  
         } 
 
         pkg.id = uid
