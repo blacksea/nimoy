@@ -14,6 +14,7 @@ module.exports = function Bricoleur (db, library) {
   var syncCache = {}
 
   function sync (d) { 
+    if (d.key === 'library') library = JSON.parse(d)
     var id = d.key.split('$:')[1]
     if (id && d.value && typeof d.value === 'string') 
       d.value = JSON.parse(d.value)
@@ -98,7 +99,7 @@ module.exports = function Bricoleur (db, library) {
     if (!action) return false
     action = action[0]
 
-    var type = str.slice(1).match(/\@|\#|\$|\||\*/)
+    var type = str.slice(1).match(/\@|\#|\$|\||\_|\*/)
     type = (type !== null) ? type[0] : isCuid(str.slice(1)) ? '^' : '*'
 
     var actor = (type === '^') ? str.slice(1) : (type === '|') 
@@ -161,6 +162,22 @@ module.exports = function Bricoleur (db, library) {
           })
         })
       })
+    }
+
+    if (type==='_') {
+      if (action==='+') {
+        var cvs = compressCanvas()
+        var macro = _.map(_.values(cvs), function (v) {
+          return '+'+v.name
+        })
+        db.put('_:'+actor, macro, function (e) {
+          cb(null,res)
+        })
+      } else if (action==='-') {
+        db.put('_:'+actor, macro, function (e) {
+          cb(null,res)
+        })
+      }
     }
 
     if (type==='^') {
@@ -280,6 +297,8 @@ module.exports = function Bricoleur (db, library) {
             cb(null,res)
             return false 
           } else {
+            // try to load group!
+
             cb(new Error('module: ' + actor + ' not found!'), null) 
             return false  
           }
