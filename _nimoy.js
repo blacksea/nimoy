@@ -131,6 +131,7 @@ function compile (conf, cb) {
   }, function end () {
     library.env = {port: conf.port, host: conf.host}  
     fs.writeFileSync(__dirname+'/library.json', JSON.stringify(library))
+    db.put('library',JSON.stringify(library))
     var bundleJS = fs.createWriteStream(OUT)
     b.transform('brfs')
     b.bundle().pipe(bundleJS)
