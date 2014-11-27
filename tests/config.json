@@ -1,8 +1,11 @@
 {
+  "environment" : {
+    "favicon" : "/files/favicon.png",
+    "port" : 9999,
+    "host" : "nimoy.dev",
+    "ssl" : false
+  },
   "pass" : "nimoy",
-  "port" : 9999,
-  "host" : "nimoy.dev",
-  "ssl" : false,
   "path_static" : "static",
   "path_modules" : "tests/test_modules/",
   "path_files" : "static/files",
