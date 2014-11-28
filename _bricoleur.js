@@ -5,11 +5,12 @@ var muxDemux = require('mux-demux')
 var createHash = require('crypto-browserify/create-hash')
 var async = require('async')
 
-// push out current canvas state -- only ... what about stream objects
-// brico tracks canvas and emits changes to canvas!
-// be careful with match + regex! do some filtering beforehand!
 
+// brico tracks canvas and emits changes to canvas!
+// push out current canvas state -- only ... what about stream objects
+// be careful with match + regex! do some filtering beforehand!
 // all commands that modify the canvas happen in that canvas context
+
 
 module.exports = function Bricoleur (db, library) {
   var canvas = {} 
@@ -66,7 +67,6 @@ module.exports = function Bricoleur (db, library) {
 
 
   function compressCanvas () { 
-
     // open + record
     // should create a generic & unique set
     
@@ -87,8 +87,6 @@ module.exports = function Bricoleur (db, library) {
       }
     })
 
-    console.log(c)
-
     return c
   }
 
@@ -96,7 +94,7 @@ module.exports = function Bricoleur (db, library) {
   function parseCommand (d, cb) { 
     var str
     var data
-    var res = {}
+    var res = {cmd : d}
 
     if (typeof d === 'object' && d.key && d.value) {
       str = d.key 
@@ -110,7 +108,7 @@ module.exports = function Bricoleur (db, library) {
     var parcel = (str.split('/').length > 1) ? str.split('/')[1] : null
     if (parcel) { res.parcel = parcel ; str = str.split('/')[0] }
 
-    var action = str[0].match(/\+|\-|\?|\!/)
+    var action = str[0].match(/\+|\-|\?|\!|\&/)
     if (!action) return false
     action = action[0]
 
@@ -131,7 +129,7 @@ module.exports = function Bricoleur (db, library) {
     // TYPES: * modules, @ users, # canvas, $ data, | pipes, ^ cuid
     
 
-    if (action==='?') { // grab all keys stream!
+    if (action==='?') { // SEARCH / GET FROM MULTILEVEL
 
       if (type==='*') {
         var pkg = _.find(library, function (v,k) {
@@ -150,11 +148,25 @@ module.exports = function Bricoleur (db, library) {
       if (type==='#'||type==='$') {
         db.get(type+':'+actor, function (e, v) {
           if (e) {
-            db.createKeyStream()
-              .on('data', function (k) {
-                res.value = k
-                if (k.match(actor)) cb(null, res)
-              })
+            res.value = e
+            cb(null,res)
+
+            // if (e) {
+            //   var rs = db.createKeyStream()
+            //   rs.on('data', function (k) {
+            //     console.log(actor)
+            //     if (k.match(actor)) {
+            //       res.value = k
+            //       cb(null, res)
+            //     }
+            //   })
+            //   rs.on('end', function () {
+            //     if (!res.value) { // really not great :(
+            //       res.value = new Error(actor+' not found!')
+            //       cb(null, res)
+            //     }
+            //   })
+            //
           } else {
             res.value = v
             cb(null, res)
@@ -164,15 +176,36 @@ module.exports = function Bricoleur (db, library) {
     }
 
 
-    if (action==='!'&&type==='^') { 
+    if (action==='&') { // CLONE MODULE / CANVAS
+        var newActor = actor.split(' ')[1]
+        actor = actor.split(' ')[0]
+        console.log(actor, newActor)
+      if (type==='#') {
+        db.get('#:' + actor, function (e, d) {
+          if (e) cb(e, null)
+          else db.put('#:' + newActor,d,function (e) {
+            if (e) cb(e, null)
+            cb(null, res)
+          })
+        })
+      } else if (type==='*') {
+
+      } else if (type==='^') {
+
+      } else {
+
+      }
+    }
+
+
+    if (action==='!'&&type==='^') { // CLEAR !module
       var cvs = _.keys(canvas)
-      var top = cvs.slice(_.indexOf(cvs,actor)) // cut down to actor
+      var top = cvs.slice(_.indexOf(cvs,actor))
       var nTop = []
       var y = window.pageYOffset
       var x = window.pageXOffset
 
       function add (cid, n) {
-        console.log('+'+cid)
         parseCommand('+'+cid, function (e,r) { 
           if (e) { cb(e,null); return false }
           n()
@@ -180,7 +213,6 @@ module.exports = function Bricoleur (db, library) {
       }
 
       function rm (cid, n) {
-        console.log('-'+cid)
         nTop.push(canvas[cid].name+':'+cid)
         parseCommand('-'+cid, function (e,r) {
           if (e) { cb(e,null); return false }
@@ -200,7 +232,7 @@ module.exports = function Bricoleur (db, library) {
     }
 
 
-    if (action==='!'&&type==='#') {
+    if (action==='!'&&type==='#') { // LOAD CANVAS !#canvas
       db.get(type+':'+actor, function (e, jsn) {
         if (e) { cb(e, null); return false }
         var cvs = JSON.parse(jsn)
@@ -228,7 +260,7 @@ module.exports = function Bricoleur (db, library) {
     }
 
 
-    if (type==='_') { 
+    if (type==='_') {  // SAVE GROUP +_group
       if (action==='+') {
         var cvs = compressCanvas()
 
@@ -250,7 +282,7 @@ module.exports = function Bricoleur (db, library) {
     }
 
 
-    if (type==='^') {
+    if (type==='^') { // ADD/RM/PIPE MODULE USING CUID +cuid|cuid
       if (action==='-') {
         if (!canvas[actor]) {
           cb(new Error(actor + ' not found'),null)
@@ -288,13 +320,14 @@ module.exports = function Bricoleur (db, library) {
         cb(null, res) 
         return false
       }
+
       if (action==='+') { // this should work!!!
         cb(new Error('use format +name:cuid instead sorry!!'),null)
       }
     }
 
 
-    if (type==='|') { 
+    if (type==='|') { // ADD/RM PIPE MODULES
       var id = cuid()
 
       if (actor[1].split(':').length>1) {
@@ -336,8 +369,7 @@ module.exports = function Bricoleur (db, library) {
     } 
 
 
-    if (type==='*') {
-
+    if (type==='*') { // ADD/RM MODULE
       if (action==='-') {
         actor = (!isCuid(actor)) ? nameToCuid(actor) : actor
 
@@ -414,7 +446,7 @@ module.exports = function Bricoleur (db, library) {
     }
 
 
-    if (type==='$' || type==='#') { 
+    if (type==='$' || type==='#') { // ADD/RM CANVAS 
       var key = type+':'+actor
       if (action==='+') {
         var val
@@ -453,7 +485,7 @@ module.exports = function Bricoleur (db, library) {
     }
 
 
-    if (type==='@') { 
+    if (type==='@') { // LOGIN/LOGOUT
       if (action==='-') {
         res.value = '-'+actor
         delete sessionStorage.edit
