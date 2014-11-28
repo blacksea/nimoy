@@ -81,7 +81,7 @@ function boot (conf, cb) {
   if (!fs.existsSync(__dirname+'/static/files'))
     fs.mkdirSync(__dirname+'/static/files')
 
-  db = level(__dirname+'/'+conf.host)
+  db = level(__dirname+'/'+conf.settings.host)
              .on('error', handleErrs)
 
   livestream.install(db)
@@ -104,7 +104,7 @@ function compile (conf, cb) {
   var OUT = __dirname + '/'+conf.path_static+'/bundle.js'
   var MODULES = __dirname + '/' + conf.path_modules
   var b = browserify(IN)
-  var library  = {} 
+  var library = []
 
   var folders = fs.readdirSync(MODULES)
 
@@ -123,15 +123,29 @@ function compile (conf, cb) {
         if (pkg.template)
           pkg.template=fs.readFileSync(folder+'/'+pkg.template,{encoding:'utf8'})
 
-        library[pkg.name] = pkg
+        library.push(pkg)
         b.require(folder+'/'+pkg.main, {expose: pkg.name})
       }
     }
     next()
   }, function end () {
-    library.env = {port: conf.port, host: conf.host}  
-    fs.writeFileSync(__dirname+'/library.json', JSON.stringify(library))
-    db.put('library',JSON.stringify(library))
+    var settings = _.clone(conf.settings)
+    fs.writeFileSync(__dirname+'/settings.json', JSON.stringify(settings))
+    db.get('$:library', function (e, d) {
+      if (e) db.put('$:library', JSON.stringify(library))
+      if (!e && d) {
+        var lib = JSON.parse(d)
+        var freshLib = _.map(lib, function (p) {
+          for (var i=0;i<library.length;i++) {
+            if (library[i].name===p.name) {
+              return library[i];
+            } else return p
+          }
+        })
+        db.put('$:library', JSON.stringify(freshLib))
+      }
+    })
+    db.put('$:settings', JSON.stringify(settings))
     var bundleJS = fs.createWriteStream(OUT)
     b.transform('brfs')
     b.bundle().pipe(bundleJS)
@@ -194,7 +208,7 @@ function startServer (conf, db, cb) {
     soc.on('error', console.error)
   }
 
-  server.listen(conf.port, conf.host, cb)
+  server.listen(conf.settings.port, conf.settings.host, cb)
 
   if (conf.soc==='engine') { 
     engineServer(handleSoc, {cookie:false})
