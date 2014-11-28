@@ -1,0 +1,368 @@
+@import "fonts.css";
+*,
+*:before,
+*:after {
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+svg {
+  shape-rendering: crispEdges;
+}
+svg text::selection {
+  background: #f1f1f1 !important;
+  fill: #000 !important;
+}
+a {
+  color: #080a17;
+  text-decoration: none;
+}
+body {
+  font-size: 12px;
+  font-family: "Andale Mono";
+  margin: 0;
+  padding: 0;
+}
+input,
+input:focus {
+  font-family: "Andale Mono" !important;
+  -webkit-font-smoothing: subpixel-antialiased;
+  outline: none;
+  padding: 0;
+  background: transparent !important;
+  color: #080a17 !important;
+}
+.omni,
+.login {
+  background: rgba(8,10,23,0.94);
+  width: 260px;
+  position: fixed;
+  left: 10px;
+  top: 10px;
+  margin: 0;
+  list-style: none;
+  z-index: 999;
+  font-family: "Andale Mono";
+  cursor: -webkit-grab;
+  cursor: grab;
+}
+.omni .tray {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.omni a {
+  color: rgba(255,255,255,0.6);
+}
+.omni .tray li {
+  padding: 2px;
+  margin-right: 2px;
+  line-height: 12px;
+  float: left;
+}
+.omni .blackbox {
+  position: absolute;
+  bottom: 0px;
+  right: 28px;
+  padding: 0 0 3px 2px;
+  border-radius: 5px;
+  background: rgba(177,177,177,0.19) !important;
+}
+.omni .blackbox input {
+  border: none;
+  padding: 0;
+  line-height: 12px;
+  color: rgba(255,255,255,0.75) !important;
+  width: 180px;
+  font-size: 14px;
+}
+.omni .tray .xray,
+.omni .tray .pallette {
+  float: right;
+}
+.omni .exit {
+  position: absolute;
+  bottom: 0px;
+  right: 0px;
+}
+.cap {
+  padding: 1px 0 0 0;
+  text-align: center;
+  font-size: 18px;
+  width: 26px;
+  border-radius: 7px;
+  line-height: 16px;
+  border-top: 1px solid rgba(255,255,255,0.26);
+  border-left: 1px solid rgba(255,255,255,0.15);
+  border-right: 1px #000;
+  border-bottom: 1px #000;
+  box-shadow: -1px -2px 6px rgba(245,238,238,0.2) inset;
+}
+.omni .tray {
+  cursor: default;
+}
+.omni .tray .name {
+  padding: 0;
+  margin: 0 0 0 1px;
+}
+.omni .tray .canvasName {
+  width: 168px;
+  border: none;
+  color: rgba(255,255,255,0.79) !important;
+  font-size: 14px;
+  margin: 0;
+  padding: 0 6px;
+  line-height: 16px;
+  background: rgba(177,177,177,0.19) !important;
+  border-radius: 5px;
+}
+.omni .tray .pallette a {
+  padding-bottom: 2px;
+  margin-right: 2px;
+  color: rgba(222,111,162,0.65);
+}
+.omni .save,
+.omni .open {
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 15px;
+  font-family: "Andale Mono";
+  background: rgba(241,241,241,0.9);
+  border-radius: 3px;
+  color: #080a17 !important;
+  text-align: center;
+  border: none;
+  outline: none;
+}
+.omni .lib {
+  cursor: default;
+  list-style: none;
+  padding: 6px;
+  margin: 23px -50px 22px;
+  background: transparent;
+  border: 1px solid rgba(255,120,182,0.46);
+  border-radius: 3px;
+  float: right;
+}
+.omni .lib li {
+  margin: 2px 0 0 2px;
+  background: rgba(8,10,23,0.94);
+  color: rgba(255,255,255,0.79);
+  padding: 0px 3px 2px 3px;
+  list-style: none;
+  line-height: 12px;
+  font-size: 14px;
+  float: right;
+  clear: both;
+}
+.omni .lib li b {
+  color: rgba(134,255,204,0.65);
+  padding: 0 8px 0 0;
+  font-size: 16px;
+  font-weight: lighter;
+}
+.login {
+  min-height: 12px;
+  padding: 10px;
+  width: 240px;
+  cursor: default;
+}
+.login input {
+  font-size: 12px;
+  width: 176px;
+  padding: 0 4px;
+  background: rgba(177,177,177,0.2) !important;
+  color: rgba(255,255,255,0.8) !important;
+  border-radius: 6px;
+  outline: none;
+  border: none;
+  margin: 0 0 0 6px;
+}
+.login span {
+  color: rgba(255,255,255,0.8) !important;
+  float: left;
+}
+.error {
+  color: #000;
+  background: rgba(255,243,10,0.65);
+  line-height: 18px;
+  padding: 0 4px 0 4px;
+  margin: 4px 0 0 0;
+  box-shadow: 1px 2px 6px rgba(0,0,0,0.3);
+  border-radius: 5px;
+  font-size: 14px;
+  position: absolute;
+  z-index: 999;
+}
+.header {
+  float: left;
+  clear: both;
+  height: 80px;
+  width: 100%;
+}
+.header ul {
+  position: relative;
+  padding: 0;
+  margin: 0;
+  margin-left: -275px;
+  margin-top: 50px;
+  left: 50%;
+  width: 550px;
+  list-style: none;
+}
+.header ul li {
+  padding: 0;
+  margin: 0;
+  margin-right: 10px;
+  height: 30px;
+  float: left;
+}
+.project {
+  float: left;
+  clear: both;
+}
+.project .full {
+  float: left;
+}
+.project .desc {
+  float: left;
+}
+.project ul {
+  float: left;
+  clear: both;
+  list-style: none;
+  margin: 10px 0 0 0;
+  padding: 0;
+}
+.project ul li {
+  margin-right: 10px;
+  float: left;
+}
+.category {
+  position: relative;
+  margin-left: -400px;
+  left: 50%;
+  width: 800px;
+}
+.category ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.category ul li {
+  padding: 0;
+  margin: 0;
+}
+.category h1 {
+  font-size: 14px;
+  text-transform: uppercase;
+  margin: 0;
+  color: #555;
+}
+.article {
+  position: relative;
+  width: 800px;
+  left: 50%;
+  margin-left: -400px;
+}
+.article .txt {
+  width: 400px;
+  margin-right: 10px;
+}
+.article img {
+  float: right;
+}
+#cvs {
+  position: fixed;
+  z-index: 9999;
+  top: 46px;
+  left: 10px;
+  border-radius: 6px;
+  background: rgba(6,6,19,0.9);
+  box-shadow: 0px 2px 13px #c3c2c2;
+  display: none;
+}
+.grifter {
+  background: rgba(8,10,23,0.94);
+  border-radius: 9px;
+  font-size: 14px;
+  position: absolute;
+  z-index: 999 !important;
+  margin: 0;
+  padding: 8px;
+}
+.grifter a {
+  color: rgba(3,7,51,0.88);
+  float: right;
+  padding: 3px 0 3px 0;
+  box-shadow: -1px -2px 6px rgba(18,10,60,0.52) inset;
+  background: rgba(81,130,141,0.75);
+  margin: 0;
+}
+.grifter a.reup {
+  background: rgba(206,161,112,0.73);
+  float: left;
+}
+.grifter ul {
+  cursor: default;
+  float: left;
+  clear: both;
+  margin: 2px 0 0 0;
+  padding: 0;
+}
+.grifter ul li {
+  float: right;
+  clear: both;
+  list-style: none;
+  margin: 1px 0;
+  pading: 0;
+}
+.grifter ul li span {
+  color: rgba(87,213,191,0.89);
+  float: right;
+}
+.grifter ul li textarea {
+  color: rgba(255,255,255,0.79) !important;
+  background: rgba(177,177,177,0.19) !important;
+  padding: 0 6px 0 6px;
+  outline: none;
+  border: none;
+  height: 16px;
+  line-height: 16px;
+  border-radius: 6px;
+  margin-left: 10px;
+  float: right;
+}
+.grifter .tray {
+  width: 100%;
+  float: left;
+  clear: both;
+  font-size: 10px;
+  text-align: center;
+  color: rgba(222,111,162,0.83);
+}
+.pumicle {
+  float: left;
+}
+img {
+  border: none;
+  background: -webkit-gradient(linear, left top, left bottom, color-stop(0, #d69fb0), color-stop(1, #cdd4de));
+  background: -o-linear-gradient(bottom, #d69fb0 0%, #cdd4de 100%);
+  background: -moz-linear-gradient(bottom, #d69fb0 0%, #cdd4de 100%);
+  background: -webkit-linear-gradient(bottom, #d69fb0 0%, #cdd4de 100%);
+  background: -ms-linear-gradient(bottom, #d69fb0 0%, #cdd4de 100%);
+  background: linear-gradient(to bottom, #d69fb0 0%, #cdd4de 100%);
+}
+.status {
+  background: rgba(8,10,23,0.94);
+  color: rgba(255,255,255,0.79) !important;
+  width: 100%;
+  height: 20px;
+  font-size: 14px;
+  line-height: 18px;
+  padding: 0 8px;
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+}

@@ -38,7 +38,7 @@ input, input:focus
 
 .omni, .login
   background rgba(8, 10, 23, 0.94)
-  width 320px
+  width 260px
   position fixed
   left 10px
   top 10px
@@ -76,7 +76,7 @@ input, input:focus
   padding 0
   line-height 12px
   color rgba(255, 255, 255, 0.75)!important
-  width 198px
+  width 180px
   font-size 14px
 
 .omni .tray .xray, .omni .tray .pallette
@@ -108,7 +108,7 @@ input, input:focus
   margin 0 0 0 1px
 
 .omni .tray .canvasName
-  width 200px
+  width 168px
   border none
   // color #080A17!important
   color rgba(255, 255, 255, 0.79)!important
@@ -139,9 +139,11 @@ input, input:focus
 .omni .lib
   cursor default
   list-style none
-  padding 0
-  margin 36px 0 54px 0
+  padding 6px
+  margin 23px -50px 22px
   background transparent 
+  border 1px solid rgba(255, 120, 182, 0.46)
+  border-radius 3px
   float right
 
 .omni .lib li
@@ -164,12 +166,12 @@ input, input:focus
 .login 
   min-height 12px
   padding 10px
-  width 300px
+  width 240px
   cursor default
 
 .login input
   font-size 12px
-  width 230px
+  width 176px
   padding 0 4px
   background rgba(177, 177, 177, 0.2)!important
   color rgba(255, 255, 255, 0.8)!important
@@ -287,19 +289,27 @@ input, input:focus
   border-radius 9px
   font-size 14px
   position absolute
-  min-height 33px
-  min-width 120px
   z-index 999!important
   margin 0
-  padding 6px
-  border 1px solid black
-  border-bottom 2px solid black
-  border-right 2px solid black
-  box-shadow 0px 0px 30px rgba(8, 10, 23, 0.51)
+  padding 8px
+
+.grifter a
+  color rgba(3, 7, 51, 0.88)
+  float right
+  padding 3px 0 3px 0
+  box-shadow -1px -2px 6px rgba(18, 10, 60, 0.52) inset
+  background rgba(81, 130, 141, 0.75)
+  margin 0
+
+.grifter a.reup
+  background rgba(206, 161, 112, 0.73)
+  float left
 
 .grifter ul 
   cursor default
-  margin 0
+  float left
+  clear both
+  margin 2px 0 0 0
   padding 0
 
 .grifter ul li
@@ -310,7 +320,7 @@ input, input:focus
   pading 0
 
 .grifter ul li span
-  color rgba(134, 255, 204, 0.65)
+  color rgba(87, 213, 191, 0.89)
   float right
 
 .grifter ul li textarea
@@ -324,6 +334,14 @@ input, input:focus
   border-radius 6px
   margin-left 10px
   float right
+
+.grifter .tray 
+  width 100%
+  float left
+  clear both
+  font-size 10px
+  text-align center
+  color rgba(222, 111, 162, 0.83)
 
 .pumicle
   float left
@@ -344,10 +362,13 @@ img
   background linear-gradient(to bottom, #D69FB0 0%, #CDD4DE 100%)
 
 .status
+  background rgba(8, 10, 23, 0.94)
+  color rgba(255, 255, 255, 0.79)!important
   width 100%
   height 20px
-  background blue
-  color white
+  font-size 14px
+  line-height 18px
+  padding 0 8px
   position fixed
   z-index 9999
   top 0
