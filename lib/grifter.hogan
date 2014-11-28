@@ -1,5 +1,10 @@
 <form class='grifter' style='top:{{y}}px;left:{{x}}px;'>
+  <div class='tray'>  
+    {{#reup}}<a href='#' class='reup cap'>😸</a>{{/reup}}
+    {{cuid}}
+    {{#rm}}<a href='#' class='rm cap'>🙀</a>{{/rm}}
+  </div>
   <ul>
-    {{#props}}<li><span>{{key}}</span><textarea>{{value}}</textarea></li>{{/props}}
+    {{#props}}<li><textarea>{{value}}</textarea><span>{{key}}</span></li>{{/props}}
   </ul>
 </form>
