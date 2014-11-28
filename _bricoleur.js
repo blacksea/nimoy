@@ -5,6 +5,7 @@ var muxDemux = require('mux-demux')
 var createHash = require('crypto-browserify/create-hash')
 var async = require('async')
 
+window._ = _
 
 // brico tracks canvas and emits changes to canvas!
 // push out current canvas state -- only ... what about stream objects
@@ -16,9 +17,21 @@ module.exports = function Bricoleur (db, library) {
   var canvas = {} 
   var ID = cuid()
   var syncCache = {}
+  var dbCache = []
 
 
   function sync (d) { 
+    if (d.type && d.type==='put' && dbCache.length>0) {
+      var match = false
+      dbCache = _.filter(dbCache, function (obj, i) {
+        if (obj.key===d.key && obj.value!== d.value) { 
+          match=true 
+          return {key:k,value:d.value} 
+        } else return {key:k,value:v}
+      })
+      if (!match) dbCache.push({key:d.key,value:d.value})
+      console.log(dbCache)
+    }
     if (d.key === 'library') library = JSON.parse(d)
     var id = d.key.split('$:')[1]
     if (id && d.value && typeof d.value === 'string') 
@@ -47,8 +60,8 @@ module.exports = function Bricoleur (db, library) {
       })
     } else parseCommand(d, handleResult)
 
-    function handleResult (e, res) { 
-      
+    function handleResult (e, res) { // make this smarter! 
+
       if (res && res.parcel) {
         if (res.key) res.key += ':' + res.parcel
         if (!res.key) res.key = res.parcel
@@ -67,9 +80,6 @@ module.exports = function Bricoleur (db, library) {
 
 
   function compressCanvas () { 
-    // open + record
-    // should create a generic & unique set
-    
     var c = {}
     _.each(canvas, function (v,k) {
       if (v instanceof Array) {
@@ -86,7 +96,6 @@ module.exports = function Bricoleur (db, library) {
         }
       }
     })
-
     return c
   }
 
@@ -106,7 +115,7 @@ module.exports = function Bricoleur (db, library) {
     if (!str) { cb(new Error('bad input!'), null); return false }
 
     var parcel = (str.split('/').length > 1) ? str.split('/')[1] : null
-    if (parcel) { res.parcel = parcel ; str = str.split('/')[0] }
+    if (parcel) { res.parcel = parcel; str = str.split('/')[0] }
 
     var action = str[0].match(/\+|\-|\?|\!|\&/)
     if (!action) return false
@@ -114,6 +123,8 @@ module.exports = function Bricoleur (db, library) {
 
     var type = str.slice(1).match(/\@|\#|\$|\||\_|\*/)
     type = (type !== null) ? type[0] : isCuid(str.slice(1)) ? '^' : '*'
+
+    if (type.match(/\*|\|/)) res.timestamp = new Date().getTime()
 
     var actor = (type === '^') ? str.slice(1) : (type === '|') 
       ? str.slice(1).split('|') : (type === '*' && str[1] !== '*') 
@@ -131,6 +142,9 @@ module.exports = function Bricoleur (db, library) {
 
     if (action==='?') { // SEARCH / GET FROM MULTILEVEL
 
+      if (actor.split(' ').length > 1) 
+        var modifier = actor.split(' ')[1]
+
       if (type==='*') {
         var pkg = _.find(library, function (v,k) {
           if(k.match(actor)) return v
@@ -139,39 +153,93 @@ module.exports = function Bricoleur (db, library) {
         var uid = _.find(canvas, function (v,k) {
           if (k.match(actor)) return k.split(':')[1]
         })
-     
+
         res.value = [pkg,uid] 
         cb(null, res)
         return false
       }
 
-      if (type==='#'||type==='$') {
-        db.get(type+':'+actor, function (e, v) {
-          if (e) {
-            res.value = e
-            cb(null,res)
+      function useModifier (str, arr) { // basic!
+        if (str.split(':').length > 1) { // search object key or vals
+          if (str[0] !== '') var k = str.split(':')[0]
+          if (str[1] !== '') var v = str.split(':')[1]
+          return _.filter(arr, function (obj, i) {
+            if (k&&v&&k===obj.key&&v===obj.value) return obj
+            else if (!k&&v&&v===obj.value) return obj
+            else if (!v&&k&&k===obj.key) return obj
+          })
+        } else return null 
+      }
 
-            // if (e) {
-            //   var rs = db.createKeyStream()
-            //   rs.on('data', function (k) {
-            //     console.log(actor)
-            //     if (k.match(actor)) {
-            //       res.value = k
-            //       cb(null, res)
-            //     }
-            //   })
-            //   rs.on('end', function () {
-            //     if (!res.value) { // really not great :(
-            //       res.value = new Error(actor+' not found!')
-            //       cb(null, res)
-            //     }
-            //   })
-            //
-          } else {
-            res.value = v
-            cb(null, res)
-          }
-        })
+      if (actor === '*') {
+        res.value = []
+        if (dbCache.length > 0) {
+          res.value = _.filter(dbCache,function(obj,i){if (obj.key[0]===type) return obj})
+          // if (modifier) {
+          //   res.value = useModifier(modifier, dbCache)
+          // }
+          // console.log(res.value)
+          cb(null, res)
+        } else {
+          var rs = db.createReadStream()
+          rs.on('data', function (d) { 
+            dbCache.push(d)
+            if (d.key[0]===type) res.value.push(d) 
+          })
+          rs.on('end', function () { 
+            if (modifier) res.value = useModifier(modifier, res.value)
+            cb(null, res) 
+          })
+        }
+      } else {
+        if (type==='^' || type==='#' || type==='$') { // just grab the key
+          db.get(type+':'+actor, function (e, v) {
+            if (e) { res.value = e; cb(null,res) }
+            else {
+              if (modifier) { // run some _.fn on v
+
+              } else {
+                res.value = v
+                cb(null, res)
+              }
+            }
+          })
+          return false
+        }
+      }
+
+      if (modifier) {
+
+        // if its an array or if its a key val
+
+        // k : v
+        
+        // k: search only for this key
+        // :v search only for this value
+        // k:v search both
+
+        // ?#* k: search all canvas for that key
+
+        // parse modifier and conver to _.fn chain 
+        // run _.fn chain on db stream and return collected results
+
+        //   var rs = db.createKeyStream()
+        //   rs.on('data', function (k) {
+        //     console.log(actor)
+        //     if (k.match(actor)) {
+        //       res.value = k
+        //       cb(null, res)
+        //     }
+        //   })
+        
+        //   rs.on('end', function () {
+        //     if (!res.value) { // really not great :(
+        //       res.value = new Error(actor+' not found!')
+        //       cb(null, res)
+        //     }
+        //   })
+        //
+        
       }
     }
 
