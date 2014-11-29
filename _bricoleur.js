@@ -26,8 +26,8 @@ module.exports = function Bricoleur (db, library) {
       dbCache = _.filter(dbCache, function (obj, i) {
         if (obj.key===d.key && obj.value!== d.value) { 
           match=true 
-          return {key:k,value:d.value} 
-        } else return {key:k,value:v}
+          return {key:obj.key,value:d.value} 
+        } else return {key:obj.key,value:obj.value}
       })
       if (!match) dbCache.push({key:d.key,value:d.value})
       console.log(dbCache)
