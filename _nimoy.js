@@ -30,17 +30,19 @@ module.exports.compile = compile
 var db
 var pass
 
-var INDEX = '<!doctype html>' +
+function INDEX (title) {
+  return ('<!doctype html>' +
   '<html lang="en">' +
   '<meta charset="utf-8">' +
   '<head>' +
-  '<title>&#x02135;IMOY</title>' +
+  '<title>'+title+'</title>' +
   '<link rel="stylesheet" href="/style.css">' +
   '</head>' +
   '<body id="canvas">' +
   '<script src="/bundle.js"></script>' +
   '</body>' +
-  '</html>'
+  '</html>')
+}
 
 function cli (d, enc, n) {}
 
@@ -90,9 +92,7 @@ function boot (conf, cb) {
   var h = hash('SHA256').update('nimoy').digest('hex')
 
   // write index
-
-  fs.writeFileSync(__dirname+'/static/index.html', INDEX)
-
+  fs.writeFileSync(__dirname+'/static/index.html', INDEX(conf.settings.title))
 
   startServer(conf, db, function () {
     cb(server.close)
@@ -189,7 +189,7 @@ function startServer (conf, db, cb) {
       fileUpload(req, res)
     } else {
       mount(req, res, function err () {
-        res.end(INDEX)
+        res.end(INDEX(conf.settings.title))
       })
     }
   }
