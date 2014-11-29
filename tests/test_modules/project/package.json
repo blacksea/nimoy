@@ -6,12 +6,8 @@
   "description" : "project page",
   "type" : "⊶",
   "data" : {
-    "desc" : "sample",
-    "full" : {
-      "img" : "/files/1x1.png",
-      "w" : 200,
-      "h" : 200
-    },
+    "description" : "sample",
+    "main" : "/files/1x1.png",
     "images" : [
       {"txt":"smple","title":"test","w":50,"h":50,"src":"/files/1x1.png"},
       {"txt":"smple","title":"test","w":50,"h":50,"src":"/files/1x1.png"},

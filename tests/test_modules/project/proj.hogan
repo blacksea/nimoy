@@ -1,11 +1,11 @@
 <div class='project'>
-  <img class='full' src='{{full.img}}' width={{full.w}} height={{full.h}}>
+  <img class='full' src='{{main}}' style='min-height:200px;min-width:200px'>
   </img>
-  <div class='desc'>{{desc}}</div>
+  <div class='desc'>{{description}}</div>
   <ul class='thumbs'>{{#thumbs}}
     <li>
       <a href='#{{title}}'>
-        <img width={{w}} height={{h}} src='{{src}}'/>
+        <img width={{w}} height={{h}} src='{{src}}'></img>
       </a>
     </li>
   {{/thumbs}}</ul>

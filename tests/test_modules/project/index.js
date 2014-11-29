@@ -1,9 +1,9 @@
 var through = require('through2')
 var D = require('../../../lib/dombii.js')
 
-module.exports = function ($) { // a shell that wraps input data into vis and binds events
+module.exports = function ($) {
 
-  var t // template
+  var t 
   var s = through.obj()
 
   $.on('data', function (d) { 
