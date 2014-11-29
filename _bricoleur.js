@@ -5,7 +5,6 @@ var muxDemux = require('mux-demux')
 var createHash = require('crypto-browserify/create-hash')
 var async = require('async')
 
-window._ = _
 
 // brico tracks canvas and emits changes to canvas!
 // push out current canvas state -- only ... what about stream objects
@@ -32,6 +31,8 @@ module.exports = function Bricoleur (db, library) {
       if (!match) dbCache.push({key:d.key,value:d.value})
       console.log(dbCache)
     }
+    if (d.type && d.type === 'put' && d.key[0]==='#') 
+      parseCommand('!'+d.key.replace(':',''), function (e,r) {})
     if (d.key === 'library') library = JSON.parse(d)
     var id = d.key.split('$:')[1]
     if (id && d.value && typeof d.value === 'string') 
