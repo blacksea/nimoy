@@ -124,7 +124,7 @@ module.exports = function Bricoleur (db, library) {
     var type = str.slice(1).match(/\@|\#|\$|\||\_|\*/)
     type = (type !== null) ? type[0] : isCuid(str.slice(1)) ? '^' : '*'
 
-    if (type.match(/\*|\|/)) res.timestamp = new Date().getTime()
+    if (type.match(/\*|\||\^/)) res.timestamp = new Date().getTime()
 
     var actor = (type === '^') ? str.slice(1) : (type === '|') 
       ? str.slice(1).split('|') : (type === '*' && str[1] !== '*') 
