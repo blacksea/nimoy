@@ -33,8 +33,10 @@ module.exports = function Bricoleur (db, library) {
     if (d.type && d.type === 'put' && d.key[0]==='#') {
       var loc = window.location.pathname.replace(/\//g,'')
       var cvs = (loc==='') ? 'home' : loc
+      var y = window.pageYOffset
+      var x = window.pageXOffset
       if (d.key.replace(/\#|:/g,'') === cvs && !document.getElementById('0mNii')) // grr!
-        parseCommand('!#'+cvs,function (e,r) {console.log('updated'+cvs)})
+        parseCommand('!#'+cvs,function (e,r) { window.scrollTo(x,y) })
     }
     if (d.key === 'library') library = JSON.parse(d)
     var id = d.key.split('$:')[1]
