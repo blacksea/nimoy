@@ -29,10 +29,13 @@ module.exports = function Bricoleur (db, library) {
         } else return {key:obj.key,value:obj.value}
       })
       if (!match) dbCache.push({key:d.key,value:d.value})
-      console.log(dbCache)
     }
-    if (d.type && d.type === 'put' && d.key[0]==='#') 
-      parseCommand('!'+d.key.replace(':',''), function (e,r) {})
+    if (d.type && d.type === 'put' && d.key[0]==='#') {
+      var loc = window.location.pathname.replace(/\//g,'')
+      var cvs = (loc==='') ? 'home' : loc
+      if (d.key.replace(/\#|:/g,'') === cvs && !document.getElementById('0mNii')) // grr!
+        parseCommand('!#'+cvs,function (e,r) {console.log('updated'+cvs)})
+    }
     if (d.key === 'library') library = JSON.parse(d)
     var id = d.key.split('$:')[1]
     if (id && d.value && typeof d.value === 'string') 
