@@ -228,7 +228,8 @@ function fileUpload (req, res) { // replace w. external!?
     var filePath = __dirname+'/static/files/'+fields.file
     var blob = fields.blob.split(',')[1]
     fs.writeFile(filePath, blob, {encoding:'base64'}, function (e) {
-      res.writeHead(200, {'content-type': 'text/plain'}) res.write('received upload:\n\n')
+      res.writeHead(200, {'content-type': 'text/plain'}) 
+      res.write('received upload:\n\n')
       res.end()
       if (!e) db.put('file:'+fields.id, '/files/'+fields.file)
     }) 
