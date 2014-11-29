@@ -188,7 +188,8 @@ function startServer (conf, db, cb) {
     if (req.url === '/upload' && req.method === 'POST') {
       fileUpload(req, res)
     } else {
-      mount(req, res, function err () {
+      mount(req, res, function err (e) {
+        if (e) console.error(e)
         res.end(INDEX(conf.settings.title))
       })
     }
@@ -225,13 +226,12 @@ function startServer (conf, db, cb) {
 function fileUpload (req, res) { // replace w. external!?
   var form = new formidable.IncomingForm()
   form.parse(req, function(err, fields, files) {
-    var filePath = __dirname+'/static/files/'+fields.file
-    var blob = fields.blob.split(',')[1]
-    fs.writeFile(filePath, blob, {encoding:'base64'}, function (e) {
-      res.writeHead(200, {'content-type': 'text/plain'}) 
-      res.end()
-      if (!e) db.put('file:'+fields.id, '/files/'+fields.file)
-    }) 
+    res.writeHead(200, {'content-type': 'text/plain'}) 
+    res.end()
+    var fileName = files.file.name.replace(/[^a-z0-9_.\-]/gi,'_').toLowerCase()
+    var filePath =  __dirname+'/static/files/'+fileName
+    if (fs.existsSync(filePath)) fs.unlinkSync(filePath)
+    fs.linkSync(files.file.path,filePath)
   })
 }
 
