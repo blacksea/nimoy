@@ -1,14 +1,13 @@
 <div class='header' 
   style='width:100%;height:80px;background-image:url({{bg}});'>
 
-  <img class='banner' src='/files/1x1.png' />
+  <img class='banner trop' src='/files/1x1.png' />
 
-  <ul>{{#menu}}
-  <li>
+  <ul class='menu'>
+  {{#menu}}<li>
     <a href='{{link}}'>
       <img height='{{h}}' width='{{w}}' src='{{img}}'/>
     </a>
-  </li>
-  {{/menu}}</ul>
+  </li>{{/menu}}</ul>
 
 </div>
