@@ -307,27 +307,45 @@ module.exports = function Bricoleur (db, library) {
 
 
     if (action==='!'&&type==='#') { // LOAD CANVAS !#canvas
+      // make sure order is consistent!
       db.get(type+':'+actor, function (e, jsn) {
         if (e) { cb(e, null); return false }
         var cvs = JSON.parse(jsn)
 
-         res.value = compressCanvas()
-        
-        var last = cvs[cvs.length-1]
-        _.each(_.keys(canvas).reverse(), function (k) {
-          if (canvas[k].name !== 'bricoleur')  
-            parseCommand('-'+k, function (e,r) {
-              if (e) cb(e, null)
-            })
-        })
-        if (cvs.length===0) { cb(null, res); return false }
-        _.each(cvs, function (cmd) { 
-          parseCommand(cmd, function (e, r) {
-            if (e) {cb(e, null)}
-            if (!e && cmd===last) {
-              res.value = compressCanvas()
-              cb(null, res)
+        var shared = []
+        var current = []
+        var add = []
+
+        for (k in canvas) { // remove redundant commands
+          if (canvas[k].name!=='bricoleur') {
+            current.push(k)
+            for (var i=0;i<cvs.length;i++) { // bah!
+              if (cvs[i].match(k)) {
+                shared.push(k)
+                cvs.splice(i,1)
+              } 
             }
+          } 
+        } 
+
+        var rm = _.difference(current,shared)
+
+        async.each(rm, function (k,n) {
+           parseCommand('-'+k, function (e,r) {
+             if (e) cb(e, null)
+             else n()
+           })
+        }, function (e) {
+          if (!e) async.eachSeries(cvs, function (k,n) {
+             parseCommand(k, function (e,r) {
+               if (!e) n()
+               if (e) cb(e, null)
+             })
+          }, function (e) {
+            if (!e) {
+              res.value = compressCanvas()
+              cb(null,res)
+            } else cb(e,null)
           })
         })
       })
