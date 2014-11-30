@@ -5,6 +5,8 @@ var url = require('url')
 var cuid = require('cuid')
 var bindshim = require('bindshim')
 
+window.openUrl = require('./lib/openUrl.js')
+
 // add templates to lib?
 var bricoleur
 var wss = require('websocket-stream')
@@ -26,28 +28,17 @@ db.get('$:library', function (e,d) {
 
   var omni = require('./lib/omni.js')({id:'0mNii',lib:_.clone(lib)})
   omni.pipe(bricoleur).pipe(omni)
+  openUrl.pipe(bricoleur)
 
-  loadCanvas(window.location.href)
+  openUrl.write(window.location.pathname)
 })
-
-function loadCanvas (loc) {
-  loc = (loc.newURL) ? url.parse(loc.newURL) : url.parse(loc)
-
-  var canvas = (loc.path !== '/') 
-    ? loc.path.slice(1)
-    : (!loc.hash) 
-    ? 'home' 
-    : loc.hash.slice(1)
-
-  bricoleur.write('!#'+canvas)
-}
 
 function Errs (err) {
   if (err.code === 1) 
     if (omni.write) omni.write({code:1})
 }
 
-window.addEventListener('hashchange', loadCanvas, false)
+// window.addEventListener('hashchange', loadCanvas, false)
 
 window.addEventListener('popstate', function (e) {
   if (e.state) console.log(e.state)
