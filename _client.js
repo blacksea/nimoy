@@ -38,8 +38,10 @@ function Errs (err) {
     if (omni.write) omni.write({code:1})
 }
 
-// window.addEventListener('hashchange', loadCanvas, false)
-
 window.addEventListener('popstate', function (e) {
-  if (e.state) console.log(e.state)
+  e.preventDefault()
+  if (e.state) {
+    console.log(e.state)
+    openUrl.write(e.state.cmd)
+  }
 }, false)
