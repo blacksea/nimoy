@@ -307,7 +307,10 @@ module.exports = function Bricoleur (db, library) {
 
 
     if (action==='!'&&type==='#') { // LOAD CANVAS !#canvas
-      // make sure order is consistent!
+
+      // make sure order is consistent! // maintain page order!
+      // -- might be ugly -- try to create representation / visual!
+      
       db.get(type+':'+actor, function (e, jsn) {
         if (e) { cb(e, null); return false }
         var cvs = JSON.parse(jsn)
@@ -316,7 +319,7 @@ module.exports = function Bricoleur (db, library) {
         var current = []
         var add = []
 
-        for (k in canvas) { // remove redundant commands
+        for (k in canvas) { 
           if (canvas[k].name!=='bricoleur') {
             current.push(k)
             for (var i=0;i<cvs.length;i++) { // bah!
