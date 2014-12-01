@@ -197,25 +197,37 @@ input:focus {
 .header {
   float: left;
   clear: both;
-  height: 80px;
+  background-repeat: no-repeat;
+  background-position: center 12px;
+  height: 138px !important;
   width: 100%;
+  border-bottom: 2px solid #72a9b8;
 }
 .header ul {
   position: relative;
+  float: left;
+  clear: both;
   padding: 0;
   margin: 0;
-  margin-left: -275px;
-  margin-top: 50px;
+  margin-left: -383px;
+  margin-top: 88px;
   left: 50%;
-  width: 550px;
+  width: 800px;
   list-style: none;
 }
 .header ul li {
   padding: 0;
   margin: 0;
-  margin-right: 10px;
+  margin-right: 28px;
   height: 30px;
   float: left;
+}
+.header ul li a img:hover {
+  filter: grayscale(90%);
+}
+.header ul li a img {
+  min-width: 40px;
+  min-height: 18px;
 }
 .project {
   float: left;
@@ -263,11 +275,16 @@ input:focus {
   position: relative;
   width: 800px;
   left: 50%;
-  margin-left: -400px;
+  margin: 30px -400px 0;
+  float: left;
+  clear: both;
 }
 .article .txt {
-  width: 400px;
-  margin-right: 10px;
+  color: #777;
+  font-size: 13px;
+  line-height: 18px;
+  width: 360px;
+  float: left;
 }
 .article img {
   float: right;
