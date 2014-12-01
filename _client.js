@@ -22,11 +22,12 @@ ws.pipe(db.createRpcStream()).pipe(ws)
 
 db.get('$:library', function (e,d) {
   var lib = JSON.parse(d)
+  console.log(lib)
 
   bricoleur = require('./_bricoleur')(db,lib)
                     .on('error', Errs)
 
-  var omni = require('./lib/omni.js')({id:'0mNii',lib:_.clone(lib)})
+  var omni = require('./lib/omni.js')({id:'0mNii',lib:lib})
   omni.pipe(bricoleur).pipe(omni)
   openUrl.pipe(bricoleur)
 
