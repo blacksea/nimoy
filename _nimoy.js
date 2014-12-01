@@ -135,12 +135,10 @@ function compile (conf, cb) {
       if (e) db.put('$:library', JSON.stringify(library))
       if (!e && d) {
         var lib = JSON.parse(d)
-        var freshLib = _.map(lib, function (p) {
-          for (var i=0;i<library.length;i++) {
-            if (library[i].name===p.name) {
-              return library[i];
-            } else return p
-          }
+        var freshLib = _.map(lib, function (p) { 
+          var replace = _.where(library,{name : p.name})
+          if (replace.length>0) return replace[0]
+           else return p
         })
         db.put('$:library', JSON.stringify(freshLib))
       }
