@@ -224,12 +224,12 @@ function startServer (conf, db, cb) {
 function fileUpload (req, res) { // replace w. external!?
   var form = new formidable.IncomingForm()
   form.parse(req, function(err, fields, files) {
-    res.writeHead(200, {'content-type': 'text/plain'}) 
-    res.end()
     var fileName = files.file.name.replace(/[^a-z0-9_.\-]/gi,'_').toLowerCase()
     var filePath =  __dirname+'/static/files/'+fileName
     if (fs.existsSync(filePath)) fs.unlinkSync(filePath)
     fs.linkSync(files.file.path,filePath)
+    res.writeHead(200, {'content-type': 'text/plain'}) 
+    res.end()
   })
 }
 
