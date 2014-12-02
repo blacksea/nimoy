@@ -1,7 +1,7 @@
 var cuid = require('cuid')
 var _ = require('underscore')
 var through = require('through2')
-var muxDemux = require('mux-demux')
+var mxdx = require('mux-demux')
 var createHash = require('crypto-browserify/create-hash')
 var async = require('async')
 
@@ -15,11 +15,11 @@ var async = require('async')
 module.exports = function Bricoleur (db, library) {
   var canvas = {} 
   var ID = cuid()
-  var syncCache = {}
   var dbCache = []
 
 
-  function sync (d) { 
+  function sync (d) {  
+
     if (d.type && d.type==='put' && dbCache.length>0) {
       var match = false
       dbCache = _.filter(dbCache, function (obj, i) {
@@ -30,6 +30,7 @@ module.exports = function Bricoleur (db, library) {
       })
       if (!match) dbCache.push({key:d.key,value:d.value})
     }
+
     if (d.type && d.type === 'put' && d.key[0]==='#') {
       var loc = window.location.pathname.replace(/\//g,'')
       var cvs = (loc==='') ? 'home' : loc
@@ -38,8 +39,11 @@ module.exports = function Bricoleur (db, library) {
       if (d.key.replace(/\#|:/g,'') === cvs && !document.getElementById('0mNii')) // grr!
         parseCommand('!#'+cvs,function (e,r) { window.scrollTo(x,y) })
     }
+
     if (d.key === 'library') library = JSON.parse(d)
+
     var id = d.key.split('$:')[1]
+
     if (id && d.value && typeof d.value === 'string') 
       d.value = JSON.parse(d.value)
     if (canvas[id] && canvas[id].$) {
@@ -47,14 +51,26 @@ module.exports = function Bricoleur (db, library) {
     }
   }
 
-
-  var dbMuxDemux = muxDemux(function (st) {
-    var key = '$:'+st.meta
-    syncCache[st.meta] = ID
-    st.on('data', function put (val) { db.put(key,JSON.stringify(val)) })
+  var wrapper = mxdx(function (st) {
+    st.on('data', function (d) {
+      parseCommand(d, function (e,r) {
+        if (e) console.error(e)
+        if (r) st.write(r)
+      })
+    })
   })
-  var moduleDataMuxDemux = muxDemux()
-  moduleDataMuxDemux.pipe(dbMuxDemux)
+
+  var connector = mxdx()
+
+  connector.pipe(wrapper).pipe(connector)
+
+  // var dbMuxDemux = muxDemux(function (st) { 
+  //   var key = '$:'+st.meta
+  //   syncCache[st.meta] = ID
+  //   st.on('data', function put (val) { db.put(key,JSON.stringify(val)) })
+  // })
+  // var moduleDataMuxDemux = muxDemux()
+  // moduleDataMuxDemux.pipe(dbMuxDemux)
 
 
   var s = through.obj(function interface (d, enc, next) {
@@ -170,9 +186,9 @@ module.exports = function Bricoleur (db, library) {
           if (str[0] !== '') var k = str.split(':')[0]
           if (str[1] !== '') var v = str.split(':')[1]
           return _.filter(arr, function (obj, i) {
-            if (k&&v&&k===obj.key&&v===obj.value) return obj
-            else if (!k&&v&&v===obj.value) return obj
-            else if (!v&&k&&k===obj.key) return obj
+            if (k && v && k === obj.key && v === obj.value) return obj
+            else if (!k && v && v === obj.value) return obj
+            else if (!v && k && k === obj.key) return obj
           })
         } else return null 
       }
@@ -180,11 +196,9 @@ module.exports = function Bricoleur (db, library) {
       if (actor === '*') {
         res.value = []
         if (dbCache.length > 0) {
-          res.value = _.filter(dbCache,function(obj,i){if (obj.key[0]===type) return obj})
-          // if (modifier) {
-          //   res.value = useModifier(modifier, dbCache)
-          // }
-          // console.log(res.value)
+          res.value = _.filter(dbCache, function (obj, i) {
+            if (obj.key[0] === type) return obj
+          })
           cb(null, res)
         } else {
           var rs = db.createReadStream()
@@ -216,36 +230,6 @@ module.exports = function Bricoleur (db, library) {
 
       if (modifier) {
 
-        // if its an array or if its a key val
-
-        // k : v
-        
-        // k: search only for this key
-        // :v search only for this value
-        // k:v search both
-
-        // ?#* k: search all canvas for that key
-
-        // parse modifier and conver to _.fn chain 
-        // run _.fn chain on db stream and return collected results
-
-        //   var rs = db.createKeyStream()
-        //   rs.on('data', function (k) {
-        //     console.log(actor)
-        //     if (k.match(actor)) {
-        //       res.value = k
-        //       cb(null, res)
-        //     }
-        //   })
-        
-        //   rs.on('end', function () {
-        //     if (!res.value) { // really not great :(
-        //       res.value = new Error(actor+' not found!')
-        //       cb(null, res)
-        //     }
-        //   })
-        //
-        
       }
     }
 
@@ -262,12 +246,6 @@ module.exports = function Bricoleur (db, library) {
             cb(null, res)
           })
         })
-      } else if (type==='*') {
-
-      } else if (type==='^') {
-
-      } else {
-
       }
     }
 
@@ -334,16 +312,16 @@ module.exports = function Bricoleur (db, library) {
         var rm = _.difference(current,shared)
 
         async.each(rm, function (k,n) {
-           parseCommand('-'+k, function (e,r) {
-             if (e) cb(e, null)
-             else n()
-           })
+          parseCommand('-'+k, function (e,r) {
+            if (e) cb(e, null)
+            else n()
+          })
         }, function (e) {
           if (!e) async.eachSeries(cvs, function (k,n) {
-             parseCommand(k, function (e,r) {
-               if (!e) n()
-               if (e) cb(e, null)
-             })
+            parseCommand(k, function (e,r) {
+              if (!e) n()
+              if (e) cb(e, null)
+            })
           }, function (e) {
             if (!e) {
               res.value = compressCanvas()
@@ -520,7 +498,7 @@ module.exports = function Bricoleur (db, library) {
 
         var mod = require(pkg.name)
 
-        canvas[uid] = mod(moduleDataMuxDemux.createStream(uid))
+        canvas[uid] = mod(connector.createStream(uid))
 
         canvas[uid].name = pkg.name
 
