@@ -1,9 +1,9 @@
 <div class='omni' style='top:{{y}}px;left:{{x}}px;'>
   <div class='tray' unselectable='on'>
     <a class='file' href='#'>&equiv;</a>
-    {{cvs}}
     <a class='exit' href='#' title='logout'>&#10799;</a>
   </div>
+  {{cvs}}
   <ul class='lib' {{#showlib}} style='display:block;' {{/showlib}}> 
     {{#lib}}
     <li draggable="true" title="{{description}}"><b>{{type}}</b>{{name}}</li>
