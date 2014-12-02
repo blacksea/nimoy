@@ -37,12 +37,14 @@ input, input:focus
   color #080A17!important
 
 .omni, .login
-  background rgba(70, 80, 135, 0.95)
+  box-shadow 0px 0px 11px rgba(0, 0, 0, 0.25)
+  background rgba(132, 188, 207, 0.95)
   width 200px
   position fixed
   left 10px
   top 10px
   margin 0
+  padding 4px 0
   list-style none
   z-index 999
   font-family "Andale Mono"
@@ -50,16 +52,18 @@ input, input:focus
   cursor grab
 
 .omni .tray 
+  cursor default!important
+  color black
   list-style none
   margin 0 
   padding 0
+  width 100%
+  text-align center
 
 .omni a
-  color rgba(255, 255, 255, 0.6)
-
-.omni .tray li
-  line-height 12px
+  color black
   float left
+  line-height 12px
 
 .omni .blackbox
   padding 0 0 3px 2px
@@ -68,86 +72,34 @@ input, input:focus
 
 .omni .blackbox input
   border none
-  padding 2px 4px 0
+  padding 4px 4px
   line-height 12px
-  color rgba(255, 255, 255, 0.75)!important
   width 200px
-  font-size 11px
-
-.omni .tray .xray, .omni .tray .pallette
-  float right
+  font-size 10px
 
 .omni .exit
   float right!important
   font-size 18px
+  margin-right 3px
 
-.cap
-  font-size 22px
-  line-height 16px
-  // border-top 1px solid rgba(255, 255, 255, 0.26)
-  // border-left 1px solid rgba(255, 255, 255, 0.15)
-  // border-right 1px #000
-  // border-bottom 1px #000
-  // box-shadow -1px -2px 6px rgba(245, 238, 238, 0.2) inset
-
-.omni .tray
-  margin 3px 5px 0
-  cursor default
-
-.omni .tray .file
-  margin -1px 0 0
+.omni .file
+  margin -1px 4px
   font-size 20px
-
-.omni .tray .name
-  padding 0
-  width 162px
-  line-height 14px
-  text-align center
-  color white
-  margin 0 0 0 1px
-
-.omni .tray .canvasName
-  width 110px
-  border none
-  color rgba(255, 255, 255, 0.79)!important
-  font-size 14px
-  margin 0
-  padding 0 6px
-  line-height 16px
-  background rgba(177, 177, 177, 0.19)!important
-  border-radius 5px
-
-.omni .tray .pallette a
-  padding-bottom 2px
-  margin-right 2px
-  color rgba(222, 111, 162, 0.65)
-
-.omni .save, .omni .open
-  font-size 11px
-  font-weight 600
-  line-height 15px
-  font-family "Andale Mono"
-  background rgba(241, 241, 241, 0.9)
-  border-radius 3px
-  color #080A17!important
-  text-align center
-  border none
-  outline none
 
 .omni .lib
   cursor default
   list-style none
-  padding 6px
-  margin 4px 
-  background rgba(57, 66, 122, 0.94)
-  float left
+  position absolute
+  margin 0
+  padding 0
+  top 55px
+  left 15px
   width 192px
-  height 220px
 
 .omni .lib li
   margin 2px 0 0 2px
-  color rgba(255, 255, 255, 0.79)
-  background #39427A
+  color black
+  background #EBEEFB
   padding 0px 3px 2px 3px
   list-style none
   line-height 12px
@@ -156,7 +108,7 @@ input, input:focus
   clear both
 
 .omni .lib li b
-  color rgba(134, 255, 204, 0.65)
+  color black
   padding 0 8px 0 0
   font-size 16px
   font-weight lighter
@@ -290,74 +242,87 @@ input, input:focus
 .article img
   float right
 
-#cvs
-  position fixed
-  z-index 9999
-  top 46px
-  left 10px
-  border-radius 6px
-  background rgba(6, 6, 19, 0.9)
-  box-shadow 0px 2px 13px #C3C2C2
-  display none
+#cvs 
+  cursor default
+  float left
+  clear both
+  width 200px
+  height 200px
+  margin 5px 0 0 0
+  background rgb(235, 238, 251)
 
 .grifter
-  background rgba(45, 54, 114, 0.94) 
+  // background rgba(45, 54, 114, 0.94) 
   font-size 14px
   position absolute
   z-index 999!important
   margin 0
   padding 8px
 
-.grifter .tray
-  cursor default
+.grifter .tray 
+  cursor default!important
+  width 100%
+  float left
+  clear both
+  font-size 10px
+  color rgba(255, 255, 255, 0.83)
 
 .grifter a
   color rgba(110, 231, 197, 0.88)
-  float right
-  padding 3px 0 3px 0
-  box-shadow -1px -2px 6px rgba(18, 10, 60, 0.52) inset
-  margin 0
-
-.grifter a.reup
   float left
+  padding 0 4px
+  margin-right 2px
+  border-radius 999px
+  box-shadow 0 0 11px rgba(57, 66, 122, 0.55)
+  font-size 10px
+
+.grifter a.reset
+  background yellow
+  color black
+
+.grifter a.del
+  background red
+  color black
 
 .grifter ul 
   cursor default
   float left
   clear both
-  margin 2px 0 0 0
+  margin 0
   padding 0
 
 .grifter ul li
-  float right
+  float left
   clear both
+  // background rgba(57, 66, 122, 0.94)
+  background rgb(138, 192, 210)
+  box-shadow 0 0 11px rgba(57, 66, 122, 0.55)
+  padding 0 1px 0 6px
+  border-radius 9px
   list-style none
   margin 1px 0
-  pading 0
 
 .grifter ul li span
-  color rgba(87, 213, 191, 0.89)
+  color black
+  font-size 12px
+  line-height 14px
+  text-transform uppercase
+  font-size 10px
   float right
 
 .grifter ul li textarea
-  color rgba(255, 255, 255, 0.79)!important
-  background rgba(177, 177, 177, 0.19)!important
+  color black!important
+  background rgb(235, 238, 251)!important
   padding 0 6px 0 6px
   outline none
   border none
-  height 16px
-  line-height 16px
-  border-radius 6px
+  height 13px
+  line-height 12px
+  border-radius 9px
   margin-left 10px
+  font-size 10px
   float right
 
-.grifter .tray 
-  width 100%
-  float left
-  clear both
-  font-size 10px
-  text-align center
-  color rgba(255, 255, 255, 0.83)
 
 .pumicle
   float left
