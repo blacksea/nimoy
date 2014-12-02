@@ -1,9 +1,8 @@
 <div class='omni' style='top:{{y}}px;left:{{x}}px;'>
   <ul class='tray' unselectable='on'>
-    <li class='name'><input class='canvasName' value={{cvs}}></input></li>
-    <li class='xray cap' title='x-ray' 
-    {{#bones}} style='color:white; {{/bones}}'><a href='#'>&#x02A22;</a></li>
-    <li class='pallette cap'><a href='#'>&#x029C9;</a></li>
+    <li class='file cap'><a href='#'>&equiv;</a></li>
+    <li class='name'>{{cvs}}</li>
+    <li class='exit cap'><a href='#' title='logout'>&#10799;</a>
   </ul>
   <ul class='lib' {{#showlib}} style='display:block;' {{/showlib}}> 
     {{#lib}}
@@ -11,7 +10,6 @@
     {{/lib}}
     <div style='clear:both'></div>
   </ul>
-  <div class='bones' id='cvs' style='display:{{bones}}'></div>
+  <canvas class='bones' id='cvs' style='display:{{bones}}'></canvas>
   <div class='blackbox' title='prompt'><input></input></div>
-  <a class='exit cap' href='#' title='logout'>&times;</a>
 </div>

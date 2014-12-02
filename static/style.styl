@@ -37,8 +37,8 @@ input, input:focus
   color #080A17!important
 
 .omni, .login
-  background rgba(8, 10, 23, 0.94)
-  width 260px
+  background rgba(70, 80, 135, 0.95)
+  width 200px
   position fixed
   left 10px
   top 10px
@@ -58,59 +58,57 @@ input, input:focus
   color rgba(255, 255, 255, 0.6)
 
 .omni .tray li
-  padding 2px
-  margin-right 2px
   line-height 12px
   float left
 
 .omni .blackbox
-  position absolute
-  bottom 0px
-  right 28px
   padding 0 0 3px 2px
-  border-radius 5px
-  background rgba(177, 177, 177, 0.19)!important
+  float left
+  clear both
 
 .omni .blackbox input
   border none
-  padding 0
+  padding 2px 4px 0
   line-height 12px
   color rgba(255, 255, 255, 0.75)!important
-  width 180px
-  font-size 14px
+  width 200px
+  font-size 11px
 
 .omni .tray .xray, .omni .tray .pallette
   float right
 
 .omni .exit
-  position absolute
-  bottom 0px
-  right 0px
+  float right!important
+  font-size 18px
 
 .cap
-  padding 1px 0 0 0 
-  text-align center
-  font-size 18px
-  width 26px
-  border-radius 7px
+  font-size 22px
   line-height 16px
-  border-top 1px solid rgba(255, 255, 255, 0.26)
-  border-left 1px solid rgba(255, 255, 255, 0.15)
-  border-right 1px #000
-  border-bottom 1px #000
-  box-shadow -1px -2px 6px rgba(245, 238, 238, 0.2) inset
+  // border-top 1px solid rgba(255, 255, 255, 0.26)
+  // border-left 1px solid rgba(255, 255, 255, 0.15)
+  // border-right 1px #000
+  // border-bottom 1px #000
+  // box-shadow -1px -2px 6px rgba(245, 238, 238, 0.2) inset
 
 .omni .tray
+  margin 3px 5px 0
   cursor default
+
+.omni .tray .file
+  margin -1px 0 0
+  font-size 20px
 
 .omni .tray .name
   padding 0
+  width 162px
+  line-height 14px
+  text-align center
+  color white
   margin 0 0 0 1px
 
 .omni .tray .canvasName
-  width 168px
+  width 110px
   border none
-  // color #080A17!important
   color rgba(255, 255, 255, 0.79)!important
   font-size 14px
   margin 0
@@ -140,21 +138,21 @@ input, input:focus
   cursor default
   list-style none
   padding 6px
-  margin 23px -50px 22px
-  background transparent 
-  border 1px solid rgba(255, 120, 182, 0.46)
-  border-radius 3px
-  float right
+  margin 4px 
+  background rgba(57, 66, 122, 0.94)
+  float left
+  width 192px
+  height 220px
 
 .omni .lib li
   margin 2px 0 0 2px
-  background rgba(8, 10, 23, 0.94)
   color rgba(255, 255, 255, 0.79)
+  background #39427A
   padding 0px 3px 2px 3px
   list-style none
   line-height 12px
-  font-size 14px
-  float right
+  font-size 12px
+  float left
   clear both
 
 .omni .lib li b
@@ -303,24 +301,24 @@ input, input:focus
   display none
 
 .grifter
-  background rgba(8, 10, 23, 0.94)
-  border-radius 9px
+  background rgba(45, 54, 114, 0.94) 
   font-size 14px
   position absolute
   z-index 999!important
   margin 0
   padding 8px
 
+.grifter .tray
+  cursor default
+
 .grifter a
-  color rgba(3, 7, 51, 0.88)
+  color rgba(110, 231, 197, 0.88)
   float right
   padding 3px 0 3px 0
   box-shadow -1px -2px 6px rgba(18, 10, 60, 0.52) inset
-  background rgba(81, 130, 141, 0.75)
   margin 0
 
 .grifter a.reup
-  background rgba(206, 161, 112, 0.73)
   float left
 
 .grifter ul 
@@ -353,21 +351,13 @@ input, input:focus
   margin-left 10px
   float right
 
-// .grifter .rm .cap, .grifter .freshen .cap
-//   color rgba(240, 59, 148, 0.58)
-//   font-size 14px
-//   text-decoration line-through
-//   padding 0 8px 2px
-//   width inherit
-//   float right
- 
 .grifter .tray 
   width 100%
   float left
   clear both
   font-size 10px
   text-align center
-  color rgba(222, 111, 162, 0.83)
+  color rgba(255, 255, 255, 0.83)
 
 .pumicle
   float left
