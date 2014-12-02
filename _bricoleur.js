@@ -237,7 +237,6 @@ module.exports = function Bricoleur (db, library) {
     if (action==='&') { // CLONE MODULE / CANVAS
         var newActor = actor.split(' ')[1]
         actor = actor.split(' ')[0]
-        console.log(actor, newActor)
       if (type==='#') {
         db.get('#:' + actor, function (e, d) {
           if (e) cb(e, null)
