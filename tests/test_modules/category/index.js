@@ -7,9 +7,15 @@ module.exports = function ($) {
   var s = through.obj()
 
   $.on('data', function (d) { 
+    console.log('CAT',d)
     if (d.nimoy) t = new D(d)
-    else t.draw(d) 
+
+    // grabs an array of data!  
+
+    // else t.draw(d) 
   })
+
+  $.write('?$*')
 
   s.on('close', function () {t.erase()})
 
