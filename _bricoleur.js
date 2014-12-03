@@ -12,7 +12,7 @@ var async = require('async')
 // all commands that modify the canvas happen in that canvas context
 
 
-module.exports = function Bricoleur (db, library) {
+module.exports = function Bricoleur (db, library, freshness) {
   var canvas = {} 
   var ID = cuid()
   var dbCache = []
@@ -45,12 +45,9 @@ module.exports = function Bricoleur (db, library) {
       document.getElementById('icon').href = sets.favicon
     }
 
-    var id = d.key.split('$:')[1]
-
-
-    if (id && d.value && typeof d.value === 'string') {
-      id = (id.match(':')) ? id.split(':')[0] : id
-      console.log(id)
+    if (d.key[0] === '$' || d.key[0] === '~') {
+      var id = d.key.slice(2)
+      freshness[id] = new Date().getTime()
       d.value = JSON.parse(d.value)
       if (canvas[id] && canvas[id].$) 
         canvas[id].$.push(d.value)
@@ -441,46 +438,60 @@ module.exports = function Bricoleur (db, library) {
       }
 
 
-      if (action==='+') {
-        var uid = (actor.split(':').length>1) 
-          ? actor.split(':')[1] 
-          : cuid()
+      if (action==='+') { 
+        if (isCuid(actor) || isCuid(actor.split(':')[1])) {
+          var uid, name, fresh
+          var uid = (actor.split(':') > 1) ? actor.split(':')[1] : actor
 
-        var name = (actor.match(':')) ? actor.split(':')[0] : actor
+          if (localStorage && localStorage[uid] && freshness[uid])
+            fresh = (JSON.parse(localStorage[uid]).meta.freshness<=freshness[uid]) 
+              ? true
+              : false
 
-        var pkg = _.find(library, function (v,k) {
-          if (v.name===name) return v
-        })
-
-        if (!pkg) {
-          if (name === 'bricoleur') { 
-            canvas[uid] = s 
-            cb(null,res)
-            return false 
-          } else cb(new Error('module: ' + actor + ' not found!'), null) 
+          if (fresh) {
+            var d = JSON.parse(localStorage[uid])
+            loadModule(getPkg(d.meta.name),d.meta,uid,d.data)
+          } else db.get('~:'+uid, function (e,meta) {
+            if (e) {cb(new Error('module id : '+uid+' not found!'),null); return false}
+            loadModule(metadata,uid,false)
+          })
+        } else { // no uid!
+          loadModule(getPkg(metadata.name),cuid(),false)
         }
 
-        pkg.id = uid
+        function getPkg (name) {
+          return  _.find(library, function (v,k) { return (v.name === name) })
+        }
+        
+        function loadModule (metaOrPkg,uid,freshData) {
+          var meta, pkg, mod
+          if (!metaOrPkg.freshness) pkg = metaOrPkg 
+          else { meta = metaOrPkg; pkg = getPkg(meta.name) }
 
-        var mod = require(pkg.name)
+          if (!pkg && !meta)  {
+            console.log(pkg,meta)
+            cb(new Error('module: ' + actor + ' not found!'), null); return false 
+          }
 
-        canvas[uid] = mod(connector.createStream(uid))
-
-        canvas[uid].name = pkg.name
-
-        if (pkg.mask) canvas[uid].mask = pkg.mask
-
-        var $ = canvas[uid].$
-
-        $.push(pkg)
-
-        db.get('$:'+uid, function (e,val){ 
-          if (typeof val === 'string') val = JSON.parse(val)
-          if (!e) { $.push(val) }
-          if (e && pkg.data) { $.push(pkg.data) }
-          res.value = compressCanvas()
-          cb(null, res) 
-        })
+          mod = require(pkg.name)
+          canvas[uid] = mod(connector.createStream(uid))
+          canvas[uid].name = pkg.name
+          if (pkg.mask) canvas[uid].mask = pkg.mask
+          if (!meta) {meta = pkg; meta.freshness = new Date().getTime()} // gen meta
+          canvas[uid].$.push(meta)
+          if (freshData) {
+            canvas[uid].$.push(freshData)
+            res.value = compressCanvas()
+            cb(null, res) 
+          }
+          if (!freshData) db.get('$:'+uid, function (e,val){ 
+            if (typeof val === 'string') val = JSON.parse(val)
+            if (!e) { $.push(val) }
+            if (e && pkg.data) { $.push(pkg.data) }
+            res.value = compressCanvas()
+            cb(null, res) 
+          })
+        }
       }
     }
 
