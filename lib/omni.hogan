@@ -4,12 +4,20 @@
     <a class='exit' href='#' title='logout'>&#10799;</a>
   </div>
   {{cvs}}
-  <ul class='lib' {{#showlib}} style='display:block;' {{/showlib}}> 
+  <ul class='lib' {{#showLib}} style='display:block;' {{/showLib}}> 
     {{#lib}}
     <li draggable="true" title="{{description}}"><b>{{type}}</b>{{name}}</li>
     {{/lib}}
     <div style='clear:both'></div>
   </ul>
+  <form {{#showSettings}}style='display:block;'{{/showSettings}} class= 'settings' >
+    <ul>
+      <li><b>name</b><input placeholder='title'>{{title}}</input></li>
+      <li><b>icon</b><input placeholder='icon'>{{icon}}</input></li>
+      <li><b>save(as)</b><input placeholder='Save as...' value='untitled'></input></li>
+      <li><b>new</b><input placholder='new' value='untitled'></input></li>
+    </ul>
+  </form>
   <canvas class='bones' id='cvs' style='display:{{bones}}'></canvas>
   <div class='blackbox' title='prompt'><input></input></div>
 </div>
