@@ -142,7 +142,7 @@ module.exports = function Bricoleur (db, library) {
     if (!action) return false
     action = action[0]
 
-    var type = str.slice(1).match(/\@|\#|\$|\||\_|\*/)
+    var type = str.slice(1).match(/\@|\#|\$|\||\~|\*/)
     type = (type !== null) ? type[0] : isCuid(str.slice(1)) ? '^' : '*'
 
     if (type.match(/\*|\||\^/)) res.timestamp = new Date().getTime()
@@ -329,28 +329,6 @@ module.exports = function Bricoleur (db, library) {
     }
 
 
-    if (type==='_') {  // SAVE GROUP +_group
-      if (action==='+') {
-        var cvs = compressCanvas()
-
-        var macro = _.map(_.values(cvs), function (v) {
-          return '+'+v.name
-        })
-
-        db.put('_:'+actor, macro, function (e) {
-          if (!e) cb(null,res)
-          if (e) cb(e,null)
-        })
-
-      } else if (action==='-') {
-        db.del('_:'+actor,function (e) {
-          if (!e) cb(null,res)
-          if (e) cb(e,null)
-        })
-      }
-    }
-
-
     if (type==='^') { // ADD/RM/PIPE MODULE USING CUID +cuid|cuid
       if (action==='-') {
         if (!canvas[actor]) {
@@ -515,7 +493,7 @@ module.exports = function Bricoleur (db, library) {
     }
 
 
-    if (type==='$' || type==='#') { // ADD/RM CANVAS 
+    if (type==='$' || type==='#' || type==='~') { // DATA FORMATS - module data / canvas data / module meta/micro data
       var key = type+':'+actor
       if (action==='+') {
         var val
