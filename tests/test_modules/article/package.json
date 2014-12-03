@@ -7,8 +7,6 @@
   "description" : "simple article style layout",
   "data" : {
     "txt" : "article text here",
-    "src" : "/files/1x1.png",
-    "w" : 400,
-    "h" : 400
+    "image" : "/files/1x1.png"
   }
 }

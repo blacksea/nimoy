@@ -9,10 +9,10 @@
     "description" : "sample",
     "main" : "/files/1x1.png",
     "images" : [
-      {"txt":"smple","title":"test","w":50,"h":50,"src":"/files/1x1.png"},
-      {"txt":"smple","title":"test","w":50,"h":50,"src":"/files/1x1.png"},
-      {"txt":"smple","title":"test","w":50,"h":50,"src":"/files/1x1.png"},
-      {"txt":"smple","title":"test","w":50,"h":50,"src":"/files/1x1.png"},
-      {"txt":"smple","title":"test","w":50,"h":50,"src":"/files/1x1.png"}
+      {"txt":"smple","title":"test","src":"/files/1x1.png"},
+      {"txt":"smple","title":"test","src":"/files/1x1.png"},
+      {"txt":"smple","title":"test","src":"/files/1x1.png"},
+      {"txt":"smple","title":"test","src":"/files/1x1.png"},
+      {"txt":"smple","title":"test","src":"/files/1x1.png"}
     ]}
 }
