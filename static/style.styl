@@ -44,10 +44,12 @@ input, input:focus
   left 10px
   top 10px
   margin 0
-  padding 4px 0
+  padding 0
   list-style none
   z-index 999
   font-family "Andale Mono"
+  font-size 10px
+  line-height 17px
   cursor -webkit-grab
   cursor grab
 
@@ -83,20 +85,25 @@ input, input:focus
 .omni .exit
   float right!important
   font-size 18px
-  margin-right 3px
+  line-height 16px
+  margin-right 1px
 
 .omni .file
-  margin -1px 4px
   font-size 20px
+  width 16px
+  height 18px
+  line-height 14px
+  text-align center
 
 .omni .lib
+  display none
   cursor default
   list-style none
   position absolute
   margin 0
   padding 0
-  top 55px
-  left 15px
+  top 45px
+  left 10px
   width 192px
 
 .omni .lib li
@@ -106,15 +113,46 @@ input, input:focus
   padding 0px 3px 2px 3px
   list-style none
   line-height 12px
-  font-size 12px
+  font-size 10px
   float left
   clear both
 
 .omni .lib li b
   color black
   padding 0 8px 0 0
-  font-size 16px
   font-weight lighter
+  font-size 14px
+
+.omni .settings
+  display none
+  position absolute
+  background #CBD4DD 
+  box-shadow 0 7px 14px #ccc
+  top 18px
+  padding 4px
+  border-right 1px solid #999
+  border-bottom 1px solid #999
+
+.omni .settings b
+  float left
+  font-size 10px
+
+.omni .settings ul
+  margin 0
+  padding 0
+
+.omni .settings ul li
+  list-style none
+  float left 
+  clear both
+
+.omni .settings input
+  border none!important
+  font-size 10px!important
+  float left
+  outline none
+  margin 0 0 0 18px
+  max-width 117px
 
 .login 
   min-height 12px
@@ -251,7 +289,6 @@ input, input:focus
   clear both
   width 200px
   height 200px
-  margin 5px 0 0 0
   background rgb(235, 238, 251)
 
 .grifter
@@ -263,10 +300,11 @@ input, input:focus
   padding 8px
 
 .grifter .tray 
+  position absolute
+  top -7px
   cursor default!important
+  top -7px
   width 100%
-  float left
-  clear both
   font-size 10px
   color rgba(255, 255, 255, 0.83)
 
