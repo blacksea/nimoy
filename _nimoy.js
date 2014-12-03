@@ -23,6 +23,7 @@ var st = require('st')
 var sessions = {edit:[]}
 var users = {}
 var pass
+var settings
 
 module.exports.boot = boot
 module.exports.compile = compile
@@ -30,13 +31,14 @@ module.exports.compile = compile
 var db
 var pass
 
-function INDEX (title) {
+function INDEX (settings) {
   return ('<!doctype html>' +
   '<html lang="en">' +
   '<meta charset="utf-8">' +
   '<head>' +
-  '<title>'+title+'</title>' +
+  '<title>'+settings.title+'</title>' +
   '<link rel="stylesheet" href="/style.css">' +
+  '<link id="icon" rel="shortcut icon" type="image/png" href="'+settings.favicon+'">' +
   '</head>' +
   '<body id="canvas">' +
   '<script src="/bundle.js"></script>' +
@@ -87,12 +89,23 @@ function boot (conf, cb) {
              .on('error', handleErrs)
 
   livestream.install(db)
+
+  db.liveStream()
+    .on('data', function (d) {
+      if (d.key==='$:settings' && d.type === 'put') 
+        settings = JSON.parse(d.value)
+    })
+
   multiLevel.writeManifest(db, __dirname+'/static/manifest.json')
 
   var h = hash('SHA256').update('nimoy').digest('hex')
 
   // write index
-  fs.writeFileSync(__dirname+'/static/index.html', INDEX(conf.settings.title))
+  db.get('$:settings', function (e,d) {
+    if (e) settings = conf.settings
+    if (!e) settings = JSON.parse(d)
+    fs.writeFileSync(__dirname+'/static/index.html', INDEX(settings))
+  })
 
   startServer(conf, db, function () {
     cb(server.close)
@@ -112,7 +125,7 @@ function compile (conf, cb) {
   asyncMap(folders, function compileModule (dir, next) {
     var folder = __dirname +'/'+conf.path_modules+dir
 
-    if (!fs.statSync(folder).isDirectory()) {next();return false}
+    if (!fs.statSync(folder).isDirectory()) { next(); return false }
 
     if (dir[0]!=='.') {
       var pkg = (fs.existsSync(folder))
@@ -127,10 +140,9 @@ function compile (conf, cb) {
         b.require(folder+'/'+pkg.main, {expose: pkg.name})
       }
     }
+
     next()
   }, function end () {
-    var settings = _.clone(conf.settings)
-    fs.writeFileSync(__dirname+'/settings.json', JSON.stringify(settings))
     db.get('$:library', function (e, d) {
       if (e) db.put('$:library', JSON.stringify(library))
       if (!e && d) {
@@ -143,7 +155,17 @@ function compile (conf, cb) {
         db.put('$:library', JSON.stringify(freshLib))
       }
     })
-    db.put('$:settings', JSON.stringify(settings))
+    db.get('$:settings', function (e, jsn) {
+      if (!e) {
+        settings = JSON.parse(jsn)
+        fs.writeFileSync(__dirname+'/settings.json', JSON.stringify(settings))
+      }
+      if (e) {
+        settings = _.clone(conf.settings)
+        db.put('$:settings', JSON.stringify(settings))
+        fs.writeFileSync(__dirname+'/settings.json', JSON.stringify(settings))
+      }
+    })
     var bundleJS = fs.createWriteStream(OUT)
     b.transform('brfs')
     b.bundle().pipe(bundleJS)
@@ -188,7 +210,7 @@ function startServer (conf, db, cb) {
     } else {
       mount(req, res, function err (e) {
         if (e) console.error(e)
-        res.end(INDEX(conf.settings.title))
+        res.end(INDEX(settings))
       })
     }
   }
