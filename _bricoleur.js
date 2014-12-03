@@ -460,14 +460,6 @@ module.exports = function Bricoleur (db, library) {
           } else cb(new Error('module: ' + actor + ' not found!'), null) 
         }
 
-        if (!pkg.main) {
-          db.get('_:'+actor, function (e,d) {
-            if (!e) parseCommand(d, cb)
-            if (e) cb(e,null)
-          })
-          return false
-        }
-
         pkg.id = uid
 
         var mod = require(pkg.name)
@@ -482,7 +474,7 @@ module.exports = function Bricoleur (db, library) {
 
         $.push(pkg)
 
-        db.get('$:'+uid+':'+pkg.name, function (e,val){ 
+        db.get('$:'+uid, function (e,val){ 
           if (typeof val === 'string') val = JSON.parse(val)
           if (!e) { $.push(val) }
           if (e && pkg.data) { $.push(pkg.data) }
