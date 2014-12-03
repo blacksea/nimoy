@@ -92,8 +92,10 @@ function boot (conf, cb) {
 
   db.liveStream()
     .on('data', function (d) {
-      if (d.key==='$:settings' && d.type === 'put') 
+      if (d.key==='$:settings' && d.type === 'put') {
         settings = JSON.parse(d.value)
+        fs.writeFileSync(__dirname+'/static/index.html', INDEX(settings))
+      }
     })
 
   multiLevel.writeManifest(db, __dirname+'/static/manifest.json')
