@@ -23,6 +23,7 @@ var st = require('st')
 var sessions = {edit:[]}
 var users = {}
 var pass
+var freshness
 var settings
 
 module.exports.boot = boot
@@ -95,6 +96,10 @@ function boot (conf, cb) {
       if (d.key==='$:settings' && d.type === 'put') {
         settings = JSON.parse(d.value)
         fs.writeFileSync(__dirname+'/static/index.html', INDEX(settings))
+      } if (d.key[0] === '$' || d.key[1] === '~') {
+        var id = d.key.slice(2)
+        if (isCuid(id)) freshness[id] = new Date().getTime()
+        db.put('freshness',JSON.stringify(freshness))
       }
     })
 
