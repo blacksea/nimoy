@@ -19,7 +19,6 @@ module.exports = function Bricoleur (db, library) {
 
 
   function sync (d) {  
-
     if (d.type && d.type==='put' && dbCache.length>0) {
       var match = false
       dbCache = _.filter(dbCache, function (obj, i) {
@@ -36,11 +35,15 @@ module.exports = function Bricoleur (db, library) {
       var cvs = (loc==='') ? 'home' : loc
       var y = window.pageYOffset
       var x = window.pageXOffset
-      if (d.key.replace(/\#|:/g,'') === cvs && !document.getElementById('0mNii')) // grr!
-        parseCommand('!#'+cvs,function (e,r) { window.scrollTo(x,y) })
+      if (d.key.replace(/\#|:/g,'')===cvs&&!document.getElementById('0mNii')) 
+        parseCommand('!#'+cvs,function (e,r) { window.scrollTo(x,y) }) // grr
     }
 
-    if (d.key === 'library') library = JSON.parse(d)
+    if (d.key === '$:settings') {
+      var sets = JSON.parse(d.value)
+      console.log(sets)
+      document.getElementById('icon').href = sets.favicon
+    }
 
     var id = d.key.split('$:')[1]
 
@@ -51,6 +54,7 @@ module.exports = function Bricoleur (db, library) {
     }
   }
 
+
   var wrapper = mxdx(function (st) {
     st.on('data', function (d) {
       parseCommand(d, function (e,r) {
@@ -60,17 +64,9 @@ module.exports = function Bricoleur (db, library) {
     })
   })
 
+
   var connector = mxdx()
-
   connector.pipe(wrapper).pipe(connector)
-
-  // var dbMuxDemux = muxDemux(function (st) { 
-  //   var key = '$:'+st.meta
-  //   syncCache[st.meta] = ID
-  //   st.on('data', function put (val) { db.put(key,JSON.stringify(val)) })
-  // })
-  // var moduleDataMuxDemux = muxDemux()
-  // moduleDataMuxDemux.pipe(dbMuxDemux)
 
 
   var s = through.obj(function interface (d, enc, next) {
@@ -228,9 +224,7 @@ module.exports = function Bricoleur (db, library) {
         }
       }
 
-      if (modifier) {
-
-      }
+      if (modifier) { }
     }
 
 
