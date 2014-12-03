@@ -41,17 +41,19 @@ module.exports = function Bricoleur (db, library) {
 
     if (d.key === '$:settings') {
       var sets = JSON.parse(d.value)
-      console.log(sets)
       document.title = sets.title
       document.getElementById('icon').href = sets.favicon
     }
 
     var id = d.key.split('$:')[1]
 
-    if (id && d.value && typeof d.value === 'string') 
+
+    if (id && d.value && typeof d.value === 'string') {
+      id = (id.match(':')) ? id.split(':')[0] : id
+      console.log(id)
       d.value = JSON.parse(d.value)
-    if (canvas[id] && canvas[id].$) {
-      canvas[id].$.push(d.value)
+      if (canvas[id] && canvas[id].$) 
+        canvas[id].$.push(d.value)
     }
   }
 
@@ -502,7 +504,7 @@ module.exports = function Bricoleur (db, library) {
 
         $.push(pkg)
 
-        db.get('$:'+uid, function (e,val){ 
+        db.get('$:'+uid+':'+pkg.name, function (e,val){ 
           if (typeof val === 'string') val = JSON.parse(val)
           if (!e) { $.push(val) }
           if (e && pkg.data) { $.push(pkg.data) }
