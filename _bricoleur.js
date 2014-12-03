@@ -42,6 +42,7 @@ module.exports = function Bricoleur (db, library) {
     if (d.key === '$:settings') {
       var sets = JSON.parse(d.value)
       console.log(sets)
+      document.title = sets.title
       document.getElementById('icon').href = sets.favicon
     }
 
