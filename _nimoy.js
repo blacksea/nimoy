@@ -94,6 +94,7 @@ function boot (conf, cb) {
     .on('data', function (d) {
       if (d.key==='$:settings' && d.type === 'put') {
         settings = JSON.parse(d.value)
+        console.log(settings)
         fs.writeFileSync(__dirname+'/static/index.html', INDEX(settings))
       }
     })
@@ -179,14 +180,15 @@ function compile (conf, cb) {
 }
 
 function startServer (conf, db, cb) {
+
   var stOpts = {
     index: 'index.html', 
     path: __dirname+'/'+conf.path_static,
     url: '/', 
     passthrough: true 
   }
-
-  if (conf.dev) stOpts.cache = false
+  if (conf.cache===undefined) conf.cache = true
+  stOpts.cache = conf.cache
 
   var mount = st(stOpts)
 
