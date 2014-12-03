@@ -94,7 +94,6 @@ function boot (conf, cb) {
     .on('data', function (d) {
       if (d.key==='$:settings' && d.type === 'put') {
         settings = JSON.parse(d.value)
-        console.log(settings)
         fs.writeFileSync(__dirname+'/static/index.html', INDEX(settings))
       }
     })
