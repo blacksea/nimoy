@@ -439,59 +439,45 @@ module.exports = function Bricoleur (db, library, freshness) {
 
 
       if (action==='+') { 
-        if (isCuid(actor) || isCuid(actor.split(':')[1])) {
-          var uid, name, fresh
-          var uid = (actor.split(':') > 1) ? actor.split(':')[1] : actor
+        var pkd
+        actor = actor.split(':')
+        var uid = (actor.length>1) ? actor[1] : (isCuid(actor)) ? actor : null
+        var name = (!uid) ? actor : (actor.length>1) ? actor[0] : null
 
-          if (localStorage && localStorage[uid] && freshness[uid])
-            fresh = (JSON.parse(localStorage[uid]).meta.freshness<=freshness[uid]) 
-              ? true
-              : false
+        function load (p) {
+          if (!uid) uid = cuid()
+          canvas[uid] = require(p.name)(connector.createStream(uid))
+          if (p.mask) canvas[uid].mask = p.mask
+          canvas[uid].name = p.name
+          canvas[uid].$.push(p)
+          res.value = compressCanvas()
+          cb(null, res) 
+        }
 
-          if (fresh) {
-            var d = JSON.parse(localStorage[uid])
-            loadModule(getPkg(d.meta.name),d.meta,uid,d.data)
-          } else db.get('~:'+uid, function (e,meta) {
-            if (e) {cb(new Error('module id : '+uid+' not found!'),null); return false}
-            loadModule(metadata,uid,false)
+        if (uid && localStorage && localStorage[uid])
+          pkd = JSON.parse(localStorage[uid])
+
+        if (!pkd && !name) {
+          cb(new Error('Module '+actor+' not found',null)); return false 
+        } else if (!pkd && name && !uid)
+          load(_.findWhere(library,{name:name}))
+
+        if (uid) {
+          var fresh = (pkd&&freshness[uid]&&pkd.freshness>freshness[uid]) 
+            ? true
+            : false
+
+          if (!pkd) pkd = (_.findWhere(library,{name:name}))
+          if (!pkd)
+            cb(new Error('Module '+actor+' not found',null)); return false 
+
+          if (!fresh) db.get('$:'+uid, function (e,jsn) {
+            if (!e) { pkd.data = JSON.parse(jsn); load(pkd) }
+            if (e) load(pkd)
           })
-        } else { // no uid!
-          loadModule(getPkg(metadata.name),cuid(),false)
+          else load(pkd)
         }
-
-        function getPkg (name) {
-          return  _.find(library, function (v,k) { return (v.name === name) })
-        }
-        
-        function loadModule (metaOrPkg,uid,freshData) {
-          var meta, pkg, mod
-          if (!metaOrPkg.freshness) pkg = metaOrPkg 
-          else { meta = metaOrPkg; pkg = getPkg(meta.name) }
-
-          if (!pkg && !meta)  {
-            console.log(pkg,meta)
-            cb(new Error('module: ' + actor + ' not found!'), null); return false 
-          }
-
-          mod = require(pkg.name)
-          canvas[uid] = mod(connector.createStream(uid))
-          canvas[uid].name = pkg.name
-          if (pkg.mask) canvas[uid].mask = pkg.mask
-          if (!meta) {meta = pkg; meta.freshness = new Date().getTime()} // gen meta
-          canvas[uid].$.push(meta)
-          if (freshData) {
-            canvas[uid].$.push(freshData)
-            res.value = compressCanvas()
-            cb(null, res) 
-          }
-          if (!freshData) db.get('$:'+uid, function (e,val){ 
-            if (typeof val === 'string') val = JSON.parse(val)
-            if (!e) { $.push(val) }
-            if (e && pkg.data) { $.push(pkg.data) }
-            res.value = compressCanvas()
-            cb(null, res) 
-          })
-        }
+        return false
       }
     }
 
