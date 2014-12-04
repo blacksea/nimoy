@@ -7,7 +7,10 @@ module.exports = function ($) {
   var s = through.obj()
 
   $.on('data', function (d) { 
-    if (d.nimoy) t = new D(d)
+    if (d.nimoy) {
+      t = new D(d)
+      t.draw(d.data)
+    }
     else t.draw(d) 
   })
 
