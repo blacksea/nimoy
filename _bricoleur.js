@@ -49,7 +49,7 @@ module.exports = function Bricoleur (db, library, freshness) {
       var id = d.key.slice(2)
       freshness[id] = new Date().getTime()
       d.value = JSON.parse(d.value)
-      if (canvas[id] && canvas[id].$) 
+      if (d.key[0]==='$' && canvas[id] && canvas[id].$) 
         canvas[id].$.push(d.value)
     }
   }
@@ -442,10 +442,13 @@ module.exports = function Bricoleur (db, library, freshness) {
         var pkd
         actor = actor.split(':')
         var uid = (actor.length>1) ? actor[1] : (isCuid(actor)) ? actor : null
-        var name = (!uid) ? actor : (actor.length>1) ? actor[0] : null
+        var name = (!uid) ? actor[0] : (actor.length>1) ? actor[0] : null
 
         function load (p) {
+          console.log(p)
           if (!uid) uid = cuid()
+          if (!p.nimoy) p.nimoy = true // mmmmmmm
+          p.id = uid
           canvas[uid] = require(p.name)(connector.createStream(uid))
           if (p.mask) canvas[uid].mask = p.mask
           canvas[uid].name = p.name
@@ -459,17 +462,18 @@ module.exports = function Bricoleur (db, library, freshness) {
 
         if (!pkd && !name) {
           cb(new Error('Module '+actor+' not found',null)); return false 
-        } else if (!pkd && name && !uid)
-          load(_.findWhere(library,{name:name}))
+        } else if (!pkd && name && !uid) {
+          load(_.findWhere(library,{name:name})); return false
+        }
 
         if (uid) {
-          var fresh = (pkd&&freshness[uid]&&pkd.freshness>freshness[uid]) 
+          var fresh = ( pkd && freshness[uid] && pkd.freshness>freshness[uid] )
             ? true
             : false
 
           if (!pkd) pkd = (_.findWhere(library,{name:name}))
           if (!pkd)
-            cb(new Error('Module '+actor+' not found',null)); return false 
+            { cb(new Error('Module '+actor+' not found',null));return false }
 
           if (!fresh) db.get('$:'+uid, function (e,jsn) {
             if (!e) { pkd.data = JSON.parse(jsn); load(pkd) }
@@ -482,7 +486,7 @@ module.exports = function Bricoleur (db, library, freshness) {
     }
 
 
-    if (type==='$' || type==='#' || type==='~') { // DATA FORMATS - module data / canvas data / module meta/micro data
+    if (type==='$' || type==='#' || type==='~') {
       var key = type+':'+actor
       if (action==='+') {
         var val
