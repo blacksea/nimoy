@@ -21,9 +21,9 @@ var cuid = require('cuid')
 var st = require('st')
 
 var sessions = {edit:[]}
+var freshness = {}
 var users = {}
 var pass
-var freshness
 var settings
 
 module.exports.boot = boot
