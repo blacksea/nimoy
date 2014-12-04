@@ -17,7 +17,7 @@ module.exports = function ($) {
         e.preventDefault(); openUrl.write(e.target.parentElement.pathname)
       }]]
       t = new D(d)
-      t.draw(d)
+      t.draw(d.data)
     }
     else t.draw(d) 
   })
