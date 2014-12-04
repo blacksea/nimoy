@@ -445,9 +445,9 @@ module.exports = function Bricoleur (db, library, freshness) {
         var name = (!uid) ? actor[0] : (actor.length>1) ? actor[0] : null
 
         function load (p) {
-          console.log(p)
           if (!uid) uid = cuid()
           if (!p.nimoy) p.nimoy = true // mmmmmmm
+          p.freshness = new Date().getTime()
           p.id = uid
           canvas[uid] = require(p.name)(connector.createStream(uid))
           if (p.mask) canvas[uid].mask = p.mask
@@ -476,10 +476,11 @@ module.exports = function Bricoleur (db, library, freshness) {
             { cb(new Error('Module '+actor+' not found',null));return false }
 
           if (!fresh) db.get('$:'+uid, function (e,jsn) {
+            console.log('STALE')
             if (!e) { pkd.data = JSON.parse(jsn); load(pkd) }
             if (e) load(pkd)
           })
-          else load(pkd)
+          else { load(pkd); console.log('fresh!')}
         }
         return false
       }
