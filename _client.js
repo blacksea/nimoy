@@ -7,7 +7,6 @@ var bindshim = require('bindshim')
 
 window.openUrl = require('./lib/openUrl.js')
 
-// add templates to lib?
 var bricoleur
 var wss = require('websocket-stream')
 
@@ -22,16 +21,19 @@ ws.pipe(db.createRpcStream()).pipe(ws)
 
 db.get('$:library', function (e,d) {
   var lib = JSON.parse(d)
-  console.log(lib)
 
-  bricoleur = require('./_bricoleur')(db,lib)
-                    .on('error', Errs)
+  db.get('freshness', function (e,d) {
+    var freshness = (!e) ? JSON.parse(d) : {}
+    console.log(freshness)
+    bricoleur = require('./_bricoleur')(db,lib,freshness)
+                      .on('error', Errs)
 
-  var omni = require('./lib/omni.js')({id:'0mNii',lib:lib})
-  omni.pipe(bricoleur).pipe(omni)
-  openUrl.pipe(bricoleur)
+    var omni = require('./lib/omni.js')({id:'0mNii',lib:lib})
+    omni.pipe(bricoleur).pipe(omni)
+    openUrl.pipe(bricoleur)
 
-  openUrl.write(window.location.pathname)
+    openUrl.write(window.location.pathname)
+  })
 })
 
 function Errs (err) {
