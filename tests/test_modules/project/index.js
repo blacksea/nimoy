@@ -10,6 +10,7 @@ module.exports = function ($) {
   $.on('data', function (d) { 
     if (d.nimoy) {
       t = new D(d)
+      t.draw(d.data)
     } else {
       t.draw(d) 
     }
