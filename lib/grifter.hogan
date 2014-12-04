@@ -1,8 +1,8 @@
 <form class='grifter' style='top:{{y}}px;left:{{x}}px;'>
   <div class='tray'>  
-    {{#reup}}<a href='#' class='reup cap'>😸</a>{{/reup}}
-    {{cuid}}
-    {{#rm}}<a href='#' class='rm cap'>🙀</a>{{/rm}}
+    <input class='tags' placeholder="tags" value='{{tags}}'></input>
+    <a href='#' class='reset'>reset</a>
+    <a href='#' class='del'>delete</a>
   </div>
   <ul>
     {{#props}}<li><textarea>{{value}}</textarea><span>{{key}}</span></li>{{/props}}
