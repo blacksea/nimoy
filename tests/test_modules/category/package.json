@@ -6,7 +6,7 @@
   "template" : "cat.hogan",
   "description" : "row of category thumbs",
   "data" : {
-    "label" : "category name",
-    "search" : ""
+    "filter" : "test",
+    "label" : "category name"
   }
 }
