@@ -1,6 +1,7 @@
 <div class='category'>
-  <h1>{{title}}</h1>
+  <h1>{{label}}</h1>
+  <div class='filter' style='display:none;' title='{{filter}}'></div>
   <ul>{{#projects}}
-    <li><img src={{src}} width={{w}} height={{h}}></img></li>
+    <li><a href='#{{index}}' style="background-image:url({{main}});"></a></li>
   {{/projects}}</ul>
 </div>
