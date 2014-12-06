@@ -41,7 +41,7 @@ function INDEX (settings) {
   '<link rel="stylesheet" href="/style.css">' +
   '<link id="icon" rel="shortcut icon" type="image/png" href="'+settings.favicon+'">' +
   '</head>' +
-  '<body id="canvas">' +
+  '<body">' +
   '<script src="/bundle.js"></script>' +
   '</body>' +
   '</html>')
@@ -186,10 +186,10 @@ function compile (conf, cb) {
 function startServer (conf, db, cb) {
 
   var stOpts = {
-    index: 'index.html', 
     path: __dirname+'/'+conf.path_static,
-    url: '/', 
-    passthrough: true 
+    url: '/',
+    passthrough: true,
+    index: 'index.html'
   }
   if (conf.cache===undefined) conf.cache = true
   stOpts.cache = conf.cache
@@ -211,16 +211,25 @@ function startServer (conf, db, cb) {
 
   function handleHttp (req, res) {
     res.setHeader('X-Frame-Options', 'Deny')
+
     if (conf.ssl) 
       res.setHeader('Strict-Transport-Security','max-age=31536000')
+
     if (req.url === '/upload' && req.method === 'POST') {
       fileUpload(req, res)
-    } else {
-      mount(req, res, function err (e) {
-        if (e) console.error(e)
-        res.end(INDEX(settings))
-      })
-    }
+      return false
+    } 
+
+    mount(req, res, function (e) {
+      var contentType = (req.headers.accept.split(',')[0])
+      if (contentType === 'text/html') {
+        console.log(req.url)
+        fs.createReadStream(__dirname+'/static/index.html').pipe(res)
+      } else {
+        res.statusCode = 404
+        res.end('not found')
+      }
+    })
   }
   
   function handleSoc (soc) {
@@ -235,7 +244,7 @@ function startServer (conf, db, cb) {
       }
     }})).pipe(soc)
     soc.on('error', console.error)
-  }
+  } 
 
   server.listen(conf.settings.port, conf.settings.host, cb)
 
