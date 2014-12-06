@@ -10,6 +10,7 @@ module.exports = function ($) {
 
   function filterMeta (r) {
     var res = _.filter(r, function (o) { return(o.value.tags === data.filter)})
+    // might not need to sort by fresh // leveldb might do that already?
     res = _.sortBy(res, function (o) { return o.value.freshness })
     return res.reverse()
   }
@@ -19,7 +20,11 @@ module.exports = function ($) {
       var key = o.key.replace('~','$')
       l[i] = _.findWhere(r, { key : key })
     })
-    return _.map(res, function (o) { return o.value })
+    res = _.map(res, function (o) { 
+      o.value.main = o.value.slides[0].src 
+      return o.value 
+    })
+    return res
   }
 
   $.on('data', function (d) { 
