@@ -1,12 +1,10 @@
 <div class='project'>
-  <img class='full' src='{{main}}' style='min-height:200px;min-width:200px'>
-  </img>
-  <div class='desc'>{{description}}</div>
-  <ul class='thumbs'>{{#thumbs}}
+  <h1>{{title}}</h1>
+  <a href='#' class='main' title="{{descript}}" style='background-image:url({{main}});'></a>
+  <ul class='thumbs'>{{#slides}}
     <li>
-      <a href='#{{title}}'>
-        <img width={{w}} height={{h}} src='{{src}}'></img>
-      </a>
+    <a href='#' style='background-image:url({{src}});' title="{{txt}}"></a>
     </li>
-  {{/thumbs}}</ul>
+  {{/slides}}</ul>
+  <span class='desc'>{{{descript}}}</span>
 </div>

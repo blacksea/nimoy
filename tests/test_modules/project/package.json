@@ -6,9 +6,8 @@
   "description" : "project page",
   "type" : "⊶",
   "data" : {
-    "description" : "sample",
-    "main" : "/files/1x1.png",
-    "images" : [
+    "title" : "project",
+    "slides" : [
       {"txt":"smple","title":"test","src":"/files/1x1.png"},
       {"txt":"smple","title":"test","src":"/files/1x1.png"},
       {"txt":"smple","title":"test","src":"/files/1x1.png"},
