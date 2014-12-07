@@ -10,12 +10,18 @@
     {{/lib}}
     <div style='clear:both'></div>
   </ul>
-  <form {{#showSettings}} style='display:block;' {{/showSettings}} class= 'settings' >
+  <form class='settings' 
+    {{#showSettings}}style='display:block;'{{/showSettings}}>
     <ul>
-      <li><b>name</b><input value='{{title}}'></input></li>
-      <li><input value='{{favicon}}'></input><b>favicon</b></li>
-      <li><b>save page(as)</b><input placeholder='untitled'></input></li>
-      <li><b>new page</b><input placeholder='untitled'></input></li>
+      <li>
+        <b>name</b><input class='title' value='{{title}}'></input>
+      </li>
+      <li>
+        <input value='{{favicon}}' class='favicon'></input><b>favicon</b>
+      </li>
+      <li>
+        <b>save page(as)</b><input class='save' placeholder='untitled'></input>
+      </li>
     </ul>
   </form>
   <canvas class='bones' id='cvs' style='display:{{bones}}'></canvas>
