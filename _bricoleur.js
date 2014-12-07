@@ -477,11 +477,10 @@ module.exports = function Bricoleur (db, library, freshness) {
             { cb(new Error('Module '+actor+' not found',null));return false }
 
           if (!fresh) db.get('$:'+uid, function (e,jsn) {
-            console.log('STALE',pkd)
             if (!e) { pkd.data = JSON.parse(jsn); load(pkd) }
             if (e) load(pkd)
           })
-          else { load(pkd); console.log('fresh!')}
+          else load(pkd)
         }
         return false
       }
