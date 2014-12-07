@@ -24,7 +24,6 @@ db.get('$:library', function (e,d) {
 
   db.get('freshness', function (e,d) {
     var freshness = (!e) ? JSON.parse(d) : {}
-    console.log(freshness)
     bricoleur = require('./_bricoleur')(db,lib,freshness)
                       .on('error', Errs)
 
