@@ -41,7 +41,7 @@ function INDEX (settings) {
   '<link rel="stylesheet" href="/style.css">' +
   '<link id="icon" rel="shortcut icon" type="image/png" href="'+settings.favicon+'">' +
   '</head>' +
-  '<body">' +
+  '<body>' +
   '<script src="/bundle.js"></script>' +
   '</body>' +
   '</html>')
@@ -191,7 +191,9 @@ function startServer (conf, db, cb) {
     passthrough: true,
     index: 'index.html'
   }
+
   if (conf.cache===undefined) conf.cache = true
+
   stOpts.cache = conf.cache
 
   var mount = st(stOpts)
