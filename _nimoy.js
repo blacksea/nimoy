@@ -39,9 +39,12 @@ function INDEX (settings) {
   '<head>' +
   '<title>'+settings.title+'</title>' +
   '<link rel="stylesheet" href="/style.css">' +
-  '<link id="icon" rel="shortcut icon" type="image/png" href="'+settings.favicon+'">' +
+  '<link id="icon" rel="shortcut icon" type="image/png" href="'+
+  settings.favicon+'">' +
   '</head>' +
   '<body>' +
+  '<div class="container">' +
+  '</div>' +
   '<script src="/bundle.js"></script>' +
   '</body>' +
   '</html>')
