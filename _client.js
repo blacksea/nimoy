@@ -42,8 +42,5 @@ function Errs (err) {
 
 window.addEventListener('popstate', function (e) {
   e.preventDefault()
-  if (e.state) {
-    console.log(e.state)
-    openUrl.write(e.state.cmd)
-  }
+  if (e.state) openUrl.write(e.state.cmd)
 }, false)
