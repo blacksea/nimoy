@@ -1,12 +1,14 @@
 // colors
-
 dark = rgba(255, 255, 255, 0.95)
-med = #CBD5DF 
+// med = #CBD5DF 
 light = #EBEEFB
+// med = #FBF4EB
+med = #FFFFF5
 shade = 0 0 11px rgba(0, 0, 0, 0.25)
 shade1 = 0 0 11px rgba(57, 66, 122, 0.55)
+uiFont = 'bmono'
 
-@import "fonts.css"
+@import "fonts/stylesheet.css"
 
 @media (min-width: 640px)
   body 
@@ -31,38 +33,53 @@ a
   text-decoration none
 
 body
+  background black
   font-size 12px
-  font-family "Andale Mono"
+  font-family uiFont
   margin 0
   padding 0
 
 input, input:focus
-  font-family "Andale Mono"!important
   -webkit-font-smoothing subpixel-antialiased
   outline none
   padding 0
   background transparent!important
   color #080A17!important
+  font-family uiFont
 
 .omni, .login
-  box-shadow shade
-  background dark
-  width 200px
+  // box-shadow shade
+  // background dark
+  width 280px
   position fixed
-  left 10px
-  top 10px
+  right 0px
+  top 0px
   margin 0
   padding 0
   list-style none
   z-index 999
-  font-family "Andale Mono"
   font-size 10px
   line-height 17px
   cursor -webkit-grab
   cursor grab
+  font-family uiFont
 
 .omni 
   text-align center
+  overflow hidden
+  // border-left 1px solid rgba(0,0,0,0.3)
+  // border-bottom 1px solid rgba(0,0,0,0.3)
+
+.omni .search
+  display none
+  position absolute
+  bottom 0
+  right 10px
+  font-family uiFont
+  border-radius 3px
+  border none
+  outline none
+  font-size 12px
 
 .omni .tray 
   cursor default!important
@@ -135,16 +152,15 @@ input, input:focus
 .omni .settings
   display none
   position absolute
-  background med
-  box-shadow 0 7px 14px #ccc
-  top 18px
-  padding 4px
-  border-right 1px solid #999
-  border-bottom 1px solid #999
+  bottom 8px
+  width 100%
+  padding 4px 8px 2px 8px
 
 .omni .settings b
   float left
-  font-size 10px
+  font-weight normal
+  font-size 12px
+  color white
 
 .omni .settings ul
   margin 0
@@ -157,17 +173,17 @@ input, input:focus
   clear both
 
 .omni .settings input
-  border none!important
-  font-size 10px!important
+  font-size 12px!important
+  color white!important
+  font-family uiFont!important
   float right
   text-align right
   outline none
   margin 0 0 0 8px
-  max-width 97px
-  line-height 16px
-
-.omni .settings .favicon:hover
-  border 1px solid red
+  max-width 160px
+  line-height 18px
+  border none
+  border-bottom 1px dotted!important
 
 .login 
   min-height 12px
@@ -356,9 +372,10 @@ input, input:focus
   cursor default
   float left
   clear both
-  width 200px
-  height 210px
-  background rgb(235, 238, 251)
+  width 100%
+  height 550px
+  background transparent!important
+  // background rgb(235, 238, 251)
 
 .grifter
   // background rgba(45, 54, 114, 0.94) 
@@ -446,6 +463,12 @@ input, input:focus
 
 .pumicle
   float left
+
+.container
+  width 100%
+
+.edit .container 
+  width 75%
 
 body img 
   border none
