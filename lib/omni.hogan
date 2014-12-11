@@ -1,17 +1,9 @@
-<div class='omni' style='top:{{y}}px;left:{{x}}px;'>
-  <div class='tray' unselectable='on'>
-    <a class='file' href='#'>&equiv;</a>
-    <a class='exit' href='#' title='logout'>&#10799;</a>
-  </div>
-  {{cvs}}
-  <ul class='lib' {{#showLib}} style='display:block;' {{/showLib}}> 
-    {{#lib}}
-    <li draggable="true" title="{{description}}"><b>{{type}}</b>{{name}}</li>
-    {{/lib}}
-    <div style='clear:both'></div>
-  </ul>
+<div class='omni' style='top:{{y}}px;right:{{x}}px;'>
+  <!-- <div class='blackbox' title='prompt'><input></input></div> -->
+  <canvas class='bones' id='cvs' style='display:{{bones}}'></canvas>
+  <!-- <input class='search' placeholder='search'></input> -->
   <form class='settings' 
-    {{#showSettings}}style='display:block;'{{/showSettings}}>
+    {{#showSettings}} style='display:block;' {{/showSettings}}>
     <ul>
       <li>
         <b>name</b><input class='title' value='{{title}}'></input>
@@ -19,11 +11,6 @@
       <li>
         <input value='{{favicon}}' class='favicon'></input><b>favicon</b>
       </li>
-      <li>
-        <b>save page(as)</b><input class='save' placeholder='untitled'></input>
-      </li>
     </ul>
   </form>
-  <canvas class='bones' id='cvs' style='display:{{bones}}'></canvas>
-  <div class='blackbox' title='prompt'><input></input></div>
 </div>
