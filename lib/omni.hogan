@@ -1,16 +1,11 @@
-<div class='omni' style='top:{{y}}px;right:{{x}}px;'>
-  <!-- <div class='blackbox' title='prompt'><input></input></div> -->
-  <canvas class='bones' id='cvs' style='display:{{bones}}'></canvas>
-  <!-- <input class='search' placeholder='search'></input> -->
-  <form class='settings' 
-    {{#showSettings}} style='display:block;' {{/showSettings}}>
+<div class='omni'>
+  <canvas class='bones' id='cvs'></canvas>
+  <input class='blackbox'></input>
+  <input class='login'></input>
+  <form class='settings'>
     <ul>
-      <li>
-        <b>name</b><input class='title' value='{{title}}'></input>
-      </li>
-      <li>
-        <input value='{{favicon}}' class='favicon'></input><b>favicon</b>
-      </li>
+      <li><b>name</b><input class='title' value='{{title}}'></input></li>
+      <li><input value='{{favicon}}' class='favicon'></input><b>favicon</b></li>
     </ul>
   </form>
 </div>
