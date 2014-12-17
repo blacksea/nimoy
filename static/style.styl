@@ -47,7 +47,7 @@ input, input:focus
   color #080A17!important
   font-family uiFont
 
-.omni, .login
+.omni
   // box-shadow shade
   // background dark
   width 280px
@@ -59,7 +59,6 @@ input, input:focus
   list-style none
   z-index 999
   font-size 10px
-  line-height 17px
   cursor -webkit-grab
   cursor grab
   font-family uiFont
@@ -96,17 +95,11 @@ input, input:focus
   line-height 12px
 
 .omni .blackbox
+  display none
   cursor default
   float left
   clear both
   background rgba(235, 238, 251, 0.35)
-
-.omni .blackbox input
-  border none
-  padding 0 4px
-  line-height 10px
-  width 200px
-  font-size 10px
 
 .omni .exit
   float right!important
@@ -186,24 +179,26 @@ input, input:focus
   border-bottom 1px dotted!important
 
 .login 
-  min-height 12px
-  padding 10px
-  width 240px
-  cursor default
+  z-index 9999
+  position absolute
+  background #E5E5DC
+  top 0!important
+  right 0
+  padding 1px 12px 4px
 
 .login input
-  font-size 12px
-  width 176px
-  padding 0 4px
-  background rgb(235, 238, 251)!important
-  color black
-  border-radius 6px
-  outline none
+  float left
+  width 256px
+  font-size 13px
+  padding 0
   border none
-  margin 0 0 0 6px
+  border-bottom 2px solid blue!important
+  color blue!important
+  outline none
+  margin 0
 
 .login span
-  color black
+  color blue
   float left
 
 .error 
@@ -459,7 +454,6 @@ input, input:focus
   margin-left 10px
   font-size 10px
   float right
-
 
 .pumicle
   float left
