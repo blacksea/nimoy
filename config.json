@@ -4,7 +4,6 @@
   "host" : "localhost",
   "ssl" : false,
   "path_static" : "static",
-  "path_modules" : "node_modules/",
-  "path_files" : "static/files",
+  "path_modules" : "node_modules/"
   "minify" : false
 }
