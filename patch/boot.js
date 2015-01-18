@@ -1,5 +1,3 @@
 var patcher = require('./patcher')
 
-p = patcher()
-
-
+p = patcher('#cvs')
