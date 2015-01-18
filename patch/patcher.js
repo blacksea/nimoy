@@ -4,11 +4,94 @@ var p = require('../lib/paper-core.js')
 
 module.exports = function (cvs) {
   var dblClick = {x:0,y:0} 
-  var canvas = document.querySelector(cvs)
+  var canvas = document.body.querySelector(cvs)
   p.setup(canvas)
   var s = through.obj()
   var inputNew = document.createElement('input')
   document.body.appendChild(inputNew)
+
+  var selection = new p.Path.Rectangle({
+    fillColor : 'red',
+    point: [0,0],
+    size: [0,0],
+    opacity : 0.1,
+    visible : false
+  })
+
+  // CONNECT / PIPE
+  window.onmouseup = function (e) { 
+    if (patch.cord) { // good
+      if (patch.cord.i && patch.cord.o) { // should snap on realease 
+        var p = patch.boxes[patch.cord.i].obj.children[3].position
+        patch.cord.drag(false, [p.x, p.y])
+        patch.boxes[patch.cord.i].ins.push(patch.cord)
+        patch.boxes[patch.cord.o].outs.push(patch.cord)
+        patch.cord.obj.data = patch.cord.i+patch.cord.o
+        patch.cords[patch.cord.i+patch.cord.o] = patch.cord
+        patch.cord = false
+      } else patch.cord.del()
+    }
+    window.onmousemove = null 
+  }
+
+  // A WAY TO RM MODULES / PIPES
+
+  // PLACE / ADD
+  canvas.addEventListener('dblclick', function (e) {
+    inputNew.style.top = (e.clientY - 10)
+    inputNew.style.left = (e.clientX - 50)
+    inputNew.style.display = 'block'
+    inputNew.focus()
+    dblClick.x = e.clientX
+    dblClick.y = e.clientY
+  },false)
+
+  canvas.addEventListener('mousedown', function (e) {
+    if (patch.cord) return false
+    selection.visible = true
+    selection.bringToFront()
+    var c0 = [e.clientX,e.clientY]
+  
+    window.onmousemove = function (ev) {
+      var c3 = [ev.clientX,ev.clientY]
+      var c1 = [(c3[0]-c0[0])+c0[0],c0[1]]
+      var c2 = [c0[0],(c3[1]-c0[1])+c0[1]]
+      selection.segments = [c0,c2,c3,c1]
+      for (bx in patch.boxes) {
+        var b = patch.boxes[bx].obj.children[0]
+        if (b.position.isInside(selection)) b.fillColor = 'rgba(255,0,0,0.1)'
+        // if (selection.intersect(b)) console.log('BLAM')
+      }
+      for (cx in patch.cords) {
+        var sects = patch.cords[cx].obj.getIntersections(selection)
+        if (sects.length>0) {
+          var id = sects[0].curve.path.data
+          patch.cords[id].obj.strokeColor ='red'
+        }
+      }
+      p.view.draw()
+    }
+  },false)
+
+  canvas.addEventListener('mouseup', function (e) {
+    selection.visible = false
+    window.onmousemove = null
+  },false)
+
+  inputNew.addEventListener('keyup', function (e) {
+    if (e.keyCode === 13) { 
+      // get library reference for module
+      // get --> assign cuid!
+      // use input stream to draw
+      patch.boxes[e.target.value] = 
+        new box([dblClick.x, dblClick.y], e.target.value)
+      // use brico api to make patch
+      inputNew.style.display = 'none'
+      inputNew.value = ''
+      p.view.draw()
+    }
+  })
+
   return s
 }
 
@@ -32,6 +115,7 @@ var cord = function (pos) {
   this.del = function () { c.remove() }
   this.i = false
   this.o = false
+  this.obj = c
 }
 
 var box = function (pos, name) {
@@ -86,7 +170,6 @@ var box = function (pos, name) {
       patch.cord.o = e.target.data
       p.view.draw()
     }
-    e.target.fillColor = 'red'
   }
   input.onMouseEnter = function (e) { 
     hov.position = e.target.position
@@ -118,48 +201,3 @@ var box = function (pos, name) {
     }
   }
 }
-
-// A WAY TO RM MODULES / PIPES
-
-// CONNECT / PIPE
-window.onmouseup = function (e) { 
-  if (patch.cord) { // good
-    if (patch.cord.i && patch.cord.o) { 
-      // should snap on realease
-      var p = patch.boxes[patch.cord.i].obj.children[3].position
-      patch.cord.drag(false, [p.x, p.y])
-      patch.boxes[patch.cord.i].ins.push(patch.cord)
-      patch.boxes[patch.cord.o].outs.push(patch.cord)
-      // make connection!
-      patch.cord = false
-    } else patch.cord.del()
-  }
-  window.onmousemove = null 
-}
-
-// PLACE / ADD
-canvas.addEventListener('dblclick', function (e) {
-  inputNew.style.top = (e.clientY - 10)
-  inputNew.style.left = (e.clientX - 50)
-  inputNew.style.display = 'block'
-  inputNew.focus()
-  dblClick.x = e.clientX
-  dblClick.y = e.clientY
-},false)
-inputNew.addEventListener('keyup', function (e) {
-  if (e.keyCode === 13) { 
-
-    // get library reference for module
-    // get --> assign cuid!
-    // use input stream to draw
-    
-    patch.boxes[e.target.value] = 
-      new box([dblClick.x, dblClick.y], e.target.value)
-
-    // use brico api to make patch
-    
-    inputNew.style.display = 'none'
-    inputNew.value = ''
-    p.view.draw()
-  }
-})
